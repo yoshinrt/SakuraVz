@@ -1193,3 +1193,59 @@ void CViewCommander::Command_CREATEKEYBINDLIST( void )
 	//2004.02.17 Moca 関数化
 	SetClipboardText( CEditWnd::getInstance()->m_cSplitterWnd.GetHwnd(), cMemKeyList.GetStringPtr(), cMemKeyList.GetStringLength() );
 }
+
+
+
+////テキストスタックへPUSH+CUT
+void CViewCommander::Command_TEXTSTACK_PUSH( void )
+{
+	// クリップボードが空でないときは push
+	if( CClipboard::HasValidData()){
+		// クリップボードから文字列取得
+		CNativeW memBuff;
+		bool bColumnSelect	= false;
+		bool bLineSelect	= false;
+		bool bRet = m_pCommanderView->MyGetClipboardData( memBuff, &bColumnSelect, &bLineSelect );
+		
+		// テキストスタックに push
+		if( bRet ){
+			GetDllShareData().m_TextStack.Push(
+				&memBuff,
+			 	bColumnSelect	? CTextStack::M_COLUMN :
+				bLineSelect		? CTextStack::M_LINE : 0
+			);
+		}
+	}
+	
+	Command_CUT();
+}
+
+
+
+////テキストスタックからPOP+PASTE
+void CViewCommander::Command_TEXTSTACK_POP( int option )
+{
+	// クリップボードが空のときは pop
+	if( !CClipboard::HasValidData() && GetDllShareData().m_TextStack.GetSize()){
+		CNativeW	memBuff;
+		UINT		uMode;
+		
+		// スタックから pop
+		GetDllShareData().m_TextStack.Pop( &memBuff, &uMode );
+		
+		// クリップボードにセット
+		m_pCommanderView->MySetClipboardData(
+			memBuff.GetStringPtr(),
+			memBuff.GetStringLength(),
+			uMode == CTextStack::M_COLUMN,
+			uMode == CTextStack::M_LINE
+		);
+	}
+	
+	// ペースト
+	Command_PASTE( option );
+	
+	// クリップボードを空に
+	CClipboard cClipboard( m_pCommanderView->GetHwnd());
+	cClipboard.Empty();
+}

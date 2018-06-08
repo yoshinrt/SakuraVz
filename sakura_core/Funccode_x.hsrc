@@ -240,6 +240,10 @@ F_COPY_ADDCRLF	= 30608,	//折り返し位置に改行をつけてコピー						なし
 F_COPY_CRLF		= 30603,	//CRLF改行でコピー										なし
 F_PASTE			= 30604,	//貼り付け(クリップボードから貼り付け)					なし
 F_PASTEBOX		= 30605,	//矩形貼り付け(クリップボードから矩形貼り付け)			なし
+F_TEXTSTACK_PUSH= 49000,	//テキストスタックへPUSH+CUT							なし
+F_TEXTSTACK_COPY= 49001,	//テキストスタックへPUSH								なし
+F_TEXTSTACK_POP	= 49002,	//テキストスタックからPOP+PASTE							なし
+F_TEXTSTACK_PASTE= 49003,	//テキストスタックをPASTE								なし
 
 //2007.09.18 kobake WCHARを求めるメッセージのメッセージ名を変更: 「*」→「*_W」
 F_INSTEXT_W					= 30606,	//テキストを貼り付け							const WCHAR* text, bool bNoWaitCursor

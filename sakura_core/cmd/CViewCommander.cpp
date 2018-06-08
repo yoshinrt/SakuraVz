@@ -379,6 +379,9 @@ BOOL CViewCommander::HandleCommand(
 	case F_COPY_COLOR_HTML:				Command_COPY_COLOR_HTML();break;	//選択範囲内色付きHTMLコピー
 	case F_COPY_COLOR_HTML_LINENUMBER:	Command_COPY_COLOR_HTML_LINENUMBER();break;	//選択範囲内行番号色付きHTMLコピー
 
+	case F_TEXTSTACK_PUSH:			Command_TEXTSTACK_PUSH(); break;		//テキストスタックへPUSH+CUT
+	case F_TEXTSTACK_POP:			Command_TEXTSTACK_POP( (int)lparam1 ); break;			//テキストスタックからPOP+PASTE
+
 	case F_CREATEKEYBINDLIST:		Command_CREATEKEYBINDLIST();break;		//キー割り当て一覧をコピー //Sept. 15, 2000 JEPRO 追加 //Dec. 25, 2000 復活
 
 	/* 挿入系 */

@@ -211,6 +211,7 @@ env/CSearchKeywordManager.o \
 env/CShareData.o \
 env/CShareData_IO.o \
 env/CTagJumpManager.o \
+env/CTextStack.o \
 env/DLLSHAREDATA.o \
 extmodule/CBregexp.o \
 extmodule/CBregexpDll2.o \

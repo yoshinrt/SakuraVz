@@ -231,6 +231,8 @@ public:
 	CColorStrategy* GetColorStrategyHTML(const CStringRef&, int, const CColorStrategyPool*, CColorStrategy**, CColorStrategy**, bool& bChange);
 	void Command_CREATEKEYBINDLIST( void );			// キー割り当て一覧をコピー //Sept. 15, 2000 JEPRO	Command_の作り方がわからないので殺してある
 
+	void Command_TEXTSTACK_PUSH( void );		//テキストスタックへPUSH+CUT
+	void Command_TEXTSTACK_POP( int option );	//テキストスタックからPOP+PASTE
 
 	/* 挿入系 */
 	void Command_INS_DATE( void );	//日付挿入

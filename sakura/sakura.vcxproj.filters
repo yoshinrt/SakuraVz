@@ -1085,6 +1085,9 @@
       <Filter>Cpp Source Files\uiparts</Filter>
     </ClInclude>
     <ClInclude Include="..\sakura_core\gitrev.h" />
+    <ClInclude Include="..\sakura_core\env\CTextStack.h">
+      <Filter>Cpp Source Files\env</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\sakura_core\Funccode_x.hsrc">
@@ -2254,6 +2257,9 @@
     </ClCompile>
     <ClCompile Include="..\sakura_core\config\build_config.cpp">
       <Filter>Cpp Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sakura_core\env\CTextStack.cpp">
+      <Filter>Cpp Source Files\env</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -78,7 +78,7 @@ inline void SetDllShareData(DLLSHAREDATA* pShareData)
 #include "print/CPrint.h" //PRINTSETTING
 #include "recent/SShare_History.h"	//SShare_History
 
-
+#include "env/CTextStack.h"	// テキストスタック
 
 
 
@@ -181,6 +181,8 @@ struct DLLSHAREDATA{
 	// -- -- テンポラリ -- -- //
 	//指定行へジャンプダイアログのオプション
 	bool						m_bLineNumIsCRLF_ForJump;			/* 指定行へジャンプの「改行単位の行番号」か「折り返し単位の行番号」か */
+	
+	CTextStack					m_TextStack;				//!< テキストスタック
 };
 
 class CShareDataLockCounter{
