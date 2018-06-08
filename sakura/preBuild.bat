@@ -5,6 +5,7 @@ HeaderMake -in=..\sakura_core\Funccode_x.hsrc -out=..\sakura_core\Funccode_enum.
 MakefileMake -file=..\sakura_core\Makefile -dir=..\sakura_core
 
 set GITREV_H=..\sakura_core\gitrev.h
+set path=%path%;c:\cygwin64\bin;c:\cygwin\bin
 
 for /f "usebackq" %%s in (`git show -s --format^=%%H`) do (
     set COMMITID=%%s
