@@ -74,21 +74,23 @@ bool CTextStack::Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop ){
 	nEndPtr = Backward( nEndPtr, AlignSize( nSize ));
 	
 	// データが buf 後端にかぶっているなら，2回に分けてコピー
-	if( nEndPtr + nSize > TEXTSTACK_SIZE ){
-		BYTE *pBuf = new BYTE[ nSize ];
-		
-		memcpy( pBuf, GetIntPtr( nEndPtr ), TEXTSTACK_SIZE - nEndPtr );
-		memcpy(
-			pBuf + ( TEXTSTACK_SIZE - nEndPtr ),
-			GetIntPtr( 0 ),
-			nSize - ( TEXTSTACK_SIZE - nEndPtr )
-		);
-		
-		cmemBuf->SetString(( wchar_t *)pBuf, nSize / sizeof( wchar_t ));
-		
-		delete [] pBuf;
-	}else{
-		cmemBuf->SetString(( wchar_t *)GetIntPtr( nEndPtr ), nSize / sizeof( wchar_t ));
+	if( cmemBuf ){
+		if( nEndPtr + nSize > TEXTSTACK_SIZE ){
+			BYTE *pBuf = new BYTE[ nSize ];
+			
+			memcpy( pBuf, GetIntPtr( nEndPtr ), TEXTSTACK_SIZE - nEndPtr );
+			memcpy(
+				pBuf + ( TEXTSTACK_SIZE - nEndPtr ),
+				GetIntPtr( 0 ),
+				nSize - ( TEXTSTACK_SIZE - nEndPtr )
+			);
+			
+			cmemBuf->SetString(( wchar_t *)pBuf, nSize / sizeof( wchar_t ));
+			
+			delete [] pBuf;
+		}else{
+			cmemBuf->SetString(( wchar_t *)GetIntPtr( nEndPtr ), nSize / sizeof( wchar_t ));
+		}
 	}
 	
 	// フラグ設定

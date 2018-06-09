@@ -47,7 +47,7 @@ public:
 	 * @param[in,out] uMode		選択モード (= m_nMode)
 	 * @retval 正常終了時は true を返す．
 	 */
-	bool Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop = false );
+	bool Pop( CNativeW* cmemBuf = nullptr, UINT* puMode = nullptr, bool bNoPop = false );
 	
 	//! 要素数取得
 	int GetSize( void ){ return m_nSize; };

@@ -2409,7 +2409,7 @@ bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, boo
 		UINT uSelMode;
 		
 		// スタックから pop，クリップボードは経由しない
-		GetDllShareData().m_TextStack.Pop( &cmemBuf, &uSelMode );
+		GetDllShareData().m_TextStack.Pop( &cmemBuf, &uSelMode, uMode == M_COPYPASTE );
 		
 		if( pbColumnSelect ) *pbColumnSelect = uSelMode == CTextStack::M_COLUMN;
 		if( pbLineSelect   ) *pbLineSelect   = uSelMode == CTextStack::M_LINE;
@@ -2425,9 +2425,15 @@ bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, boo
 		return false;
 	}
 	
-	// テキストスタック使用時はクリップボードを空にすることにより
-	// 次回はスタックからペーストされる．
 	if( bEnbStack && ( uMode != M_COPYPASTE )){
+		// クリップボードがサクラで copy されたものなら，stack top
+		// と同じ内容であるので，stack top は破棄する
+		if( ::IsClipboardFormatAvailable( CClipboard::GetSakuraFormat())){
+			GetDllShareData().m_TextStack.Pop();
+		}
+		
+		// テキストスタック使用時はクリップボードを空にすることにより
+		// 次回はスタックからペーストされる．
 		cClipboard.Empty();
 	}
 	
@@ -2452,28 +2458,28 @@ bool CEditView::MySetClipboardData( const WCHAR* pszText, int nTextLen, bool bCo
 		return false;
 	}
 	
-	// クリップボードに有効なデータが有る場合は，push
-	if( GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack && CClipboard::HasValidData()){
-		
-		// クリップボードから文字列取得
-		CNativeW memBuff;
-		bool bColumnSelect	= false;
-		bool bLineSelect	= false;
-		
-		CEol cEol = m_pcEditDoc->m_cDocEditor.GetNewLineCode();
-		
-		// テキストスタックに push
-		if(cClipboard.GetText(&memBuff, &bColumnSelect, &bLineSelect, cEol)){
-			GetDllShareData().m_TextStack.Push(
-				&memBuff,
-			 	bColumnSelect	? CTextStack::M_COLUMN :
-				bLineSelect		? CTextStack::M_LINE : 0
-			);
-		}
-	}
-	
+	// クリップボードにセット
 	cClipboard.Empty();
-	return cClipboard.SetText(pszText,nTextLen,bColumnSelect,bLineSelect);
+	if( !cClipboard.SetText(pszText,nTextLen,bColumnSelect,bLineSelect))
+		return false;
+	
+	// 以下，テキストスタック有効時のみ処理
+	if( !GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack ) return true;
+	
+	CNativeW memBuff;
+	bool bColumnSelect2	= false;
+	bool bLineSelect2	= false;
+	
+	CEol cEol = m_pcEditDoc->m_cDocEditor.GetNewLineCode();
+	
+	// クリップボードから文字列取得→テキストスタックに push
+	return
+		cClipboard.GetText(&memBuff, &bColumnSelect2, &bLineSelect2, cEol) &&
+		GetDllShareData().m_TextStack.Push(
+			&memBuff,
+		 	bColumnSelect2	? CTextStack::M_COLUMN :
+			bLineSelect2	? CTextStack::M_LINE : 0
+		);
 }
 
 
