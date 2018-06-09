@@ -716,6 +716,9 @@ bool CShareData::InitShareData()
 			m_pShareData->m_bLineNumIsCRLF_ForJump = true;	/* 指定行へジャンプの「改行単位の行番号」か「折り返し単位の行番号」か */
 		}
 		
+		// テキストスタック
+		m_pShareData->m_TextStack.Initialize();
+		
 		// Vz モード
 		m_pShareData->m_Common.m_sVzMode.Initialize();
 		

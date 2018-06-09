@@ -112,6 +112,7 @@ static const EFunctionCode EIsModificationForbidden[] = {
 	F_PASTEBOX,
 	F_INSTEXT_W,
 	F_ADDTAIL_W,
+	F_COPYPASTE,
 	F_INS_DATE,
 	F_INS_TIME,
 	F_CTRL_CODE_DIALOG,	//@@@ 2002.06.02 MIK

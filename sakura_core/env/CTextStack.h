@@ -24,8 +24,10 @@
 class CTextStack
 {
 public:
-	//! コンストラクタ
-	CTextStack(){
+	/*! @brief DLLSHAREDATA はコンストラクタが呼ばれないので
+	 * 自前で初期化する
+	 */
+	void Initialize( void ){
 		m_nTopPtr =
 		m_nEndPtr =
 		m_nSize	= 0;
@@ -51,9 +53,9 @@ public:
 	int GetSize( void ){ return m_nSize; };
 	
 	enum {
-		M_CHAR		= 0,	//<! 文字単位
-		M_COLUMN	= 1,	//<! 矩形
-		M_LINE		= 2,	//<! 行単位
+		M_CHAR		= 0,	//!< 文字単位
+		M_COLUMN	= 1,	//!< 矩形
+		M_LINE		= 2,	//!< 行単位
 	};
 	
 private:
@@ -82,10 +84,10 @@ private:
 		return ( int *)(( BYTE *)m_nStack + nPtr );
 	}
 	
-	int		m_nTopPtr;	//<! 先頭ポインタ (バイト単位)
-	int		m_nEndPtr;	//<! 後端ポインタ (バイト単位)
-	int		m_nSize;	//<! 使用サイズ
-	int		m_nStack[ TEXTSTACK_SIZE / sizeof( int )];	//<! バッファ，要 int アライメント
+	int		m_nTopPtr;	//!< 先頭ポインタ (バイト単位)
+	int		m_nEndPtr;	//!< 後端ポインタ (バイト単位)
+	int		m_nSize;	//!< 使用サイズ
+	int		m_nStack[ TEXTSTACK_SIZE / sizeof( int )];	//!< バッファ，要 int アライメント
 };
 
 ///////////////////////////////////////////////////////////////////////

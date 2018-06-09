@@ -1036,6 +1036,7 @@ BOOL CSMacroMgr::CanFuncIsKeyMacro( int nFuncID )
 	case F_COPY_ADDCRLF				://折り返し位置に改行をつけてコピー
 	case F_COPY_CRLF				://CRLF改行でコピー(選択範囲を改行コード=CRLFでコピー)
 	case F_PASTE					://貼り付け(クリップボードから貼り付け)
+	case F_COPYPASTE				://貼り付け(スタックPOPなし)
 	case F_PASTEBOX					://矩形貼り付け(クリップボードから矩形貼り付け)
 	case F_INSTEXT_W					://テキストを貼り付け
 //	case F_ADDTAIL_W					://最後にテキストを追加

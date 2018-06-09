@@ -750,6 +750,7 @@ int FuncID_To_HelpContextID( EFunctionCode nFuncID )
 	case F_COPY_ADDCRLF:	return HLP000219;			//折り返し位置に改行をつけてコピー(選択範囲をクリップボードにコピー)
 	case F_COPY_CRLF:		return HLP000163;			//CRLF改行でコピー(選択範囲をクリップボードにコピー)	//Feb. 23, 2001 JEPRO 抜けていたので追加
 	case F_PASTE:			return HLP000039;			//貼り付け(クリップボードから貼り付け)
+	case F_COPYPASTE:		return HLP000039;			//!< @todo ヘルプ ID の割当が必要 //貼り付け(スタックPOPなし)
 	case F_PASTEBOX:		return HLP000040;			//矩形貼り付け(クリップボードから矩形貼り付け)
 //	case F_INSTEXT_W:		return ;					// テキストを貼り付け
 	case F_COPYLINES:				return HLP000036;	//選択範囲内全行コピー
@@ -1118,6 +1119,7 @@ bool IsFuncEnable( const CEditDoc* pcEditDoc, const DLLSHAREDATA* pShareData, EF
 			return false;
 		}
 	case F_PASTE:
+	case F_COPYPASTE:
 		/* クリップボードから貼り付け可能か？ */
 		if( pcEditDoc->m_cDocEditor.IsEnablePaste() ){
 			return true;
