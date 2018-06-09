@@ -152,6 +152,7 @@ void CViewCommander::Command_COPY(
 	@li 0x08 ラインモード貼り付け無効
 	@li 0x10 矩形コピーは常に矩形貼り付け
 	@li 0x20 矩形コピーは常に通常貼り付け
+	@li 0x40 COPYPASTE
 
 	@date 2007.10.04 ryoji MSDEVLineSelect形式の行コピー対応処理を追加（VS2003/2005のエディタと類似の挙動に）
 */
@@ -171,7 +172,10 @@ void CViewCommander::Command_PASTE( int option )
 		((option & 0x08) == 0x08) ? false :
 		GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste;
 
-	if( !m_pCommanderView->MyGetClipboardData( cmemClip, &bColumnSelect, bLineSelectOption ? &bLineSelect: NULL ) ){
+	if( !m_pCommanderView->MyGetClipboardData(
+			cmemClip, &bColumnSelect, bLineSelectOption ? &bLineSelect: NULL,
+			option & 0x40 ? CEditView::M_COPYPASTE : CEditView::M_DEFAULT
+		)){
 		ErrorBeep();
 		return;
 	}
@@ -1192,60 +1196,4 @@ void CViewCommander::Command_CREATEKEYBINDLIST( void )
 	// Windowsクリップボードにコピー
 	//2004.02.17 Moca 関数化
 	SetClipboardText( CEditWnd::getInstance()->m_cSplitterWnd.GetHwnd(), cMemKeyList.GetStringPtr(), cMemKeyList.GetStringLength() );
-}
-
-
-
-////テキストスタックへPUSH+CUT
-void CViewCommander::Command_TEXTSTACK_PUSH( void )
-{
-	// クリップボードが空でないときは push
-	if( CClipboard::HasValidData()){
-		// クリップボードから文字列取得
-		CNativeW memBuff;
-		bool bColumnSelect	= false;
-		bool bLineSelect	= false;
-		bool bRet = m_pCommanderView->MyGetClipboardData( memBuff, &bColumnSelect, &bLineSelect );
-		
-		// テキストスタックに push
-		if( bRet ){
-			GetDllShareData().m_TextStack.Push(
-				&memBuff,
-			 	bColumnSelect	? CTextStack::M_COLUMN :
-				bLineSelect		? CTextStack::M_LINE : 0
-			);
-		}
-	}
-	
-	Command_CUT();
-}
-
-
-
-////テキストスタックからPOP+PASTE
-void CViewCommander::Command_TEXTSTACK_POP( int option )
-{
-	// クリップボードが空のときは pop
-	if( !CClipboard::HasValidData() && GetDllShareData().m_TextStack.GetSize()){
-		CNativeW	memBuff;
-		UINT		uMode;
-		
-		// スタックから pop
-		GetDllShareData().m_TextStack.Pop( &memBuff, &uMode );
-		
-		// クリップボードにセット
-		m_pCommanderView->MySetClipboardData(
-			memBuff.GetStringPtr(),
-			memBuff.GetStringLength(),
-			uMode == CTextStack::M_COLUMN,
-			uMode == CTextStack::M_LINE
-		);
-	}
-	
-	// ペースト
-	Command_PASTE( option );
-	
-	// クリップボードを空に
-	CClipboard cClipboard( m_pCommanderView->GetHwnd());
-	cClipboard.Empty();
 }

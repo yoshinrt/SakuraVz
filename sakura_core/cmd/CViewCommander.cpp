@@ -366,6 +366,7 @@ BOOL CViewCommander::HandleCommand(
 	case F_COPY_ADDCRLF:			Command_COPY( false, true );break;		//折り返し位置に改行をつけてコピー(選択範囲をクリップボードにコピー)
 	case F_COPY_CRLF:				Command_COPY( false, GetDllShareData().m_Common.m_sEdit.m_bAddCRLFWhenCopy, EOL_CRLF );break;	//CRLF改行でコピー(選択範囲をクリップボードにコピー)
 	case F_PASTE:					Command_PASTE( (int)lparam1 );break;				//貼り付け(クリップボードから貼り付け)
+	case F_COPYPASTE:				Command_PASTE( (int)lparam1 | 0x40 );break;			//貼り付け(スタックPOPなし)
 	case F_PASTEBOX:				Command_PASTEBOX( (int)lparam1 );break;				//矩形貼り付け(クリップボードから矩形貼り付け)
 	case F_INSBOXTEXT:				Command_INSBOXTEXT((const wchar_t*)lparam1, (int)lparam2 );break;				//矩形テキスト挿入
 	case F_INSTEXT_W:				Command_INSTEXT( bRedraw, (const wchar_t*)lparam1, (CLogicInt)lparam2, lparam3!=FALSE );break;/* テキストを貼り付け */ // 2004.05.14 Moca 長さを示す引数追加
@@ -378,9 +379,6 @@ BOOL CViewCommander::HandleCommand(
 	case F_COPYLINESWITHLINENUMBER:	Command_COPYLINESWITHLINENUMBER();break;//選択範囲内全行行番号付きコピー
 	case F_COPY_COLOR_HTML:				Command_COPY_COLOR_HTML();break;	//選択範囲内色付きHTMLコピー
 	case F_COPY_COLOR_HTML_LINENUMBER:	Command_COPY_COLOR_HTML_LINENUMBER();break;	//選択範囲内行番号色付きHTMLコピー
-
-	case F_TEXTSTACK_PUSH:			Command_TEXTSTACK_PUSH(); break;		//テキストスタックへPUSH+CUT
-	case F_TEXTSTACK_POP:			Command_TEXTSTACK_POP( (int)lparam1 ); break;			//テキストスタックからPOP+PASTE
 
 	case F_CREATEKEYBINDLIST:		Command_CREATEKEYBINDLIST();break;		//キー割り当て一覧をコピー //Sept. 15, 2000 JEPRO 追加 //Dec. 25, 2000 復活
 

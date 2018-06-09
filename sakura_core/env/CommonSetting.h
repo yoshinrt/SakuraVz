@@ -716,6 +716,33 @@ struct CommonSetting_MainMenu
 
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+//                        Vz 互換モード                        //
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+//! メインメニュー種類
+enum ESelectMode {
+	T_None,		//!< 選択モード変更しない
+	T_AtStart,	//!< 選択開始時に決定
+	T_Always,	//!< 常に変更する
+};
+
+class CommonSetting_VzMode
+{
+public:
+	bool	m_bEnableTextStack;			//!< テキストスタック有効
+	bool	m_bNoMoveAfterPaste;		//!< ペースト後にカーソル移動しない
+	bool	m_bCancelWordBoundary;		//!< * で単語境界をキャンセルする
+	int		m_nSelectMode;				//!< 選択モード
+	
+	void Initialize( void ){
+		m_bEnableTextStack		= true;
+		m_bNoMoveAfterPaste		= true;
+		m_bCancelWordBoundary	= true;
+		m_nSelectMode			= ESelectMode::T_Always;
+	}
+};
+
+
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                                                             //
 //                          まとめ                             //
 //                                                             //
@@ -749,6 +776,8 @@ struct CommonSetting
 	CommonSetting_Statusbar			m_sStatusbar;		//!< ステータスバー		// 2008/6/21 Uchi
 	CommonSetting_Plugin			m_sPlugin;			//!< プラグイン 2009/11/30 syat
 	CommonSetting_MainMenu			m_sMainMenu;		//!< メインメニュー		// 2010/5/15 Uchi
+	//
+	CommonSetting_VzMode			m_sVzMode;			//!< Vz 互換設定
 };
 
 #endif /* SAKURA_COMMONSETTING_7C01A3F3_AD50_4AEA_84D6_0798DB67F40C_H_ */

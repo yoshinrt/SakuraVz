@@ -180,7 +180,7 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
 	//取得
-	bool MyGetClipboardData( CNativeW&, bool*, bool* = NULL );			/* クリップボードからデータを取得 */
+	bool MyGetClipboardData( CNativeW&, bool*, bool* = NULL, UINT uMode = 0 );		/* クリップボードからデータを取得 */
 
 	//設定
 	bool MySetClipboardData( const ACHAR*, int, bool bColumnSelect, bool = false );	/* クリップボードにデータを設定 */
@@ -190,7 +190,11 @@ public:
 	void CopyCurLine( bool bAddCRLFWhenCopy, EEolType neweol, bool bEnableLineModePaste );	/* カーソル行をクリップボードにコピーする */	// 2007.10.08 ryoji
 	void CopySelectedAllLines( const wchar_t*, BOOL );			/* 選択範囲内の全行をクリップボードにコピーする */
 
-
+	enum {
+		M_DEFAULT,		//!< paste 時デフォルト，設定に依存
+		M_COPYPASTE,	//!< paste 時コピーペーストモード
+	};
+	
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                         イベント                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

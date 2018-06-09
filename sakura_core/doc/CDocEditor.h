@@ -84,7 +84,13 @@ public:
 	//! クリップボードから貼り付け可能か？
 	bool IsEnablePaste( void ) const
 	{
-		return CClipboard::HasValidData();
+		return
+			// テキストスタックモードで，スタックにデータが有る
+			GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack &&
+			GetDllShareData().m_TextStack.GetSize() != 0 ||
+			
+			// クリップボードにデータが有る
+			CClipboard::HasValidData();
 	}
 
 public:

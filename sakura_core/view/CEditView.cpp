@@ -2391,7 +2391,7 @@ void CEditView::CopySelectedAllLines(
 	@date 2007.10.04 ryoji MSDEVLineSelect対応処理を追加
 	@date 2008.09.10 bosagami パス貼り付け対応
 */
-bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, bool* pbLineSelect /*= NULL*/ )
+bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, bool* pbLineSelect /*= NULL*/, UINT uMode /*= 0*/ )
 {
 	if(pbColumnSelect)
 		*pbColumnSelect = false;
@@ -2399,18 +2399,38 @@ bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, boo
 	if(pbLineSelect)
 		*pbLineSelect = false;
 
-	if(!CClipboard::HasValidData())
-		return false;
+	bool bEnbStack = GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack;
+	
+	if(!CClipboard::HasValidData()){
+		
+		// スタック不使用 or スタックが空なら直帰
+		if( !bEnbStack || GetDllShareData().m_TextStack.GetSize() == 0 ) return false;
+		
+		UINT uSelMode;
+		
+		// スタックから pop，クリップボードは経由しない
+		GetDllShareData().m_TextStack.Pop( &cmemBuf, &uSelMode );
+		
+		if( pbColumnSelect ) *pbColumnSelect = uSelMode == CTextStack::M_COLUMN;
+		if( pbLineSelect   ) *pbLineSelect   = uSelMode == CTextStack::M_LINE;
+		return true;
+	}
 	
 	CClipboard cClipboard(GetHwnd());
 	if(!cClipboard)
 		return false;
-
+	
 	CEol cEol = m_pcEditDoc->m_cDocEditor.GetNewLineCode();
 	if(!cClipboard.GetText(&cmemBuf,pbColumnSelect,pbLineSelect,cEol)){
 		return false;
 	}
-
+	
+	// テキストスタック使用時はクリップボードを空にすることにより
+	// 次回はスタックからペーストされる．
+	if( bEnbStack && ( uMode != M_COPYPASTE )){
+		cClipboard.Empty();
+	}
+	
 	return true;
 }
 
@@ -2431,6 +2451,27 @@ bool CEditView::MySetClipboardData( const WCHAR* pszText, int nTextLen, bool bCo
 	if(!cClipboard){
 		return false;
 	}
+	
+	// クリップボードに有効なデータが有る場合は，push
+	if( GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack && CClipboard::HasValidData()){
+		
+		// クリップボードから文字列取得
+		CNativeW memBuff;
+		bool bColumnSelect	= false;
+		bool bLineSelect	= false;
+		
+		CEol cEol = m_pcEditDoc->m_cDocEditor.GetNewLineCode();
+		
+		// テキストスタックに push
+		if(cClipboard.GetText(&memBuff, &bColumnSelect, &bLineSelect, cEol)){
+			GetDllShareData().m_TextStack.Push(
+				&memBuff,
+			 	bColumnSelect	? CTextStack::M_COLUMN :
+				bLineSelect		? CTextStack::M_LINE : 0
+			);
+		}
+	}
+	
 	cClipboard.Empty();
 	return cClipboard.SetText(pszText,nTextLen,bColumnSelect,bLineSelect);
 }

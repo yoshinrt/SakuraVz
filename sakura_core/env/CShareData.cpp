@@ -715,6 +715,10 @@ bool CShareData::InitShareData()
 
 			m_pShareData->m_bLineNumIsCRLF_ForJump = true;	/* 指定行へジャンプの「改行単位の行番号」か「折り返し単位の行番号」か */
 		}
+		
+		// Vz モード
+		m_pShareData->m_Common.m_sVzMode.Initialize();
+		
 	}else{
 		/* オブジェクトがすでに存在する場合 */
 		/* ファイルのビューを､ 呼び出し側プロセスのアドレス空間にマップします */

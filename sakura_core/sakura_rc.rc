@@ -3133,6 +3133,7 @@ BEGIN
     F_COPY                  "コピー"
     F_COPY_CRLF             "CRLF改行でコピー"
     F_PASTE                 "貼り付け"
+    F_COPYPASTE             "貼り付け(スタックPOPなし)"
     F_PASTEBOX              "矩形貼り付け"
     F_INSTEXT_W             "テキストを貼り付け"
 	F_EDIT_INS_SUBMENU		"挿入"
@@ -3141,10 +3142,6 @@ BEGIN
 	F_EDIT_SEL_SUBMENU		"選択"
 	F_EDIT_BOX_SEL_SUBMENU	"矩形選択"
 	F_EDIT_COS_SUBMENU	"整形"
-	F_TEXTSTACK_PUSH	"テキストスタックへPUSH+CUT"
-	F_TEXTSTACK_COPY	"テキストスタックへPUSH"
-	F_TEXTSTACK_POP		"テキストスタックからPOP+PASTE"
-	F_TEXTSTACK_PASTE	"テキストスタックをPASTE"
 END
 
 STRINGTABLE DISCARDABLE 

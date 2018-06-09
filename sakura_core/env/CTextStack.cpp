@@ -16,7 +16,7 @@ bool CTextStack::Push( CNativeW* cmemBuf, UINT uMode ){
 	int nSizeAlign	= AlignSize( nSize ) + sizeof( UINT ) * 3;
 	
 	// TEXTSTACK_SIZE を超えるものは push しない
-	if( nSizeAlign > TEXTSTACK_SIZE ) return TRUE;
+	if( nSizeAlign > TEXTSTACK_SIZE ) return false;
 	
 	// push の結果 TEXTSTACK_SIZE を超える場合，TopPtr を変更し buf を切り詰める
 	while( nSizeAlign + m_nSize > TEXTSTACK_SIZE ){
@@ -55,51 +55,53 @@ bool CTextStack::Push( CNativeW* cmemBuf, UINT uMode ){
 	
 	//DEBUG_TRACE( _T( "<<Push: t=%04X e=%04X s=%04X new=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize, nSize );
 	
-	return FALSE;
+	return true;
 }
 
-bool CTextStack::Pop( CNativeW* cmemBuf, UINT* puMode ){
+bool CTextStack::Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop ){
 	
 	//DEBUG_TRACE( _T( ">>Pop: t=%04X e=%04X s=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize );
 	
 	// スタックが空ならリターン
-	if( m_nSize == 0 ) return TRUE;
+	if( m_nSize == 0 ) return false;
 	
 	// データ長を得る
-	m_nEndPtr = Backward( m_nEndPtr, sizeof( int ));
-	int nSize = *GetIntPtr( m_nEndPtr );
+	int nEndPtr = m_nEndPtr;
+	nEndPtr = Backward( nEndPtr, sizeof( int ));
+	int nSize = *GetIntPtr( nEndPtr );
 	
 	// データ先頭に移動
-	m_nEndPtr = Backward( m_nEndPtr, AlignSize( nSize ));
+	nEndPtr = Backward( nEndPtr, AlignSize( nSize ));
 	
 	// データが buf 後端にかぶっているなら，2回に分けてコピー
-	if( m_nEndPtr + nSize > TEXTSTACK_SIZE ){
+	if( nEndPtr + nSize > TEXTSTACK_SIZE ){
 		BYTE *pBuf = new BYTE[ nSize ];
 		
-		memcpy( pBuf, GetIntPtr( m_nEndPtr ), TEXTSTACK_SIZE - m_nEndPtr );
+		memcpy( pBuf, GetIntPtr( nEndPtr ), TEXTSTACK_SIZE - nEndPtr );
 		memcpy(
-			pBuf + ( TEXTSTACK_SIZE - m_nEndPtr ),
+			pBuf + ( TEXTSTACK_SIZE - nEndPtr ),
 			GetIntPtr( 0 ),
-			nSize - ( TEXTSTACK_SIZE - m_nEndPtr )
+			nSize - ( TEXTSTACK_SIZE - nEndPtr )
 		);
 		
 		cmemBuf->SetString(( wchar_t *)pBuf, nSize / sizeof( wchar_t ));
 		
 		delete [] pBuf;
 	}else{
-		cmemBuf->SetString(( wchar_t *)GetIntPtr( m_nEndPtr ), nSize / sizeof( wchar_t ));
+		cmemBuf->SetString(( wchar_t *)GetIntPtr( nEndPtr ), nSize / sizeof( wchar_t ));
 	}
 	
 	// フラグ設定
-	m_nEndPtr = Backward( m_nEndPtr, sizeof( int ));
-	if( puMode ) *puMode = *GetIntPtr( m_nEndPtr );
+	nEndPtr = Backward( nEndPtr, sizeof( int ));
+	if( puMode ) *puMode = *GetIntPtr( nEndPtr );
 	
 	// データ長分戻す
-	m_nEndPtr = Backward( m_nEndPtr, sizeof( int ));
-	
-	m_nSize -= AlignSize( nSize ) + sizeof( UINT ) * 3;
+	if( !bNoPop ){
+		m_nEndPtr = Backward( nEndPtr, sizeof( int ));
+		m_nSize -= AlignSize( nSize ) + sizeof( UINT ) * 3;
+	}
 	
 	//DEBUG_TRACE( _T( "<<Pop: t=%04X e=%04X s=%04X new=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize, nSize );
 	
-	return FALSE;
+	return true;
 }

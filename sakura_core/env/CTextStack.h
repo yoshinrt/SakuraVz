@@ -36,16 +36,16 @@ public:
 	/*! @brief 引数で指定されたデータを，新たに領域確保しコピーする
 	 * @param[in] cmemBuf	スタックに積むテキスト
 	 * @param[in] uMode		選択モード (= m_nMode)
-	 * @retval 正常終了時は FALSE を返す．
+	 * @retval 正常終了時は true を返す．
 	 */
 	bool Push( CNativeW* cmemBuf, UINT uMode );
 	
 	/*! @brief テキストスタックから pop
 	 * @param[in,out] cmemBuf	スタックに積むテキスト
 	 * @param[in,out] uMode		選択モード (= m_nMode)
-	 * @retval 正常終了時は FALSE を返す．
+	 * @retval 正常終了時は true を返す．
 	 */
-	bool Pop( CNativeW* cmemBuf, UINT* puMode );
+	bool Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop = false );
 	
 	//! 要素数取得
 	int GetSize( void ){ return m_nSize; };
