@@ -52,9 +52,9 @@ public:
 
 private:
 	CEditView*		m_pCommanderView;
-	CSMacroMgr*		m_pcSMacroMgr;
 
 public:
+	CSMacroMgr*		m_pcSMacroMgr;
 	/* キーリピート状態 */
 	int				m_bPrevCommand;
 

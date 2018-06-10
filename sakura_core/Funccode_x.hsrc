@@ -569,6 +569,7 @@ F_ISTEXTSELECTINGLOCK	= 40055,	// 選択状態のロックを取得
 F_GETVIEWLINES		= 40056,	// ビューの行数取得
 F_GETVIEWCOLUMNS	= 40057,	// ビューの列数取得
 F_CREATEMENU		= 40058,	// メニュー作成
+F_GETMACROINFO		= 40059,	// 実行中のマクロ名等の情報を返す
 
 
 //	= 2005,.01.10 genta ISearch用補助コード
