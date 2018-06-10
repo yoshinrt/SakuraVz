@@ -46,7 +46,9 @@ public:
 	CRecentSearch			m_cRecentSearch;
 	SComboBoxItemDeleter	m_comboDel;
 	CFontAutoDeleter		m_cFontText;
-
+	
+	int	m_nFixedOption;	//!< 検索・置換ダイアログのオプション固定
+	
 protected:
 //@@@ 2002.2.2 YAZAKI CShareDataに移動
 //	void AddToSearchKeyArr( const char* );

@@ -55,6 +55,8 @@ public:
 	bool			m_bCanceled;		//すべて置換で中断したか	// 2002.02.08 hor
 
 	CLogicPoint		m_ptEscCaretPos_PHY;	// 検索/置換開始時のカーソル位置退避エリア
+	
+	int	m_nFixedOption;	//!< 検索・置換ダイアログのオプション固定
 
 protected:
 	CRecentSearch			m_cRecentSearch;

@@ -592,7 +592,8 @@ int CDlgGrep::GetData( void )
 
 	//2001/06/23 N.Nakatani
 	/* íPåÍíPà Ç≈åüçı */
-	m_sSearchOption.bWordOnly = (0!=::IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD ));
+	m_sSearchOption.bWordOnly     = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) && !GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
+	m_sSearchOption.bVzWordSearch = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) &&  GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
 
 	/* ê≥ãKï\åª */
 	m_sSearchOption.bRegularExp = (0!=::IsDlgButtonChecked( GetHwnd(), IDC_CHK_REGULAREXP ));

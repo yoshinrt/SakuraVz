@@ -47,6 +47,7 @@ const DWORD p_helpids[] = {	//11800
 CDlgFind::CDlgFind()
 {
 	m_sSearchOption.Reset();
+	m_nFixedOption = 0;
 	return;
 }
 
@@ -140,21 +141,38 @@ void CDlgFind::SetData( void )
 	SetCombosList();
 
 	/* 英大文字と英小文字を区別する */
-	::CheckDlgButton( GetHwnd(), IDC_CHK_LOHICASE, m_sSearchOption.bLoHiCase );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_LOHICASE,
+		m_nFixedOption & SCH_CLR_CASE ? 0 :
+		m_nFixedOption & SCH_SET_CASE ? 1 :
+		m_sSearchOption.bLoHiCase
+	);
 
 	// 2001/06/23 Norio Nakatani
 	/* 単語単位で検索 */
-	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD, m_sSearchOption.bWordOnly );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD,
+		m_nFixedOption & SCH_CLR_WORD ? 0 :
+		m_nFixedOption & SCH_SET_WORD ? 1 :
+		m_sSearchOption.bWordOnly
+	);
 
 	/* 検索／置換  見つからないときメッセージを表示 */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_NOTIFYNOTFOUND, m_bNOTIFYNOTFOUND );
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_NOTIFYNOTFOUND,
+		m_nFixedOption & SCH_CLR_MSG ? 0 :
+		m_nFixedOption & SCH_SET_MSG ? 1 :
+		m_bNOTIFYNOTFOUND
+	);
 
 	// From Here Jun. 29, 2001 genta
 	// 正規表現ライブラリの差し替えに伴う処理の見直し
 	// 処理フロー及び判定条件の見直し。必ず正規表現のチェックと
 	// 無関係にCheckRegexpVersionを通過するようにした。
-	if( CheckRegexpVersion( GetHwnd(), IDC_STATIC_JRE32VER, false )
-		&& m_sSearchOption.bRegularExp){
+	if(
+		CheckRegexpVersion( GetHwnd(), IDC_STATIC_JRE32VER, false ) && (
+			m_nFixedOption & SCH_CLR_REGEXP ? 0 :
+			m_nFixedOption & SCH_SET_REGEXP ? 1 :
+			m_sSearchOption.bRegularExp
+		)
+	){
 		/* 英大文字と英小文字を区別する */
 		::CheckDlgButton( GetHwnd(), IDC_CHK_REGULAREXP, 1 );
 //正規表現がONでも、大文字小文字を区別する／しないを選択できるように。
@@ -171,11 +189,24 @@ void CDlgFind::SetData( void )
 	// To Here Jun. 29, 2001 genta
 
 	/* 検索ダイアログを自動的に閉じる */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_bAutoCloseDlgFind, m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgFind );
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_bAutoCloseDlgFind,
+		m_nFixedOption & SCH_CLR_CLOSEDLG ? 0 :
+		m_nFixedOption & SCH_SET_CLOSEDLG ? 1 :
+		m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgFind
+	);
 
 	/* 先頭（末尾）から再検索 2002.01.26 hor */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_SEARCHALL, m_pShareData->m_Common.m_sSearch.m_bSearchAll );
-
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_SEARCHALL,
+		m_nFixedOption & SCH_CLR_LOOP ? 0 :
+		m_nFixedOption & SCH_SET_LOOP ? 1 :
+		m_pShareData->m_Common.m_sSearch.m_bSearchAll
+	);
+	
+	// デフォルトボタン設定
+	if( m_nFixedOption & SCH_PREV ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
+	if( m_nFixedOption & SCH_NEXT ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
+	if( m_nFixedOption & SCH_MARK ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
+	
 	return;
 }
 

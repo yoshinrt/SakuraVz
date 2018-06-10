@@ -134,6 +134,31 @@ public:
 	//特殊インターフェース (使用は好ましくない)
 	void _SetHwnd(HWND hwnd){ m_hWnd = hwnd; }
 
+	//! 検索・置換ダイアログのオプション固定
+	enum {
+		SCH_CLR_WORD		= 1 << 0,	//!< 単語単位クリア
+		SCH_SET_WORD		= 1 << 1,	//!< 単語単位セット
+		SCH_CLR_CASE		= 1 << 2,	//!< 大文字小文字区別クリア
+		SCH_SET_CASE		= 1 << 3,	//!< 大文字小文字区別セット
+		SCH_CLR_REGEXP		= 1 << 4,	//!< 正規表現クリア
+		SCH_SET_REGEXP		= 1 << 5,	//!< 正規表現セット
+		SCH_CLR_MSG			= 1 << 6,	//!< メッセージクリア
+		SCH_SET_MSG			= 1 << 7,	//!< メッセージセット
+		SCH_CLR_CLOSEDLG	= 1 << 8,	//!< ダイアログを閉じるクリア
+		SCH_SET_CLOSEDLG	= 1 << 9,	//!< ダイアログを閉じるセット
+		SCH_CLR_LOOP		= 1 << 10,	//!< 上から検索クリア
+		SCH_SET_LOOP		= 1 << 11,	//!< 上から検索セット
+		SCH_CLR_CLIP		= 1 << 12,	//!< クリップボードから貼り付けクリア
+		SCH_SET_CLIP		= 1 << 13,	//!< クリップボードから貼り付けセット
+		
+		SCH_PREV			= 1 << 31,	//!< ↑検索
+		SCH_NEXT			= 1 << 30,	//!< ↓検索
+		SCH_MARK			= 1 << 29,	//!< 該当行マーク
+		SCH_REPLACE			= 1 << 28,	//!< 置換
+		SCH_REPLACEA		= 1 << 27,	//!< すべて置換
+		SCH_SETONLY			= 1 << 26,	//!< 検索条件のみセット(ボタンにはない)
+	};
+
 public:
 	HINSTANCE		m_hInstance;	/* アプリケーションインスタンスのハンドル */
 	HWND			m_hwndParent;	/* オーナーウィンドウのハンドル */

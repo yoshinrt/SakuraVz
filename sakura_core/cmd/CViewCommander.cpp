@@ -416,12 +416,12 @@ BOOL CViewCommander::HandleCommand(
 	case F_UUDECODE:				Command_UUDECODE();break;				/* uudecodeして保存 */	//Oct. 17, 2000 jepro 説明を「選択部分をUUENCODEデコード」から変更
 
 	/* 検索系 */
-	case F_SEARCH_DIALOG:		Command_SEARCH_DIALOG();break;												//検索(単語検索ダイアログ)
+	case F_SEARCH_DIALOG:		Command_SEARCH_DIALOG(( int )lparam1 );break;							//検索(単語検索ダイアログ)
 	case F_SEARCH_BOX:			Command_SEARCH_BOX();break;		// Jan. 13, 2003 MIK					//検索(ボックス)	// 2006.06.04 yukihane Command_SEARCH_BOX()
 	case F_SEARCH_NEXT:			Command_SEARCH_NEXT( true, bRedraw, false, (HWND)lparam1, (const WCHAR*)lparam2 );break;	//次を検索
 	case F_SEARCH_PREV:			Command_SEARCH_PREV( bRedraw, (HWND)lparam1 );break;						//前を検索
 	case F_REPLACE_DIALOG:	//置換(置換ダイアログ)
-		Command_REPLACE_DIALOG();	//@@@ 2002.2.2 YAZAKI ダイアログ呼び出しと、実行を分離
+		Command_REPLACE_DIALOG(( int )lparam1 );	//@@@ 2002.2.2 YAZAKI ダイアログ呼び出しと、実行を分離
 		break;
 	case F_REPLACE:				Command_REPLACE( (HWND)lparam1 );break;			//置換実行 @@@ 2002.2.2 YAZAKI
 	case F_REPLACE_ALL:			Command_REPLACE_ALL();break;		//すべて置換実行(通常) 2002.2.8 hor 2006.04.02 かろと

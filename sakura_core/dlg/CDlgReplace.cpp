@@ -124,11 +124,19 @@ void CDlgReplace::SetData( void )
 	SetCombosList();
 
 	/* 英大文字と英小文字を区別する */
-	::CheckDlgButton( GetHwnd(), IDC_CHK_LOHICASE, m_sSearchOption.bLoHiCase );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_LOHICASE,
+		m_nFixedOption & SCH_CLR_CASE ? 0 :
+		m_nFixedOption & SCH_SET_CASE ? 1 :
+		m_sSearchOption.bLoHiCase
+	);
 
 	// 2001/06/23 N.Nakatani
 	/* 単語単位で探す */
-	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD, m_sSearchOption.bWordOnly );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD,
+		m_nFixedOption & SCH_CLR_WORD ? 0 :
+		m_nFixedOption & SCH_SET_WORD ? 1 :
+		m_sSearchOption.bWordOnly
+	);
 
 	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji
 	::CheckDlgButton( GetHwnd(), IDC_CHECK_CONSECUTIVEALL, m_bConsecutiveAll );
@@ -137,8 +145,13 @@ void CDlgReplace::SetData( void )
 	// 正規表現ライブラリの差し替えに伴う処理の見直し
 	// 処理フロー及び判定条件の見直し。必ず正規表現のチェックと
 	// 無関係にCheckRegexpVersionを通過するようにした。
-	if( CheckRegexpVersion( GetHwnd(), IDC_STATIC_JRE32VER, false )
-		&& m_sSearchOption.bRegularExp){
+	if(
+		CheckRegexpVersion( GetHwnd(), IDC_STATIC_JRE32VER, false ) && (
+			m_nFixedOption & SCH_CLR_REGEXP ? 0 :
+			m_nFixedOption & SCH_SET_REGEXP ? 1 :
+			m_sSearchOption.bRegularExp
+		)
+	){
 		/* 英大文字と英小文字を区別する */
 		::CheckDlgButton( GetHwnd(), IDC_CHK_REGULAREXP, 1 );
 
@@ -155,18 +168,34 @@ void CDlgReplace::SetData( void )
 	// To Here Jun. 29, 2001 genta
 
 	/* 検索／置換  見つからないときメッセージを表示 */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_NOTIFYNOTFOUND, m_bNOTIFYNOTFOUND );
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_NOTIFYNOTFOUND,
+		m_nFixedOption & SCH_CLR_MSG ? 0 :
+		m_nFixedOption & SCH_SET_MSG ? 1 :
+		m_bNOTIFYNOTFOUND
+	);
 
 
 	/* 置換 ダイアログを自動的に閉じる */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_bAutoCloseDlgReplace, m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgReplace );
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_bAutoCloseDlgReplace,
+		m_nFixedOption & SCH_CLR_CLOSEDLG ? 0 :
+		m_nFixedOption & SCH_SET_CLOSEDLG ? 1 :
+		m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgReplace
+	);
 
 	/* 先頭（末尾）から再検索 2002.01.26 hor */
-	::CheckDlgButton( GetHwnd(), IDC_CHECK_SEARCHALL, m_pShareData->m_Common.m_sSearch.m_bSearchAll );
+	::CheckDlgButton( GetHwnd(), IDC_CHECK_SEARCHALL,
+		m_nFixedOption & SCH_CLR_LOOP ? 0 :
+		m_nFixedOption & SCH_SET_LOOP ? 1 :
+		m_pShareData->m_Common.m_sSearch.m_bSearchAll
+	);
 
 	// From Here 2001.12.03 hor
 	// クリップボードから貼り付ける？
-	::CheckDlgButton( GetHwnd(), IDC_CHK_PASTE, m_nPaste );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_PASTE,
+		m_nFixedOption & SCH_CLR_CLIP ? 0 :
+		m_nFixedOption & SCH_SET_CLIP ? 1 :
+		m_nPaste
+	);
 	// 置換対象
 	if(m_nReplaceTarget==0){
 		::CheckDlgButton( GetHwnd(), IDC_RADIO_REPLACE, TRUE );
@@ -184,6 +213,13 @@ void CDlgReplace::SetData( void )
 	}
 	// To Here 2001.12.03 hor
 
+	// デフォルトボタン設定
+	if( m_nFixedOption & SCH_PREV )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
+	if( m_nFixedOption & SCH_NEXT )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
+	if( m_nFixedOption & SCH_MARK )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
+	if( m_nFixedOption & SCH_REPLACE )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCE, 0 );
+	if( m_nFixedOption & SCH_REPLACEA )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCEALL, 0 );
+	
 	return;
 }
 

@@ -46,7 +46,7 @@ void CViewCommander::Command_SEARCH_BOX( void )
 
 
 /* 検索(単語検索ダイアログ) */
-void CViewCommander::Command_SEARCH_DIALOG( void )
+void CViewCommander::Command_SEARCH_DIALOG( int nOption )
 {
 	/* 現在カーソル位置単語または選択範囲より検索等のキーを取得 */
 	CNativeW		cmemCurText;
@@ -56,6 +56,10 @@ void CViewCommander::Command_SEARCH_DIALOG( void )
 	if( 0 < cmemCurText.GetStringLength() ){
 		GetEditWindow()->m_cDlgFind.m_strText = cmemCurText.GetStringPtr();
 	}
+	
+	// オプション固定の設定
+	GetEditWindow()->m_cDlgFind.m_nFixedOption = nOption;
+
 	/* 検索ダイアログの表示 */
 	if( NULL == GetEditWindow()->m_cDlgFind.GetHwnd() ){
 		GetEditWindow()->m_cDlgFind.DoModeless( G_AppInstance(), m_pCommanderView->GetHwnd(), (LPARAM)&GetEditWindow()->GetActiveView() );
@@ -485,7 +489,7 @@ end_of_func:;
 
 
 //置換(置換ダイアログ)
-void CViewCommander::Command_REPLACE_DIALOG( void )
+void CViewCommander::Command_REPLACE_DIALOG( int nOption )
 {
 	BOOL		bSelected = FALSE;
 
@@ -512,6 +516,9 @@ void CViewCommander::Command_REPLACE_DIALOG( void )
 	GetEditWindow()->m_cDlgReplace.m_nReplaceTarget=0;	/* 置換対象 */
 	GetEditWindow()->m_cDlgReplace.m_nPaste=FALSE;		/* 貼り付ける？ */
 // To Here 2001.12.03 hor
+
+	// オプション固定の設定
+	GetEditWindow()->m_cDlgReplace.m_nFixedOption = nOption;
 
 	/* 置換ダイアログの表示 */
 	//	From Here Jul. 2, 2001 genta 置換ウィンドウの2重開きを抑止

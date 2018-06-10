@@ -810,6 +810,12 @@ bool CMacro::HandleCommand(
 			}
 		}
 		break;
+	
+	case F_SEARCH_DIALOG:
+	case F_REPLACE_DIALOG:
+		pcEditView->GetCommander().HandleCommand( Index, true, (Argument[0] != NULL ? _wtoi(Argument[0]) : 0 ), 0, 0, 0 );
+		break;
+		
 	case F_DIFF:
 		//	Argument[0]とDiff差分表示。オプションはArgument[1]に。
 		//	Argument[1]:
