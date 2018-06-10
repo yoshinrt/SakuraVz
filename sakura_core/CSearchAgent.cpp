@@ -77,6 +77,7 @@ void CSearchStringPattern::Reset(){
 	delete [] m_pnUseCharSkipArr;
 	m_pnUseCharSkipArr = NULL;
 #endif
+	m_uVzWordSearch	= 0;
 }
 
 bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const wchar_t* pszPattern2, const SSearchOption& sSearchOption, CBregexp* regexp, bool bGlobal)
@@ -109,6 +110,27 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 		}
 	}else if( m_psSearchOption->bWordOnly ){
 	}else{
+		// 単語境界キャンセルの解析
+		if( m_psSearchOption->bVzWordSearch ){
+			
+			if( iswalnum( pszPattern[ 0 ])){
+				// 単語先頭が英数字なら，単語境界
+				m_uVzWordSearch = WORDSEARCH_TOP;
+			}else if( pszPattern[ 0 ] == L'*' ){
+				// '*' をスキップ
+				m_pszCaseKeyRef	= m_pszKey = ++pszPattern;
+				m_nPatternLen	= --nPatternLen;
+			}
+			
+			if( iswalnum( pszPattern[ nPatternLen - 1 ])){
+				// 単語先頭が英数字なら，単語境界
+				m_uVzWordSearch |= WORDSEARCH_TAIL;
+			}else if( pszPattern[ nPatternLen - 1 ] == L'*' ){
+				// '*' をスキップ
+				m_nPatternLen	= --nPatternLen;
+			}
+		}
+		
 		if( GetIgnoreCase() ){
 			m_pszPatternCase = new wchar_t[nPatternLen + 1];
 			m_pszCaseKeyRef = m_pszPatternCase;
@@ -166,9 +188,42 @@ const wchar_t* CSearchAgent::SearchString(
 	const wchar_t*	pLine,
 	int				nLineLen,
 	int				nIdxPos,
-	const CSearchStringPattern& pattern
+	const CSearchStringPattern& pattern,
+	bool			bVzWordSearch
 )
 {
+	// Vz サーチワード時は，とりあえず普通にサーチして後で単語境界をチェックする
+	if( bVzWordSearch && pattern.m_uVzWordSearch ){
+		const wchar_t *pRet = nullptr;
+		wchar_t c;
+		
+		while(
+			nLineLen - nIdxPos >= pattern.GetLen() &&
+			( pRet = SearchString( pLine, nLineLen, nIdxPos, pattern, false ))
+		){
+			if(
+				(
+					// 先頭単語境界チェックなし
+					!( pattern.m_uVzWordSearch & CSearchStringPattern::WORDSEARCH_TOP ) ||
+					// 行頭なら単語境界   一文字前が非英数なら単語境界
+					( pLine == pRet ) || !iswalnum( c = *( pRet - 1 )) && c != L'_'
+				) && (
+					// 末端単語境界チェックなし
+					!( pattern.m_uVzWordSearch & CSearchStringPattern::WORDSEARCH_TAIL ) ||
+					// 行末なら単語境界
+					( nLineLen - ( pRet - pLine ) == pattern.GetLen()) ||
+					// 一文字後ろが非英数なら単語境界
+					!iswalnum( c = *( pRet + pattern.GetLen())) && c != L'_'
+				)
+			) break; // 発見
+			
+			nIdxPos = pRet - pLine + 1;
+			pRet = nullptr;
+		}
+		
+		return pRet;
+	}
+	
 	const int      nPatternLen = pattern.GetLen();
 	const wchar_t* pszPattern  = pattern.GetCaseKey();
 #ifdef SEARCH_STRING_SUNDAY_QUICK

@@ -241,7 +241,8 @@ int CDlgFind::GetData( void )
 
 	// 2001/06/23 Norio Nakatani
 	/* 単語単位で検索 */
-	m_sSearchOption.bWordOnly = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD ));
+	m_sSearchOption.bWordOnly     = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) && !GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
+	m_sSearchOption.bVzWordSearch = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) &&  GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
 
 	/* 一致する単語のみ検索する */
 	/* 正規表現 */

@@ -730,13 +730,13 @@ class CommonSetting_VzMode
 public:
 	bool	m_bEnableTextStack;			//!< テキストスタック有効
 	bool	m_bNoMoveAfterPaste;		//!< ペースト後にカーソル移動しない
-	bool	m_bCancelWordBoundary;		//!< * で単語境界をキャンセルする
+	bool	m_bWordSearch;				//!< Vz 互換の単語検索
 	int		m_nSelectMode;				//!< 選択モード
 	
 	void Initialize( void ){
 		m_bEnableTextStack		= true;
 		m_bNoMoveAfterPaste		= true;
-		m_bCancelWordBoundary	= true;
+		m_bWordSearch			= true;
 		m_nSelectMode			= ESelectMode::T_Always;
 	}
 };

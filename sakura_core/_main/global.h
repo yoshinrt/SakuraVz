@@ -166,16 +166,19 @@ struct SSearchOption{
 	bool	bRegularExp;	//!< true==³‹K•\Œ»
 	bool	bLoHiCase;		//!< true==‰p‘å•¶Žš¬•¶Žš‚Ì‹æ•Ê
 	bool	bWordOnly;		//!< true==’PŒê‚Ì‚ÝŒŸõ
-
-	SSearchOption() : bRegularExp(false), bLoHiCase(false), bWordOnly(false) { }
+	bool	bVzWordSearch;	//!< Vz ŒÝŠ·’PŒêŒŸõ
+	
+	SSearchOption() : bRegularExp(false), bLoHiCase(false), bWordOnly(false), bVzWordSearch(false) { }
 	SSearchOption(
 		bool _bRegularExp,
 		bool _bLoHiCase,
-		bool _bWordOnly
+		bool _bWordOnly,
+		bool _bVzWordSearch = false
 	)
 	: bRegularExp(_bRegularExp)
 	, bLoHiCase(_bLoHiCase)
 	, bWordOnly(_bWordOnly)
+	, bVzWordSearch(_bVzWordSearch)
 	{
 	}
 	void Reset()
@@ -183,6 +186,7 @@ struct SSearchOption{
 		bRegularExp = false;
 		bLoHiCase   = false;
 		bWordOnly   = false;
+		bVzWordSearch= false;
 	}
 
 	//‰‰ŽZŽq

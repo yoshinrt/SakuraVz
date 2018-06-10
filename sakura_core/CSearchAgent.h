@@ -60,6 +60,12 @@ public:
 	static int GetMapIndex( wchar_t c );
 #endif
 
+	UINT m_uVzWordSearch;		//!< Vz 互換ワードサーチの境界
+	enum {
+		WORDSEARCH_TOP	= 0x1,	//!< 単語先頭は境界
+		WORDSEARCH_TAIL	= 0x2,	//!< 単語終端は境界
+	};
+
 private:
 	// 外部依存
 	const wchar_t*	m_pszKey;
@@ -90,7 +96,8 @@ public:
 		const wchar_t*	pLine,
 		int				nLineLen,
 		int				nIdxPos,
-		const CSearchStringPattern& pattern
+		const CSearchStringPattern& pattern,
+		bool			bVzWordSearch = true
 	);
 	// 単語単位で文字列検索
 	static const wchar_t* SearchStringWord(
