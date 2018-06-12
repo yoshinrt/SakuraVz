@@ -353,20 +353,25 @@ BOOL CDlgFind::OnBnClicked( int wID )
 			if( m_bModal ){		/* モーダルダイアログか */
 				CloseDialog( 1 );
 			}else{
-				/* 前を検索 */
-				pcEditView->GetCommander().HandleCommand( F_SEARCH_PREV, true, (LPARAM)GetHwnd(), 0, 0, 0 );
+				if( m_nFixedOption & SCH_SETONLY ){
+					// 表示だけ更新
+					pcEditView->GetCommander().m_pCommanderView->ChangeCurRegexp();
+				}else{
+					/* 前を検索 */
+					pcEditView->GetCommander().HandleCommand( F_SEARCH_PREV, true, (LPARAM)GetHwnd(), 0, 0, 0 );
 
-				/* 再描画 2005.04.06 zenryaku 0文字幅マッチでキャレットを表示するため */
-				pcEditView->Redraw();	// 前回0文字幅マッチの消去にも必要
+					/* 再描画 2005.04.06 zenryaku 0文字幅マッチでキャレットを表示するため */
+					pcEditView->Redraw();	// 前回0文字幅マッチの消去にも必要
 
-				// 02/06/26 ai Start
-				// 検索開始位置を登録
-				if( FALSE != pcEditView->m_bSearch ){
-					// 検索開始時のカーソル位置登録条件変更 02/07/28 ai start
-					pcEditView->m_ptSrchStartPos_PHY = m_ptEscCaretPos_PHY;
-					pcEditView->m_bSearch = FALSE;
-					// 02/07/28 ai end
-				}//  02/06/26 ai End
+					// 02/06/26 ai Start
+					// 検索開始位置を登録
+					if( FALSE != pcEditView->m_bSearch ){
+						// 検索開始時のカーソル位置登録条件変更 02/07/28 ai start
+						pcEditView->m_ptSrchStartPos_PHY = m_ptEscCaretPos_PHY;
+						pcEditView->m_bSearch = FALSE;
+						// 02/07/28 ai end
+					}//  02/06/26 ai End
+				}
 
 				/* 検索ダイアログを自動的に閉じる */
 				if( m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgFind ){
@@ -386,17 +391,22 @@ BOOL CDlgFind::OnBnClicked( int wID )
 				CloseDialog( 2 );
 			}
 			else{
-				/* 次を検索 */
-				pcEditView->GetCommander().HandleCommand( F_SEARCH_NEXT, true, (LPARAM)GetHwnd(), 0, 0, 0 );
+				if( m_nFixedOption & SCH_SETONLY ){
+					// 表示だけ更新
+					pcEditView->GetCommander().m_pCommanderView->ChangeCurRegexp();
+				}else{
+					/* 次を検索 */
+					pcEditView->GetCommander().HandleCommand( F_SEARCH_NEXT, true, (LPARAM)GetHwnd(), 0, 0, 0 );
 
-				/* 再描画 2005.04.06 zenryaku 0文字幅マッチでキャレットを表示するため */
-				pcEditView->Redraw();	// 前回0文字幅マッチの消去にも必要
+					/* 再描画 2005.04.06 zenryaku 0文字幅マッチでキャレットを表示するため */
+					pcEditView->Redraw();	// 前回0文字幅マッチの消去にも必要
 
-				// 検索開始位置を登録
-				if( FALSE != pcEditView->m_bSearch ){
-					// 検索開始時のカーソル位置登録条件変更 02/07/28 ai start
-					pcEditView->m_ptSrchStartPos_PHY = m_ptEscCaretPos_PHY;
-					pcEditView->m_bSearch = FALSE;
+					// 検索開始位置を登録
+					if( FALSE != pcEditView->m_bSearch ){
+						// 検索開始時のカーソル位置登録条件変更 02/07/28 ai start
+						pcEditView->m_ptSrchStartPos_PHY = m_ptEscCaretPos_PHY;
+						pcEditView->m_bSearch = FALSE;
+					}
 				}
 
 				/* 検索ダイアログを自動的に閉じる */

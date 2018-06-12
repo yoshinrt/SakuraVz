@@ -50,11 +50,10 @@ public:
 	CLayoutRange& GetSelect();
 	CCaret& GetCaret();
 
-private:
-	CEditView*		m_pCommanderView;
-
 public:
+	CEditView*		m_pCommanderView;
 	CSMacroMgr*		m_pcSMacroMgr;
+	
 	/* キーリピート状態 */
 	int				m_bPrevCommand;
 
