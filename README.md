@@ -1,3 +1,20 @@
+# Sakura Editor VZ 化 fork
+
+サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつかを実装するプロジェクトです．現在以下の機能が追加されています．
+
+### Vz の機能
+
+- テキストスタック
+- Vz 互換の「単語単位で検索」仕様．`*` で単語境界のチェックをキャンセルします．
+
+### Vz とは関係ない機能
+
+- 実行中のマクロ名，マクロ ID を取得する `GetMacroInfo()` マクロ関数追加
+- 検索・置換ダイアログのオプションを固定できるよう，`SearchDialog()`, `ReplaceDialog()` に引数追加
+
+----
+以下は，サクラエディタ本家の README になります．本 fork には適用されない情報もありますので，ご了承ください．
+
 # Sakura Editor
 [![Build status](https://ci.appveyor.com/api/projects/status/xlsp22h1q91mh96j/branch/master?svg=true)](https://ci.appveyor.com/project/sakuraeditor/sakura/branch/master)
 
@@ -22,7 +39,7 @@ https://github.com/sakura-editor/sakura/wiki
 More information: https://github.com/sakura-editor/sakura/issues/6
 
 ## How to build
-Visual Studio Community 2017 で `sakura/sakura.sln` を開いてビルド。
+Visual Studio Community 2017 で `sakura.sln` を開いてビルド。
 
 ## CI Build (AppVeyor)
 本リポジトリの最新 master は以下の AppVeyor プロジェクト上で自動ビルドされます。  
