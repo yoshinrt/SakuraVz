@@ -62,7 +62,10 @@ void CViewCommander::Command_CUT( void )
 		return;
 	}
 	/* クリップボードにデータを設定 */
-	if( !m_pCommanderView->MySetClipboardData( cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), bBeginBoxSelect ) ){
+	if( !m_pCommanderView->MySetClipboardData(
+		cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), bBeginBoxSelect,
+		m_pCommanderView->GetSelectionInfo().IsLineSelecting())
+	){
 		ErrorBeep();
 		return;
 	}
@@ -114,7 +117,10 @@ void CViewCommander::Command_COPY(
 		}
 
 		/* クリップボードにデータcmemBufの内容を設定 */
-		if( !m_pCommanderView->MySetClipboardData( cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), bBeginBoxSelect, FALSE ) ){
+		if( !m_pCommanderView->MySetClipboardData(
+			cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), bBeginBoxSelect,
+			m_pCommanderView->GetSelectionInfo().IsLineSelecting())
+		){
 			ErrorBeep();
 			return;
 		}

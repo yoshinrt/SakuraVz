@@ -151,6 +151,12 @@ public:
 		return m_bBeginBoxSelect;
 	}
 
+	//!s‘I‘ğ’†‚©
+	bool IsLineSelecting() const
+	{
+		return m_bBeginLineSelect;
+	}
+
 
 private:
 	//QÆ
