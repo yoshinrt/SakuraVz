@@ -63,7 +63,12 @@ void CMacroBeforeAfter::ExecKeyMacroAfter( class CEditView* pcEditView, int flag
 			pcEditView->SetUndoBuffer();
 		}
 	}
-	pcEditView->m_pcEditWnd->SetDrawSwitchOfAllViews(m_bDrawSwitchOld);
+	bool bDrawSwitch = pcEditView->m_pcEditWnd->SetDrawSwitchOfAllViews(m_bDrawSwitchOld);
+	
+	// •\Ž¦ off¨on ‚É‚µ‚½‚çÄ•\Ž¦
+	if( !bDrawSwitch && m_bDrawSwitchOld ){
+		pcEditView->RedrawAll();
+	}
 }
 
 // CMacroManagerBase
