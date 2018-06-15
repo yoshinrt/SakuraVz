@@ -1,5 +1,5 @@
-/*!	@file
-	@brief Dialog BoxŠî’êƒNƒ‰ƒXƒwƒbƒ_ƒtƒ@ƒCƒ‹
+ï»¿/*!	@file
+	@brief Dialog BoxåŸºåº•ã‚¯ãƒ©ã‚¹ãƒ˜ãƒƒãƒ€ãƒ•ã‚¡ã‚¤ãƒ«
 
 	@author Norio Nakatani
 */
@@ -62,14 +62,14 @@ struct SComboBoxItemDeleter
 };
 
 /*-----------------------------------------------------------------------
-ƒNƒ‰ƒX‚ÌéŒ¾
+ã‚¯ãƒ©ã‚¹ã®å®£è¨€
 -----------------------------------------------------------------------*/
 /*!
-	@brief ƒ_ƒCƒAƒƒOƒEƒBƒ“ƒhƒE‚ğˆµ‚¤ƒNƒ‰ƒX
+	@brief ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æ‰±ã†ã‚¯ãƒ©ã‚¹
 
-	ƒ_ƒCƒAƒƒOƒ{ƒbƒNƒX‚ğì‚é‚Æ‚«‚É‚Í‚±‚±‚©‚çŒp³‚³‚¹‚éD
+	ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãƒœãƒƒã‚¯ã‚¹ã‚’ä½œã‚‹ã¨ãã«ã¯ã“ã“ã‹ã‚‰ç¶™æ‰¿ã•ã›ã‚‹ï¼
 
-	@date 2002.2.17 YAZAKI CShareData‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ÍACProcess‚É‚Ğ‚Æ‚Â‚ ‚é‚Ì‚İB
+	@date 2002.2.17 YAZAKI CShareDataã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¯ã€CProcessã«ã²ã¨ã¤ã‚ã‚‹ã®ã¿ã€‚
 */
 class CDialog
 {
@@ -82,10 +82,10 @@ public:
 	/*
 	||  Attributes & Operations
 	*/
-	virtual INT_PTR DispatchEvent( HWND, UINT, WPARAM, LPARAM );	/* ƒ_ƒCƒAƒƒO‚ÌƒƒbƒZ[ƒWˆ— */
-	INT_PTR DoModal( HINSTANCE, HWND, int, LPARAM );	/* ƒ‚[ƒ_ƒ‹ƒ_ƒCƒAƒƒO‚Ì•\¦ */
-	HWND DoModeless( HINSTANCE, HWND, int, LPARAM, int );	/* ƒ‚[ƒhƒŒƒXƒ_ƒCƒAƒƒO‚Ì•\¦ */
-	HWND DoModeless( HINSTANCE, HWND, LPCDLGTEMPLATE, LPARAM, int );	/* ƒ‚[ƒhƒŒƒXƒ_ƒCƒAƒƒO‚Ì•\¦ */
+	virtual INT_PTR DispatchEvent( HWND, UINT, WPARAM, LPARAM );	/* ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸å‡¦ç† */
+	INT_PTR DoModal( HINSTANCE, HWND, int, LPARAM );	/* ãƒ¢ãƒ¼ãƒ€ãƒ«ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®è¡¨ç¤º */
+	HWND DoModeless( HINSTANCE, HWND, int, LPARAM, int );	/* ãƒ¢ãƒ¼ãƒ‰ãƒ¬ã‚¹ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®è¡¨ç¤º */
+	HWND DoModeless( HINSTANCE, HWND, LPCDLGTEMPLATE, LPARAM, int );	/* ãƒ¢ãƒ¼ãƒ‰ãƒ¬ã‚¹ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®è¡¨ç¤º */
 	void CloseDialog( INT_PTR );
 
 	virtual BOOL OnInitDialog( HWND, WPARAM wParam, LPARAM lParam );
@@ -99,8 +99,8 @@ public:
 	virtual BOOL OnTimer( WPARAM wParam ){return TRUE;}
 	virtual BOOL OnKeyDown( WPARAM wParam, LPARAM lParam ){return TRUE;}
 	virtual BOOL OnDeviceChange( WPARAM wParam, LPARAM lParam ){return TRUE;}
-	virtual int GetData( void ){return 1;}/* ƒ_ƒCƒAƒƒOƒf[ƒ^‚Ìæ“¾ */
-	virtual void SetData( void ){return;}/* ƒ_ƒCƒAƒƒOƒf[ƒ^‚Ìİ’è */
+	virtual int GetData( void ){return 1;}/* ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãƒ‡ãƒ¼ã‚¿ã®å–å¾— */
+	virtual void SetData( void ){return;}/* ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãƒ‡ãƒ¼ã‚¿ã®è¨­å®š */
 	virtual BOOL OnBnClicked( int );
 	virtual BOOL OnStnClicked( int ){return FALSE;}
 	virtual BOOL OnEnChange( HWND hwndCtl, int wID ){return FALSE;}
@@ -108,7 +108,7 @@ public:
 	virtual BOOL OnLbnSelChange( HWND hwndCtl, int wID ){return FALSE;}
 	virtual BOOL OnLbnDblclk( int wID ){return FALSE;}
 	virtual BOOL OnCbnSelChange( HWND hwndCtl, int wID ){return FALSE;}
-	virtual BOOL OnCbnEditChange( HWND hwndCtl, int wID ){return FALSE;} // @@2005.03.31 MIK ƒ^ƒOƒWƒƒƒ“ƒvDialog
+	virtual BOOL OnCbnEditChange( HWND hwndCtl, int wID ){return FALSE;} // @@2005.03.31 MIK ã‚¿ã‚°ã‚¸ãƒ£ãƒ³ãƒ—Dialog
 	virtual BOOL OnCbnDropDown( HWND hwndCtl, int wID );
 	static BOOL OnCbnDropDown( HWND hwndCtl, bool scrollBar );
 //	virtual BOOL OnCbnCloseUp( HWND hwndCtl, int wID ){return FALSE;}
@@ -131,45 +131,45 @@ public:
 
 public:
 	HWND GetHwnd() const{ return m_hWnd; }
-	//“ÁêƒCƒ“ƒ^[ƒtƒF[ƒX (g—p‚ÍD‚Ü‚µ‚­‚È‚¢)
+	//ç‰¹æ®Šã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ (ä½¿ç”¨ã¯å¥½ã¾ã—ããªã„)
 	void _SetHwnd(HWND hwnd){ m_hWnd = hwnd; }
 
-	//! ŒŸõE’uŠ·ƒ_ƒCƒAƒƒO‚ÌƒIƒvƒVƒ‡ƒ“ŒÅ’è
+	//! æ¤œç´¢ãƒ»ç½®æ›ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®ã‚ªãƒ—ã‚·ãƒ§ãƒ³å›ºå®š
 	enum {
-		SCH_CLR_WORD		= 1 << 0,	//!< ’PŒê’PˆÊƒNƒŠƒA
-		SCH_SET_WORD		= 1 << 1,	//!< ’PŒê’PˆÊƒZƒbƒg
-		SCH_CLR_CASE		= 1 << 2,	//!< ‘å•¶š¬•¶š‹æ•ÊƒNƒŠƒA
-		SCH_SET_CASE		= 1 << 3,	//!< ‘å•¶š¬•¶š‹æ•ÊƒZƒbƒg
-		SCH_CLR_REGEXP		= 1 << 4,	//!< ³‹K•\Œ»ƒNƒŠƒA
-		SCH_SET_REGEXP		= 1 << 5,	//!< ³‹K•\Œ»ƒZƒbƒg
-		SCH_CLR_MSG			= 1 << 6,	//!< ƒƒbƒZ[ƒWƒNƒŠƒA
-		SCH_SET_MSG			= 1 << 7,	//!< ƒƒbƒZ[ƒWƒZƒbƒg
-		SCH_CLR_CLOSEDLG	= 1 << 8,	//!< ƒ_ƒCƒAƒƒO‚ğ•Â‚¶‚éƒNƒŠƒA
-		SCH_SET_CLOSEDLG	= 1 << 9,	//!< ƒ_ƒCƒAƒƒO‚ğ•Â‚¶‚éƒZƒbƒg
-		SCH_CLR_LOOP		= 1 << 10,	//!< ã‚©‚çŒŸõƒNƒŠƒA
-		SCH_SET_LOOP		= 1 << 11,	//!< ã‚©‚çŒŸõƒZƒbƒg
-		SCH_CLR_CLIP		= 1 << 12,	//!< ƒNƒŠƒbƒvƒ{[ƒh‚©‚ç“\‚è•t‚¯ƒNƒŠƒA
-		SCH_SET_CLIP		= 1 << 13,	//!< ƒNƒŠƒbƒvƒ{[ƒh‚©‚ç“\‚è•t‚¯ƒZƒbƒg
+		SCH_CLR_WORD		= 1 << 0,	//!< å˜èªå˜ä½ã‚¯ãƒªã‚¢
+		SCH_SET_WORD		= 1 << 1,	//!< å˜èªå˜ä½ã‚»ãƒƒãƒˆ
+		SCH_CLR_CASE		= 1 << 2,	//!< å¤§æ–‡å­—å°æ–‡å­—åŒºåˆ¥ã‚¯ãƒªã‚¢
+		SCH_SET_CASE		= 1 << 3,	//!< å¤§æ–‡å­—å°æ–‡å­—åŒºåˆ¥ã‚»ãƒƒãƒˆ
+		SCH_CLR_REGEXP		= 1 << 4,	//!< æ­£è¦è¡¨ç¾ã‚¯ãƒªã‚¢
+		SCH_SET_REGEXP		= 1 << 5,	//!< æ­£è¦è¡¨ç¾ã‚»ãƒƒãƒˆ
+		SCH_CLR_MSG			= 1 << 6,	//!< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚¯ãƒªã‚¢
+		SCH_SET_MSG			= 1 << 7,	//!< ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚»ãƒƒãƒˆ
+		SCH_CLR_CLOSEDLG	= 1 << 8,	//!< ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’é–‰ã˜ã‚‹ã‚¯ãƒªã‚¢
+		SCH_SET_CLOSEDLG	= 1 << 9,	//!< ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’é–‰ã˜ã‚‹ã‚»ãƒƒãƒˆ
+		SCH_CLR_LOOP		= 1 << 10,	//!< ä¸Šã‹ã‚‰æ¤œç´¢ã‚¯ãƒªã‚¢
+		SCH_SET_LOOP		= 1 << 11,	//!< ä¸Šã‹ã‚‰æ¤œç´¢ã‚»ãƒƒãƒˆ
+		SCH_CLR_CLIP		= 1 << 12,	//!< ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã‹ã‚‰è²¼ã‚Šä»˜ã‘ã‚¯ãƒªã‚¢
+		SCH_SET_CLIP		= 1 << 13,	//!< ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã‹ã‚‰è²¼ã‚Šä»˜ã‘ã‚»ãƒƒãƒˆ
 		
-		SCH_PREV			= 1 << 31,	//!< ªŒŸõ
-		SCH_NEXT			= 1 << 30,	//!< «ŒŸõ
-		SCH_MARK			= 1 << 29,	//!< ŠY“–sƒ}[ƒN
-		SCH_REPLACE			= 1 << 28,	//!< ’uŠ·
-		SCH_REPLACEA		= 1 << 27,	//!< ‚·‚×‚Ä’uŠ·
-		SCH_SETONLY			= 1 << 26,	//!< ŒŸõğŒ‚Ì‚İƒZƒbƒg(ƒ{ƒ^ƒ“‚É‚Í‚È‚¢)
+		SCH_PREV			= 1 << 31,	//!< â†‘æ¤œç´¢
+		SCH_NEXT			= 1 << 30,	//!< â†“æ¤œç´¢
+		SCH_MARK			= 1 << 29,	//!< è©²å½“è¡Œãƒãƒ¼ã‚¯
+		SCH_REPLACE			= 1 << 28,	//!< ç½®æ›
+		SCH_REPLACEA		= 1 << 27,	//!< ã™ã¹ã¦ç½®æ›
+		SCH_SETONLY			= 1 << 26,	//!< æ¤œç´¢æ¡ä»¶ã®ã¿ã‚»ãƒƒãƒˆ(ãƒœã‚¿ãƒ³ã«ã¯ãªã„)
 	};
 
 public:
-	HINSTANCE		m_hInstance;	/* ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒCƒ“ƒXƒ^ƒ“ƒX‚Ìƒnƒ“ƒhƒ‹ */
-	HWND			m_hwndParent;	/* ƒI[ƒi[ƒEƒBƒ“ƒhƒE‚Ìƒnƒ“ƒhƒ‹ */
+	HINSTANCE		m_hInstance;	/* ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ãƒãƒ³ãƒ‰ãƒ« */
+	HWND			m_hwndParent;	/* ã‚ªãƒ¼ãƒŠãƒ¼ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ãƒãƒ³ãƒ‰ãƒ« */
 private:
-	HWND			m_hWnd;			/* ‚±‚Ìƒ_ƒCƒAƒƒO‚Ìƒnƒ“ƒhƒ‹ */
+	HWND			m_hWnd;			/* ã“ã®ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã®ãƒãƒ³ãƒ‰ãƒ« */
 public:
 	HWND			m_hwndSizeBox;
 	LPARAM			m_lParam;
-	BOOL			m_bModal;		/* ƒ‚[ƒ_ƒ‹ ƒ_ƒCƒAƒƒO‚© */
-	bool			m_bSizable;		// ‰Â•Ïƒ_ƒCƒAƒƒO‚©‚Ç‚¤‚©
-	int				m_nShowCmd;		//	Å‘å‰»/Å¬‰»
+	BOOL			m_bModal;		/* ãƒ¢ãƒ¼ãƒ€ãƒ« ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‹ */
+	bool			m_bSizable;		// å¯å¤‰ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‹ã©ã†ã‹
+	int				m_nShowCmd;		//	æœ€å¤§åŒ–/æœ€å°åŒ–
 	int				m_nWidth;
 	int				m_nHeight;
 	int				m_xPos;
@@ -177,7 +177,7 @@ public:
 //	void*			m_pcEditView;
 	DLLSHAREDATA*	m_pShareData;
 	BOOL			m_bInited;
-	HINSTANCE		m_hLangRsrcInstance;		// ƒƒbƒZ[ƒWƒŠƒ\[ƒXDLL‚ÌƒCƒ“ƒXƒ^ƒ“ƒXƒnƒ“ƒhƒ‹	// 2011.04.10 nasukoji
+	HINSTANCE		m_hLangRsrcInstance;		// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒªã‚½ãƒ¼ã‚¹DLLã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒãƒ³ãƒ‰ãƒ«	// 2011.04.10 nasukoji
 
 protected:
 	void CreateSizeBox( void );
@@ -185,7 +185,7 @@ protected:
 
 	HWND GetItemHwnd(int nID){ return ::GetDlgItem( GetHwnd(), nID ); }
 
-	// ƒRƒ“ƒgƒ[ƒ‹‚É‰æ–Ê‚ÌƒtƒHƒ“ƒg‚ğİ’è	2012/11/27 Uchi
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã«ç”»é¢ã®ãƒ•ã‚©ãƒ³ãƒˆã‚’è¨­å®š	2012/11/27 Uchi
 	HFONT SetMainFont( HWND hTarget );
 };
 
