@@ -2080,15 +2080,21 @@ bool CEditView::GetSelectedData(
 			if( NULL == pLine ){
 				break;
 			}
-			if( nLineNum == GetSelectionInfo().m_sSelect.GetFrom().y ){
+			if(
+				!GetSelectionInfo().IsLineSelecting() && // 行選択モードでは x=0
+				nLineNum == GetSelectionInfo().m_sSelect.GetFrom().y
+			){
 				/* 指定された桁に対応する行のデータ内の位置を調べる */
 				nIdxFrom = LineColumnToIndex( pcLayout, GetSelectionInfo().m_sSelect.GetFrom().GetX2() );
 			}else{
 				nIdxFrom = CLogicInt(0);
 			}
+			
 			if( nLineNum == GetSelectionInfo().m_sSelect.GetTo().y ){
 				/* 指定された桁に対応する行のデータ内の位置を調べる */
-				nIdxTo = LineColumnToIndex( pcLayout, GetSelectionInfo().m_sSelect.GetTo().GetX2() );
+				nIdxTo =
+					GetSelectionInfo().IsLineSelecting() ? CLogicInt( 0 ) : // 行選択モードでは x=0
+					LineColumnToIndex( pcLayout, GetSelectionInfo().m_sSelect.GetTo().GetX2() );
 			}else{
 				nIdxTo = nLineLen;
 			}

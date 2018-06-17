@@ -187,6 +187,10 @@ int CViewCommander::Command_LEFT( bool bSelect, bool bRepeat )
 				m_pCommanderView->GetSelectionInfo().SetBoxSelect(false);
 			}
 		}
+		
+		// 行選択モードを解除
+		if( bSelect ) m_pCommanderView->GetSelectionInfo().SetLineSelect( false );
+		
 		// (これから求める)カーソルの移動先。
 		CLayoutPoint ptPos(CLayoutInt(0), ptCaretMove.GetY2());
 
@@ -290,6 +294,10 @@ void CViewCommander::Command_RIGHT( bool bSelect, bool bIgnoreCurrentSelection, 
 				}
 			}
 		}
+		
+		// 行選択モードを解除
+		if( bSelect ) m_pCommanderView->GetSelectionInfo().SetLineSelect( false );
+		
 //		2003.06.28 Moca [EOF]のみの行にカーソルがあるときに右を押しても選択を解除できない問題に対応
 
 		// (これから求める)カーソルの移動先。

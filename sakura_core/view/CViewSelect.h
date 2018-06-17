@@ -94,6 +94,12 @@ public:
 		m_bBeginBoxSelect = b;
 	}
 
+	//!m_bBeginLineSelect‚ğİ’èB
+	void SetLineSelect(bool b)
+	{
+		m_bBeginLineSelect = b;
+	}
+
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                           •`‰æ                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

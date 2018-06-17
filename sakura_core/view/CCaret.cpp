@@ -925,7 +925,14 @@ CLayoutInt CCaret::Cursor_UPDOWN( CLayoutInt nMoveLines, bool bSelect )
 			m_pEditView->GetSelectionInfo().SetBoxSelect(false);
 		}
 	}
-
+	
+	// 行モードにする
+	if( bSelect ){
+		m_pEditView->GetSelectionInfo().SetLineSelect(
+			GetDllShareData().m_Common.m_sVzMode.m_nSelectMode == ESelectMode::T_Always
+		);
+	}
+	
 	// (これから求める)キャレットの移動先。
 	CLayoutPoint ptTo( CLayoutInt(0), ptCaret.y + nMoveLines );
 

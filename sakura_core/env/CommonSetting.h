@@ -721,8 +721,8 @@ struct CommonSetting_MainMenu
 //! メインメニュー種類
 enum ESelectMode {
 	T_None,		//!< 選択モード変更しない
-	T_AtStart,	//!< 選択開始時に決定
 	T_Always,	//!< 常に変更する
+	T_AtStart,	//!< 選択開始時に決定
 };
 
 class CommonSetting_VzMode

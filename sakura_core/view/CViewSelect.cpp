@@ -146,6 +146,12 @@ void CViewSelect::ChangeSelectAreaByCurrentCursorTEST(
 			pSelect->SetTo(ptCaretPos);
 		}
 	}
+	
+	// 行選択モード時は，from, to の x を 0 にする
+	if( IsLineSelecting()){
+		pSelect->SetFromX( CLayoutPoint::IntType( 0 ));
+		pSelect->SetToX( CLayoutPoint::IntType( 0 ));
+	}
 }
 
 
@@ -203,12 +209,12 @@ void CViewSelect::DrawSelectArea(bool bDrawBracketCursorLine)
 				}else{
 					rc.UnionStrictRect(rcOld, rcNew);
 				}
-			}else if(rcOld.top == rcNew.top){
+			/*}else if(rcOld.top == rcNew.top){
 				rc.top    = t_min(rcOld.bottom, rcNew.bottom);
 				rc.bottom = t_max(rcOld.bottom, rcNew.bottom);
 			}else if(rcOld.bottom == rcNew.bottom){
 				rc.top    = t_min(rcOld.top, rcNew.top);
-				rc.bottom = t_max(rcOld.top, rcNew.top);
+				rc.bottom = t_max(rcOld.top, rcNew.top);*/
 			}else{
 				rc.UnionStrictRect(rcOld, rcNew);
 			}
