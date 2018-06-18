@@ -2383,7 +2383,7 @@ void CEditView::CopySelectedAllLines(
 		return;
 	}
 	/* クリップボードにデータを設定 */
-	MySetClipboardData( cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), false );
+	MySetClipboardData( cmemBuf.GetStringPtr(), cmemBuf.GetStringLength(), false, true );
 }
 
 /*! クリップボードからデータを取得

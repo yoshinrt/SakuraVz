@@ -80,7 +80,12 @@ bool CClipboard::SetText(
 	if( !m_bOpenResult ){
 		return false;
 	}
-
+	
+	// ラインモード貼付けを可能にする off なら，ラインモードを強制 off
+	if( !GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste ){
+		bLineSelect = false;
+	}
+	
 	/*
 	// テキスト形式のデータ (CF_OEMTEXT)
 	HGLOBAL hgClipText = ::GlobalAlloc(
@@ -290,11 +295,13 @@ bool CClipboard::GetText(CNativeW* cmemBuf, bool* pbColumnSelect, bool* pbLineSe
 					break;
 				}
 				if( NULL != pbLineSelect && 0 == lstrcmpi( _T("MSDEVLineSelect"), szFormatName ) ){
-					*pbLineSelect = true;
+					// ラインモード貼付けを可能にする off なら，ラインモードを強制 off
+					*pbLineSelect = GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste;
 					break;
 				}
 				if( NULL != pbLineSelect && 0 == lstrcmpi( _T("VisualStudioEditorOperationsLineCutCopyClipboardTag"), szFormatName ) ){
-					*pbLineSelect = true;
+					// ラインモード貼付けを可能にする off なら，ラインモードを強制 off
+					*pbLineSelect = GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste;
 					break;
 				}
 			}
