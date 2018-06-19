@@ -590,6 +590,9 @@ void CEditView::DeleteData(
 				m_cCommander.GetOpeBlk()->AppendOpe( pcOpe );
 			}
 		}else{
+			// ラインモード時はカーソル位置退避
+			bool bLineMode = GetSelectionInfo().IsLineSelecting();
+			
 			/* データ置換 削除&挿入にも使える */
 			ReplaceData_CEditView(
 				GetSelectionInfo().m_sSelect,
@@ -598,6 +601,13 @@ void CEditView::DeleteData(
 				bRedraw,
 				m_bDoing_UndoRedo?NULL:m_cCommander.GetOpeBlk()
 			);
+			
+			// ラインモード時にカーソル位置復帰
+			if( bLineMode ){
+				ptCaretPosOld.y = GetCaret().GetCaretLayoutPos().GetY2();
+				GetCaret().m_nCaretPosX_Prev = ptCaretPosOld.x;
+				GetCaret().MoveCursor( ptCaretPosOld, true );
+			}
 		}
 	}else{
 		/* 現在行のデータを取得 */
