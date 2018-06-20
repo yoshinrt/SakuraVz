@@ -276,7 +276,8 @@ void CEditDoc::InitDoc()
 	CAppMode::getInstance()->m_szGrepKey[0] = L'\0';	//$$
 
 	CEditApp::getInstance()->m_pcGrepAgent->m_bGrepMode = false;	/* Grepモード */	//$$同上
-	m_cAutoReloadAgent.m_eWatchUpdate = WU_QUERY; // Dec. 4, 2002 genta 更新監視方法 $$
+	m_cAutoReloadAgent.m_eWatchUpdate = GetDllShareData().m_Common.m_sVzMode.m_nNoAskWhenFileUpdate
+		? WU_AUTOLOAD : WU_QUERY; // Dec. 4, 2002 genta 更新監視方法 $$
 
 	// 2005.06.24 Moca バグ修正
 	//	アウトプットウィンドウで「閉じて(無題)」を行ってもアウトプットウィンドウのまま

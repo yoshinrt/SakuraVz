@@ -731,12 +731,14 @@ public:
 	bool	m_bEnableTextStack;			//!< テキストスタック有効
 	bool	m_bNoMoveAfterPaste;		//!< ペースト後にカーソル移動しない
 	bool	m_bWordSearch;				//!< Vz 互換の単語検索
+	bool	m_nNoAskWhenFileUpdate;		//!< 外部で編集されたとき，未変更なら問い合わせしない
 	int		m_nSelectMode;				//!< 選択モード
 	
 	void Initialize( void ){
 		m_bEnableTextStack		= true;
 		m_bNoMoveAfterPaste		= true;
 		m_bWordSearch			= true;
+		m_nNoAskWhenFileUpdate	= true;
 		m_nSelectMode			= ESelectMode::T_Always;
 	}
 };
