@@ -136,7 +136,7 @@ void CDlgReplace::SetData( void )
 	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD,
 		m_nFixedOption & SCH_CLR_WORD ? 0 :
 		m_nFixedOption & SCH_SET_WORD ? 1 :
-		m_sSearchOption.bWordOnly
+		( m_sSearchOption.bWordOnly || m_sSearchOption.bVzWordSearch )
 	);
 
 	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji

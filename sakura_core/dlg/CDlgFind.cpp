@@ -152,7 +152,7 @@ void CDlgFind::SetData( void )
 	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD,
 		m_nFixedOption & SCH_CLR_WORD ? 0 :
 		m_nFixedOption & SCH_SET_WORD ? 1 :
-		m_sSearchOption.bWordOnly
+		( m_sSearchOption.bWordOnly || m_sSearchOption.bVzWordSearch )
 	);
 
 	/* 検索／置換  見つからないときメッセージを表示 */
