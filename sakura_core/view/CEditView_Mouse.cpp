@@ -1087,6 +1087,7 @@ void CEditView::OnMOUSEMOVE( WPARAM fwKeys, int xPos_, int yPos_ )
 			}
 			/* カーソル位置にURLが有る場合 */
 			else if(
+				GetDllShareData().m_Common.m_sEdit.m_bSelectClickedURL &&
 				IsCurrentPositionURL(
 					ptNew,			// カーソル位置
 					&cUrlRange,		// URL範囲
