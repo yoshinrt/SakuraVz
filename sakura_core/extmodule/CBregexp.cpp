@@ -654,16 +654,10 @@ bool CheckRegexpVersion(
 {
 	CBregexp cRegexp;
 
-	if( !InitRegexp( hWnd, cRegexp, bShowMessage ) ){
-		if( hWnd != NULL ){
-			::DlgItem_SetText( hWnd, nCmpId, _T(" "));
-		}
-		return false;
-	}
 	if( hWnd != NULL ){
-		::DlgItem_SetText( hWnd, nCmpId, cRegexp.GetVersionT() );
+		::DlgItem_SetText( hWnd, nCmpId, _T(" "));
 	}
-	return true;
+	return InitRegexp( hWnd, cRegexp, bShowMessage );
 }
 
 /*!
