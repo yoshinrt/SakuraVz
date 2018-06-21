@@ -2464,28 +2464,62 @@ bool CEditView::MySetClipboardData( const WCHAR* pszText, int nTextLen, bool bCo
 		return false;
 	}
 	
-	// クリップボードにセット
-	cClipboard.Empty();
-	if( !cClipboard.SetText(pszText,nTextLen,bColumnSelect,bLineSelect))
-		return false;
+	WCHAR	*szConvText	= const_cast<WCHAR *>( pszText );
+	int		iLen		= nTextLen;
 	
-	// 以下，テキストスタック有効時のみ処理
-	if( !GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack ) return true;
 	
-	CNativeW memBuff;
-	bool bColumnSelect2	= false;
-	bool bLineSelect2	= false;
+	if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
+		// LF→CRLF 変換
+		iLen = 0;
+		for( int i = 0; i < nTextLen; ++i ){
+			if( pszText[ i ] == L'\r' ){
+				if( pszText[ i + 1 ] == L'\n' ) ++i;		// \r\n
+				iLen += 2;									// \r, \r\n
+			}else if( pszText[ i ] == L'\n' )	iLen += 2;	// \n
+			else								++iLen;		// other
+		}
+		
+		if( nTextLen != iLen ){
+			szConvText = new WCHAR[ iLen ];
+			
+			// \r\n に変換
+			iLen = 0;
+			for( int i = 0; i < nTextLen; ++i ){
+				if( pszText[ i ] == L'\r' && pszText[ i + 1 ] == L'\n' ){
+					szConvText[ iLen++ ] = L'\r';
+					szConvText[ iLen++ ] = L'\n';
+					++i;
+				}else if( pszText[ i ] == L'\r' || pszText[ i ] == L'\n' ){
+					szConvText[ iLen++ ] = L'\r';
+					szConvText[ iLen++ ] = L'\n';
+				}else{
+					szConvText[ iLen++ ] = pszText[ i ];
+				}
+			}
+		}
+	}
 	
-	CEol cEol = m_pcEditDoc->m_cDocEditor.GetNewLineCode();
-	
-	// クリップボードから文字列取得→テキストスタックに push
-	return
-		cClipboard.GetText(&memBuff, &bColumnSelect2, &bLineSelect2, cEol) &&
-		GetDllShareData().m_TextStack.Push(
-			&memBuff,
-		 	bColumnSelect2	? CTextStack::M_COLUMN :
-			bLineSelect2	? CTextStack::M_LINE : 0
+	bool bResult;
+	do{
+		// クリップボードにセット
+		cClipboard.Empty();
+		if( !( bResult = cClipboard.SetText(szConvText,iLen,bColumnSelect,bLineSelect)))
+			break;
+		
+		// 以下，テキストスタック有効時のみ処理
+		if( !GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack ) break;
+		
+		// テキストスタックに push
+		bResult = GetDllShareData().m_TextStack.Push(
+			szConvText,iLen,
+		 	bColumnSelect	? CTextStack::M_COLUMN :
+			bLineSelect		? CTextStack::M_LINE : 0
 		);
+	}while( 0 );
+	
+	if( szConvText != pszText ) delete [] szConvText;
+	
+	return bResult;
 }
 
 

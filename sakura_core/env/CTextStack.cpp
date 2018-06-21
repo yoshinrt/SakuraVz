@@ -6,11 +6,15 @@
 #include "StdAfx.h"
 
 bool CTextStack::Push( CNativeW* cmemBuf, UINT uMode ){
+	return Push( cmemBuf->GetStringPtr(), ( int )cmemBuf->GetStringLength(), uMode );
+}
+
+bool CTextStack::Push( WCHAR *szText, int iLen, UINT uMode ){
 	
 	//DEBUG_TRACE( _T( ">>Push: t=%04X e=%04X s=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize );
 	
 	// データ長 (バイト単位)
-	int nSize		= ( int )cmemBuf->GetStringLength() * sizeof( wchar_t );
+	int nSize		= iLen * sizeof( wchar_t );
 	
 	// buf 上で占有するデータ長 (バイト単位)
 	int nSizeAlign	= AlignSize( nSize ) + sizeof( UINT ) * 3;
@@ -35,15 +39,15 @@ bool CTextStack::Push( CNativeW* cmemBuf, UINT uMode ){
 	
 	// バッファにコピー，バッファ後端にかかる場合は，2回に分ける
 	if( m_nEndPtr + nSize > TEXTSTACK_SIZE ){
-		memcpy( GetIntPtr( m_nEndPtr ), cmemBuf->GetStringPtr(), TEXTSTACK_SIZE - m_nEndPtr );
+		memcpy( GetIntPtr( m_nEndPtr ), szText, TEXTSTACK_SIZE - m_nEndPtr );
 		memcpy(
 			GetIntPtr( 0 ),
-			( BYTE *)cmemBuf->GetStringPtr() + ( TEXTSTACK_SIZE - m_nEndPtr ),
+			( BYTE *)szText + ( TEXTSTACK_SIZE - m_nEndPtr ),
 			nSize - ( TEXTSTACK_SIZE - m_nEndPtr )
 		);
 		
 	}else{
-		memcpy(( wchar_t *)GetIntPtr( m_nEndPtr ), cmemBuf->GetStringPtr(), nSize );
+		memcpy(( wchar_t *)GetIntPtr( m_nEndPtr ), szText, nSize );
 	}
 	m_nEndPtr = Forward( m_nEndPtr, AlignSize( nSize ));
 	

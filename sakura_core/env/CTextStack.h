@@ -42,6 +42,14 @@ public:
 	 */
 	bool Push( CNativeW* cmemBuf, UINT uMode );
 	
+	/*! @brief 引数で指定されたデータを，新たに領域確保しコピーする
+	 * @param[in] szText	スタックに積むテキスト
+	 * @param[in] iLen		文字列長
+	 * @param[in] uMode		選択モード (= m_nMode)
+	 * @retval 正常終了時は true を返す．
+	 */
+	bool Push( WCHAR *szText, int iLen, UINT uMode );
+	
 	/*! @brief テキストスタックから pop
 	 * @param[in,out] cmemBuf	スタックに積むテキスト
 	 * @param[in,out] uMode		選択モード (= m_nMode)
