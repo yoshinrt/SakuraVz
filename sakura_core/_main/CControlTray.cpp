@@ -126,7 +126,8 @@ void CControlTray::DoGrepCreateWindow(HINSTANCE hinst, HWND msgParent, CDlgGrep&
 	if( cDlgGrep.m_sSearchOption.bRegularExp	)_tcscat( pOpt, _T("R") );	// 正規表現
 	if( cDlgGrep.m_nGrepOutputLineType == 1     )_tcscat( pOpt, _T("P") );	// 行を出力する
 	if( cDlgGrep.m_nGrepOutputLineType == 2     )_tcscat( pOpt, _T("N") );	// 否ヒット行を出力する 2014.09.23
-	if( cDlgGrep.m_sSearchOption.bWordOnly		)_tcscat( pOpt, _T("W") );	// 単語単位で探す
+	if( cDlgGrep.m_sSearchOption.bWordOnly ||
+		cDlgGrep.m_sSearchOption.bVzWordSearch	)_tcscat( pOpt, _T("W") );	// 単語単位で探す
 	if( 1 == cDlgGrep.m_nGrepOutputStyle		)_tcscat( pOpt, _T("1") );	// Grep: 出力形式
 	if( 2 == cDlgGrep.m_nGrepOutputStyle		)_tcscat( pOpt, _T("2") );	// Grep: 出力形式
 	if( 3 == cDlgGrep.m_nGrepOutputStyle		)_tcscat( pOpt, _T("3") );
