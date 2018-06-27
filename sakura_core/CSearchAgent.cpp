@@ -113,7 +113,7 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 		// 単語境界キャンセルの解析
 		if( m_psSearchOption->bVzWordSearch ){
 			
-			if( iswalnum( pszPattern[ 0 ])){
+			if( CSearchAgent::IsAlnum( pszPattern[ 0 ])){
 				// 単語先頭が英数字なら，単語境界
 				m_uVzWordSearch = WORDSEARCH_TOP;
 			}else if( pszPattern[ 0 ] == L'*' ){
@@ -122,7 +122,7 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 				m_nPatternLen	= --nPatternLen;
 			}
 			
-			if( iswalnum( pszPattern[ nPatternLen - 1 ])){
+			if( CSearchAgent::IsAlnum( pszPattern[ nPatternLen - 1 ])){
 				// 単語先頭が英数字なら，単語境界
 				m_uVzWordSearch |= WORDSEARCH_TAIL;
 			}else if( pszPattern[ nPatternLen - 1 ] == L'*' ){
@@ -195,7 +195,6 @@ const wchar_t* CSearchAgent::SearchString(
 	// Vz サーチワード時は，とりあえず普通にサーチして後で単語境界をチェックする
 	if( bVzWordSearch && pattern.m_uVzWordSearch ){
 		const wchar_t *pRet = nullptr;
-		wchar_t c;
 		
 		while(
 			nLineLen - nIdxPos >= pattern.GetLen() &&
@@ -206,14 +205,14 @@ const wchar_t* CSearchAgent::SearchString(
 					// 先頭単語境界チェックなし
 					!( pattern.m_uVzWordSearch & CSearchStringPattern::WORDSEARCH_TOP ) ||
 					// 行頭なら単語境界   一文字前が非英数なら単語境界
-					( pLine == pRet ) || !iswalnum( c = *( pRet - 1 )) && c != L'_'
+					( pLine == pRet ) || !IsAlnum( *( pRet - 1 ))
 				) && (
 					// 末端単語境界チェックなし
 					!( pattern.m_uVzWordSearch & CSearchStringPattern::WORDSEARCH_TAIL ) ||
 					// 行末なら単語境界
 					( nLineLen - ( pRet - pLine ) == pattern.GetLen()) ||
 					// 一文字後ろが非英数なら単語境界
-					!iswalnum( c = *( pRet + pattern.GetLen())) && c != L'_'
+					!IsAlnum( *( pRet + pattern.GetLen()))
 				)
 			) break; // 発見
 			

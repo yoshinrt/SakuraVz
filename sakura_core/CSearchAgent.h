@@ -133,6 +133,11 @@ public:
 	int SearchWord( CLogicPoint ptSerachBegin, ESearchDirection eDirection, CLogicRange* pMatchRange, const CSearchStringPattern& pattern ); /* íPåÍåüçı */
 
 	void ReplaceData( DocLineReplaceArg* );
+	
+	//! 8bit ÇÃ alnum, '_' Ç©?
+	static bool IsAlnum( wchar_t c ){
+		return c < 256 && ( iswalnum( c ) || c == L'_' );
+	}
 private:
 	CDocLineMgr* m_pcDocLineMgr;
 };
