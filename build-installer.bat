@@ -4,17 +4,15 @@ set INSTALLER_RESOURCES=installer\temp
 set INSTALLER_WORK=installer\sakura
 set INSTALLER_OUTPUT=installer\Output
 
-set INSTALLER_RESOURCES_SINT=installer\temp\sint
+set INSTALLER_RESOURCES_SINT=installer\sinst_src
 set INSTALLER_RESOURCES_BRON=installer\temp\bron
 
 if exist "%INSTALLER_RESOURCES%" rmdir /s /q "%INSTALLER_RESOURCES%"
 if exist "%INSTALLER_WORK%"      rmdir /s /q "%INSTALLER_WORK%"
 if exist "%INSTALLER_OUTPUT%"    rmdir /s /q "%INSTALLER_OUTPUT%"
 
-if exist "%INSTALLER_RESOURCES_SINT%" rmdir /s /q "%INSTALLER_RESOURCES_SINT%"
 if exist "%INSTALLER_RESOURCES_BRON%" rmdir /s /q "%INSTALLER_RESOURCES_BRON%"
 
-7z x installer\sinst_src.zip                   -O"%INSTALLER_RESOURCES_SINT%" || (echo error && exit /b 1)
 7z x installer\externals\bregonig\bron412.zip  -O"%INSTALLER_RESOURCES_BRON%" || (echo error && exit /b 1)
 
 mkdir %INSTALLER_WORK%
@@ -39,7 +37,8 @@ copy help\macro\macro.chm                        %INSTALLER_WORK%\
 copy %platform%\%configuration%\*.exe            %INSTALLER_WORK%\
 copy %platform%\%configuration%\*.dll            %INSTALLER_WORK%\
 
-"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" installer\sakura.iss || (echo error && exit /b 1)
+set SAKURA_ISS=installer\sakura-%platform%.iss
+"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" %SAKURA_ISS% || (echo error && exit /b 1)
 
 if exist "%INSTALLER_RESOURCES%" rmdir /s /q "%INSTALLER_RESOURCES%"
 if exist "%INSTALLER_WORK%"      rmdir /s /q "%INSTALLER_WORK%"
