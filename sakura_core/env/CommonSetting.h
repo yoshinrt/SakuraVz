@@ -29,6 +29,7 @@
 #include "func/CKeyBind.h"
 #include "func/CFuncLookup.h" //MacroRec
 #include "io/CFile.h" //EShareMode
+#include "CDataProfile.h"
 
 // Apr. 05, 2003 genta WindowCaption用領域（変換前）の長さ
 static const int MAX_CAPTION_CONF_LEN = 256;
@@ -731,15 +732,24 @@ public:
 	bool	m_bEnableTextStack;			//!< テキストスタック有効
 	bool	m_bNoMoveAfterPaste;		//!< ペースト後にカーソル移動しない
 	bool	m_bWordSearch;				//!< Vz 互換の単語検索
-	bool	m_nNoAskWhenFileUpdate;		//!< 外部で編集されたとき，未変更なら問い合わせしない
+	bool	m_bNoAskWhenFileUpdate;		//!< 外部で編集されたとき，未変更なら問い合わせしない
 	int		m_nSelectMode;				//!< 選択モード
 	
 	void Initialize( void ){
 		m_bEnableTextStack		= true;
 		m_bNoMoveAfterPaste		= true;
 		m_bWordSearch			= true;
-		m_nNoAskWhenFileUpdate	= true;
+		m_bNoAskWhenFileUpdate	= true;
 		m_nSelectMode			= ESelectMode::T_Always;
+	}
+	
+	//! VzMode の ini 入出力
+	void IOProfileData( const WCHAR* pszSecName, CDataProfile& cProfile ){
+		cProfile.IOProfileData( pszSecName, L"bVzModeEnableTextStack",		m_bEnableTextStack );
+		cProfile.IOProfileData( pszSecName, L"bVzModeNoMoveAfterPaste",		m_bNoMoveAfterPaste );
+		cProfile.IOProfileData( pszSecName, L"bVzModeWordSearch",			m_bWordSearch );
+		cProfile.IOProfileData( pszSecName, L"bVzModeNoAskWhenFileUpdate",	m_bNoAskWhenFileUpdate );
+		cProfile.IOProfileData( pszSecName, L"nVzModeSelectMode",			m_nSelectMode );
 	}
 };
 
