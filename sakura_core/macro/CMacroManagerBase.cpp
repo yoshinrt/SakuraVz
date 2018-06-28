@@ -65,7 +65,7 @@ void CMacroBeforeAfter::ExecKeyMacroAfter( class CEditView* pcEditView, int flag
 	}
 	bool bDrawSwitch = pcEditView->m_pcEditWnd->SetDrawSwitchOfAllViews(m_bDrawSwitchOld);
 	
-	// •\Ž¦ off¨on ‚É‚µ‚½‚çÄ•\Ž¦
+	// è¡¨ç¤º offâ†’on ã«ã—ãŸã‚‰å†è¡¨ç¤º
 	if( !bDrawSwitch && m_bDrawSwitchOld ){
 		pcEditView->RedrawAll();
 	}
