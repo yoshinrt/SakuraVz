@@ -1084,7 +1084,7 @@
     <ClInclude Include="..\sakura_core\uiparts\HandCursor.h">
       <Filter>Cpp Source Files\uiparts</Filter>
     </ClInclude>
-    <ClInclude Include="..\sakura_core\gitrev.h" />
+    <ClInclude Include="..\sakura_core\githash.h" />
     <ClInclude Include="..\sakura_core\env\CTextStack.h">
       <Filter>Cpp Source Files\env</Filter>
     </ClInclude>
