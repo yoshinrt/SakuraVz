@@ -138,7 +138,7 @@ public:
 			}
 		}else if( 0 <= memid && memid < (int)m_MethodsRef.size() ){
 			if( pBstrName ){
-				*pBstrName = SysAllocString( m_MethodsRef[memid].Name );
+				*pBstrName = SysAllocString( m_MethodsRef[memid].pName );
 			}
 		}else{
 			return TYPE_E_ELEMENTNOTFOUND;
@@ -248,7 +248,7 @@ HRESULT STDMETHODCALLTYPE CIfObjTypeInfo::GetNames(
 #endif
 	*pcNames = 1;
 	if(cMaxNames > 0)
-		*rgBstrNames = SysAllocString(m_MethodsRef[memid].Name);
+		*rgBstrNames = SysAllocString(m_MethodsRef[memid].pName);
 	return S_OK;
 }
 
@@ -340,19 +340,24 @@ HRESULT STDMETHODCALLTYPE CIfObj::GetIDsOfNames(
 		//大量にメッセージが出るので注意。
 		//DEBUG_TRACE( _T("GetIDsOfNames: %ls\n"), rgszNames[i] );
 #endif
-		size_t nSize = m_Methods.size();
-		for(size_t j = 0; j < nSize; ++j)
-		{
-			//	Nov. 10, 2003 FILE Win9Xでは、[lstrcmpiW]が無効のため、[_wcsicmp]に修正
-			if(_wcsicmp(rgszNames[i], m_Methods[j].Name) == 0)
-			{
-				rgdispid[i] = j;
-				goto Found;
-			}
+		std::wstring strFuncName( rgszNames[ i ]);
+		
+		#ifndef WSH_FUNCTION_CASE_SENSITIVE
+			transform(
+				strFuncName.begin(), strFuncName.end(),
+				strFuncName.begin(),
+				towlower
+			);
+		#endif
+		
+		// 見つからない
+		auto result = m_FuncNameLookupTbl.find( strFuncName );
+		if( result == m_FuncNameLookupTbl.end()){
+			return DISP_E_UNKNOWNNAME;
 		}
-		return DISP_E_UNKNOWNNAME;
-		Found:
-		;
+		
+		// 見つかった
+		rgdispid[i] = result->second;
 	}
 	return S_OK;
 }
@@ -370,17 +375,16 @@ void CIfObj::AddMethod(
 	/*
 		this->m_TypeInfoが NULLでなければ AddMethod()は反映されない。
 	*/
-	m_Methods.push_back(CMethodInfo());
-	CMethodInfo *Info = &m_Methods[m_Methods.size() - 1];
+	m_Methods.emplace_back();
+	CMethodInfo *Info = &m_Methods.back();
 	ZeroMemory(Info, sizeof(CMethodInfo));
 	Info->Desc.invkind = INVOKE_FUNC;
 	Info->Desc.cParams = (SHORT)ArgumentCount + 1; //戻り値の分
 	Info->Desc.lprgelemdescParam = Info->Arguments;
 	//	Nov. 10, 2003 FILE Win9Xでは、[lstrcpyW]が無効のため、[wcscpy]に修正
-	assert( auto_strlen(Name)<_countof(Info->Name) );
-	wcscpy(Info->Name, Name);
-	Info->Method = Method;
-	Info->ID = ID;
+	Info->pName		= Name;
+	Info->Method	= Method;
+	Info->ID		= ID;
 	for(int i = 0; i < ArgumentCount; ++i)
 	{
 		Info->Arguments[i].tdesc.vt = ArgumentTypes[ArgumentCount - i - 1];
@@ -388,4 +392,17 @@ void CIfObj::AddMethod(
 	}
 	Info->Arguments[ArgumentCount].tdesc.vt = ResultType;
 	Info->Arguments[ArgumentCount].paramdesc.wParamFlags = PARAMFLAG_FRETVAL;
+	
+	// func 名→func テーブル添字 map 登録
+	std::wstring strFuncName( Name );
+	
+	#ifndef WSH_FUNCTION_CASE_SENSITIVE
+		transform(
+			strFuncName.begin(), strFuncName.end(),
+			strFuncName.begin(),
+			towlower
+		);
+	#endif
+	
+	m_FuncNameLookupTbl.emplace( strFuncName, m_Methods.size() - 1 );
 }
