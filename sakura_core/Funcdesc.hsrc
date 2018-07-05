@@ -30,11 +30,11 @@
 //			コマンド番号のシンボル (F_FILEOPEN 等) と実際のコマンド番号を定義する．
 //			コマンド，マクロ関数を割り当てず，シンボルのみを割り当てる場合に使用する．
 //		
-//		CMD, <id>, <val>, <name>[, <retarg>[, <ext>]]
+//		CMD, <id>, <val>, <name>[, <retarg>]
 //			キーやメニューに割り当てることができるコマンド用に，
 //			マクロ関数の情報を定義する．
 //		
-//		FUNC, <id>, <val>, <name>[, <retarg>[, <ext>]]
+//		FUNC, <id>, <val>, <name>[, <retarg>]
 //			キーやメニューに割り当てることができないマクロ専用の関数用に，
 //			関数の情報を定義する．
 //		
@@ -72,12 +72,12 @@
 //		name: マクロで呼び出されるときの関数名．"..." で囲まない．
 //		
 //		retarg:
-//			マクロ関数の返り値の型，引数の型を最大 5 文字で指定する．
+//			マクロ関数の返り値の型，引数の型を最大 7 文字で指定する．
 //			1文字目: 返り値の型．
 //				E: VT_EMPTY (なし)
 //				S: VT_BSTR  (文字列型)
 //				I: VT_I4    (整数型)
-//			2～5文字目: 1～4番目の引数の型．指定できる文字は 1文字目と同じ．
+//			2～7文字目: 1～6番目の引数の型．指定できる文字は 1文字目と同じ．
 //			
 //			retarg 後端の連続する E (正規表現で /E+$/) は省略することができる．
 //			例:
@@ -85,11 +85,6 @@
 //				EII		EIIEE と等しい．このマクロ関数は，2つの int 型引数をとり，返り値はない．
 //						II とは省略できないので注意．
 //				(空)	EEEEE と等しい．このマクロ関数は，引数も返り値も無い．
-//		
-//		ext:
-//			MacroFuncInfo クラスの m_pData に指定するパラメータを指定する．
-//			省略時は nullptr が指定されたとみなす．
-//			詳細は GrepReplace を参照．
 
 
 ID,		F_INVALID,					-1		
@@ -355,9 +350,9 @@ CMD,	F_SEARCH_CLEARMARK,			30905,	SearchClearMark					//検索マークの切替
 CMD,	F_JUMP_SRCHSTARTPOS,		30909,	SearchStartPos					//検索開始位置へ戻る
 ID,		F_SEARCH_BOX,				30908	//検索(ボックス)
 ID,		F_GREP_DIALOG,				30910	//Grep
-CMD,	F_GREP,						30911,	Grep,					ESSSI, &s_MacroInfoEx_i//Grep
+CMD,	F_GREP,						30911,	Grep,					ESSSII	//Grep
 ID,		F_GREP_REPLACE_DLG,			30912	//Grep置換
-CMD,	F_GREP_REPLACE,				30913,	GrepReplace,			ESSSS, &s_MacroInfoEx_ii//Grep置換
+CMD,	F_GREP_REPLACE,				30913,	GrepReplace,			ESSSSII	//Grep置換
 ID,		F_JUMP_DIALOG,				30920	//指定行へジャンプ
 CMD,	F_JUMP,						30921,	Jump,					EII		//指定行へジャンプ
 CMD,	F_OUTLINE,					30930,	Outline,				EI		//アウトライン解析

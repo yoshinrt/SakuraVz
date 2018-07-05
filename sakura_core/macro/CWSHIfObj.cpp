@@ -55,44 +55,25 @@ void CWSHIfObj::ReadyMethods( CEditView* pView, int flags )
 */
 void CWSHIfObj::ReadyCommands(MacroFuncInfo *Info, int flags)
 {
-	while(Info->m_nFuncID != -1)	// Aug. 29, 2002 genta 番人の値が変更されたのでここも変更
+	while(Info->m_nFuncID != F_INVALID)	// Aug. 29, 2002 genta 番人の値が変更されたのでここも変更
 	{
-		wchar_t FuncName[256];
-		wcscpy(FuncName, Info->m_pszFuncName);
-
 		int ArgCount = 0;
-		if( Info->m_pData ){
-			ArgCount = Info->m_pData->m_nArgMinSize;
-		}else{
-			for(int i = 0; i < 4; ++i){
-				if(Info->m_varArguments[i] != VT_EMPTY) 
-					++ArgCount;
-			}
+		for(int i = 0; i < MAX_MACROFUNC_ARG_NUM; ++i){
+			if(Info->m_varArguments[i] != VT_EMPTY) 
+				++ArgCount;
 		}
-		VARTYPE* varArgTmp = NULL;
-		VARTYPE* varArg = Info->m_varArguments;
-		if( 4 < ArgCount ){
-			varArgTmp = varArg = new VARTYPE[ArgCount];
-			for( int i = 0; i < ArgCount; i++ ){
-				if( i < 4 ){
-					varArg[i] = Info->m_varArguments[i];
-				}else{
-					varArg[i] = Info->m_pData->m_pVarArgEx[i-4];
-				}
-			}
-		}
+		
 		//	2007.07.21 genta : flagを加えた値を登録する
 		this->AddMethod(
-			FuncName,
+			Info->m_pszFuncName,
 			(Info->m_nFuncID | flags),
-			varArg,
+			Info->m_varArguments,
 			ArgCount,
 			Info->m_varResult,
 			reinterpret_cast<CIfObjMethod>(&CWSHIfObj::MacroCommand)
 			/* CWSHIfObjを継承したサブクラスからReadyCommandsを呼び出した場合、
 			 * サブクラスのMacroCommandが呼び出される。 */
 		);
-		delete [] varArgTmp;
 		++Info;
 	}
 }
@@ -133,8 +114,8 @@ HRESULT CWSHIfObj::MacroCommand(int IntID, DISPPARAMS *Arguments, VARIANT* Resul
 	}
 	else
 	{
-		// 最低4つは確保
-		int argCountMin = t_max(4, ArgCount);
+		// 最低 MAX_MACROFUNC_ARG_NUM は確保
+		int argCountMin = t_max(MAX_MACROFUNC_ARG_NUM, ArgCount);
 		//	Nov. 29, 2005 FILE 引数を文字列で取得する
 		auto_array_ptr<LPWSTR> StrArgs( new LPWSTR[argCountMin] );
 		auto_array_ptr<int> strLengths( new int[argCountMin] );

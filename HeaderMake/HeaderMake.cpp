@@ -125,7 +125,6 @@ enum {
 	CMD_VAL,
 	CMD_NAME,
 	CMD_RETARG,
-	CMD_EXT,
 	CMD__MAX,
 	CMD__MIN = CMD_NAME + 1,
 };
@@ -136,7 +135,6 @@ enum {
 	FUNC_VAL,
 	FUNC_NAME,
 	FUNC_RETARG,
-	FUNC_EXT,
 	FUNC__MAX,
 	FUNC__MIN = FUNC_NAME + 1,
 };
@@ -150,7 +148,7 @@ enum {
 };
 
 // retarg の最大長，MacroFuncInfo.m_varArguments[] の要素数 + 1
-#define MAX_RETARG_NUM	5
+#define MAX_RETARG_NUM	7
 
 /*** 正規表現を使用する場所で wregex するためのヘルパ関数 *******************/
 // 書きやすさ最優先で，実行効率は求めない．
@@ -269,7 +267,6 @@ int OutputFuncTable(
 	wchar_t*		szTypeStr	= iType ? L"FUNC"     : L"CMD";
 	unsigned int	uIdxName	= iType ? FUNC_NAME   : CMD_NAME;
 	unsigned int	uIdxRetArg	= iType ? FUNC_RETARG : CMD_RETARG;
-	unsigned int	uIdxExt		= iType ? FUNC_EXT    : CMD_EXT;
 	
 	for( auto itr = FuncTbl.begin(); itr != FuncTbl.end(); ++itr ){
 		vector<wstring>* pData = &*itr;
@@ -301,9 +298,7 @@ int OutputFuncTable(
 			return iRet;
 		}
 		
-		fwprintf( out, L"%s },\n",
-			pData->size() > uIdxExt ? ( *pData )[ uIdxExt ].c_str() : L"NULL"
-		);
+		fwprintf( out, L"},\n" );
 	}
 	
 	fprintf( out, "\t{ F_INVALID },\n};\n\n" );
