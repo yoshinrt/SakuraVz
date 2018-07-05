@@ -70,7 +70,7 @@ void CWSHIfObj::ReadyCommands(MacroFuncInfo *Info, int flags)
 			Info->m_varArguments,
 			ArgCount,
 			Info->m_varResult,
-			reinterpret_cast<CIfObjMethod>(&CWSHIfObj::MacroCommand)
+			Info->m_Func ? Info->m_Func : reinterpret_cast<CIfObjMethod>(&CWSHIfObj::MacroCommand)
 			/* CWSHIfObjを継承したサブクラスからReadyCommandsを呼び出した場合、
 			 * サブクラスのMacroCommandが呼び出される。 */
 		);

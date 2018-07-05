@@ -38,6 +38,7 @@
 #include <WTypes.h> //VARTYPE
 
 #include "CMacroManagerBase.h"
+#include "macro/CIfObj.h"
 #include "env/DLLSHAREDATA.h"
 #include "config/maxdata.h"
 #include "util/design_template.h"
@@ -59,6 +60,7 @@ struct MacroFuncInfo {
 	const WCHAR*	m_pszFuncName;
 	VARTYPE			m_varArguments[MAX_MACROFUNC_ARG_NUM];	//!< 引数の型の配列
 	VARTYPE			m_varResult;		//!< 戻り値の型 VT_EMPTYならprocedureということで
+	CIfObjMethod	m_Func;
 };
 //マクロ関数情報構造体配列
 typedef MacroFuncInfo* MacroFuncInfoArray;

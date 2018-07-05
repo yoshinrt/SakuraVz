@@ -9,6 +9,7 @@
 HeaderMake -in=..\sakura_core\Funcdesc.hsrc -out=..\sakura_core\Funccode_define.h -mode=define
 HeaderMake -in=..\sakura_core\Funcdesc.hsrc -out=..\sakura_core\Funccode_enum.h -mode=enum -class=EFunctionCode
 HeaderMake -in=..\sakura_core\Funcdesc.hsrc -out=..\sakura_core\Funcdesc_CSMacroMgr.h -mode=func -class=CSMacroMgr
+HeaderMake -in=..\sakura_core\Funcdesc.hsrc -out=..\sakura_core\Funcwrapper_CEditorIfObj.h -mode=wrapper -class=CEditorIfObj
 
 @echo.
 @echo ---- MakefileMake ----

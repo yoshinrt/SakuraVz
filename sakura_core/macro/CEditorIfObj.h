@@ -43,6 +43,31 @@ public:
 	MacroFuncInfoArray GetMacroFuncInfo() const;	//関数情報を取得する
 	bool HandleFunction(CEditView* View, EFunctionCode ID, const VARIANT *Arguments, const int ArgSize, VARIANT &Result);	//関数を処理する
 	bool HandleCommand(CEditView* View, EFunctionCode ID, const WCHAR* Arguments[], const int ArgLengths[], const int ArgSize);	//コマンドを処理する
+	
+	const wchar_t* GetVariantArgStr( DISPPARAMS *Arguments, unsigned int uIdx ){
+		if( Arguments->cArgs <= uIdx ) return nullptr;
+		return GetVariantStr( &Arguments->rgvarg[ Arguments->cArgs - uIdx - 1 ]);
+	}
+	
+	const wchar_t* GetVariantStr( VARIANT* pVar ){
+		if( pVar->vt & VT_BYREF ) pVar = pVar->pvarVal; // VT_REF 外し
+		if( pVar->vt == VT_BSTR ) pVar->bstrVal;
+		return nullptr;
+	}
+	
+	int GetVariantArgInt( DISPPARAMS *Arguments, unsigned int uIdx ){
+		if( Arguments->cArgs <= uIdx ) return 0;
+		return GetVariantInt( &Arguments->rgvarg[ Arguments->cArgs - uIdx - 1 ]);
+	}
+	
+	int GetVariantInt( VARIANT* pVar ){
+		VARIANT VarCopy;
+		VariantInit( &VarCopy );
+		if( VariantChangeType( &VarCopy, pVar, 0, VT_I4 ) == S_OK ) return VarCopy.lVal;
+		return 0;
+	}
+	
+	#include "Funcwrapper_CEditorIfObj.h"
 };
 
 

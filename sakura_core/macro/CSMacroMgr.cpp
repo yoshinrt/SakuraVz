@@ -27,6 +27,7 @@
 #include "macro/CPPAMacroMgr.h"
 #include "macro/CWSHManager.h"
 #include "macro/CMacroFactory.h"
+#include "macro/CEditorIfObj.h"
 #include "env/CShareData.h"
 #include "view/CEditView.h"
 #include "debug/CRunningTimer.h"

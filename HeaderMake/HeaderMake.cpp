@@ -130,6 +130,16 @@ enum {
 };
 
 enum {
+	CMDA_TYPE,
+	CMDA_ID,
+	CMDA_VAL,
+	CMDA_NAME,
+	CMDA_RETARG,
+	CMDA__MAX,
+	CMDA__MIN = CMDA_NAME + 1,
+};
+
+enum {
 	FUNC_TYPE,
 	FUNC_ID,
 	FUNC_VAL,
@@ -140,11 +150,30 @@ enum {
 };
 
 enum {
+	FUNCA_TYPE,
+	FUNCA_ID,
+	FUNCA_VAL,
+	FUNCA_NAME,
+	FUNCA_RETARG,
+	FUNCA__MAX,
+	FUNCA__MIN = FUNCA_NAME + 1,
+};
+
+enum {
 	ALIAS_TYPE,
 	ALIAS_ID,
 	ALIAS_NAME,
 	ALIAS__MAX,
 	ALIAS__MIN = ALIAS__MAX,
+};
+
+enum {
+	TYPE_ID,
+	TYPE_CMD,
+	TYPE_CMDA,
+	TYPE_FUNC,
+	TYPE_FUNCA,
+	TYPE_ALIAS,
 };
 
 // retarg の最大長，MacroFuncInfo.m_varArguments[] の要素数 + 1
@@ -180,7 +209,7 @@ vector<wstring>* FindAlias(
 	unordered_map<wstring, unsigned int>& FuncTblHash,	// ID->index map
 	wstring& strName,									// ALIAS name (メッセージ表示用)
 	wstring& strId,										// ALIAS ID
-	wchar_t* szTargetType								// 対象 type (CMD of FUNC)
+	int iType											// 対象 type (TYPE_CMD or TYPE_FUNC)
 ){
 	// ID が一致するデータを検索
 	auto FindData = FuncTblHash.find( strId );
@@ -197,7 +226,10 @@ vector<wstring>* FindAlias(
 	}
 	
 	// ALIAS の参照先が期待する type ではない
-	if( FuncTbl[ FindData->second ][ ID_TYPE ] != szTargetType ) return NULL;
+	if( !(
+			iType == TYPE_CMD  && regex_match( FuncTbl[ FindData->second ][ ID_TYPE ], re( "CMDA?" )) ||
+			iType == TYPE_FUNC && regex_match( FuncTbl[ FindData->second ][ ID_TYPE ], re( "FUNCA?"))
+	)) return NULL;
 	
 	return &FuncTbl[ FindData->second ];
 }
@@ -245,7 +277,7 @@ int OutputRetarg(
 	if(( szType = TypeCharToStr( szRetArg[ 0 ])) == NULL ){
 		return 1;
 	}
-	fwprintf( out, L"%s,\t", szType );
+	fwprintf( out, L"%s, ", szType );
 	
 	return 0;
 }
@@ -257,31 +289,37 @@ int OutputFuncTable(
 	vector<vector<wstring>>& FuncTbl,					// Funccode データ本体
 	unordered_map<wstring, unsigned int>& FuncTblHash,	// ID->index map
 	const char *class_name,
-	int	iType											// 0:cmd 1:func
+	int	iType											// type
 ){
 	fprintf( out,
 		"MacroFuncInfo %s::m_MacroFuncInfo%sArr[] =\n{\n", class_name,
-		iType ? "" : "Command"
+		iType == TYPE_FUNC ? "" : "Command"
 	);
 	
-	wchar_t*		szTypeStr	= iType ? L"FUNC"     : L"CMD";
-	unsigned int	uIdxName	= iType ? FUNC_NAME   : CMD_NAME;
-	unsigned int	uIdxRetArg	= iType ? FUNC_RETARG : CMD_RETARG;
+	unsigned int	uIdxName	= iType == TYPE_FUNC ? FUNC_NAME   : CMD_NAME;
+	unsigned int	uIdxRetArg	= iType == TYPE_FUNC ? FUNC_RETARG : CMD_RETARG;
+	
+	bool bIsAlias = false;
 	
 	for( auto itr = FuncTbl.begin(); itr != FuncTbl.end(); ++itr ){
 		vector<wstring>* pData = &*itr;
 		wstring *pstrName;	// ALIAS の name 挿げ替え用
 		
-		if(( *pData )[ CMD_TYPE ] == szTypeStr ){
+		if(
+			iType == TYPE_CMD  && regex_match(( *pData )[ CMD_TYPE ], re( "CMDA?" )) ||
+			iType == TYPE_FUNC && regex_match(( *pData )[ CMD_TYPE ], re( "FUNCA?"))
+		){
 			pstrName = &( *pData )[ uIdxName ];
 		}else if(( *pData )[ CMD_TYPE ] == L"ALIAS" ){
 			pstrName = &( *pData )[ ALIAS_NAME ];
 			
 			// ALIAS の参照先を検索
-			pData = FindAlias( FuncTbl, FuncTblHash, ( *pData )[ ALIAS_NAME ], ( *pData )[ ALIAS_ID ], szTypeStr );
+			pData = FindAlias( FuncTbl, FuncTblHash, ( *pData )[ ALIAS_NAME ], ( *pData )[ ALIAS_ID ], iType );
 			if( !pData ) continue;
+			
+			bIsAlias = true;
 		}else{
-			// CMD, ALIAS 以外はスキップ
+			// CMD(A), FUNC(A), ALIAS 以外はスキップ
 			continue;
 		}
 		
@@ -298,10 +336,78 @@ int OutputFuncTable(
 			return iRet;
 		}
 		
-		fwprintf( out, L"},\n" );
+		// WSH→C++ I/F ラッパ関数
+		if( !bIsAlias && regex_match(( *pData )[ CMD_TYPE ], re( "(?:CMD|FUNC)A" ))){
+			fwprintf( out, L"reinterpret_cast<CIfObjMethod>(&CEditorIfObj::MacroFuncWrapper_%s) },\n", pstrName->c_str());
+		}else{
+			fwprintf( out, L"NULL },\n" );
+		}
 	}
 	
 	fprintf( out, "\t{ F_INVALID },\n};\n\n" );
+	return 0;
+}
+
+/*** WSH -> C++ I/F ラッパ関数生成 ******************************************/
+
+int OutputMacroFuncWrapper(
+	FILE *out,
+	vector<vector<wstring>>& FuncTbl,					// Funccode データ本体
+	unordered_map<wstring, unsigned int>& FuncTblHash,	// ID->index map
+	const char *class_name
+){
+	for( auto itr = FuncTbl.begin(); itr != FuncTbl.end(); ++itr ){
+		auto& Data = *itr;
+		
+		if( Data[ ID_TYPE ] == L"CMDA" ){
+			
+		}else if( Data[ ID_TYPE ] == L"FUNCA" ){
+			fwprintf( out, L"HRESULT MacroFuncWrapper_%s( int IntID, DISPPARAMS *Arguments, VARIANT* Result, void *Data ){\n",
+				Data[ FUNC_NAME ].c_str()
+			);
+			
+			// 引数変換
+			int iArgNum = Data[ FUNC_RETARG ].length() - 1;
+			
+			for( int i = 0; i < iArgNum; ++i ){
+				
+				// 引数変換用 local var 宣言
+				if( Data[ FUNC_RETARG ][ i + 1 ] == L'S' ){
+					fprintf( out, "	wchar_t*	arg%d = GetVariantArgStr( Arguments, %d );\n\t", i, i );
+				}else if( Data[ FUNC_RETARG ][ i + 1 ] == L'I' ){
+					fprintf( out, "	int			arg%d = GetVariantArgInt( Arguments, %d );\n\t", i, i );
+				}
+			}
+			
+			// ret 値用 local var 宣言
+			if( Data[ FUNC_RETARG ][ 0 ] == L'S' ){
+				fprintf( out, "\twchar_t* ret = " );
+			}else if( Data[ FUNC_RETARG ][ 0 ] == L'I' ){
+				fprintf( out, "\tint ret = " );
+			}
+			
+			// 関数名
+			fwprintf( out, L"%s( ", Data[ FUNC_NAME ].c_str());
+			
+			// 関数引数
+			for( int i = 0; i < iArgNum; ++i ){
+				fprintf( out, "arg%d%s", i, i == iArgNum - 1 ? " " : ", " );
+			}
+			fprintf( out, ");\n" );
+			
+			// ret 値 -> VARIANT 変換
+			if( Data[ FUNC_RETARG ][ 0 ] == L'S' ){
+				fprintf( out,
+					"\tWrap( Result )->Receive( SysString( ret, wcslen( ret )));\n"
+				);
+			}else if( Data[ FUNC_RETARG ][ 0 ] == L'I' ){
+				fprintf( out, "\tWrap( &Result )->Receive( ret );\n" );
+			}
+			
+			// wrapper 関数終了
+			fprintf( out, "\treturn S_OK;\n}\n\n" );
+		}
+	}
 	return 0;
 }
 
@@ -313,6 +419,7 @@ enum EMode{
 	MODE_ENUM,
 	MODE_DEFINE,
 	MODE_FUNC,
+	MODE_WRAPPER,
 };
 
 int usage()
@@ -324,12 +431,13 @@ int usage()
 		"    InputFile            : Input .hsrc file path\n"
 		"    OutputFile           : Output .h file path\n"
 		"    Mode                 : define|enum\n"
-		"    ClassName (Optional) : Enum name (when enum mode only) / class name (when func mode only)\n"
+		"    ClassName (Optional) : enum, class name\n"
 		"\n"
 		"  Mode\n"
 		"    define : Output .h file as #define list\n"
 		"    enum   : Output .h file as enum list\n"
 		"    func   : Output macro function table\n"
+		"    wrapper: Output WSH-->C++ I/F wrapper\n"
 	);
 	return 1;
 }
@@ -438,6 +546,7 @@ int main_impl(
 	if(      _stricmp (mode_name, "DEFINE" ) == 0) mode = MODE_DEFINE;
 	else if( _stricmp( mode_name, "ENUM"   ) == 0) mode = MODE_ENUM;
 	else if( _stricmp( mode_name, "FUNC"   ) == 0) mode = MODE_FUNC;
+	else if( _stricmp( mode_name, "WRAPPER") == 0) mode = MODE_WRAPPER;
 	else{
 		printf("Error: Unknown mode[%s].\n", mode_name);
 		return 2;
@@ -501,7 +610,9 @@ int main_impl(
 		if(
 			Data[ ID_TYPE ] != L"ID"	&&
 			Data[ ID_TYPE ] != L"CMD"	&&
+			Data[ ID_TYPE ] != L"CMDA"	&&
 			Data[ ID_TYPE ] != L"FUNC"	&&
+			Data[ ID_TYPE ] != L"FUNCA"	&&
 			Data[ ID_TYPE ] != L"ALIAS"
 		){
 			wprintf( L"unknown type: %s", line );
@@ -515,7 +626,9 @@ int main_impl(
 		if(
 			!CheckArgNum( ID ) &&
 			!CheckArgNum( CMD ) &&
+			!CheckArgNum( CMDA ) &&
 			!CheckArgNum( FUNC ) &&
+			!CheckArgNum( FUNCA ) &&
 			!CheckArgNum( ALIAS )
 		){
 			wprintf( L"invalid argument num: %s", line );
@@ -550,12 +663,14 @@ int main_impl(
 		int iRet;
 		// m_MacroFuncInfoCommandArr[] の出力
 		// type が CMD, ALIAS(がCMDを指しているもの) が対象となる
-		if( iRet = OutputFuncTable( out, FuncTbl, FuncTblHash, class_name, 0 )) return iRet;
+		if( iRet = OutputFuncTable( out, FuncTbl, FuncTblHash, class_name, TYPE_CMD )) return iRet;
 		
 		// m_MacroFuncInfoArr[] の出力
 		// type が FUNC, ALIAS(がFUNCを指しているもの) が対象となる
-		if( iRet = OutputFuncTable( out, FuncTbl, FuncTblHash, class_name, 1 )) return iRet;
+		if( iRet = OutputFuncTable( out, FuncTbl, FuncTblHash, class_name, TYPE_FUNC )) return iRet;
 		
+	}else if( mode == MODE_WRAPPER ){
+		OutputMacroFuncWrapper( out, FuncTbl, FuncTblHash, class_name );
 	}else{
 		// define, enum の出力
 		// ALIAS 以外の id, val を出力する
@@ -563,7 +678,7 @@ int main_impl(
 		if(mode==MODE_ENUM)fprintf(out,"enum %s{\n",class_name); //enum開始
 		
 		for( auto itr = FuncTbl.begin(); itr != FuncTbl.end(); ++itr ){
-			auto Data = *itr;
+			auto& Data = *itr;
 			
 			if( Data[ ID_TYPE ] == L"ALIAS" ) continue;
 			
