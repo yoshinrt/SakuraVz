@@ -70,6 +70,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <algorithm>
 #include <memory>
 #endif // ifndef SAKURA_PCH_MODE_MIN
