@@ -341,10 +341,10 @@ CMD,	F_UUDECODE,					30880,	Uudecode						//uudecodeして保存
 
 
 // 検索系 
-CMD,	F_SEARCH_DIALOG,			30901,	SearchDialog			EI		//検索(単語検索ダイアログ)
+CMD,	F_SEARCH_DIALOG,			30901,	SearchDialog,			EI		//検索(単語検索ダイアログ)
 CMD,	F_SEARCH_NEXT,				30902,	SearchNext,				ESI		//次を検索
 CMD,	F_SEARCH_PREV,				30903,	SearchPrev,				ESI		//前を検索
-CMD,	F_REPLACE_DIALOG,			30904,	ReplaceDialog			EI		//置換(置換ダイアログ)
+CMD,	F_REPLACE_DIALOG,			30904,	ReplaceDialog,			EI		//置換(置換ダイアログ)
 CMD,	F_REPLACE,					30906,	Replace,				ESSI	//置換(実行)
 CMD,	F_REPLACE_ALL,				30907,	ReplaceAll,				ESSI	//すべて置換(実行)
 CMD,	F_SEARCH_CLEARMARK,			30905,	SearchClearMark					//検索マークの切替え
@@ -620,7 +620,7 @@ FUNC,	F_ISTEXTSELECTINGLOCK,		*,		IsTextSelectingLock,	I		// 選択状態のロ�
 FUNC,	F_GETVIEWLINES,				*,		GetViewLines,			I		// ビューの行数取得
 FUNC,	F_GETVIEWCOLUMNS,			*,		GetViewColumns,			I		// ビューの列数取得
 FUNC,	F_CREATEMENU,				*,		CreateMenu,				IIS		// メニュー作成
-FUNC,	F_CREATEMENU,				*,		GetMacroInfo,			SI		// 実行中のマクロ名島の情報を返す
+FUNC,	F_GETMACROINFO,				*,		GetMacroInfo,			SI		// 実行中のマクロ名島の情報を返す
 
 
 // 2005.01.10 genta ISearch用補助コード
