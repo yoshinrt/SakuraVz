@@ -61,17 +61,17 @@ public:
 	MacroFuncInfoArray GetMacroCommandInfo() const{
 		static MacroFuncInfo macroFuncInfoArr[] = {
 			//	終端
-			{F_INVALID,	NULL, {VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_EMPTY,	NULL}
+			{F_INVALID,	NULL, {VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_EMPTY},
 		};
 		return macroFuncInfoArr;
 	}
 	//関数情報を取得する
 	MacroFuncInfoArray GetMacroFuncInfo() const{
 		static MacroFuncInfo macroFuncInfoNotCommandArr[] = {
-			//ID									関数名							引数										戻り値の型	m_pszData
-			{EFunctionCode(F_SI_GETCHAR),			LTEXT("GetChar"),				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //押下したキーを取得する
+			//ID									関数名							引数										戻り値の型
+			{EFunctionCode(F_SI_GETCHAR),			LTEXT("GetChar"),				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR}, //押下したキーを取得する
 			//	終端
-			{F_INVALID,	NULL, {VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_EMPTY,	NULL}
+			{F_INVALID,	NULL, {VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_EMPTY},
 		};
 		return macroFuncInfoNotCommandArr;
 	}

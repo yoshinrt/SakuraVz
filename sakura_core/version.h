@@ -1,6 +1,27 @@
 ﻿#pragma once
 
+#include "config/build_config.h"
 #include "githash.h"
+
+// バージョン定義 //
+// ver a.b.c.d
+// 例: ver 2.3.2.0
+//       a  => 2
+//       b  => 3
+//       c  => 2
+//       d  => 0
+#define VER_A   2 // a of ver a.b.c.d
+#define VER_B   3 // b of ver a.b.c.d
+#define VER_C   2 // c of ver a.b.c.d
+#define VER_D   0 // d of ver a.b.c.d
+
+#define TO_STR(arg)                            #arg
+#define MAKE_VERSION_STR(a, b, c, d, sep)      TO_STR(a) sep TO_STR(b) sep TO_STR(c) sep TO_STR(d)
+#define MAKE_VERSION_STR_PERIOD(a, b, c, d)    MAKE_VERSION_STR(a, b, c, d, ".")
+#define MAKE_VERSION_COMMA(a, b, c, d)         a, b, c, d
+
+#define PR_VER_STR  MAKE_VERSION_STR_PERIOD(VER_A, VER_B, VER_C, VER_D)
+#define PR_VER      MAKE_VERSION_COMMA(VER_A, VER_B, VER_C, VER_D)
 
 #ifdef _UNICODE
 #define VER_CHARSET "UNICODE"
@@ -24,10 +45,6 @@
 #define SPACE_WHEN_DEBUG " "
 #else
 #define SPACE_WHEN_DEBUG ""
-#endif
-
-#if _WIN64
-#define ALPHA_VERSION
 #endif
 
 #if defined(ALPHA_VERSION)

@@ -210,15 +210,12 @@ BOOL CKeyMacroMgr::LoadKeyMacro( HINSTANCE hInstance, const TCHAR* pszPath )
 		/* 関数名→機能ID，機能名日本語 */
 		//@@@ 2002.2.2 YAZAKI マクロをCSMacroMgrに統一
 		nFuncID = CSMacroMgr::GetFuncInfoByName( hInstance, szFuncName, szFuncNameJapanese );
-		if( -1 != nFuncID ){
+		if( F_INVALID != nFuncID ){
 			macro = new CMacro( nFuncID );
 			// Jun. 16, 2002 genta プロトタイプチェック用に追加
 			int nArgs;
 			const MacroFuncInfo* mInfo= CSMacroMgr::GetFuncInfoByID( nFuncID );
 			int nArgSizeMax = _countof( mInfo->m_varArguments );
-			if( mInfo->m_pData  ){
-				nArgSizeMax = mInfo->m_pData->m_nArgMaxSize;
-			}
 			for(nArgs = 0; szLine[i] ; ++nArgs ) {
 				// Jun. 16, 2002 genta プロトタイプチェック
 				if( nArgs >= nArgSizeMax ){
@@ -233,12 +230,8 @@ BOOL CKeyMacroMgr::LoadKeyMacro( HINSTANCE hInstance, const TCHAR* pszPath )
 					m_nReady = false;
 				}
 				VARTYPE type = VT_EMPTY;
-				if( nArgs < 4 ){
+				if( nArgs < nArgSizeMax){
 					type = mInfo->m_varArguments[nArgs];
-				}else{
-					if(  mInfo->m_pData && nArgs < mInfo->m_pData->m_nArgMinSize ){
-						type = mInfo->m_pData->m_pVarArgEx[nArgs - 4];
-					}
 				}
 
 				//	Skip Space

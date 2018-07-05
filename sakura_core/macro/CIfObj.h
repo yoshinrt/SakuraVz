@@ -31,8 +31,6 @@
 #ifndef SAKURA_CIFOBJ_9DB7E463_B156_4A8D_85C7_44259381BBBF9_H_
 #define SAKURA_CIFOBJ_9DB7E463_B156_4A8D_85C7_44259381BBBF9_H_
 
-#include <string>
-#include <vector>
 #include "_os/OleTypes.h"
 class CEditView;
 
@@ -82,7 +80,7 @@ public:
 	struct CMethodInfo
 	{
 		FUNCDESC		Desc;
-		wchar_t			Name[64];
+		const wchar_t	*pName;
 		CIfObjMethod	Method;
 		ELEMDESC		Arguments[9];
 		int				ID;
@@ -137,6 +135,7 @@ private:
 	// メンバ変数
 	CMethodInfoList m_Methods;			//メソッド情報リスト
 	ITypeInfo* m_TypeInfo;
+	std::unordered_map<std::wstring, UINT>	m_FuncNameLookupTbl;	//!< 関数名→テーブル ID map
 };
 
 #endif /* SAKURA_CIFOBJ_9DB7E463_B156_4A8D_85C7_44259381BBBF9_H_ */
