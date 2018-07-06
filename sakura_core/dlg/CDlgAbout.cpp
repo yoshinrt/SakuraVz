@@ -24,8 +24,8 @@
 #include "uiparts/HandCursor.h"
 #include "util/file.h"
 #include "util/module.h"
-#include "gitrev.h"
 #include "sakura_rc.h" // 2002/2/10 aroka 復帰
+#include "version.h"
 #include "sakura.hh"
 
 // バージョン情報 CDlgAbout.cpp	//@@@ 2002.01.07 add start MIK
@@ -98,6 +98,20 @@ const DWORD p_helpids[] = {	//12900
 	#define MY_WIN32_WINNT 0
 #endif
 
+#if defined(APPVEYOR_URL) && defined(APPVEYOR_ACCOUNT_NAME) && defined(APPVEYOR_PROJECT_SLUG) && defined(APPVEYOR_BUILD_VERSION)
+#define APPVEYOR_BUILD_URL	APPVEYOR_URL "/project/" APPVEYOR_ACCOUNT_NAME "/" APPVEYOR_PROJECT_SLUG "/build/" APPVEYOR_BUILD_VERSION
+#endif
+#if defined(APPVEYOR_BUILD_NUMBER)
+#define APPVEYOR_BUILD_TEXT	"Build " APPVEYOR_BUILD_NUMBER
+#endif
+
+#if defined(APPVEYOR_BUILD_URL)
+#pragma message("APPVEYOR_BUILD_URL: " APPVEYOR_BUILD_URL)
+#endif
+#if defined(APPVEYOR_BUILD_TEXT)
+#pragma message("APPVEYOR_BUILD_TEXT: " APPVEYOR_BUILD_TEXT)
+#endif
+
 //	From Here Nov. 7, 2000 genta
 /*!
 	標準以外のメッセージを捕捉する
@@ -160,29 +174,40 @@ BOOL CDlgAbout::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	//      Last Modified: 1999/9/9 00:00:00
 	//      (あればSKR_PATCH_INFOの文字列がそのまま表示)
 	CNativeT cmemMsg;
-	cmemMsg.AppendString(LS(STR_DLGABOUT_APPNAME));
+	cmemMsg.AppendString(LS(STR_DLGABOUT_APPNAME)); // e.g. "サクラエディタ", "Sakura Editor"
 	cmemMsg.AppendString(_T("   "));
 
-	// バージョン&リビジョン情報
+	// バージョン情報・コンフィグ情報 //
+#ifdef GIT_COMMIT_HASH
+#define VER_GITHASH "(GitHash " GIT_COMMIT_HASH ")"
+#endif
 	DWORD dwVersionMS, dwVersionLS;
 	GetAppVersionInfo( NULL, VS_VERSION_INFO, &dwVersionMS, &dwVersionLS );
-#if defined(GIT_COMMIT_HASH)
-	auto_sprintf(szMsg, _T("Ver. %d.%d.%d.%d\r\n(GitHash ") _T(GIT_COMMIT_HASH) _T(")\r\n"),
-		HIWORD(dwVersionMS),
-		LOWORD(dwVersionMS),
-		HIWORD(dwVersionLS),
-		LOWORD(dwVersionLS)
+	auto_sprintf(szMsg,
+		_T("v%d.%d.%d.%d"),
+		HIWORD(dwVersionMS), LOWORD(dwVersionMS), HIWORD(dwVersionLS), LOWORD(dwVersionLS) // e.g. {2, 3, 2, 0}
 	);
-#else
-	auto_sprintf( szMsg, _T("Ver. %d.%d.%d.%d (Rev.") _T(SVN_REV_STR) _T(")\r\n"),
-		HIWORD( dwVersionMS ),
-		LOWORD( dwVersionMS ),
-		HIWORD( dwVersionLS ),
-		LOWORD( dwVersionLS )
-	);
-#endif
+	
+	// 1行目
 	cmemMsg.AppendString( szMsg );
+	cmemMsg.AppendString( _T(" ") _T(VER_PLATFORM) );
+	cmemMsg.AppendString( _T(SPACE_WHEN_DEBUG) _T(VER_CONFIG) );
+#ifdef ALPHA_VERSION
+	cmemMsg.AppendString( _T(" ") _T(ALPHA_VERSION_STR));
+#endif
+	cmemMsg.AppendString( _T("\r\n") );
 
+	// 2行目
+#ifdef VER_GITHASH
+	cmemMsg.AppendString( _T(VER_GITHASH) _T("\r\n"));
+#endif
+
+	// 3行目
+#ifdef GIT_URL
+	cmemMsg.AppendString( _T("(GitURL ") _T(GIT_URL) _T(")\r\n"));
+#endif
+
+	// 段落区切り
 	cmemMsg.AppendString( _T("\r\n") );
 
 	// 共有メモリ情報
@@ -248,6 +273,20 @@ BOOL CDlgAbout::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 
 	// URLウィンドウをサブクラス化する
 	m_UrlUrWnd.SetSubclassWindow( GetDlgItem( GetHwnd(), IDC_STATIC_URL_UR ) );
+	m_UrlGitWnd.SetSubclassWindow(GetDlgItem( GetHwnd(), IDC_STATIC_URL_GIT));
+	m_UrlBuildLinkWnd.SetSubclassWindow(GetDlgItem(GetHwnd(), IDC_STATIC_URL_APPVEYOR_BUILD));
+#ifdef GIT_URL
+	::SetWindowText(::GetDlgItem(GetHwnd(), IDC_STATIC_URL_GIT), _T(GIT_URL));
+#else
+	ShowWindow(::GetDlgItem(GetHwnd(), IDC_STATIC_GIT_CAPTION), SW_HIDE);
+	ShowWindow(::GetDlgItem(GetHwnd(), IDC_STATIC_URL_GIT), SW_HIDE);
+#endif
+#if defined(APPVEYOR_BUILD_TEXT)
+	::SetWindowText(::GetDlgItem(GetHwnd(), IDC_STATIC_URL_APPVEYOR_BUILD), _T(APPVEYOR_BUILD_TEXT));
+#else
+	ShowWindow(::GetDlgItem(GetHwnd(), IDC_STATIC_URL_APPVEYOR_CAPTION), SW_HIDE);
+	ShowWindow(::GetDlgItem(GetHwnd(), IDC_STATIC_URL_APPVEYOR_BUILD), SW_HIDE);
+#endif
 
 	//	Oct. 22, 2005 genta 原作者ホームページが無くなったので削除
 	//m_UrlOrgWnd.SubclassWindow( GetDlgItem( GetHwnd(), IDC_STATIC_URL_ORG ) );
@@ -277,12 +316,22 @@ BOOL CDlgAbout::OnStnClicked( int wID )
 	switch( wID ){
 	//	2006.07.27 genta 原作者連絡先のボタンを削除 (ヘルプから削除されているため)
 	case IDC_STATIC_URL_UR:
+	case IDC_STATIC_URL_GIT:
 //	case IDC_STATIC_URL_ORG:	del 2008/7/4 Uchi
 		//	Web Browserの起動
 		{
 			TCHAR buf[512];
 			::GetWindowText( ::GetDlgItem( GetHwnd(), wID ), buf, _countof(buf) );
 			::ShellExecute( GetHwnd(), NULL, buf, NULL, NULL, SW_SHOWNORMAL );
+			return TRUE;
+		}
+	case IDC_STATIC_URL_APPVEYOR_BUILD:
+		{
+#if defined(APPVEYOR_BUILD_URL)
+			::ShellExecute(GetHwnd(), NULL, _T(APPVEYOR_BUILD_URL), NULL, NULL, SW_SHOWNORMAL);
+#elif defined(GIT_URL)
+			::ShellExecute(GetHwnd(), NULL, _T(GIT_URL), NULL, NULL, SW_SHOWNORMAL);
+#endif
 			return TRUE;
 		}
 	}
