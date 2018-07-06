@@ -165,6 +165,10 @@ void CDocEditor::SetImeMode( int mode )
 }
 //	To Here Nov. 20, 2000 genta
 
+// â¸çsç¨ç›ã÷é~éûÇÕ LF å≈íË
+CEol CDocEditor::GetNewLineCode( void ) const {
+	return GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ? EOL_LF : m_cNewLineCode;
+}
 
 
 

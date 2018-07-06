@@ -33,6 +33,17 @@ class CDocLineMgr;
 
 class CDocEditor : public CDocListenerEx{
 public:
+	CEditDoc*		m_pcDocRef;
+	COpeBuf			m_cOpeBuf;					//!< アンドゥバッファ
+	COpeBlk*		m_pcOpeBlk;					//!< 操作ブロック
+	int				m_nOpeBlkRedawCount;		//!< OpeBlkの再描画非対象数
+	bool			m_bInsMode;					//!< 挿入・上書きモード Oct. 2, 2005 genta
+	bool			m_bIsDocModified;
+
+private:
+	CEol 			m_cNewLineCode;				//!< Enter押下時に挿入する改行コード種別
+
+public:
 	CDocEditor(CEditDoc* pcDoc);
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -62,8 +73,9 @@ public:
 	void SetImeMode(int mode);	//	IME状態の設定
 
 	//	May 15, 2000 genta
-	CEol  GetNewLineCode() const { return m_cNewLineCode; }
+	CEol  GetNewLineCode( void ) const;
 	void  SetNewLineCode(const CEol& t){ m_cNewLineCode = t; }
+	CEol  GetNewLineCodeFile() const { return m_cNewLineCode; }
 
 	//	Oct. 2, 2005 genta 挿入モードの設定
 	bool IsInsMode() const { return m_bInsMode; }
@@ -92,17 +104,6 @@ public:
 			// クリップボードにデータが有る
 			CClipboard::HasValidData();
 	}
-
-public:
-	CEditDoc*		m_pcDocRef;
-	COpeBuf			m_cOpeBuf;					//!< アンドゥバッファ
-	COpeBlk*		m_pcOpeBlk;					//!< 操作ブロック
-	int				m_nOpeBlkRedawCount;		//!< OpeBlkの再描画非対象数
-	bool			m_bInsMode;					//!< 挿入・上書きモード Oct. 2, 2005 genta
-	bool			m_bIsDocModified;
-
-private:
-	CEol 			m_cNewLineCode;				//!< Enter押下時に挿入する改行コード種別
 };
 
 
