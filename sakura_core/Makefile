@@ -237,6 +237,7 @@ macro/CKeyMacroMgr.o \
 macro/CMacro.o \
 macro/CMacroFactory.o \
 macro/CMacroManagerBase.o \
+macro/CMacro..o \
 macro/CPPA.o \
 macro/CPPAMacroMgr.o \
 macro/CSMacroMgr.o \

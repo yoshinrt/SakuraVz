@@ -29,6 +29,7 @@
 #define SAKURA_CEDITORIFOBJ_87C246CB_1387_4893_A26F_190155191A96D_H_
 
 #include "_os/OleTypes.h"
+#include "macro/CMacro.h"
 #include "macro/CWSHIfObj.h"
 
 

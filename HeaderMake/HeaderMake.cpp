@@ -387,7 +387,7 @@ int OutputMacroFuncWrapper(
 			}
 			
 			// 関数名
-			fwprintf( out, L"%s( ", Data[ FUNC_NAME ].c_str());
+			fwprintf( out, L"CMacro::%s( ", Data[ FUNC_NAME ].c_str());
 			
 			// 関数引数
 			for( int i = 0; i < iArgNum; ++i ){

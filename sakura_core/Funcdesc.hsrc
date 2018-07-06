@@ -560,7 +560,7 @@ CMD,	F_SETVIEWLEFT,				32819,	SetViewLeft,			EI		// ビューの左端の桁数�
 ID,		F_FUNCTION_FIRST,			*		// 2003-02-21 鬼 これ以上だと関数
 // ここ以降の id はビルドごとに値が変わっても問題ないので，id は * でよい
 
-FUNCA,	F_GETFILENAME,				*,		GetFilename,			S		// 編集中のファイル名を取得する
+FUNC,	F_GETFILENAME,				*,		GetFilename,			S		// 編集中のファイル名を取得する
 FUNC,	F_GETSAVEFILENAME,			*,		GetSaveFilename,		S		// 保存時のファイル名を取得する
 FUNC,	F_GETSELECTED,				*,		GetSelectedString,		SI		// 選択範囲の取得
 FUNC,	F_EXPANDPARAMETER,			*,		ExpandParameter,		SS		// コマンドラインパラメータ展開
@@ -620,7 +620,7 @@ FUNC,	F_ISTEXTSELECTINGLOCK,		*,		IsTextSelectingLock,	I		// 選択状態のロ�
 FUNC,	F_GETVIEWLINES,				*,		GetViewLines,			I		// ビューの行数取得
 FUNC,	F_GETVIEWCOLUMNS,			*,		GetViewColumns,			I		// ビューの列数取得
 FUNC,	F_CREATEMENU,				*,		CreateMenu,				IIS		// メニュー作成
-FUNC,	F_GETMACROINFO,				*,		GetMacroInfo,			SI		// 実行中のマクロ名島の情報を返す
+FUNCA,	F_GETMACROINFO,				*,		GetMacroInfo,			SI		// 実行中のマクロ名島の情報を返す
 
 
 // 2005.01.10 genta ISearch用補助コード

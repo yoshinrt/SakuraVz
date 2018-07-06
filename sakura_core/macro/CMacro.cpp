@@ -2465,44 +2465,18 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			}
 			return false;
 		}
-	case F_GETMACROINFO:
-		{
-			int nFunc = 0;
-			if(
-				ArgSize >= 1 &&
-				VariantChangeType( &varCopy.Data, const_cast<VARIANTARG*>( &( Arguments[ 0 ])), 0, VT_I4 ) == S_OK
-			){
-				nFunc = varCopy.Data.lVal;
-			}
-			
-			int nMacroNo = View->GetCommander().m_pcSMacroMgr->GetCurrentIdx();
-			const TCHAR *strTmp = nullptr;
-			
-			switch( nFunc ){
-				case 1: // マクロ No.
-					break;
-				
-				case 2: // マクロファイル名
-					strTmp = GetDllShareData().m_Common.m_sMacro.m_MacroTable[ nMacroNo ].m_szFile;
-					break;
-					
-				default: // マクロ名
-					strTmp = GetDllShareData().m_Common.m_sMacro.m_MacroTable[ nMacroNo ].m_szName;
-			}
-			
-			if( strTmp ){
-				// 文字列を返す
-				SysString sysstr( strTmp, _tcslen( strTmp ));
-				Wrap( &Result )->Receive( sysstr );
-			}else{
-				// int を返す
-				Wrap( &Result )->Receive( nMacroNo );
-			}
-		}
-		return true;
 	default:
 		return false;
 	}
 }
 
+wchar_t* CMacro::GetMacroInfo( int iFunc ){
+	int nMacroNo = View->GetCommander().m_pcSMacroMgr->GetCurrentIdx();
+	
+	if( iFunc ){
+		return GetDllShareData().m_Common.m_sMacro.m_MacroTable[ nMacroNo ].m_szFile;
+	}
+	
+	return GetDllShareData().m_Common.m_sMacro.m_MacroTable[ nMacroNo ].m_szName;
+}
 

@@ -125,7 +125,10 @@ public:
 	static int GetFuncInfoByName( HINSTANCE , const char* , char* );	/* 関数名→機能ID，機能名日本語 */
 	static BOOL CanFuncIsKeyMacro( int );	/* キーマクロに記録可能な機能かどうかを調べる */
 #endif
-
+	
+	// コマンド・マクロ関数
+	static wchar_t* GetMacroInfo( int iFunc );
+	
 protected:
 	static WCHAR* GetParamAt(CMacroParam*, int);
 
