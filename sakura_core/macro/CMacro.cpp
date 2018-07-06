@@ -927,6 +927,11 @@ bool CMacro::HandleCommand(
 		//		0x400	「すべて置換」は置換の繰返し（ON:連続置換, OFF:一括置換）
 		//		0x800	(マクロ専用)検索キーを履歴に登録しない
 		//		0x1000	(マクロ専用)検索オプションを元に戻す
+		if( Argument[0] == NULL ){
+			// 直前の置換の再実行
+			pcEditView->GetCommander().HandleCommand( Index, true, 0, 0, 0, 0);
+			return true;
+		}
 		if( Argument[0] == NULL || Argument[0][0] == L'\0' ){
 			::MYMESSAGEBOX( NULL, MB_OK | MB_ICONSTOP | MB_TOPMOST, EXEC_ERROR_TITLE,
 				LS(STR_ERR_DLGMACRO09));
