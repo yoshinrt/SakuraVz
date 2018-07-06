@@ -833,11 +833,11 @@ void CEditWnd::SetDocumentTypeWhenCreate(
 		}
 		if( nCharCode == eDefaultCharCode ){	// デフォルト文字コードと同じ文字コードが選択されたとき
 			GetDocument()->SetDocumentEncoding( nCharCode, types.m_encoding.m_bDefaultBom );
-			GetDocument()->m_cDocEditor.m_cNewLineCode = static_cast<EEolType>( types.m_encoding.m_eDefaultEoltype );
+			GetDocument()->m_cDocEditor.SetNewLineCode( static_cast<EEolType>( types.m_encoding.m_eDefaultEoltype ));
 		}
 		else{
 			GetDocument()->SetDocumentEncoding( nCharCode, CCodeTypeName( nCharCode ).IsBomDefOn() );
-			GetDocument()->m_cDocEditor.m_cNewLineCode = EOL_CRLF;
+			GetDocument()->m_cDocEditor.SetNewLineCode( EOL_CRLF );
 		}
 	}
 

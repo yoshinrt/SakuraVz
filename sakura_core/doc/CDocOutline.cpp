@@ -441,7 +441,7 @@ void CDocOutline::MakeFuncList_BookMark( CFuncInfoArr* pcFuncInfoArr )
 	CLogicInt		nLineCount;
 	int		leftspace, pos_wo_space, k;
 	BOOL	bMarkUpBlankLineEnable = GetDllShareData().m_Common.m_sOutline.m_bMarkUpBlankLineEnable;	//! 空行をマーク対象にするフラグ 20020119 aroka
-	int		nNewLineLen	= m_pcDocRef->m_cDocEditor.m_cNewLineCode.GetLen();
+	int		nNewLineLen	= m_pcDocRef->m_cDocEditor.GetNewLineCode().GetLen();
 	CLogicInt	nLineLast	= m_pcDocRef->m_cDocLineMgr.GetLineCount();
 	int		nCharChars;
 
