@@ -135,6 +135,10 @@ ECallbackResult CCodeChecker::OnCheckSave(SSaveInfo* pSaveInfo)
 		);
 	}
 
+	// 改行混在禁止時は，問答無用で EOL 統一
+	if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
+		pSaveInfo->cEol = pcDoc->m_cDocEditor.GetNewLineCodeFile();
+	}else
 	//ユーザ問い合わせ
 	if (bTmpResult) {
 		int nDlgResult = MYMESSAGEBOX(
