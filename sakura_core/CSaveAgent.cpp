@@ -103,7 +103,7 @@ void CSaveAgent::OnBeforeSave(const SSaveInfo& sSaveInfo)
 	CEditDoc* pcDoc = GetListeningDoc();
 
 	//改行コード統一
-	CDocVisitor(pcDoc).SetAllEol(sSaveInfo.cEol);
+	pcDoc->m_cDocLineMgr.SetEol( sSaveInfo.cEol, nullptr, true );
 }
 
 void CSaveAgent::OnSave(const SSaveInfo& sSaveInfo)
@@ -119,11 +119,8 @@ void CSaveAgent::OnSave(const SSaveInfo& sSaveInfo)
 	);
 	
 	// EOL を LF に戻す
-	if(
-		GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste &&
-		pcDoc->m_cDocEditor.GetNewLineCodeFile() != EOL_LF
-	){
-		CDocVisitor(pcDoc).SetAllEol( EOL_LF );
+	if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
+		pcDoc->m_cDocLineMgr.SetEol( EOL_LF );
 	}
 
 	//セーブ情報の確定

@@ -425,3 +425,31 @@ void CDocLineMgr::DUMP()
 	return;
 }
 
+void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
+	
+	CDocLine* Line = GetDocLineTop();
+	
+	// Doc が空
+	if( !Line ){
+		if( pcOrgEol ) *pcOrgEol = EOL_NONE;
+		return;
+	}
+	
+	// オリジナル EOL 保存
+	const CEol& cOrgEol = Line->GetEol();
+	if( pcOrgEol ) *pcOrgEol = cOrgEol;
+	
+	// cEol が invalid or 変換前後が同一 EOL なら return
+	if(
+		!cEol.IsValid() ||
+		!bForce && cEol == cOrgEol
+	) return;
+	
+	for(; Line; Line = Line->GetNextLine()){
+		
+		// 行単位で，変換前後が同一なら変換しない
+		if( Line->GetEol() == cEol ) continue;
+		
+		Line->SetEol( cEol, nullptr );
+	}
+}

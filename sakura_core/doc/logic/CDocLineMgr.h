@@ -72,6 +72,8 @@ public:
 	//デバッグ
 	void DUMP();
 
+	// 高速(?) Eol 統一
+	void SetEol( const CEol& cEol, CEol* pcOrgEol = nullptr, bool bForce = false );
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                         実装補助                            //
