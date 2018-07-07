@@ -76,6 +76,14 @@ void CDocEditor::OnAfterLoad(const SLoadInfo& sLoadInfo)
 	//	May 12, 2000 genta
 	//	編集用改行コードの設定
 	{
+		// CLoadAgent::OnLoad で判定済み
+		if(
+			GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste &&
+			GetNewLineCodeFile().IsValid()
+		){
+			return;
+		}
+		
 		const STypeConfig& type = pcDoc->m_cDocType.GetDocumentAttribute();
 		if ( pcDoc->m_cDocFile.GetCodeSet() == type.m_encoding.m_eDefaultCodetype ){
 			SetNewLineCode( type.m_encoding.m_eDefaultEoltype );	// 2011.01.24 ryoji デフォルトEOL
@@ -84,11 +92,6 @@ void CDocEditor::OnAfterLoad(const SLoadInfo& sLoadInfo)
 			SetNewLineCode( EOL_CRLF );
 		}
 		CDocLine*	pFirstlineinfo = pcDoc->m_cDocLineMgr.GetLine( CLogicInt(0) );
-		
-		if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
-			// CLoadAgent::OnLoad で判定済み
-		}else
-		
 		if( pFirstlineinfo != NULL ){
 			EEolType t = pFirstlineinfo->GetEol();
 			if( t != EOL_NONE && t != EOL_UNKNOWN ){
