@@ -207,7 +207,13 @@ ELoadResult CLoadAgent::OnLoad(const SLoadInfo& sLoadInfo)
 		if(eReadResult==RESULT_LOSESOME){
 			eRet = LOADED_LOSESOME;
 		}
+		
 		if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
+			// •¶‘ EOL ‚ð”»’è
+			pcDoc->m_cDocEditor.SetNewLineCode(
+				pcDoc->m_cDocLineMgr.GetDocLineTop()->GetEol()
+			);
+			
 			// EOL ‚ð LF ‚É•ÏŠ·
 			if( pcDoc->m_cDocLineMgr.GetDocLineTop()->GetEol() != EOL_LF )
 				CDocVisitor(pcDoc).SetAllEol( EOL_LF );
