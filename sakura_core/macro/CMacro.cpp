@@ -1660,7 +1660,7 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		//	2005.08.04 maru ƒ}ƒNƒ’Ç‰Á
 		{
 			int n = 0;
-			switch( View->m_pcEditDoc->m_cDocEditor.GetNewLineCode() ){
+			switch( View->m_pcEditDoc->m_cDocEditor.GetNewLineCodeFile() ){
 			case EOL_CRLF:
 				n = 0;
 				break;

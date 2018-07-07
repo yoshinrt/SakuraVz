@@ -714,7 +714,7 @@ void CCaret::ShowCaretPosInfo()
 	// -- -- -- -- 改行モード -> szEolMode -- -- -- -- //
 	//	May 12, 2000 genta
 	//	改行コードの表示を追加
-	CEol cNlType = m_pEditDoc->m_cDocEditor.GetNewLineCode();
+	CEol cNlType = m_pEditDoc->m_cDocEditor.GetNewLineCodeFile();
 	const TCHAR* szEolMode = cNlType.GetName();
 
 

@@ -485,7 +485,7 @@ void CEditDoc::GetSaveInfo(SSaveInfo* pSaveInfo) const
 	pSaveInfo->eCharCode   = m_cDocFile.GetCodeSet();
 	pSaveInfo->bBomExist   = m_cDocFile.IsBomExist();
 	pSaveInfo->bChgCodeSet = m_cDocFile.IsChgCodeSet();
-	pSaveInfo->cEol        = m_cDocEditor.GetNewLineCode(); //編集時改行コードを保存時改行コードとして設定
+	pSaveInfo->cEol        = m_cDocEditor.GetNewLineCodeFile(); //編集時改行コードを保存時改行コードとして設定
 }
 
 
