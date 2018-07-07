@@ -30,6 +30,7 @@
 #include "env/CDocTypeManager.h"
 #include "env/CShareData.h"
 #include "doc/CEditDoc.h"
+#include "doc/CDocVisitor.h"
 #include "view/CEditView.h"
 #include "window/CEditWnd.h"
 #include "uiparts/CVisualProgress.h"
@@ -205,6 +206,11 @@ ELoadResult CLoadAgent::OnLoad(const SLoadInfo& sLoadInfo)
 		);
 		if(eReadResult==RESULT_LOSESOME){
 			eRet = LOADED_LOSESOME;
+		}
+		if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
+			// EOL ‚ð LF ‚É•ÏŠ·
+			if( pcDoc->m_cDocLineMgr.GetDocLineTop()->GetEol() != EOL_LF )
+				CDocVisitor(pcDoc).SetAllEol( EOL_LF );
 		}
 		CEditApp::getInstance()->m_pcVisualProgress->CProgressListener::Listen(pOld);
 	}
