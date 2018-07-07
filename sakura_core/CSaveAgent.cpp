@@ -117,6 +117,14 @@ void CSaveAgent::OnSave(const SSaveInfo& sSaveInfo)
 		pcDoc->m_cDocLineMgr,
 		sSaveInfo
 	);
+	
+	// EOL を LF に戻す
+	if(
+		GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste &&
+		pcDoc->m_cDocEditor.GetNewLineCodeFile() != EOL_LF
+	){
+		CDocVisitor(pcDoc).SetAllEol( EOL_LF );
+	}
 
 	//セーブ情報の確定
 	pcDoc->SetFilePathAndIcon( sSaveInfo.cFilePath );
