@@ -1953,7 +1953,7 @@ LRESULT CEditWnd::DispatchEvent(
 			//	2006.07.09 genta 選択範囲を考慮して移動
 			//	MoveCursorの位置調整機能があるので，最終行以降への
 			//	移動指示の調整もMoveCursorにまかせる
-			GetActiveView().MoveCursorSelecting( ptCaretPos, bSelect, _CARETMARGINRATE / 3 );
+			GetActiveView().MoveCursorSelecting( ptCaretPos, bSelect, _CARETMARGINRATE_JUMP );
 		}
 		return 0L;
 

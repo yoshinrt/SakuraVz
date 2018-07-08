@@ -25,6 +25,8 @@
 #define SAKURA_CCARET_EF835ACD_9DB2_4F5A_8513_35034F1894219_H_
 
 #define _CARETMARGINRATE 20
+#define _CARETMARGINRATE_JUMP 2	// Tag Jmp “™‚Ì‘å•‚É jmp ‚·‚éê‡‚Ìƒ}[ƒWƒ“
+
 class CTextArea;
 class CEditView;
 class CEditDoc;

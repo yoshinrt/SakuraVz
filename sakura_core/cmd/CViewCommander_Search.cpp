@@ -246,7 +246,7 @@ re_do:;
 		//	Sep. 8, 2000 genta
 		if ( !bReplaceAll ) m_pCommanderView->AddCurrentLineToHistory();	// 2002.02.16 hor すべて置換のときは不要
 		if( NULL == pcSelectLogic ){
-			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw );
+			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw, _CARETMARGINRATE_JUMP );
 			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 		}else{
 			GetCaret().MoveCursorFastMode( pcSelectLogic->GetFrom() );
@@ -264,7 +264,7 @@ re_do:;
 			GetSelect().SetTo(sRangeA.GetFrom());
 
 			/* カーソル移動 */
-			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw );
+			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw, _CARETMARGINRATE_JUMP );
 			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 
 			if( bRedraw ){
@@ -429,7 +429,7 @@ re_do:;							//	hor
 		/* カーソル移動 */
 		//	Sep. 8, 2000 genta
 		m_pCommanderView->AddCurrentLineToHistory();
-		GetCaret().MoveCursor( sRangeA.GetFrom(), bReDraw );
+		GetCaret().MoveCursor( sRangeA.GetFrom(), bReDraw, _CARETMARGINRATE_JUMP );
 		GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 		bFound = TRUE;
 	}else{
@@ -440,7 +440,7 @@ re_do:;							//	hor
 			GetSelect() = sSelect_Old;
 
 			/* カーソル移動 */
-			GetCaret().MoveCursor( sRangeA.GetFrom(), bReDraw );
+			GetCaret().MoveCursor( sRangeA.GetFrom(), bReDraw, _CARETMARGINRATE_JUMP );
 			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 			/* 選択領域描画 */
 			m_pCommanderView->GetSelectionInfo().DrawSelectArea();

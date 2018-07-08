@@ -108,7 +108,7 @@ void CViewCommander::Command_JUMP( void )
 		//	Sep. 8, 2000 genta
 		m_pCommanderView->AddCurrentLineToHistory();
 		//	2006.07.09 genta ‘I‘ðó‘Ô‚ð‰ðœ‚µ‚È‚¢‚æ‚¤‚É
-		m_pCommanderView->MoveCursorSelecting( CLayoutPoint(0, nLineNum - 1), m_pCommanderView->GetSelectionInfo().m_bSelectingLock, _CARETMARGINRATE / 3 );
+		m_pCommanderView->MoveCursorSelecting( CLayoutPoint(0, nLineNum - 1), m_pCommanderView->GetSelectionInfo().m_bSelectingLock, _CARETMARGINRATE_JUMP );
 		return;
 	}
 	if( 0 >= nLineNum ){
