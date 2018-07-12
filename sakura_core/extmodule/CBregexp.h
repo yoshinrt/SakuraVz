@@ -42,7 +42,10 @@
 #ifndef _DLL_BREGEXP_H_
 #define _DLL_BREGEXP_H_
 
-#include "CBregexpDll2.h"
+#include "bregexp.h"
+#include "CDllHandler.h"
+
+typedef BREGEXP BREGEXP_W;
 
 /*!
 	@brief Perl互換正規表現 BREGEXP.DLL をサポートするクラス
@@ -62,10 +65,10 @@
 	@date 2005.03.19 かろと リファクタリング。クラス内部を隠蔽
 	@date 2006.01.22 かろと オプション追加・名称変更(全て行置換用Globalオプション追加のため)
 */
-class CBregexp : public CBregexpDll2{
+class CBregexp {
 public:
 	CBregexp();
-	virtual ~CBregexp();
+	~CBregexp();
 
 	// 2006.01.22 かろと オプション追加・名称変更
 	enum Option {
@@ -84,9 +87,6 @@ public:
 		PAT_UNKNOWN = 0,		//!< 不明（初期値)
 		PAT_NORMAL = 1,			//!< 通常
 		PAT_TOP = 2,			//!< 行頭"^"
-		PAT_BOTTOM = 4,			//!< 行末"$"
-		PAT_TAB = 8,			//!< 行頭行末"^$"
-		PAT_LOOKAHEAD = 16		//!< 先読み"(?[=]"
 	};
 
 	//! DLLのバージョン情報を取得
@@ -169,24 +169,6 @@ public:
 	*/
 	const TCHAR* GetLastMessage() const;// { return m_szMsg; }
 
-	/*!	先読みパターンが存在するかを返す
-		この関数は、コンパイル後であることが前提なので、コンパイル前はfalse
-		@retval true 先読みがある
-		@retval false 先読みがない 又は コンパイル前
-	*/
-	bool IsLookAhead(void) {
-		return m_ePatType & PAT_LOOKAHEAD ? true : false;
-	}
-	/*!	検索パターンに先読みが含まれるか？（コンパイル前でも判別可能）
-		@param[in] pattern 検索パターン
-		@retval true 先読みがある
-		@retval false 先読みがない
-	*/
-	bool IsLookAhead(const wchar_t *pattern) {
-		CheckPattern(pattern);
-		return IsLookAhead();
-	}
-
 protected:
 
 	//!	コンパイルバッファを解放する
@@ -199,7 +181,6 @@ protected:
 			BRegfree( m_pRegExp );
 			m_pRegExp = NULL;
 		}
-		m_ePatType = PAT_UNKNOWN;
 	}
 
 private:
@@ -213,12 +194,53 @@ private:
 
 	//	メンバ変数
 	BREGEXP_W*			m_pRegExp;			//!< コンパイル構造体
-	int					m_ePatType;			//!< 検索文字列パターン種別
 	const wchar_t*		m_szTarget;			//!< 対象文字列へのポインタ
 	wchar_t				m_szMsg[80];		//!< BREGEXP_Wからのメッセージを保持する
 
 	// 静的メンバ変数
 	static const wchar_t	m_tmpBuf[2];	//!< ダミー文字列
+	
+	// bregonig.dll I/F
+public:
+	// UNICODEインターフェースを提供する
+	int BMatch(const wchar_t* str, const wchar_t* target,const wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
+		return ::BMatch(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
+	}
+	int BSubst(const wchar_t* str, const wchar_t* target,const wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
+		return ::BSubst(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
+	}
+	int BTrans(const wchar_t* str, wchar_t* target,wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
+		return ::BTrans(const_cast<TCHAR*>( str ),target,targetendp,rxp,msg);
+	}
+	int BSplit(const wchar_t* str, wchar_t* target,wchar_t* targetendp,int limit,BREGEXP_W** rxp,wchar_t* msg){
+		return ::BSplit(const_cast<TCHAR*>( str ),target,targetendp,limit,rxp,msg);
+	}
+	void BRegfree(BREGEXP_W* rx){
+		return ::BRegfree(rx);
+	}
+	const wchar_t* BRegexpVersion(void){
+		return ::BRegexpVersion();
+	}
+	int BMatchEx(const wchar_t* str, const wchar_t* targetbeg, const wchar_t* target, const wchar_t* targetendp, BREGEXP_W** rxp, wchar_t* msg){
+		return ::BMatchEx(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( targetbeg ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
+	}
+	int BSubstEx(const wchar_t* str, const wchar_t* targetbeg, const wchar_t* target, const wchar_t* targetendp, BREGEXP_W** rxp, wchar_t* msg){
+		return ::BSubstEx(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( targetbeg ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
+	}
+
+	// 関数があるかどうか
+	bool ExistBMatchEx() const{ return true; }
+	bool ExistBSubstEx() const{ return true; }
+	
+	// DLL の名残
+	bool IsAvailable( void ){ return true; }
+	
+	//! DLLロードと初期処理
+	EDllResult InitDll(
+		LPCTSTR pszSpecifiedDllName = NULL	//!< [in] クラスが定義しているDLL名以外のDLLを読み込みたいときに、そのDLL名を指定。
+	){
+		return DLL_SUCCESS;
+	}
 };
 
 //	Jun. 26, 2001 genta
@@ -228,4 +250,3 @@ bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, 
 bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage );
 
 #endif
-

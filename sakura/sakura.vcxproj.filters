@@ -1036,9 +1036,6 @@
     <ClInclude Include="..\sakura_core\extmodule\CBregexp.h">
       <Filter>Cpp Source Files\extmodule</Filter>
     </ClInclude>
-    <ClInclude Include="..\sakura_core\extmodule\CBregexpDll2.h">
-      <Filter>Cpp Source Files\extmodule</Filter>
-    </ClInclude>
     <ClInclude Include="..\sakura_core\extmodule\CDllHandler.h">
       <Filter>Cpp Source Files\extmodule</Filter>
     </ClInclude>
@@ -2211,9 +2208,6 @@
       <Filter>Cpp Source Files\cmd</Filter>
     </ClCompile>
     <ClCompile Include="..\sakura_core\extmodule\CBregexp.cpp">
-      <Filter>Cpp Source Files\extmodule</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sakura_core\extmodule\CBregexpDll2.cpp">
       <Filter>Cpp Source Files\extmodule</Filter>
     </ClCompile>
     <ClCompile Include="..\sakura_core\extmodule\CDllHandler.cpp">
