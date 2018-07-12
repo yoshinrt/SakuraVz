@@ -70,68 +70,6 @@ CBregexp::~CBregexp()
 }
 
 
-/*! @brief 検索パターンが特定の検索パターンかチェックする
-**
-** @param[in] szPattern 検索パターン
-**
-** @retval 検索パターン文字列長
-** 
-** @date 2005.03.20 かろと 関数に切り出し
-*/
-int CBregexp::CheckPattern(const wchar_t* szPattern)
-{
-	static const wchar_t TOP_MATCH[] = L"/^\\(*\\^/k";							//!< 行頭パターンのチェック用パターン
-	static const wchar_t DOL_MATCH[] = L"/\\\\\\$$/k";							//!< \$(行末パターンでない)チェック用パターン
-	static const wchar_t BOT_MATCH[] = L"/\\$\\)*$/k";							//!< 行末パターンのチェック用パターン
-	static const wchar_t TAB_MATCH[] = L"/^\\(*\\^\\$\\)*$/k";					//!< "^$"パターンかをチェック用パターン
-	static const wchar_t LOOKAHEAD[] = L"/\\(\\?[=]/k";							//!< "(?=" 先読み の存在チェックパターン
-	BREGEXP_W*	sReg = NULL;					//!< コンパイル構造体
-	wchar_t szMsg[80] = L"";					//!< エラーメッセージ
-	int nLen;									//!< 検索パターンの長さ
-	const wchar_t *szPatternEnd;				//!< 検索パターンの終端
-
-	m_ePatType = PAT_NORMAL;	//!<　ノーマルは確定
-	nLen = wcslen( szPattern );
-	szPatternEnd = szPattern + nLen;
-	// パターン種別の設定
-	if( BMatch( TOP_MATCH, szPattern, szPatternEnd, &sReg, szMsg ) > 0 ) {
-		// 行頭パターンにマッチした
-		m_ePatType |= PAT_TOP;
-	}
-	BRegfree(sReg);
-	sReg = NULL;
-	if( BMatch( TAB_MATCH, szPattern, szPatternEnd, &sReg, szMsg ) > 0 ) {
-		// 行頭行末パターンにマッチした
-		m_ePatType |= PAT_TAB;
-	}
-	BRegfree(sReg);
-	sReg = NULL;
-	if( BMatch( DOL_MATCH, szPattern, szPatternEnd, &sReg, szMsg ) > 0 ) {
-		// 行末の\$ にマッチした
-		// PAT_NORMAL
-	} else {
-		BRegfree(sReg);
-		sReg = NULL;
-		if( BMatch( BOT_MATCH, szPattern, szPatternEnd, &sReg, szMsg ) > 0 ) {
-			// 行末パターンにマッチした
-			m_ePatType |= PAT_BOTTOM;
-		} else {
-			// その他
-			// PAT_NORMAL
-		}
-	}
-	BRegfree(sReg);
-	sReg = NULL;
-	
-	if( BMatch( LOOKAHEAD, szPattern, szPattern + nLen, &sReg, szMsg ) > 0 ) {
-		// 先読みパターンにマッチした
-		m_ePatType |= PAT_LOOKAHEAD;
-	}
-	BRegfree(sReg);
-	sReg = NULL;
-	return (nLen);
-}
-
 /*! @brief ライブラリに渡すための検索・置換パターンを作成する
 **
 ** @note szPattern2: == NULL:検索 != NULL:置換
@@ -212,91 +150,6 @@ wchar_t* CBregexp::MakePatternSub(
 }
 
 
-/*! 
-** 行末文字の意味がライブラリでは \n固定なので、
-** これをごまかすために、ライブラリに渡すための検索・置換パターンを工夫する
-**
-** 行末文字($)が検索パターンの最後にあり、その直前が [\r\n] でない場合に、
-** 行末文字($)の手前に ([\r\n]+)を補って、置換パターンに $(nParen+1)を補う
-** というアルゴリズムを用いて、ごまかす。
-**
-** @note szPattern2: == NULL:検索 != NULL:置換
-** 
-** @param[in] szPattern 検索パターン
-** @param[in] szPattern2 置換パターン(NULLなら検索)
-** @param[in] nOption 検索オプション
-**
-** @retval ライブラリに渡す検索パターンへのポインタを返す
-** @note 返すポインタは、呼び出し側で delete すること
-**
-** @date 2003.05.03 かろと 関数に切り出し
-*/
-wchar_t* CBregexp::MakePattern( const wchar_t* szPattern, const wchar_t* szPattern2, int nOption ) 
-{
-	using namespace WCODE;
-	static const wchar_t* szCRLF = CRLF;		//!< 復帰・改行
-	static const wchar_t szCR[] = {CR,0};				//!< 復帰
-	static const wchar_t szLF[] = {LF,0};				//!< 改行
-	static const wchar_t BOT_SUBST[] = L"s/\\$(\\)*)$/([\\\\r\\\\n]+)\\$$1/k";	//!< 行末パターンの置換用パターン
-	int nLen;									//!< szPatternの長さ
-	BREGEXP_W*	sReg = NULL;					//!< コンパイル構造体
-	wchar_t szMsg[80] = L"";						//!< エラーメッセージ
-	wchar_t szAdd2[5] = L"";						//!< 行末あり置換の $数字 格納用
-	int nParens = 0;							//!< 検索パターン(szPattern)中の括弧の数(行末時に使用)
-	wchar_t *szNPattern;							//!< 検索パターン
-
-	nLen = CheckPattern( szPattern );
-	if( (m_ePatType & PAT_BOTTOM) != 0 ) {
-		bool bJustDollar = false;			// 行末指定の$のみであるフラグ($の前に \r\nが指定されていない)
-		szNPattern = MakePatternSub(szPattern, NULL, NULL, nOption);
-		int matched = BMatch( szNPattern, szCRLF, szCRLF+wcslen(szCRLF), &sReg, szMsg );
-		if( matched >= 0 ) {
-			// szNPatternが不正なパターン等のエラーでなかった
-			// エラー時には sRegがNULLのままなので、sReg->nparensへのアクセスは不正
-			nParens = sReg->nparens;			// オリジナルの検索文字列中の()の数を記憶
-			if( matched > 0 ) {
-				if( sReg->startp[0] == &szCRLF[1] && sReg->endp[0] == &szCRLF[1] ) {
-					if( BMatch( NULL, szCR, szCR+wcslen(szCR), &sReg, szMsg ) > 0 && sReg->startp[0] == &szCR[1] && sReg->endp[0] == &szCR[1] ) {
-						if( BMatch( NULL, szLF, szLF+wcslen(szLF), &sReg, szMsg ) > 0 && sReg->startp[0] == &szLF[0] && sReg->endp[0] == &szLF[0] ) {
-							// 検索文字列は 行末($)のみだった
-							bJustDollar = true;
-						}
-					}
-				}
-			} else {
-				if( BMatch( NULL, szCR, szCR+wcslen(szCR), &sReg, szMsg ) <= 0 ) {
-					if( BMatch( NULL, szLF, szLF+wcslen(szLF), &sReg, szMsg ) <= 0 ) {
-						// 検索文字列は、文字＋行末($)だった
-						bJustDollar = true;
-					}
-				}
-			}
-			BRegfree(sReg);
-			sReg = NULL;
-		}
-		delete [] szNPattern;
-
-		if( bJustDollar == true || (m_ePatType & PAT_TAB) != 0 ) {
-			// 行末指定の$ or 行頭行末指定 なので、検索文字列を置換
-			if( BSubst( BOT_SUBST, szPattern, szPattern + nLen, &sReg, szMsg ) > 0 ) {
-				szPattern = sReg->outp;
-				if( szPattern2 != NULL ) {
-					// 置換パターンもあるので、置換パターンの最後に $(nParens+1)を追加
-					auto_sprintf( szAdd2, L"$%d", nParens + 1 );
-				}
-			}
-			// sReg->outp のポインタを参照しているので、sRegを解放するのは最後に
-		}
-	}
-
-	szNPattern = MakePatternSub( szPattern, szPattern2, szAdd2, nOption );
-	if( sReg != NULL ) {
-		BRegfree(sReg);
-	}
-	return szNPattern;
-}
-
-
 /*!
 	CBregexp::MakePattern()の代替。
 	* エスケープされておらず、文字集合と \Q...\Eの中にない . を [^\r\n] に置換する。
@@ -308,7 +161,8 @@ wchar_t* CBregexp::MakePattern( const wchar_t* szPattern, const wchar_t* szPatte
 */
 wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wchar_t* const szReplace, int nOption )
 {
-	this->CheckPattern( szSearch );
+	m_ePatType = std::regex_search( szSearch, std::wregex( L"^\\(*\\^" )) ?
+		( PAT_NORMAL | PAT_TOP ) : PAT_NORMAL;
 
 	static const wchar_t szDotAlternative[] = L"[^\\r\\n]";
 	static const wchar_t szDollarAlternative[] = L"(?<![\\r\\n])(?=\\r|$)";

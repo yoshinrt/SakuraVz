@@ -84,9 +84,6 @@ public:
 		PAT_UNKNOWN = 0,		//!< 不明（初期値)
 		PAT_NORMAL = 1,			//!< 通常
 		PAT_TOP = 2,			//!< 行頭"^"
-		PAT_BOTTOM = 4,			//!< 行末"$"
-		PAT_TAB = 8,			//!< 行頭行末"^$"
-		PAT_LOOKAHEAD = 16		//!< 先読み"(?[=]"
 	};
 
 	//! DLLのバージョン情報を取得
@@ -168,24 +165,6 @@ public:
 		@retval メッセージへのポインタ
 	*/
 	const TCHAR* GetLastMessage() const;// { return m_szMsg; }
-
-	/*!	先読みパターンが存在するかを返す
-		この関数は、コンパイル後であることが前提なので、コンパイル前はfalse
-		@retval true 先読みがある
-		@retval false 先読みがない 又は コンパイル前
-	*/
-	bool IsLookAhead(void) {
-		return m_ePatType & PAT_LOOKAHEAD ? true : false;
-	}
-	/*!	検索パターンに先読みが含まれるか？（コンパイル前でも判別可能）
-		@param[in] pattern 検索パターン
-		@retval true 先読みがある
-		@retval false 先読みがない
-	*/
-	bool IsLookAhead(const wchar_t *pattern) {
-		CheckPattern(pattern);
-		return IsLookAhead();
-	}
 
 protected:
 

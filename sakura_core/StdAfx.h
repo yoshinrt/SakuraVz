@@ -72,6 +72,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <regex>
 #endif // ifndef SAKURA_PCH_MODE_MIN
 
 #if defined(__MINGW32__) && defined(_countof)
