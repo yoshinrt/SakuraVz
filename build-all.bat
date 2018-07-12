@@ -5,6 +5,12 @@ set configuration=%2
 @echo CONFIGURATION %CONFIGURATION%
 @echo.
 
+@echo ---- start git submodule ----
+git submodule init
+git submodule update
+@echo ---- end   git submodule ----
+@echo.
+
 @echo ---- start build-sln.bat ----
 call build-sln.bat       %PLATFORM% %CONFIGURATION% || (echo error build-sln.bat       && exit /b 1)
 @echo ---- end   build-sln.bat ----
