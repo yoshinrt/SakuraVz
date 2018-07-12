@@ -1,0 +1,6 @@
+[submodule "Onigmo"]
+	path = Onigmo
+	url = https://github.com/yoshinrt/Onigmo.git
+[submodule "bregonig"]
+	path = bregonig
+	url = https://github.com/yoshinrt/bregonig.git
