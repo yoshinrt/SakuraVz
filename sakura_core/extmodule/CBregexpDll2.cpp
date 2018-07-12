@@ -55,22 +55,5 @@ LPCTSTR CBregexpDll2::GetDllNameImp( int index )
 */
 bool CBregexpDll2::InitDllImp()
 {
-	//DLLì‡ä÷êîñºÉäÉXÉg
-	const ImportTable table[] = {
-		{ &m_BMatch,			"BMatchW" },
-		{ &m_BSubst,			"BSubstW" },
-		{ &m_BTrans,			"BTransW" },
-		{ &m_BSplit,			"BSplitW" },
-		{ &m_BRegfree,			"BRegfreeW" },
-		{ &m_BRegexpVersion,	"BRegexpVersionW" },
-		{ &m_BMatchEx,			"BMatchExW" },
-		{ &m_BSubstEx,			"BSubstExW" },
-		{ NULL, 0 }
-	};
-	
-	if( ! RegisterEntries( table )){
-		return false;
-	}
-	
 	return true;
 }

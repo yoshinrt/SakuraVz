@@ -101,6 +101,7 @@
       <AdditionalOptions>/Zc:strictStrings- /wd4703 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Onigmo\enc\unicode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,6 +119,7 @@
       <AdditionalOptions>/Zc:strictStrings- /wd4703 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Onigmo\enc\unicode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -138,6 +140,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StringPooling>true</StringPooling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Onigmo\enc\unicode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,6 +163,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <StringPooling>true</StringPooling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Onigmo\enc\unicode;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,6 +179,11 @@
     <ClInclude Include="..\bregonig\src\mem_vc6.h" />
     <ClInclude Include="..\bregonig\src\sv.h" />
     <ClInclude Include="..\bregonig\src\version.h" />
+    <ClInclude Include="..\Onigmo\enc\iso_8859.h" />
+    <ClInclude Include="..\Onigmo\enc\jis\props.h" />
+    <ClInclude Include="..\Onigmo\enc\shift_jis.h" />
+    <ClInclude Include="..\Onigmo\enc\unicode\casefold.h" />
+    <ClInclude Include="..\Onigmo\enc\unicode\name2ctype.h" />
     <ClInclude Include="..\Onigmo\onigmo.h" />
     <ClInclude Include="..\Onigmo\onigmognu.h" />
     <ClInclude Include="..\Onigmo\onigmoposix.h" />
@@ -190,6 +199,48 @@
     <ClCompile Include="..\bregonig\src\btrans.cpp" />
     <ClCompile Include="..\bregonig\src\subst.cpp" />
     <ClCompile Include="..\bregonig\src\sv.cpp" />
+    <ClCompile Include="..\Onigmo\enc\ascii.c" />
+    <ClCompile Include="..\Onigmo\enc\big5.c" />
+    <ClCompile Include="..\Onigmo\enc\cp949.c" />
+    <ClCompile Include="..\Onigmo\enc\emacs_mule.c" />
+    <ClCompile Include="..\Onigmo\enc\euc_jp.c" />
+    <ClCompile Include="..\Onigmo\enc\euc_kr.c" />
+    <ClCompile Include="..\Onigmo\enc\euc_tw.c" />
+    <ClCompile Include="..\Onigmo\enc\gb18030.c" />
+    <ClCompile Include="..\Onigmo\enc\gbk.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_1.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_10.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_11.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_13.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_14.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_15.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_16.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_2.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_3.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_4.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_5.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_6.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_7.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_8.c" />
+    <ClCompile Include="..\Onigmo\enc\iso_8859_9.c" />
+    <ClCompile Include="..\Onigmo\enc\koi8_r.c" />
+    <ClCompile Include="..\Onigmo\enc\koi8_u.c" />
+    <ClCompile Include="..\Onigmo\enc\mktable.c" />
+    <ClCompile Include="..\Onigmo\enc\shift_jis.c" />
+    <ClCompile Include="..\Onigmo\enc\unicode.c" />
+    <ClCompile Include="..\Onigmo\enc\us_ascii.c" />
+    <ClCompile Include="..\Onigmo\enc\utf_16be.c" />
+    <ClCompile Include="..\Onigmo\enc\utf_16le.c" />
+    <ClCompile Include="..\Onigmo\enc\utf_32be.c" />
+    <ClCompile Include="..\Onigmo\enc\utf_32le.c" />
+    <ClCompile Include="..\Onigmo\enc\utf_8.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1250.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1251.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1252.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1253.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1254.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_1257.c" />
+    <ClCompile Include="..\Onigmo\enc\windows_31j.c" />
     <ClCompile Include="..\Onigmo\regcomp.c" />
     <ClCompile Include="..\Onigmo\regenc.c" />
     <ClCompile Include="..\Onigmo\regerror.c" />

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="ソース ファイル\enc">
+      <UniqueIdentifier>{f2de2bd9-1914-41d2-9e55-5900dc056544}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\bregonig\src\bregexp.h">
@@ -56,6 +59,21 @@
     </ClInclude>
     <ClInclude Include="..\Onigmo\win32\config.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Onigmo\enc\iso_8859.h">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Onigmo\enc\jis\props.h">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Onigmo\enc\shift_jis.h">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Onigmo\enc\unicode\casefold.h">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Onigmo\enc\unicode\name2ctype.h">
+      <Filter>ソース ファイル\enc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +130,132 @@
     </ClCompile>
     <ClCompile Include="..\Onigmo\st.c">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\ascii.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\big5.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\cp949.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\emacs_mule.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\euc_jp.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\euc_kr.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\euc_tw.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\gb18030.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\gbk.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_1.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_10.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_11.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_13.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_14.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_15.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_16.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_2.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_3.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_4.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_5.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_6.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_7.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_8.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\iso_8859_9.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\koi8_r.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\koi8_u.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\mktable.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\shift_jis.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\unicode.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\us_ascii.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\utf_16be.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\utf_16le.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\utf_32be.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\utf_32le.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\utf_8.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1250.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1251.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1252.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1253.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1254.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_1257.c">
+      <Filter>ソース ファイル\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Onigmo\enc\windows_31j.c">
+      <Filter>ソース ファイル\enc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
