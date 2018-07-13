@@ -58,7 +58,6 @@ const wchar_t CBregexp::m_tmpBuf[2] = L"\0";
 
 CBregexp::CBregexp()
 : m_pRegExp( NULL )
-, m_ePatType( PAT_NORMAL )	//	Jul, 25, 2002 genta
 {
 	m_szMsg[0] = L'\0';
 }
@@ -161,9 +160,6 @@ wchar_t* CBregexp::MakePatternSub(
 */
 wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wchar_t* const szReplace, int nOption )
 {
-	m_ePatType = std::regex_search( szSearch, std::wregex( L"^\\(*\\^" )) ?
-		( PAT_NORMAL | PAT_TOP ) : PAT_NORMAL;
-
 	static const wchar_t szDotAlternative[] = L"[^\\r\\n]";
 	static const wchar_t szDollarAlternative[] = L"(?<![\\r\\n])(?=\\r|$)";
 
@@ -345,20 +341,9 @@ bool CBregexp::Match( const wchar_t* target, int len, int nStart )
 
 	m_szMsg[0] = '\0';		//!< エラー解除
 	// 拡張関数がない場合は、行の先頭("^")の検索時の特別処理 by かろと
-	if (!ExistBMatchEx()) {
-		/*
-		** 行頭(^)とマッチするのは、nStart=0の時だけなので、それ以外は false
-		*/
-		if( (m_ePatType & PAT_TOP) != 0 && nStart != 0 ) {
-			// nStart!=0でも、BMatch()にとっては行頭になるので、ここでfalseにする必要がある
-			return false;
-		}
-		//	検索文字列＝NULLを指定すると前回と同一の文字列と見なされる
-		matched = BMatch( NULL, target + nStart, target + len, &m_pRegExp, m_szMsg );
-	} else {
-		//	検索文字列＝NULLを指定すると前回と同一の文字列と見なされる
-		matched = BMatchEx( NULL, target, target + nStart, target + len, &m_pRegExp, m_szMsg );
-	}
+	//	検索文字列＝NULLを指定すると前回と同一の文字列と見なされる
+	matched = BMatchEx( NULL, target, target + nStart, target + len, &m_pRegExp, m_szMsg );
+	
 	m_szTarget = target;
 			
 	if ( matched < 0 || m_szMsg[0] ) {
@@ -412,11 +397,8 @@ int CBregexp::Replace(const wchar_t *szTarget, int nLen, int nStart)
 	//	To Here 2003.05.03 かろと
 
 	m_szMsg[0] = '\0';		//!< エラー解除
-	if (!ExistBSubstEx()) {
-		result = BSubst( NULL, szTarget + nStart, szTarget + nLen, &m_pRegExp, m_szMsg );
-	} else {
-		result = BSubstEx( NULL, szTarget, szTarget + nStart, szTarget + nLen, &m_pRegExp, m_szMsg );
-	}
+	result = BSubstEx( NULL, szTarget, szTarget + nStart, szTarget + nLen, &m_pRegExp, m_szMsg );
+	
 	m_szTarget = szTarget;
 
 	//	メッセージが空文字列でなければ何らかのエラー発生。

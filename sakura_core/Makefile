@@ -214,7 +214,6 @@ env/CTagJumpManager.o \
 env/CTextStack.o \
 env/DLLSHAREDATA.o \
 extmodule/CBregexp.o \
-extmodule/CBregexpDll2.o \
 extmodule/CDllHandler.o \
 extmodule/CHtmlHelp.o \
 extmodule/CMigemo.o \
