@@ -1483,10 +1483,7 @@ LRESULT CEditWnd::DispatchEvent(
 				else if( mp->dwItemSpec == 4 ){	//	文字コードセット→文字コードセット指定
 					GetDocument()->HandleCommand( F_CHG_CHARSET );
 				}
-			}
-			else if( pnmh->code == NM_RCLICK ){
-				LPNMMOUSE mp = (LPNMMOUSE) lParam;
-				if( mp->dwItemSpec == 2 ){	//	入力改行モード
+				else if( mp->dwItemSpec == 2 ){	//	入力改行モード
 					enum eEolExts {
 						F_CHGMOD_EOL_NEL = F_CHGMOD_EOL_CR + 1,
 						F_CHGMOD_EOL_PS,
