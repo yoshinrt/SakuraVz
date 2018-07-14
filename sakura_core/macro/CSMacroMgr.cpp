@@ -473,6 +473,10 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_GETVIEWCOLUMNS,			L"GetViewColumns",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //ビューの列数取得
 	{F_CREATEMENU,				L"CreateMenu",				{VT_I4,    VT_BSTR,  VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //メニュー作成
 	{F_GETMACROINFO,			L"GetMacroInfo",			{VT_I4,    VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //実行中のマクロ名等の情報を返す
+	{F_GetCursorPosX,				L"GetCursorPosX",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 Logic X
+	{F_GetCursorPosY,				L"GetCursorPosY",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 Logic Y
+	{F_IsCursorEOF,				L"IsCursorEOF",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOF?
+	{F_IsCursorEOL,				L"IsCursorEOL",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOL?
 
 	//	終端
 	//	Jun. 27, 2002 genta

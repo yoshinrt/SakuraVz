@@ -260,7 +260,7 @@ F_CREATEKEYBINDLIST			= 30630,	//キー割り当て一覧をコピー						なし
 F_INS_DATE				= 30790,	//日付挿入										なし
 F_INS_TIME				= 30791,	//時刻挿入										なし
 F_CTRL_CODE_DIALOG		= 30792,	//コントロールコードの入力(ダイアログ)			なし
-F_CTRL_CODE				= 30793.	//コントロールコードの入力						wchar_t code
+F_CTRL_CODE				= 30793,	//コントロールコードの入力						wchar_t code
 
 
 // 変換系
@@ -570,7 +570,10 @@ F_GETVIEWLINES		= 40056,	// ビューの行数取得
 F_GETVIEWCOLUMNS	= 40057,	// ビューの列数取得
 F_CREATEMENU		= 40058,	// メニュー作成
 F_GETMACROINFO		= 40059,	// 実行中のマクロ名等の情報を返す
-
+F_GetCursorPosX		= 40060,	// カーソル位置 X
+F_GetCursorPosY		= 40061,	// カーソル位置 Y
+F_IsCursorEOF			= 40062,	// カーソル位置 EOF?
+F_IsCursorEOL			= 40063,	// カーソル位置 EOL?
 
 //	= 2005,.01.10 genta ISearch用補助コード
 //	2007.07.07 genta 16bit以内に収めないと状況コードと衝突するのでコードを変更

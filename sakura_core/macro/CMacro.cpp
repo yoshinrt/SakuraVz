@@ -2500,6 +2500,58 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			}
 		}
 		return true;
+	
+	case F_GetCursorPosX:
+		// Logic X
+		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetX2());
+		return true;
+		
+	case F_GetCursorPosY:
+		// Logic Y
+		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetY2());
+		return true;
+		
+	case F_IsCursorEOF:
+		// EOF?
+		Wrap( &Result )->Receive(
+			(
+				// 現在行が総行数を超えている
+				View->GetCaret().GetCaretLogicPos().GetY2() >=
+				View->m_pcEditDoc->m_cDocLineMgr.GetLineCount()
+			) || (
+				// 最終行が改行なしの場合の判定
+				(
+					// 最終行
+					View->GetCaret().GetCaretLogicPos().GetY2() ==
+					View->m_pcEditDoc->m_cDocLineMgr.GetLineCount() - 1
+				) && (
+					// 改行を含む length == x の場合，改行がない かつ 行の右端
+					View->GetCaret().GetCaretLogicPos().GetX2() >=	// x 位置
+					View->m_pcEditDoc->m_cDocLineMgr.GetLine(		// 現在行 length
+						View->GetCaret().GetCaretLogicPos().GetY2()
+					)->GetLengthWithEOL()
+				)
+			)
+		);
+		return true;
+	
+	case F_IsCursorEOL:
+		// EOL?
+		Wrap( &Result )->Receive(
+			(
+				// 現在行が総行数を超えている
+				View->GetCaret().GetCaretLogicPos().GetY2() >=
+				View->m_pcEditDoc->m_cDocLineMgr.GetLineCount()
+			) || (
+				// EOL?
+				View->GetCaret().GetCaretLogicPos().GetX2() >=	// x 位置
+				View->m_pcEditDoc->m_cDocLineMgr.GetLine(		// 現在行 length
+					View->GetCaret().GetCaretLogicPos().GetY2()
+				)->GetLengthWithoutEOL()
+			)
+		);
+		return true;
+	
 	default:
 		return false;
 	}
