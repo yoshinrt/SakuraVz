@@ -1,7 +1,7 @@
 # Sakura Editor VZ 化 fork
 [![Build status](https://ci.appveyor.com/api/projects/status/mf8tx836jtb7epq8/branch/vz_mode?svg=true)](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode)
 
-サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug) を参照してください．
+サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+sort%3Aupdated-desc) を参照してください．
 
 機能の on/off を GUI で設定する機能はありませんので，`sakura.ini` を直接編集してください．本 fork のビルドでは，デフォルトで全て有効になっています．
 
@@ -15,7 +15,8 @@
 - [改行混在を許可しないモード](https://github.com/yoshinrt/sakura#改行混在を許可しないモード)
 - [直前の置換を再実行](https://github.com/yoshinrt/sakura#直前の置換を再実行)
 - [他アプリで編集されたときの問い合わせダイアログボックス抑制](https://github.com/yoshinrt/sakura#他アプリで編集されたときの問い合わせダイアログボックス抑制)
-- [実行中のマクロ名，マクロ ID を取得するマクロ命令追加](https://github.com/yoshinrt/sakura#実行中のマクロ名マクロidを取得するマクロ命令追加)
+- [JavaScript ファイルを共通にするためのマクロ関数](https://github.com/yoshinrt/sakura#JavaScriptファイルを共通にするためのマクロ関数)
+- [カーソル位置周辺の情報を取得するマクロ関数](https://github.com/yoshinrt/sakura#カーソル位置周辺の情報を取得するマクロ関数)
 - [検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加](https://github.com/yoshinrt/sakura#検索置換ダイアログのオプションデフォルトボタンを固定できるパラメータ追加)
 
 
@@ -48,14 +49,14 @@
 
 ### 改行混在を許可しないモード
 
-標準では一つの文書内で CRLF, LF, CR 等の改行コードが混在することができますが，メニューの 設定→共通設定→編集→改行コードを変換して貼り付ける を有効にすることで，改行コードの混在を許可しないモードになります．これにより，挙動が以下のように変わります．
+標準では一つの文書内で CRLF, LF, CR 等の改行コードを混在させることができますが，メニューの 設定→共通設定→編集→改行コードを変換して貼り付ける を有効にすることで，改行コードの混在を許可しないモードになります．これにより，挙動が以下のように変更されます．
 
 - 開いたファイルは，エディタ内部ですべて LF に統一され，保存時に元の改行に統一してから保存します．これにより，
     -  正規表現やマクロの `InsText()` で改行を示す文字列は，ファイルの改行コードによらず，( `\r\n` 等ではなく ) `\n` に統一されます．
     - メニューの「入力改行コードの指定」，マクロの `GetLineCode()`, `ChgmodEOL()` は，入力時の改行コードではなく，保存時の改行コードの設定・取得になります．入力時に LF 以外を入力することはできません．
 - 貼り付け時に，クリップボードに格納された文字列は，改行コードが LF に統一されてから貼り付けられます．
 - コピー時にクリップボードに格納される文字列は，改行コードが CRLF に統一されます．
-- 改行が混在している (例: LF と判定されたファイルに一部  CRLF が混じっていた等) ファイルを保存する場合，ユーザに問い合わせすることなく，設定された改行コードに統一してから保存します．
+- 改行が混在している (例: `InsText( "\r" )` を実行した) ファイルを保存する場合，ユーザに問い合わせすることなく，設定された改行コードに統一してから保存します．
 
 ### 直前の置換を再実行
 
@@ -73,8 +74,8 @@ ReDraw();
 
 `sakura.ini`: `bVzModeNoAskWhenFileUpdate=1` で有効になります
 
-### 実行中のマクロ名，マクロIDを取得するマクロ命令追加
-実行中のマクロ情報を取得する関数 `GetMacroInfo( mode )` を追加しました．`mode` には以下の値のいずれかを指定します．
+### JavaScript ファイルを共通にするためのマクロ関数
+複数のマクロで JavaScript ファイルを共通にすることを可能にするため，実行中のマクロ情報を取得する関数 `GetMacroInfo( mode )` を追加しました．`mode` には以下の値のいずれかを指定します．
 
 - 0: 「共通設定」→「マクロ」の「マクロ名」に設定された文字列を取得します．
 - 1: 「共通設定」→「マクロ」の「番号」を取得します．
@@ -98,6 +99,14 @@ FuncTable.Fuga = function(){
 if( FuncTable[ GetMacroInfo()]) FuncTable[ GetMacroInfo()]();
 else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + GetMacroInfo( 2 ));
 ```
+
+### カーソル位置周辺の情報を取得するマクロ関数
+カーソル位置周辺の情報を取得するマクロ関数を追加しました．
+
+ - `GetCursorPosX()`: カーソル位置の行頭からの文字数 (行頭 = 0) を返します．
+ - `GetCursorPosY()`: カーソル位置のファイル先頭からの行数 (先頭行 = 0) を返します．
+ - `IsCursorEOL()`: カーソル位置が EOL の場合，非 0 を返します．
+ - `IsCursorEOF()`: カーソル位置が EOF の場合，非 0 を返します．
 
 ### 検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加
 `SearchDialog( mode )`, `ReplaceDialog( mode )` に引数を追加しました．mode には以下の値のいくつかを `|` で繋げて指定します．
