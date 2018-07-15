@@ -1616,7 +1616,7 @@ int CGrepAgent::DoGrepReplaceFile(
 	CEol	cEol;
 	int		nEolCodeLen;
 	int		nOldPercent = 0;
-	int	nKeyLen = wcslen( pszKey );
+	int	nKeyLen = pattern.GetLen();
 	const TCHAR*	pszCodeName = _T("");
 
 	const STypeConfigMini* type;
