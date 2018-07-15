@@ -88,6 +88,7 @@ protected:
 		@li	0x80	標準出力をUTF-8で行う
 		@li	0x100	標準入力をUTF-8で行う
 		@li	0x200	カレントディレクトリを指定
+		@li	0x400	console ウィンドウを前面にする
 
 	@note	子プロセスの標準出力取得はパイプを使用する
 	@note	子プロセスの標準入力への送信は一時ファイルを使用
@@ -318,6 +319,7 @@ bool CEditView::ExecCmd( const TCHAR* pszCmd, int nFlgOpt, const TCHAR* pszCurDi
 			CFormatManager().MyGetTimeFormat( systime, szTextTime, _countof( szTextTime ) - 1 );
 			WCHAR szOutTemp[1024*2+100];
 			oa.OutputW( L"\r\n" );
+			if( nFlgOpt & 0x400 ) ActivateFrameWindow(GetDllShareData().m_sHandles.m_hwndDebug);
 			oa.OutputW( L"#============================================================\r\n" );
 			int len = auto_snprintf_s( szOutTemp, _countof(szOutTemp),
 				L"#DateTime : %ts %ts\r\n", szTextDate, szTextTime );
