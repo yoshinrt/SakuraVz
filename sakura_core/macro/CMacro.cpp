@@ -929,6 +929,12 @@ bool CMacro::HandleCommand(
 		//		0x1000	(マクロ専用)検索オプションを元に戻す
 		if( Argument[0] == NULL ){
 			// 直前の置換の再実行
+			if( 0 < GetDllShareData().m_sSearchKeywords.m_aReplaceKeys.size() ){
+				if( pcEditView->m_pcEditWnd->m_cDlgReplace.m_nReplaceKeySequence < GetDllShareData().m_Common.m_sSearch.m_nReplaceKeySequence ){
+					pcEditView->m_pcEditWnd->m_cDlgReplace.m_strText2 = GetDllShareData().m_sSearchKeywords.m_aReplaceKeys[0];
+				}
+			}
+			
 			pcEditView->GetCommander().HandleCommand( Index, true, 0, 0, 0, 0);
 			return true;
 		}
