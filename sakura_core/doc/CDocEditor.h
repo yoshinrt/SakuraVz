@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 	Copyright (C) 2008, kobake
 
 	This software is provided 'as-is', without any express or implied
@@ -34,74 +34,74 @@ class CDocLineMgr;
 class CDocEditor : public CDocListenerEx{
 public:
 	CEditDoc*		m_pcDocRef;
-	COpeBuf			m_cOpeBuf;					//!< ƒAƒ“ƒhƒDƒoƒbƒtƒ@
-	COpeBlk*		m_pcOpeBlk;					//!< ‘€ìƒuƒƒbƒN
-	int				m_nOpeBlkRedawCount;		//!< OpeBlk‚ÌÄ•`‰æ”ñ‘ÎÛ”
-	bool			m_bInsMode;					//!< ‘}“üEã‘‚«ƒ‚[ƒh Oct. 2, 2005 genta
+	COpeBuf			m_cOpeBuf;					//!< ã‚¢ãƒ³ãƒ‰ã‚¥ãƒãƒƒãƒ•ã‚¡
+	COpeBlk*		m_pcOpeBlk;					//!< æ“ä½œãƒ–ãƒ­ãƒƒã‚¯
+	int				m_nOpeBlkRedawCount;		//!< OpeBlkã®å†æç”»éžå¯¾è±¡æ•°
+	bool			m_bInsMode;					//!< æŒ¿å…¥ãƒ»ä¸Šæ›¸ããƒ¢ãƒ¼ãƒ‰ Oct. 2, 2005 genta
 	bool			m_bIsDocModified;
 
 private:
-	CEol 			m_cNewLineCode;				//!< Enter‰Ÿ‰ºŽž‚É‘}“ü‚·‚é‰üsƒR[ƒhŽí•Ê
+	CEol 			m_cNewLineCode;				//!< EnteræŠ¼ä¸‹æ™‚ã«æŒ¿å…¥ã™ã‚‹æ”¹è¡Œã‚³ãƒ¼ãƒ‰ç¨®åˆ¥
 
 public:
 	CDocEditor(CEditDoc* pcDoc);
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//                         ƒCƒxƒ“ƒg                            //
+	//                         ã‚¤ãƒ™ãƒ³ãƒˆ                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//ƒ[ƒh‘OŒã
+	//ãƒ­ãƒ¼ãƒ‰å‰å¾Œ
 	void OnBeforeLoad(SLoadInfo* sLoadInfo);
 	void OnAfterLoad(const SLoadInfo& sLoadInfo);
 
-	//ƒZ[ƒu‘OŒã
+	//ã‚»ãƒ¼ãƒ–å‰å¾Œ
 	void OnAfterSave(const SSaveInfo& sSaveInfo);
 
 
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//                           ó‘Ô                              //
+	//                           çŠ¶æ…‹                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//	Jan. 22, 2002 genta Modified Flag‚ÌÝ’è
+	//	Jan. 22, 2002 genta Modified Flagã®è¨­å®š
 	void SetModified( bool flag, bool redraw);
-	//! ƒtƒ@ƒCƒ‹‚ªC³’†‚©‚Ç‚¤‚©
+	//! ãƒ•ã‚¡ã‚¤ãƒ«ãŒä¿®æ­£ä¸­ã‹ã©ã†ã‹
 	bool IsModified() const { return m_bIsDocModified; }
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//                           Ý’è                              //
+	//                           è¨­å®š                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//	Nov. 20, 2000 genta
-	void SetImeMode(int mode);	//	IMEó‘Ô‚ÌÝ’è
+	void SetImeMode(int mode);	//	IMEçŠ¶æ…‹ã®è¨­å®š
 
 	//	May 15, 2000 genta
 	CEol  GetNewLineCode( void ) const;
 	void  SetNewLineCode(const CEol& t){ m_cNewLineCode = t; }
 	CEol  GetNewLineCodeFile() const { return m_cNewLineCode; }
 
-	//	Oct. 2, 2005 genta ‘}“üƒ‚[ƒh‚ÌÝ’è
+	//	Oct. 2, 2005 genta æŒ¿å…¥ãƒ¢ãƒ¼ãƒ‰ã®è¨­å®š
 	bool IsInsMode() const { return m_bInsMode; }
 	void SetInsMode(bool mode) { m_bInsMode = mode; }
 
-	//! Undo(Œ³‚É–ß‚·)‰Â”\‚Èó‘Ô‚©H */
+	//! Undo(å…ƒã«æˆ»ã™)å¯èƒ½ãªçŠ¶æ…‹ã‹ï¼Ÿ */
 	bool IsEnableUndo( void ) const
 	{
 		return m_cOpeBuf.IsEnableUndo();
 	}
 
-	//! Redo(‚â‚è’¼‚µ)‰Â”\‚Èó‘Ô‚©H
+	//! Redo(ã‚„ã‚Šç›´ã—)å¯èƒ½ãªçŠ¶æ…‹ã‹ï¼Ÿ
 	bool IsEnableRedo( void ) const
 	{
 		return m_cOpeBuf.IsEnableRedo();
 	}
 
-	//! ƒNƒŠƒbƒvƒ{[ƒh‚©‚ç“\‚è•t‚¯‰Â”\‚©H
+	//! ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã‹ã‚‰è²¼ã‚Šä»˜ã‘å¯èƒ½ã‹ï¼Ÿ
 	bool IsEnablePaste( void ) const
 	{
 		return
-			// ƒeƒLƒXƒgƒXƒ^ƒbƒNƒ‚[ƒh‚ÅCƒXƒ^ƒbƒN‚Éƒf[ƒ^‚ª—L‚é
+			// ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯ãƒ¢ãƒ¼ãƒ‰ã§ï¼Œã‚¹ã‚¿ãƒƒã‚¯ã«ãƒ‡ãƒ¼ã‚¿ãŒæœ‰ã‚‹
 			GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack &&
 			GetDllShareData().m_TextStack.GetSize() != 0 ||
 			
-			// ƒNƒŠƒbƒvƒ{[ƒh‚Éƒf[ƒ^‚ª—L‚é
+			// ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã«ãƒ‡ãƒ¼ã‚¿ãŒæœ‰ã‚‹
 			CClipboard::HasValidData();
 	}
 };
@@ -112,10 +112,10 @@ public:
 	CDocEditAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//                           ‘€ì                              //
+	//                           æ“ä½œ                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//	May 15, 2000 genta
-	void AddLineStrX( const wchar_t*, int );	/* ––”ö‚És‚ð’Ç‰Á Ver1.5 */
+	void AddLineStrX( const wchar_t*, int );	/* æœ«å°¾ã«è¡Œã‚’è¿½åŠ  Ver1.5 */
 
 private:
 	CDocLineMgr* m_pcDocLineMgr;
