@@ -53,7 +53,8 @@ public:
 public:
 	CEditView*		m_pCommanderView;
 	CSMacroMgr*		m_pcSMacroMgr;
-	
+
+public:
 	/* キーリピート状態 */
 	int				m_bPrevCommand;
 
@@ -229,6 +230,7 @@ public:
 	void Command_COPY_COLOR_HTML_LINENUMBER( void );		//選択範囲内色付きHTMLコピー
 	CColorStrategy* GetColorStrategyHTML(const CStringRef&, int, const CColorStrategyPool*, CColorStrategy**, CColorStrategy**, bool& bChange);
 	void Command_CREATEKEYBINDLIST( void );			// キー割り当て一覧をコピー //Sept. 15, 2000 JEPRO	Command_の作り方がわからないので殺してある
+
 
 	/* 挿入系 */
 	void Command_INS_DATE( void );	//日付挿入

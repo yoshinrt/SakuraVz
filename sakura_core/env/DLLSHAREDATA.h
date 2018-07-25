@@ -82,6 +82,7 @@ inline void SetDllShareData(DLLSHAREDATA* pShareData)
 
 
 
+
 //! 共有フラグ
 struct SShare_Flags{
 	BOOL				m_bEditWndChanging;				// 編集ウィンドウ切替中	// 2007.04.03 ryoji

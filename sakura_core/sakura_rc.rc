@@ -1,5 +1,11 @@
-﻿//Microsoft Developer Studio generated resource script.
-//
+//Microsoft Developer Studio generated resource script.
+
+// このファイルのエンコーディングは UTF-8 (BOM無し) です.
+// ※ BOM を付けると Visual Studio のリソースエディタで開けなくなってしまう.
+
+// CodePage: 65001 (UTF-8)
+#pragma code_page(65001)
+
 //#define SAKURA_LANG_RESOURCE
 
 #ifndef SAKURA_LANG_RESOURCE
@@ -29,10 +35,9 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 #ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
-#pragma code_page(932)
 #endif //_WIN32
 
-#define	S_COPYRIGHT	"Copyright (C) 1998-2017  by Norio Nakatani & Collaborators"
+#define	S_COPYRIGHT	"Copyright (C) 1998-2018  by Norio Nakatani & Collaborators"
 #define FL_VER		PR_VER
 #define FL_VER_STR	PR_VER_STR
 
@@ -128,7 +133,14 @@ BEGIN
     LTEXT           "Build No.",
                     IDC_STATIC_URL_APPVEYOR_BUILD, 101, 108,120,8,SS_NOTIFY | NOT WS_GROUP |
                     WS_TABSTOP
-    EDITTEXT        IDC_EDIT_ABOUT,5,121,233,63,ES_MULTILINE | ES_READONLY | 
+    LTEXT           "GitHub URL:", IDC_STATIC_URL_GITHUB_CAPTION,33,118,50,8,NOT WS_GROUP
+    LTEXT           "Commit",
+                    IDC_STATIC_URL_GITHUB_COMMIT, 101, 118,30,8,SS_NOTIFY | NOT WS_GROUP |
+                    WS_TABSTOP
+    LTEXT           "PR.",
+                    IDC_STATIC_URL_GITHUB_PR, 150, 118,30,8,SS_NOTIFY | NOT WS_GROUP |
+                    WS_TABSTOP
+    EDITTEXT        IDC_EDIT_ABOUT,5,131,233,53,ES_MULTILINE | ES_READONLY | 
                     WS_VSCROLL | NOT WS_TABSTOP
 END
 
@@ -3138,7 +3150,7 @@ BEGIN
 	F_EDIT_MOV_SUBMENU		"移動"
 	F_EDIT_SEL_SUBMENU		"選択"
 	F_EDIT_BOX_SEL_SUBMENU	"矩形選択"
-	F_EDIT_COS_SUBMENU	"整形"
+	F_EDIT_COS_SUBMENU		"整形"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -3512,7 +3524,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    F_MENU_NOT_USED_FIRST   "——ツールバー折返——"
+    F_MENU_NOT_USED_FIRST   "――ツールバー折返――"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4316,7 +4328,7 @@ BEGIN
 	// CPropComMainMenu.cpp
 	STR_SPECIAL_FUNC			"特別機能"
 	STR_PROPCOMMAINMENU_EDIT	"編集してください"
-	STR_PROPCOMMAINMENU_SEP		"——————————"
+	STR_PROPCOMMAINMENU_SEP		"――――――――――"
 	STR_PROPCOMMAINMENU_ACCKEY1	"メニューアイテムのアクセスキー設定"
 	STR_PROPCOMMAINMENU_ACCKEY2	"キーを入力してください。"
 	STR_PROPCOMMAINMENU_CLEAR	"メニューの設定をクリアします。\nよろしいですか？"
@@ -4395,7 +4407,7 @@ BEGIN
 	STR_PROPCOMTOOL_ERR04		"Toolbar Dialog: ADD: 値の設定に失敗しました。:%d"
 	STR_PROPCOMTOOL_ERR05		"Toolbar Dialog: 要素の追加に失敗しました。:%d"
 	STR_PROPCOMTOOL_ITEM1		"───────────"
-	STR_PROPCOMTOOL_ITEM2		"——ツールバー折返——"
+	STR_PROPCOMTOOL_ITEM2		"――ツールバー折返――"
 	STR_PROPCOMTOOL_ITEM3		"────不　明────"
 
 	// CPropComWin.cpp

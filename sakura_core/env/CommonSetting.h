@@ -772,6 +772,7 @@ struct CommonSetting
 	CommonSetting_Format			m_sFormat;			//!< 書式
 	CommonSetting_Search			m_sSearch;			//!< 検索
 	CommonSetting_KeyBind			m_sKeyBind;			//!< キー割り当て
+
 	//
 	CommonSetting_CustomMenu		m_sCustomMenu;		//!< カスタムメニュー
 	CommonSetting_ToolBar			m_sToolBar;			//!< ツールバー
