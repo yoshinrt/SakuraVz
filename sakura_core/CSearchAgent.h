@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 	Copyright (C) 2008, kobake
 
 	This software is provided 'as-is', without any express or implied
@@ -60,21 +60,21 @@ public:
 	static int GetMapIndex( wchar_t c );
 #endif
 
-	UINT m_uVzWordSearch;		//!< Vz ŒÝŠ·ƒ[ƒhƒT[ƒ`‚Ì‹«ŠE
+	UINT m_uVzWordSearch;		//!< Vz äº’æ›ãƒ¯ãƒ¼ãƒ‰ã‚µãƒ¼ãƒã®å¢ƒç•Œ
 	enum {
-		WORDSEARCH_TOP	= 0x1,	//!< ’PŒêæ“ª‚Í‹«ŠE
-		WORDSEARCH_TAIL	= 0x2,	//!< ’PŒêI’[‚Í‹«ŠE
+		WORDSEARCH_TOP	= 0x1,	//!< å˜èªžå…ˆé ­ã¯å¢ƒç•Œ
+		WORDSEARCH_TAIL	= 0x2,	//!< å˜èªžçµ‚ç«¯ã¯å¢ƒç•Œ
 	};
 
 private:
-	// ŠO•”ˆË‘¶
+	// å¤–éƒ¨ä¾å­˜
 	const wchar_t*	m_pszKey;
 	const SSearchOption* m_psSearchOption;
 	mutable CBregexp* m_pRegexp;
 
 	const wchar_t* m_pszCaseKeyRef;
 
-	// “à•”ƒoƒbƒtƒ@
+	// å†…éƒ¨ãƒãƒƒãƒ•ã‚¡
 	wchar_t* m_pszPatternCase;
 	int  m_nPatternLen;
 #ifdef SEARCH_STRING_KMP
@@ -91,7 +91,7 @@ private:
 
 class CSearchAgent{
 public:
-	// •¶Žš—ñŒŸõ
+	// æ–‡å­—åˆ—æ¤œç´¢
 	static const wchar_t* SearchString(
 		const wchar_t*	pLine,
 		int				nLineLen,
@@ -99,7 +99,7 @@ public:
 		const CSearchStringPattern& pattern,
 		bool			bVzWordSearch = true
 	);
-	// ’PŒê’PˆÊ‚Å•¶Žš—ñŒŸõ
+	// å˜èªžå˜ä½ã§æ–‡å­—åˆ—æ¤œç´¢
 	static const wchar_t* SearchStringWord(
 		const wchar_t*	pLine,
 		int				nLineLen,
@@ -110,7 +110,7 @@ public:
 	);
 
 	
-	// ŒŸõðŒ‚Ìî•ñ
+	// æ¤œç´¢æ¡ä»¶ã®æƒ…å ±
 	static void CreateCharCharsArr(
 		const wchar_t*	pszPattern,
 		int				nSrcLen,
@@ -126,15 +126,15 @@ public:
 public:
 	CSearchAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }
 
-	bool WhereCurrentWord( CLogicInt , CLogicInt , CLogicInt* , CLogicInt*, CNativeW*, CNativeW* );	/* Œ»ÝˆÊ’u‚Ì’PŒê‚Ì”ÍˆÍ‚ð’²‚×‚é */
+	bool WhereCurrentWord( CLogicInt , CLogicInt , CLogicInt* , CLogicInt*, CNativeW*, CNativeW* );	/* ç¾åœ¨ä½ç½®ã®å˜èªžã®ç¯„å›²ã‚’èª¿ã¹ã‚‹ */
 
-	bool PrevOrNextWord( CLogicInt , CLogicInt , CLogicInt* , BOOL bLEFT, BOOL bStopsBothEnds );	/* Œ»ÝˆÊ’u‚Ì¶‰E‚Ì’PŒê‚Ìæ“ªˆÊ’u‚ð’²‚×‚é */
-	//	Jun. 26, 2001 genta	³‹K•\Œ»ƒ‰ƒCƒuƒ‰ƒŠ‚Ì·‚µ‘Ö‚¦
-	int SearchWord( CLogicPoint ptSerachBegin, ESearchDirection eDirection, CLogicRange* pMatchRange, const CSearchStringPattern& pattern ); /* ’PŒêŒŸõ */
+	bool PrevOrNextWord( CLogicInt , CLogicInt , CLogicInt* , BOOL bLEFT, BOOL bStopsBothEnds );	/* ç¾åœ¨ä½ç½®ã®å·¦å³ã®å˜èªžã®å…ˆé ­ä½ç½®ã‚’èª¿ã¹ã‚‹ */
+	//	Jun. 26, 2001 genta	æ­£è¦è¡¨ç¾ãƒ©ã‚¤ãƒ–ãƒ©ãƒªã®å·®ã—æ›¿ãˆ
+	int SearchWord( CLogicPoint ptSerachBegin, ESearchDirection eDirection, CLogicRange* pMatchRange, const CSearchStringPattern& pattern ); /* å˜èªžæ¤œç´¢ */
 
 	void ReplaceData( DocLineReplaceArg* );
 	
-	//! 8bit ‚Ì alnum, '_' ‚©?
+	//! 8bit ã® alnum, '_' ã‹?
 	static bool IsAlnum( wchar_t c ){
 		return c < 256 && ( iswalnum( c ) || c == L'_' );
 	}
