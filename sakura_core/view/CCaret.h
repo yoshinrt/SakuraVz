@@ -25,7 +25,7 @@
 #define SAKURA_CCARET_EF835ACD_9DB2_4F5A_8513_35034F1894219_H_
 
 #define _CARETMARGINRATE 20
-#define _CARETMARGINRATE_JUMP 2	// Tag Jmp 等の大幅に jmp する場合のマージン
+#define _CARETMARGINRATE_JUMP (( int )( -0x10000 * 0.45 ))	// Tag Jmp 等の大幅に jmp する場合のマージン
 
 class CTextArea;
 class CEditView;

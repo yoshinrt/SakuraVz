@@ -180,7 +180,12 @@ CLayoutInt CCaret::MoveCursor(
 	}
 	else{
 		//	2001/10/20 novice
-		nCaretMarginY = (Int)m_pEditView->GetTextArea().m_nViewRowNum / nCaretMarginRate;
+		if( nCaretMarginRate < 0 ){
+			nCaretMarginY = (Int)m_pEditView->GetTextArea().m_nViewRowNum * -nCaretMarginRate / 0x10000;
+		}else{
+			nCaretMarginY = (Int)m_pEditView->GetTextArea().m_nViewRowNum / nCaretMarginRate;
+		}
+		
 		if( 1 > nCaretMarginY ){
 			nCaretMarginY = 1;
 		}
