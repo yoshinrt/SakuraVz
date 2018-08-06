@@ -15,7 +15,7 @@
 - [改行混在を許可しないモード](https://github.com/yoshinrt/sakura#改行混在を許可しないモード)
 - [直前の置換を再実行](https://github.com/yoshinrt/sakura#直前の置換を再実行)
 - [他アプリで編集されたときの問い合わせダイアログボックス抑制](https://github.com/yoshinrt/sakura#他アプリで編集されたときの問い合わせダイアログボックス抑制)
-- [JavaScript ファイルを共通にするためのマクロ関数](https://github.com/yoshinrt/sakura#JavaScriptファイルを共通にするためのマクロ関数)
+- [JavaScript ファイルを共通にするためのマクロ関数](https://github.com/yoshinrt/sakura#javascriptファイルを共通にするためのマクロ関数)
 - [カーソル位置周辺の情報を取得するマクロ関数](https://github.com/yoshinrt/sakura#カーソル位置周辺の情報を取得するマクロ関数)
 - [検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加](https://github.com/yoshinrt/sakura#検索置換ダイアログのオプションデフォルトボタンを固定できるパラメータ追加)
 
@@ -74,7 +74,7 @@ ReDraw();
 
 `sakura.ini`: `bVzModeNoAskWhenFileUpdate=1` で有効になります
 
-### JavaScript ファイルを共通にするためのマクロ関数
+### JavaScriptファイルを共通にするためのマクロ関数
 複数のマクロで JavaScript ファイルを共通にすることを可能にするため，実行中のマクロ情報を取得する関数 `GetMacroInfo( mode )` を追加しました．`mode` には以下の値のいずれかを指定します．
 
 - 0: 「共通設定」→「マクロ」の「マクロ名」に設定された文字列を取得します．
