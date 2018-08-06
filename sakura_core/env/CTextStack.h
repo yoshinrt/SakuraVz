@@ -6,7 +6,6 @@
 #ifndef SAKURA_ENV_CTEXTSTACK_H_
 #define SAKURA_ENV_CTEXTSTACK_H_
 
-#include <list>
 #include "mem/CNativeW.h"
 
 #define TEXTSTACK_SIZE	( 32 * 1024 )	//!< テキストスタックサイズ
