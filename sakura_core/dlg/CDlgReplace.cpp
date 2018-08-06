@@ -276,6 +276,8 @@ int CDlgReplace::GetData( void )
 
 	/* 正規表現 */
 	m_sSearchOption.bRegularExp = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_REGULAREXP ));
+	if( ::GetKeyState( VK_SHIFT ) & 0x8000 ) m_sSearchOption.bRegularExp = 1;	// shift キーで regexp
+	
 	/* 選択範囲内置換 */
 	m_bSelectedArea = ::IsDlgButtonChecked( GetHwnd(), IDC_RADIO_SELECTEDAREA );
 	/* 検索／置換  見つからないときメッセージを表示 */

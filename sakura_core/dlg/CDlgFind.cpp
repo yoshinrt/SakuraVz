@@ -247,6 +247,7 @@ int CDlgFind::GetData( void )
 	/* 一致する単語のみ検索する */
 	/* 正規表現 */
 	m_sSearchOption.bRegularExp = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_REGULAREXP ));
+	if( ::GetKeyState( VK_SHIFT ) & 0x8000 ) m_sSearchOption.bRegularExp = 1;	// shift キーで regexp
 
 	/* 検索／置換  見つからないときメッセージを表示 */
 	m_bNOTIFYNOTFOUND = ::IsDlgButtonChecked( GetHwnd(), IDC_CHECK_NOTIFYNOTFOUND );
