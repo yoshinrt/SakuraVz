@@ -1,5 +1,5 @@
-/*!	@file
-	@brief ƒeƒLƒXƒgƒXƒ^ƒbƒN
+ï»¿/*!	@file
+	@brief ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯
 	@author YoshiNRT
 */
 
@@ -13,31 +13,31 @@ bool CTextStack::Push( WCHAR *szText, int iLen, UINT uMode ){
 	
 	//DEBUG_TRACE( _T( ">>Push: t=%04X e=%04X s=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize );
 	
-	// ƒf[ƒ^’· (ƒoƒCƒg’PˆÊ)
+	// ãƒ‡ãƒ¼ã‚¿é•· (ãƒã‚¤ãƒˆå˜ä½)
 	int nSize		= iLen * sizeof( wchar_t );
 	
-	// buf ã‚Åè—L‚·‚éƒf[ƒ^’· (ƒoƒCƒg’PˆÊ)
+	// buf ä¸Šã§å æœ‰ã™ã‚‹ãƒ‡ãƒ¼ã‚¿é•· (ãƒã‚¤ãƒˆå˜ä½)
 	int nSizeAlign	= AlignSize( nSize ) + sizeof( UINT ) * 3;
 	
-	// TEXTSTACK_SIZE ‚ğ’´‚¦‚é‚à‚Ì‚Í push ‚µ‚È‚¢
+	// TEXTSTACK_SIZE ã‚’è¶…ãˆã‚‹ã‚‚ã®ã¯ push ã—ãªã„
 	if( nSizeAlign > TEXTSTACK_SIZE ) return false;
 	
-	// push ‚ÌŒ‹‰Ê TEXTSTACK_SIZE ‚ğ’´‚¦‚éê‡CTopPtr ‚ğ•ÏX‚µ buf ‚ğØ‚è‹l‚ß‚é
+	// push ã®çµæœ TEXTSTACK_SIZE ã‚’è¶…ãˆã‚‹å ´åˆï¼ŒTopPtr ã‚’å¤‰æ›´ã— buf ã‚’åˆ‡ã‚Šè©°ã‚ã‚‹
 	while( nSizeAlign + m_nSize > TEXTSTACK_SIZE ){
 		int nTmpSize = AlignSize( *GetIntPtr( m_nTopPtr )) + sizeof( int ) * 3;
 		m_nSize -= nTmpSize;
 		m_nTopPtr = Forward( m_nTopPtr, nTmpSize );
 	}
 	
-	// ƒf[ƒ^’·İ’è
+	// ãƒ‡ãƒ¼ã‚¿é•·è¨­å®š
 	*GetIntPtr( m_nEndPtr ) = nSize;
 	m_nEndPtr = Forward( m_nEndPtr, sizeof( int ));
 	
-	// ƒtƒ‰ƒOİ’è
+	// ãƒ•ãƒ©ã‚°è¨­å®š
 	*GetIntPtr( m_nEndPtr ) = uMode;
 	m_nEndPtr = Forward( m_nEndPtr, sizeof( int ));
 	
-	// ƒoƒbƒtƒ@‚ÉƒRƒs[Cƒoƒbƒtƒ@Œã’[‚É‚©‚©‚éê‡‚ÍC2‰ñ‚É•ª‚¯‚é
+	// ãƒãƒƒãƒ•ã‚¡ã«ã‚³ãƒ”ãƒ¼ï¼Œãƒãƒƒãƒ•ã‚¡å¾Œç«¯ã«ã‹ã‹ã‚‹å ´åˆã¯ï¼Œ2å›ã«åˆ†ã‘ã‚‹
 	if( m_nEndPtr + nSize > TEXTSTACK_SIZE ){
 		memcpy( GetIntPtr( m_nEndPtr ), szText, TEXTSTACK_SIZE - m_nEndPtr );
 		memcpy(
@@ -51,7 +51,7 @@ bool CTextStack::Push( WCHAR *szText, int iLen, UINT uMode ){
 	}
 	m_nEndPtr = Forward( m_nEndPtr, AlignSize( nSize ));
 	
-	// ƒf[ƒ^’·İ’è
+	// ãƒ‡ãƒ¼ã‚¿é•·è¨­å®š
 	*GetIntPtr( m_nEndPtr ) = nSize;
 	m_nEndPtr = Forward( m_nEndPtr, sizeof( int ));
 	
@@ -66,18 +66,18 @@ bool CTextStack::Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop ){
 	
 	//DEBUG_TRACE( _T( ">>Pop: t=%04X e=%04X s=%04X\n" ), m_nTopPtr, m_nEndPtr, m_nSize );
 	
-	// ƒXƒ^ƒbƒN‚ª‹ó‚È‚çƒŠƒ^[ƒ“
+	// ã‚¹ã‚¿ãƒƒã‚¯ãŒç©ºãªã‚‰ãƒªã‚¿ãƒ¼ãƒ³
 	if( m_nSize == 0 ) return false;
 	
-	// ƒf[ƒ^’·‚ğ“¾‚é
+	// ãƒ‡ãƒ¼ã‚¿é•·ã‚’å¾—ã‚‹
 	int nEndPtr = m_nEndPtr;
 	nEndPtr = Backward( nEndPtr, sizeof( int ));
 	int nSize = *GetIntPtr( nEndPtr );
 	
-	// ƒf[ƒ^æ“ª‚ÉˆÚ“®
+	// ãƒ‡ãƒ¼ã‚¿å…ˆé ­ã«ç§»å‹•
 	nEndPtr = Backward( nEndPtr, AlignSize( nSize ));
 	
-	// ƒf[ƒ^‚ª buf Œã’[‚É‚©‚Ô‚Á‚Ä‚¢‚é‚È‚çC2‰ñ‚É•ª‚¯‚ÄƒRƒs[
+	// ãƒ‡ãƒ¼ã‚¿ãŒ buf å¾Œç«¯ã«ã‹ã¶ã£ã¦ã„ã‚‹ãªã‚‰ï¼Œ2å›ã«åˆ†ã‘ã¦ã‚³ãƒ”ãƒ¼
 	if( cmemBuf ){
 		if( nEndPtr + nSize > TEXTSTACK_SIZE ){
 			BYTE *pBuf = new BYTE[ nSize ];
@@ -97,11 +97,11 @@ bool CTextStack::Pop( CNativeW* cmemBuf, UINT* puMode, bool bNoPop ){
 		}
 	}
 	
-	// ƒtƒ‰ƒOİ’è
+	// ãƒ•ãƒ©ã‚°è¨­å®š
 	nEndPtr = Backward( nEndPtr, sizeof( int ));
 	if( puMode ) *puMode = *GetIntPtr( nEndPtr );
 	
-	// ƒf[ƒ^’·•ª–ß‚·
+	// ãƒ‡ãƒ¼ã‚¿é•·åˆ†æˆ»ã™
 	if( !bNoPop ){
 		m_nEndPtr = Backward( nEndPtr, sizeof( int ));
 		m_nSize -= AlignSize( nSize ) + sizeof( UINT ) * 3;

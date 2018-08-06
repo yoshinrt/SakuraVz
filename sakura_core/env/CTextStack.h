@@ -1,5 +1,5 @@
-/*!	@file
-	@brief ƒeƒLƒXƒgƒXƒ^ƒbƒN
+ï»¿/*!	@file
+	@brief ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯
 	@author YoshiNRT
 */
 
@@ -9,23 +9,23 @@
 #include <list>
 #include "mem/CNativeW.h"
 
-#define TEXTSTACK_SIZE	( 32 * 1024 )	//!< ƒeƒLƒXƒgƒXƒ^ƒbƒNƒTƒCƒY
+#define TEXTSTACK_SIZE	( 32 * 1024 )	//!< ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯ã‚µã‚¤ã‚º
 
-/*!	@brief ƒeƒLƒXƒgƒXƒ^ƒbƒN
- * ƒeƒLƒXƒgƒXƒ^ƒbƒN‚Í TEXTSTACK_SIZE •ª‚ÌƒŠƒ“ƒOƒoƒbƒtƒ@‚Æ‚µ‚Ä
- * À‘•‚³‚ê‚éD1 —v‘f•ª‚ÍˆÈ‰º‚Ì’Ê‚èD
- * - ƒf[ƒ^ƒTƒCƒY (byte ’PˆÊ)Cint 3ŒÂ•ª‚ÌƒTƒCƒY‚ÍŠÜ‚Ü‚È‚¢
- * - ƒ‚[ƒhƒtƒ‰ƒO
- * - ƒf[ƒ^ (int ’PˆÊ‚ÉL’·‚³‚ê‚é)
- * - ƒf[ƒ^ƒTƒCƒY (byte ’PˆÊC‘O—v‘f‚Ö‚Ìƒ|ƒCƒ“ƒ^‘ã‚í‚è‚Ég—p)
- * ƒoƒbƒtƒ@Œã’[¨ƒoƒbƒtƒ@‘O’[‚Í‚Â‚È‚ª‚Á‚Ä‚¢‚é‚à‚Ì‚Æ‚µ‚Äˆ—‚·‚éD
- * ‚Â‚Ü‚è 1—v‘f‚Íƒoƒbƒtƒ@Œã’[¨ƒoƒbƒtƒ@‘O’[‚ğ‚Ü‚½‚¢‚Å‘¶İ‚µ‚¤‚éD
+/*!	@brief ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯
+ * ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯ã¯ TEXTSTACK_SIZE åˆ†ã®ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡ã¨ã—ã¦
+ * å®Ÿè£…ã•ã‚Œã‚‹ï¼1 è¦ç´ åˆ†ã¯ä»¥ä¸‹ã®é€šã‚Šï¼
+ * - ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º (byte å˜ä½)ï¼Œint 3å€‹åˆ†ã®ã‚µã‚¤ã‚ºã¯å«ã¾ãªã„
+ * - ãƒ¢ãƒ¼ãƒ‰ãƒ•ãƒ©ã‚°
+ * - ãƒ‡ãƒ¼ã‚¿ (int å˜ä½ã«ä¼¸é•·ã•ã‚Œã‚‹)
+ * - ãƒ‡ãƒ¼ã‚¿ã‚µã‚¤ã‚º (byte å˜ä½ï¼Œå‰è¦ç´ ã¸ã®ãƒã‚¤ãƒ³ã‚¿ä»£ã‚ã‚Šã«ä½¿ç”¨)
+ * ãƒãƒƒãƒ•ã‚¡å¾Œç«¯â†’ãƒãƒƒãƒ•ã‚¡å‰ç«¯ã¯ã¤ãªãŒã£ã¦ã„ã‚‹ã‚‚ã®ã¨ã—ã¦å‡¦ç†ã™ã‚‹ï¼
+ * ã¤ã¾ã‚Š 1è¦ç´ ã¯ãƒãƒƒãƒ•ã‚¡å¾Œç«¯â†’ãƒãƒƒãƒ•ã‚¡å‰ç«¯ã‚’ã¾ãŸã„ã§å­˜åœ¨ã—ã†ã‚‹ï¼
  */
 class CTextStack
 {
 public:
-	/*! @brief DLLSHAREDATA ‚ÍƒRƒ“ƒXƒgƒ‰ƒNƒ^‚ªŒÄ‚Î‚ê‚È‚¢‚Ì‚Å
-	 * ©‘O‚Å‰Šú‰»‚·‚é
+	/*! @brief DLLSHAREDATA ã¯ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãŒå‘¼ã°ã‚Œãªã„ã®ã§
+	 * è‡ªå‰ã§åˆæœŸåŒ–ã™ã‚‹
 	 */
 	void Initialize( void ){
 		m_nTopPtr =
@@ -35,67 +35,67 @@ public:
 	
 	//~CTextStack()
 	
-	/*! @brief ˆø”‚Åw’è‚³‚ê‚½ƒf[ƒ^‚ğCV‚½‚É—ÌˆæŠm•Û‚µƒRƒs[‚·‚é
-	 * @param[in] cmemBuf	ƒXƒ^ƒbƒN‚ÉÏ‚ŞƒeƒLƒXƒg
-	 * @param[in] uMode		‘I‘ğƒ‚[ƒh (= m_nMode)
-	 * @retval ³íI—¹‚Í true ‚ğ•Ô‚·D
+	/*! @brief å¼•æ•°ã§æŒ‡å®šã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã‚’ï¼Œæ–°ãŸã«é ˜åŸŸç¢ºä¿ã—ã‚³ãƒ”ãƒ¼ã™ã‚‹
+	 * @param[in] cmemBuf	ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€ãƒ†ã‚­ã‚¹ãƒˆ
+	 * @param[in] uMode		é¸æŠãƒ¢ãƒ¼ãƒ‰ (= m_nMode)
+	 * @retval æ­£å¸¸çµ‚äº†æ™‚ã¯ true ã‚’è¿”ã™ï¼
 	 */
 	bool Push( CNativeW* cmemBuf, UINT uMode );
 	
-	/*! @brief ˆø”‚Åw’è‚³‚ê‚½ƒf[ƒ^‚ğCV‚½‚É—ÌˆæŠm•Û‚µƒRƒs[‚·‚é
-	 * @param[in] szText	ƒXƒ^ƒbƒN‚ÉÏ‚ŞƒeƒLƒXƒg
-	 * @param[in] iLen		•¶š—ñ’·
-	 * @param[in] uMode		‘I‘ğƒ‚[ƒh (= m_nMode)
-	 * @retval ³íI—¹‚Í true ‚ğ•Ô‚·D
+	/*! @brief å¼•æ•°ã§æŒ‡å®šã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ã‚’ï¼Œæ–°ãŸã«é ˜åŸŸç¢ºä¿ã—ã‚³ãƒ”ãƒ¼ã™ã‚‹
+	 * @param[in] szText	ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€ãƒ†ã‚­ã‚¹ãƒˆ
+	 * @param[in] iLen		æ–‡å­—åˆ—é•·
+	 * @param[in] uMode		é¸æŠãƒ¢ãƒ¼ãƒ‰ (= m_nMode)
+	 * @retval æ­£å¸¸çµ‚äº†æ™‚ã¯ true ã‚’è¿”ã™ï¼
 	 */
 	bool Push( WCHAR *szText, int iLen, UINT uMode );
 	
-	/*! @brief ƒeƒLƒXƒgƒXƒ^ƒbƒN‚©‚ç pop
-	 * @param[in,out] cmemBuf	ƒXƒ^ƒbƒN‚ÉÏ‚ŞƒeƒLƒXƒg
-	 * @param[in,out] uMode		‘I‘ğƒ‚[ƒh (= m_nMode)
-	 * @retval ³íI—¹‚Í true ‚ğ•Ô‚·D
+	/*! @brief ãƒ†ã‚­ã‚¹ãƒˆã‚¹ã‚¿ãƒƒã‚¯ã‹ã‚‰ pop
+	 * @param[in,out] cmemBuf	ã‚¹ã‚¿ãƒƒã‚¯ã«ç©ã‚€ãƒ†ã‚­ã‚¹ãƒˆ
+	 * @param[in,out] uMode		é¸æŠãƒ¢ãƒ¼ãƒ‰ (= m_nMode)
+	 * @retval æ­£å¸¸çµ‚äº†æ™‚ã¯ true ã‚’è¿”ã™ï¼
 	 */
 	bool Pop( CNativeW* cmemBuf = nullptr, UINT* puMode = nullptr, bool bNoPop = false );
 	
-	//! —v‘f”æ“¾
+	//! è¦ç´ æ•°å–å¾—
 	int GetSize( void ){ return m_nSize; };
 	
 	enum {
-		M_CHAR		= 0,	//!< •¶š’PˆÊ
-		M_COLUMN	= 1,	//!< ‹éŒ`
-		M_LINE		= 2,	//!< s’PˆÊ
+		M_CHAR		= 0,	//!< æ–‡å­—å˜ä½
+		M_COLUMN	= 1,	//!< çŸ©å½¢
+		M_LINE		= 2,	//!< è¡Œå˜ä½
 	};
 	
 private:
-	//! ƒ|ƒCƒ“ƒ^‚ğƒTƒCƒY•ªi‚ß‚é
+	//! ãƒã‚¤ãƒ³ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†é€²ã‚ã‚‹
 	int Forward( int nPtr, int nSize ){
 		if(( nPtr += nSize ) > TEXTSTACK_SIZE ) nPtr -= TEXTSTACK_SIZE;
 		return nPtr;
 	}
 	
-	//! ƒ|ƒCƒ“ƒ^‚ğƒTƒCƒY•ª–ß‚·
+	//! ãƒã‚¤ãƒ³ã‚¿ã‚’ã‚µã‚¤ã‚ºåˆ†æˆ»ã™
 	int Backward( int nPtr, int nSize ){
 		if(( nPtr -= nSize ) < 0 ) nPtr += TEXTSTACK_SIZE;
 		return nPtr;
 	}
 	
-	//! ƒTƒCƒY‚ğ UINT ƒAƒ‰ƒCƒƒ“ƒg
+	//! ã‚µã‚¤ã‚ºã‚’ UINT ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆ
 	int AlignSize( int nSize ){
 		return ( nSize + ( sizeof( int ) - 1 )) & ~( sizeof( int ) - 1 );
 	}
 	
-	/*! @brief int ƒAƒNƒZƒX
-	 * @param[in] nPtr ƒoƒCƒg’PˆÊƒ|ƒCƒ“ƒ^C‚½‚¾‚µ—v int ƒAƒ‰ƒCƒƒ“ƒg
-	 * @retval int ‚Ö‚Ì ptr
+	/*! @brief int ã‚¢ã‚¯ã‚»ã‚¹
+	 * @param[in] nPtr ãƒã‚¤ãƒˆå˜ä½ãƒã‚¤ãƒ³ã‚¿ï¼ŒãŸã ã—è¦ int ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆ
+	 * @retval int ã¸ã® ptr
 	 */
 	int* GetIntPtr( int nPtr ){
 		return ( int *)(( BYTE *)m_nStack + nPtr );
 	}
 	
-	int		m_nTopPtr;	//!< æ“ªƒ|ƒCƒ“ƒ^ (ƒoƒCƒg’PˆÊ)
-	int		m_nEndPtr;	//!< Œã’[ƒ|ƒCƒ“ƒ^ (ƒoƒCƒg’PˆÊ)
-	int		m_nSize;	//!< g—pƒTƒCƒY
-	int		m_nStack[ TEXTSTACK_SIZE / sizeof( int )];	//!< ƒoƒbƒtƒ@C—v int ƒAƒ‰ƒCƒƒ“ƒg
+	int		m_nTopPtr;	//!< å…ˆé ­ãƒã‚¤ãƒ³ã‚¿ (ãƒã‚¤ãƒˆå˜ä½)
+	int		m_nEndPtr;	//!< å¾Œç«¯ãƒã‚¤ãƒ³ã‚¿ (ãƒã‚¤ãƒˆå˜ä½)
+	int		m_nSize;	//!< ä½¿ç”¨ã‚µã‚¤ã‚º
+	int		m_nStack[ TEXTSTACK_SIZE / sizeof( int )];	//!< ãƒãƒƒãƒ•ã‚¡ï¼Œè¦ int ã‚¢ãƒ©ã‚¤ãƒ¡ãƒ³ãƒˆ
 };
 
 ///////////////////////////////////////////////////////////////////////
