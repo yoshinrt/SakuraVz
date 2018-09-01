@@ -1,11 +1,33 @@
+@echo off
 set platform=%1
 set configuration=%2
-@echo off
+
+if "%platform%" == "Win32" (
+	@rem OK
+) else if "%platform%" == "x64" (
+	@rem OK
+) else (
+	call :showhelp %0
+	exit /b 1
+)
+
+if "%configuration%" == "Release" (
+	@rem OK
+) else if "%configuration%" == "Debug" (
+	@rem OK
+) else (
+	call :showhelp %0
+	exit /b 1
+)
+
 if "%platform%" == "x64" (
 	set ALPHA=1
 ) else (
 	set ALPHA=0
 )
+
+set ZIP_CMD=%~dp0tools\zip\zip.bat
+set LIST_ZIP_CMD=%~dp0tools\zip\listzip.bat
 
 @rem ----------------------------------------------------------------
 @rem prepare environment variable
@@ -144,25 +166,38 @@ mkdir %WORKDIR%
 mkdir %WORKDIR_LOG%
 mkdir %WORKDIR_EXE%
 mkdir %WORKDIR_INST%
-copy %platform%\%configuration%\sakura.exe %WORKDIR_EXE%\
-copy %platform%\%configuration%\*.dll      %WORKDIR_EXE%\
-copy %platform%\%configuration%\*.pdb      %WORKDIR_EXE%\
+copy /Y /B %platform%\%configuration%\sakura.exe %WORKDIR_EXE%\
+copy /Y /B %platform%\%configuration%\*.dll      %WORKDIR_EXE%\
+copy /Y /B %platform%\%configuration%\*.pdb      %WORKDIR_EXE%\
 
-copy help\macro\macro.chm    %WORKDIR_EXE%\
-copy help\plugin\plugin.chm  %WORKDIR_EXE%\
-copy help\sakura\sakura.chm  %WORKDIR_EXE%\
+copy /Y /B help\macro\macro.chm    %WORKDIR_EXE%\
+copy /Y /B help\plugin\plugin.chm  %WORKDIR_EXE%\
+copy /Y /B help\sakura\sakura.chm  %WORKDIR_EXE%\
 
-copy installer\warning.txt   %WORKDIR%\
+copy /Y installer\warning.txt   %WORKDIR%\
 if "%ALPHA%" == "1" (
-	copy installer\warning-alpha.txt   %WORKDIR%\
+	copy /Y installer\warning-alpha.txt   %WORKDIR%\
 )
-copy installer\Output\*.exe  %WORKDIR_INST%\
-copy msbuild-%platform%-%configuration%.log     %WORKDIR_LOG%\
-copy msbuild-%platform%-%configuration%.log.csv %WORKDIR_LOG%\
+copy /Y /B installer\Output-%platform%\*.exe       %WORKDIR_INST%\
+copy /Y msbuild-%platform%-%configuration%.log     %WORKDIR_LOG%\
+copy /Y msbuild-%platform%-%configuration%.log.csv %WORKDIR_LOG%\
 if exist "msbuild-%platform%-%configuration%.log.xlsx" (
-	copy "msbuild-%platform%-%configuration%.log.xlsx" %WORKDIR_LOG%\
+	copy /Y /B "msbuild-%platform%-%configuration%.log.xlsx" %WORKDIR_LOG%\
 )
-copy sakura_core\githash.h                      %WORKDIR_LOG%\
+copy /Y sakura_core\githash.h                      %WORKDIR_LOG%\
+if exist "cppcheck-install.log" (
+	copy /Y "cppcheck-install.log" %WORKDIR_LOG%\
+)
+if exist "cppcheck-%platform%-%configuration%.xml" (
+	copy /Y "cppcheck-%platform%-%configuration%.xml" %WORKDIR_LOG%\
+)
+if exist "cppcheck-%platform%-%configuration%.log" (
+	copy /Y "cppcheck-%platform%-%configuration%.log" %WORKDIR_LOG%\
+)
+
+if exist "set_appveyor_env.bat" (
+	copy /Y "set_appveyor_env.bat" %WORKDIR_LOG%\
+)
 
 set HASHFILE=sha256.txt
 if exist "%HASHFILE%" (
@@ -170,19 +205,20 @@ if exist "%HASHFILE%" (
 )
 call calc-hash.bat %HASHFILE% %WORKDIR%\
 if exist "%HASHFILE%" (
-	copy %HASHFILE%           %WORKDIR%\
+	copy /Y %HASHFILE%           %WORKDIR%\
 )
-7z a %OUTFILE%  -r %WORKDIR%
-7z l %OUTFILE%
+call %ZIP_CMD%       %OUTFILE%      %WORKDIR%
+call %LIST_ZIP_CMD%  %OUTFILE%
 
-7z a %OUTFILE_LOG%  -r %WORKDIR_LOG%
-7z l %OUTFILE_LOG%
+call %ZIP_CMD%       %OUTFILE_LOG%  %WORKDIR_LOG%
+call %LIST_ZIP_CMD%  %OUTFILE_LOG%
 
 @echo start zip asm
 mkdir %WORKDIR_ASM%
-copy sakura\%platform%\%configuration%\*.asm %WORKDIR_ASM%\
-7z a %OUTFILE_ASM%  -r %WORKDIR_ASM%
-7z l %OUTFILE_ASM%
+copy /Y sakura\%platform%\%configuration%\*.asm %WORKDIR_ASM%\
+call %ZIP_CMD%       %OUTFILE_ASM%  %WORKDIR_ASM%
+call %LIST_ZIP_CMD%  %OUTFILE_ASM%
+
 @echo end   zip asm
 
 if exist "%WORKDIR%" (
@@ -191,3 +227,25 @@ if exist "%WORKDIR%" (
 if exist "%WORKDIR_ASM%" (
 	rmdir /s /q %WORKDIR_ASM%
 )
+
+exit /b 0
+
+@rem ------------------------------------------------------------------------------
+@rem show help
+@rem see http://orangeclover.hatenablog.com/entry/20101004/1286120668
+@rem ------------------------------------------------------------------------------
+:showhelp
+@echo off
+@echo usage
+@echo    %~nx1 platform configuration
+@echo.
+@echo parameter
+@echo    platform      : Win32   or x64
+@echo    configuration : Release or Debug
+@echo.
+@echo example
+@echo    %~nx1 Win32 Release
+@echo    %~nx1 Win32 Debug
+@echo    %~nx1 x64   Release
+@echo    %~nx1 x64   Release
+exit /b 0

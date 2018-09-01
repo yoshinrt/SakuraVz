@@ -1,5 +1,24 @@
+@echo off
 set platform=%1
 set configuration=%2
+
+if "%platform%" == "Win32" (
+	@rem OK
+) else if "%platform%" == "x64" (
+	@rem OK
+) else (
+	call :showhelp %0
+	exit /b 1
+)
+
+if "%configuration%" == "Release" (
+	@rem OK
+) else if "%configuration%" == "Debug" (
+	@rem OK
+) else (
+	call :showhelp %0
+	exit /b 1
+)
 
 @echo PLATFORM      %PLATFORM%
 @echo CONFIGURATION %CONFIGURATION%
@@ -20,9 +39,39 @@ call build-installer.bat %PLATFORM% %CONFIGURATION% || (echo error build-install
 @echo ---- end   build-installer.bat ----
 @echo.
 
+@echo ---- start externals\cppcheck\install-cppcheck.bat ----
+call externals\cppcheck\install-cppcheck.bat        || (echo error externals\cppcheck\install-cppcheck.bat && exit /b 1)
+@echo ---- end   externals\cppcheck\install-cppcheck.bat ----
+@echo.
+
+@echo ---- start run-cppcheck.bat ----
+call run-cppcheck.bat %PLATFORM% %CONFIGURATION%    || (echo error run-cppcheck.bat    && exit /b 1)
+@echo ---- end   run-cppcheck.bat ----
+@echo.
+
 @echo ---- start zipArtifacts.bat ----
 call zipArtifacts.bat    %PLATFORM% %CONFIGURATION% || (echo error zipArtifacts.bat    && exit /b 1)
 @echo ---- end   zipArtifacts.bat ----
 @echo.
 
+exit /b 0
+
+@rem ------------------------------------------------------------------------------
+@rem show help
+@rem see http://orangeclover.hatenablog.com/entry/20101004/1286120668
+@rem ------------------------------------------------------------------------------
+:showhelp
+@echo off
+@echo usage
+@echo    %~nx1 platform configuration
+@echo.
+@echo parameter
+@echo    platform      : Win32   or x64
+@echo    configuration : Release or Debug
+@echo.
+@echo example
+@echo    %~nx1 Win32 Release
+@echo    %~nx1 Win32 Debug
+@echo    %~nx1 x64   Release
+@echo    %~nx1 x64   Release
 exit /b 0

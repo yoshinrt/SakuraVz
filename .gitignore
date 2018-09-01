@@ -13,3 +13,6 @@ msbuild-*.log.xlsx
 sha256.txt
 *.pyc
 /tests/build
+/cppcheck-install.log
+/cppcheck-*.xml
+set_appveyor_env.bat

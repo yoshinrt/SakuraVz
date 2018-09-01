@@ -3,9 +3,19 @@
 SETLOCAL
 
 set OUT_DIR=%1
+if "%OUT_DIR%" == "" (
+	set OUT_DIR=.
+)
+
+@rem replace '/' with '\'
+set OUT_DIR=%OUT_DIR:/=\%
 
 @echo.
 @echo ---- Make githash.h ----
+
+@rem ensure to be in the proper directory
+pushd "%~dp0"
+
 : Git enabled checking
 set GIT_ENABLED=1
 where git 1>nul 2>&1
@@ -34,6 +44,9 @@ if "%GIT_ENABLED%" == "1" (
 	set COMMITID=
 	set GIT_URL=
 )
+
+@rem get back to the original directory
+popd
 
 set PREFIX_GITHUB=https://github.com
 if "%APPVEYOR_REPO_PROVIDER%" == "gitHub" (
@@ -88,6 +101,21 @@ if "%APPVEYOR_BUILD_URL_VALID%" == "1" (
 set GITHASH_H=%OUT_DIR%\githash.h
 set GITHASH_H_TMP=%GITHASH_H%.tmp
 
+@rem set SKIP_CREATE_GITHASH=1 to disable creation of githash.h
+@rem check if skip creation of %GITHASH_H%
+set VALID_CREATE_GITHASH=1
+if "%SKIP_CREATE_GITHASH%" == "1" (
+	set VALID_CREATE_GITHASH=0
+)
+if not exist "%GITHASH_H%" (
+	set VALID_CREATE_GITHASH=1
+)
+
+if "%VALID_CREATE_GITHASH%" == "0" (
+	@echo skip creation of %GITHASH_H%
+	exit /b 0
+)
+
 call :output_githash > %GITHASH_H_TMP%
 
 fc %GITHASH_H% %GITHASH_H_TMP% 1>nul 2>&1
@@ -101,7 +129,7 @@ if "%ERRORLEVEL%" == "0" (
 )
 
 ENDLOCAL
-exit /b
+exit /b 0
 
 :output_githash
 echo #pragma once
@@ -197,4 +225,4 @@ if "%APPVEYOR_BUILD_URL%" == "" (
 	echo #define APPVEYOR_BUILD_URL             "%APPVEYOR_BUILD_URL%"
 )
 
-exit /b
+exit /b 0
