@@ -129,10 +129,13 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 以下は，サクラエディタ本家の README になります．本 fork には適用されない情報もありますので，ご了承ください．
 
 # Sakura Editor
+[![Build status](https://ci.appveyor.com/api/projects/status/xlsp22h1q91mh96j/branch/master?svg=true)](https://ci.appveyor.com/project/sakuraeditor/sakura/branch/master)
+[![Github Releases All](https://img.shields.io/github/downloads/sakura-editor/sakura/total.svg)](https://github.com/sakura-editor/sakura/releases "All Releases")
 
 <!-- TOC -->
 
 - [Sakura Editor](#sakura-editor)
+    - [Hot topic](#hot-topic)
     - [Web Site](#web-site)
     - [開発参加ポリシー](#開発参加ポリシー)
     - [Build Requirements](#build-requirements)
@@ -140,6 +143,7 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
             - [Visual Studio Install options required](#visual-studio-install-options-required)
     - [How to build](#how-to-build)
         - [詳細情報](#詳細情報)
+    - [PR(Pull Request) を簡単にローカルに取得する方法](#prpull-request-を簡単にローカルに取得する方法)
     - [CI Build (AppVeyor)](#ci-build-appveyor)
         - [ビルドの仕組み](#ビルドの仕組み)
         - [ビルド成果物を利用する上での注意事項](#ビルド成果物を利用する上での注意事項)
@@ -147,12 +151,17 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
             - [master の 最新](#master-の-最新)
             - [master の 最新以外](#master-の-最新以外)
         - [単体テスト](#単体テスト)
+        - [デバッグ方法](#デバッグ方法)
 
 <!-- /TOC -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/xlsp22h1q91mh96j/branch/master?svg=true)](https://ci.appveyor.com/project/sakuraeditor/sakura/branch/master)
-
 A free Japanese text editor for Windows
+
+## Hot topic
+カンバン運用を始めます。
+
+- [カンバン](https://github.com/orgs/sakura-editor/projects/1)
+- [カンバン運用に関する議論](https://github.com/sakura-editor/management-forum/issues/9)
 
 ## Web Site
 - [Sakura Editor Portal](https://sakura-editor.github.io/)
@@ -180,6 +189,11 @@ More information: https://github.com/sakura-editor/sakura/issues/6
 ### 詳細情報
 
 詳しくは [こちら](build.md) を参照
+
+## PR(Pull Request) を簡単にローカルに取得する方法
+
+- [PR(Pull Request) を簡単にローカルに取得する方法](get-PR.md)
+
 
 ## CI Build (AppVeyor)
 
@@ -212,4 +226,8 @@ https://ci.appveyor.com/project/sakuraeditor/sakura/history
 ### 単体テスト
 
 [単体テスト](unittest.md) を参照
+
+### デバッグ方法
+
+- [タスクトレイのメニュー項目のデバッグ方法](debug-tasktray-menu.md) を参照
 

@@ -28,3 +28,12 @@ set_target_properties(gmock_main  PROPERTIES FOLDER GoogleTest)
 set_target_properties(gtest       PROPERTIES FOLDER GoogleTest)
 set_target_properties(gtest_main  PROPERTIES FOLDER GoogleTest)
 set_target_properties(tests1      PROPERTIES FOLDER Tests)
+
+# specify startup project
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT tests1)
+
+# enable testing
+enable_testing()
+
+# add test
+add_test(NAME unitTest1 COMMAND tests1)

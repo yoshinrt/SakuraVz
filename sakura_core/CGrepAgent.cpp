@@ -17,9 +17,10 @@
 #include "io/CBinaryStream.h"
 #include "util/window.h"
 #include "util/module.h"
-#include "util/other_util.h"
+#include "util/string_ex2.h"
 #include "debug/CRunningTimer.h"
 #include <deque>
+#include <memory>
 #include "sakura_rc.h"
 
 #define UICHECK_INTERVAL_MILLISEC 100	// UI確認の時間間隔
@@ -63,8 +64,8 @@ void CGrepAgent::OnAfterSave(const SSaveInfo& sSaveInfo)
 void CGrepAgent::CreateFolders( const TCHAR* pszPath, std::vector<std::tstring>& vPaths )
 {
 	const int nPathLen = auto_strlen( pszPath );
-	auto_array_ptr<TCHAR> szPath(new TCHAR[nPathLen + 1]);
-	auto_array_ptr<TCHAR> szTmp(new TCHAR[nPathLen + 1]);
+	auto szPath = std::make_unique<TCHAR[]>(nPathLen + 1);
+	auto szTmp = std::make_unique<TCHAR[]>(nPathLen + 1);
 	auto_strcpy( &szPath[0], pszPath );
 	TCHAR* token;
 	int nPathPos = 0;
@@ -136,7 +137,7 @@ void CGrepAgent::AddTail( CEditView* pcEditView, const CNativeW& cmem, bool bAdd
 		HANDLE out = ::GetStdHandle(STD_OUTPUT_HANDLE);
 		if( out && out != INVALID_HANDLE_VALUE ){
 			CMemory cmemOut;
-			std::auto_ptr<CCodeBase> pcCodeBase( CCodeFactory::CreateCodeBase(
+			std::unique_ptr<CCodeBase> pcCodeBase( CCodeFactory::CreateCodeBase(
 					pcEditView->GetDocument()->GetDocumentEncoding(), 0) );
 			pcCodeBase->UnicodeToCode( cmem, &cmemOut );
 			DWORD dwWrite = 0;
@@ -878,8 +879,45 @@ cancel_return:;
 	return -1;
 }
 
-
-
+/*!	@brief マッチした行番号と桁番号をGrep結果に出力する為に文字列化
+	auto_sprintf 関数を 書式文字列 "(%I64d,%d)" で実行するのと同等の処理結果を生成
+	高速化の為に自前実装に置き換え
+	@return 出力先文字列
+*/
+template <size_t nCapacity>
+static inline
+wchar_t* lineColumnToString(
+	wchar_t (&strWork)[nCapacity],	/*!< [out] 出力先 */
+	LONGLONG	nLine,				/*!< [in] マッチした行番号(1～) */
+	int			nColumn				/*!< [in] マッチした桁番号(1～) */
+)
+{
+	// int2dec_destBufferSufficientLength 関数の
+	// 戻り値から -1 しているのは終端0文字の分を削っている為
+	constexpr size_t requiredMinimumCapacity =
+		1		// (
+		+ int2dec_destBufferSufficientLength<LONGLONG>() - 1	// I64d
+		+ 1		// ,
+		+ int2dec_destBufferSufficientLength<int32_t>() - 1	// %d
+		+ 1		// )
+		+ 1		// \0 終端0文字の分
+	;
+	static_assert(nCapacity >= requiredMinimumCapacity, "nCapacity not enough.");
+	wchar_t* p = strWork;
+	*p++ = L'(';
+	p += int2dec(nLine, p);
+	*p++ = L',';
+	p += int2dec(nColumn, p);
+	*p++ = L')';
+	*p = '\0';
+#ifdef _DEBUG
+	// Debug 版に限って両方実行して、両者が一致することを確認
+	wchar_t strWork2[requiredMinimumCapacity];
+	::auto_sprintf( strWork2, L"(%I64d,%d)", nLine, nColumn );
+	assert(wcscmp(strWork, strWork2) == 0);
+#endif
+	return strWork;
+}
 
 /*!	@brief Grep結果を構築する
 
@@ -921,8 +959,7 @@ void CGrepAgent::SetGrepResult(
 			cmemBuf.AppendString( L"・" );
 		}
 		cmemBuf.AppendStringT( pszFilePath );
-		::auto_sprintf( strWork, L"(%I64d,%d)", nLine, nColumn );
-		cmemBuf.AppendString( strWork );
+		cmemBuf.AppendString( lineColumnToString(strWork, nLine, nColumn) );
 		cmemBuf.AppendStringT( pszCodeName );
 		cmemBuf.AppendString( L": " );
 		nMaxOutStr = 2000; // 2003.06.10 Moca 最大長変更
@@ -1138,7 +1175,7 @@ int CGrepAgent::DoGrepFile(
 			X / O  :                  (D)Folder(Abs) -> (G)RelPath(File)
 			X / X  : (H)FullPath
 */
-			auto_array_ptr<wchar_t> pszWork(new wchar_t[auto_strlen(pszFullPath) + auto_strlen(pszCodeName) + 10]);
+			auto pszWork = std::make_unique<wchar_t[]>(auto_strlen(pszFullPath) + auto_strlen(pszCodeName) + 10);
 			wchar_t* szWork0 = &pszWork[0];
 			if( sGrepOption.bGrepOutputBaseFolder || sGrepOption.bGrepSeparateFolder ){
 				if( !bOutputBaseFolder && sGrepOption.bGrepOutputBaseFolder ){
@@ -1593,7 +1630,7 @@ private:
 	size_t bufferSize;
 	std::deque<CNativeW> buffer;
 	CBinaryOutputStream* out;
-	std::auto_ptr<CCodeBase> pcCodeBase;
+	std::unique_ptr<CCodeBase> pcCodeBase;
 	CNativeW&	memMessage;
 };
 

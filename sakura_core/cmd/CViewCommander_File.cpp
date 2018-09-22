@@ -136,6 +136,16 @@ void CViewCommander::Command_FILEOPEN( const WCHAR* filename, ECodeType nCharCod
 		);
 		if(!bDlgResult)return;
 
+		for(size_t i = 0; i < files.size(); i++ ){
+			if (files[i].length() >= _MAX_PATH){
+				ErrorMessage(
+					CEditWnd::getInstance()->GetHwnd(),
+					LS(STR_ERR_FILEPATH_TOO_LONG),
+					files[i].c_str()
+				);
+				return;
+			}
+		}
 		sLoadInfo.cFilePath = files[0].c_str();
 		// 他のファイルは新規ウィンドウ
 		int nSize = (int)files.size();
@@ -537,7 +547,7 @@ void CViewCommander::Command_PROPERTY_FILE( void )
 //		MYTRACE( _T("全データ取得             (%dバイト) 所要時間(ミリ秒) = %d\n"), nDataAllLen, cRunningTimer.Read() );
 		free( pDataAll );
 		pDataAll = NULL;
-//		MYTRACE( _T("全データ取得のメモリ開放 (%dバイト) 所要時間(ミリ秒) = %d\n"), nDataAllLen, cRunningTimer.Read() );
+//		MYTRACE( _T("全データ取得のメモリ解放 (%dバイト) 所要時間(ミリ秒) = %d\n"), nDataAllLen, cRunningTimer.Read() );
 	}
 #endif
 
@@ -613,7 +623,7 @@ BOOL CViewCommander::Command_PUTFILE(
 	//	2007.09.08 genta CEditDoc::FileWrite()にならって砂時計カーソル
 	CWaitCursor cWaitCursor( m_pCommanderView->GetHwnd() );
 
-	std::auto_ptr<CCodeBase> pcSaveCode( CCodeFactory::CreateCodeBase(nSaveCharCode,0) );
+	std::unique_ptr<CCodeBase> pcSaveCode( CCodeFactory::CreateCodeBase(nSaveCharCode,0) );
 
 	bool bBom = false;
 	if (CCodeTypeName(nSaveCharCode).UseBom()) {
@@ -635,7 +645,7 @@ BOOL CViewCommander::Command_PUTFILE(
 			const CNativeW* pConvBuffer;
 			if( bBom ){
 				CNativeW cmemBom;
-				std::auto_ptr<CCodeBase> pcUtf16( CCodeFactory::CreateCodeBase(CODE_UNICODE,0) );
+				std::unique_ptr<CCodeBase> pcUtf16( CCodeFactory::CreateCodeBase(CODE_UNICODE,0) );
 				pcUtf16->GetBom(cmemBom._GetMemory());
 				cMem2.AppendNativeData(cmemBom);
 				cMem2.AppendNativeData(cMem);
