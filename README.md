@@ -131,6 +131,7 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 # Sakura Editor
 [![Build status](https://ci.appveyor.com/api/projects/status/xlsp22h1q91mh96j/branch/master?svg=true)](https://ci.appveyor.com/project/sakuraeditor/sakura/branch/master)
 [![Github Releases All](https://img.shields.io/github/downloads/sakura-editor/sakura/total.svg)](https://github.com/sakura-editor/sakura/releases "All Releases")
+[![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
 
 <!-- TOC -->
 
@@ -158,10 +159,10 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 A free Japanese text editor for Windows
 
 ## Hot topic
-カンバン運用を始めます。
+Project(カンバン)運用を始めます。
 
-- [カンバン](https://github.com/orgs/sakura-editor/projects/1)
-- [カンバン運用に関する議論](https://github.com/sakura-editor/management-forum/issues/9)
+- [Projects](https://github.com/orgs/sakura-editor/projects)
+- [カンバン運用](https://github.com/sakura-editor/sakura/wiki/ProjectOperation)
 
 ## Web Site
 - [Sakura Editor Portal](https://sakura-editor.github.io/)
@@ -177,7 +178,8 @@ https://github.com/sakura-editor/sakura/wiki
 #### Visual Studio Install options required
 - Windows SDK
 - Windows XP Support for C++
-- C++に関するWindows XP サポート
+- Windows 8.1 SDK と UCRT SDK
+- C++ に関する Windows XP サポート
 
 More information: https://github.com/sakura-editor/sakura/issues/6
 
@@ -216,7 +218,12 @@ More information: https://github.com/sakura-editor/sakura/issues/6
 2. 右端にある `Jobs` をクリックします。
 3. 自分がダウンロードしたいビルド構成 (例: `Configuration: Release; Platform: Win32`) をクリックします。
 4. 右端にある `ARTIFACTS` をクリックします。
-5. 自分がダウンロードしたいものをクリックしてダウンロードします。(末尾に asm や Log がついていないものがバイナリ、インストーラです)
+5. 自分がダウンロードしたいものをクリックしてダウンロードします。
+   - (ユーザー用) 末尾に `Exe` がついてるのが実行ファイルのセットです。
+   - (ユーザー用) 末尾に `Installer` がついてるのがインストーラのセットです。
+   - (すべて欲しい人向け) `All` がついてるのがバイナリ、インストーラ、ビルドログ、アセンブラ出力のフルセットです。
+   - (開発者用) 末尾に `Log` がついてるのがビルドログのセットです。
+   - (開発者用) 末尾に `Asm` がついてるのがアセンブラ出力セットです。
 
 #### master の 最新以外
 
@@ -230,4 +237,4 @@ https://ci.appveyor.com/project/sakuraeditor/sakura/history
 ### デバッグ方法
 
 - [タスクトレイのメニュー項目のデバッグ方法](debug-tasktray-menu.md) を参照
-
+- [大きなファイルの作成方法](create-big-file.md)

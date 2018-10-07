@@ -53,13 +53,13 @@ protected:
 
 	//インターフェース
 public:
-	void AllocBuffer( int );                               //!< バッファサイズの調整。必要に応じて拡大する。
+	void AllocBuffer(int nNewDataLen);                               //!< バッファサイズの調整。必要に応じて拡大する。
 	void SetRawData( const void* pData, int nDataLen );    //!< バッファの内容を置き換える
-	void SetRawData( const CMemory& );                     //!< バッファの内容を置き換える
+	void SetRawData(const CMemory& pcmemData);                     //!< バッファの内容を置き換える
 	void SetRawDataHoldBuffer( const void* pData, int nDataLen );    //!< バッファの内容を置き換える(バッファを保持)
-	void SetRawDataHoldBuffer( const CMemory& );                     //!< バッファの内容を置き換える(バッファを保持)
+	void SetRawDataHoldBuffer(const CMemory& pcmemData);                     //!< バッファの内容を置き換える(バッファを保持)
 	void AppendRawData( const void* pData, int nDataLen ); //!< バッファの最後にデータを追加する
-	void AppendRawData( const CMemory* );                  //!< バッファの最後にデータを追加する
+	void AppendRawData(const CMemory* pcmemData);                  //!< バッファの最後にデータを追加する
 	void Clean(){ _Empty(); }
 	void Clear(){ _Empty(); }
 
@@ -70,15 +70,15 @@ public:
 	int GetRawLength() const { return m_nRawLen; }                //!<データ長を返す。バイト単位。
 
 	// 演算子
-	const CMemory& operator=( const CMemory& );
+	const CMemory& operator=(const CMemory& rhs);
 
 	// 比較
-	static int IsEqual( CMemory&, CMemory& );	/* 等しい内容か */
+	static int IsEqual(const CMemory& cmem1, const CMemory& cmem2);	/* 等しい内容か */
 
 	// 変換関数
-	static void SwapHLByte( char*, const int ); // 下記関数のstatic関数版
+	static void SwapHLByte(char* pData, const int nDataLen); // 下記関数のstatic関数版
 	void SwapHLByte();			// Byteを交換する
-	bool SwabHLByte( const CMemory& ); // Byteを交換する(コピー版)
+	bool SwabHLByte(const CMemory& mem); // Byteを交換する(コピー版)
 
 
 protected:
@@ -86,7 +86,7 @@ protected:
 	||  実装ヘルパ関数
 	*/
 	void _Empty( void ); //!< 解放する。m_pRawDataはNULLになる。
-	void _AddData( const void*, int );
+	void _AddData(const void* pData, int nDataLen);
 public:
 	void _AppendSz(const char* str);
 	void _SetRawLength(int nLength);
