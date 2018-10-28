@@ -48,7 +48,6 @@
 #include "_main/CCommandLine.h"	/// 2003/1/26 aroka
 #include "_main/CAppMode.h"
 #include "_os/CDropTarget.h"
-#include "_os/COsVersionInfo.h"
 #include "dlg/CDlgAbout.h"
 #include "dlg/CDlgPrintSetting.h"
 #include "env/CShareData.h"
@@ -75,17 +74,6 @@
 
 //@@@ 2002.01.14 YAZAKI 印刷プレビューをCPrintPreviewに独立させたので
 //	定義を削除
-
-#ifndef TBSTYLE_ALTDRAG
-	#define TBSTYLE_ALTDRAG	0x0400
-#endif
-#ifndef TBSTYLE_FLAT
-	#define TBSTYLE_FLAT	0x0800
-#endif
-#ifndef TBSTYLE_LIST
-	#define TBSTYLE_LIST	0x1000
-#endif
-
 
 
 #define		YOHAKU_X		4		/* ウィンドウ内の枠と紙の隙間最小値 */
@@ -212,8 +200,6 @@ CEditWnd::CEditWnd()
 , m_nActivePaneIndex( 0 )
 , m_nEditViewCount( 1 )
 , m_nEditViewMaxCount( _countof(m_pcEditViewArr) )	// 今のところ最大値は固定
-, m_uMSIMEReconvertMsg( ::RegisterWindowMessage( RWM_RECONVERT ) ) // 20020331 aroka 再変換対応 for 95/NT
-, m_uATOKReconvertMsg( ::RegisterWindowMessage( MSGNAME_ATOK_RECONVERT ) )
 , m_bIsActiveApp( false )
 , m_pszLastCaption( NULL )
 , m_pszMenubarMessage( new TCHAR[MENUBAR_MESSAGE_MAX_LEN] )
@@ -506,19 +492,6 @@ void CEditWnd::_AdjustInMonitor(const STabGroupInfo& sTabGroupInfo)
 		::SetWindowPos( GetHwnd(), (dwExStyle & WS_EX_TOPMOST)? HWND_TOPMOST: HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE );
 
 		//タブウインドウ時は現状を維持
-		/* ウィンドウサイズ継承 */
-		// Vista 以降の初回表示アニメーション効果を抑止する
-		if( !IsWinVista_or_later() ){
-			if( sTabGroupInfo.wpTop.showCmd == SW_SHOWMAXIMIZED )
-			{
-				::ShowWindow( GetHwnd(), SW_SHOWMAXIMIZED );
-			}
-			else
-			{
-				::ShowWindow( GetHwnd(), SW_SHOW );
-			}
-		}
-		else
 		{
 			// 初回表示のアニメーション効果を抑止する
 
@@ -756,7 +729,7 @@ HWND CEditWnd::Create(
 	m_bIsActiveApp = ( ::GetActiveWindow() == GetHwnd() );	// 2007.03.08 ryoji
 
 	// エディタ－トレイ間でのUI特権分離の確認（Vista UIPI機能） 2007.06.07 ryoji
-	if( IsWinVista_or_later() ){
+	{
 		m_bUIPI = FALSE;
 		::SendMessage( m_pShareData->m_sHandles.m_hwndTray, MYWM_UIPI_CHECK,  (WPARAM)0, (LPARAM)GetHwnd() );
 		if( !m_bUIPI ){	// 返事が返らない
@@ -1092,6 +1065,7 @@ void CEditWnd::EndLayoutBars( BOOL bAdjust/* = TRUE*/ )
 		RECT		rc;
 		m_cSplitterWnd.DoSplit( -1, -1 );
 		::GetClientRect( GetHwnd(), &rc );
+		::SendMessage( GetHwnd(), WM_SIZE, 0, 0 ); // ツールバーの表示ON/OFFを行うとちらつきが発生する事への対策
 		::SendMessage( GetHwnd(), WM_SIZE, m_nWinSizeType, MAKELONG( rc.right - rc.left, rc.bottom - rc.top ) );
 		::RedrawWindow( GetHwnd(), NULL, NULL, RDW_FRAME | RDW_INVALIDATE | RDW_UPDATENOW );	// ステータスバーに必要？
 
@@ -3855,9 +3829,12 @@ int	CEditWnd::CreateFileDropDownMenu( HWND hwnd )
 
 	m_cMenuDrawer.ResetContents();
 
+	/* 空メニューを作る */
+	hMenu = ::CreatePopupMenu();
+
 	/* MRUリストのファイルのリストをメニューにする */
 	const CMRUFile cMRU;
-	hMenu = cMRU.CreateMenu( &m_cMenuDrawer );
+	hMenu = cMRU.CreateMenu( hMenu, &m_cMenuDrawer );
 	if( cMRU.MenuLength() > 0 )
 	{
 		m_cMenuDrawer.MyAppendMenuSep( hMenu, MF_BYPOSITION | MF_SEPARATOR, 0, NULL, FALSE );
@@ -3877,6 +3854,10 @@ int	CEditWnd::CreateFileDropDownMenu( HWND hwnd )
 		m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING | MF_POPUP | MF_GRAYED, (UINT_PTR)hMenuPopUp, LS(F_FOLDER_USED_RECENTLY), _T("") );
 	}
 
+	m_cMenuDrawer.MyAppendMenuSep( hMenu, MF_BYPOSITION | MF_SEPARATOR, 0, NULL, FALSE );
+
+	/* 履歴の管理のメニューを作成 */
+	m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING, F_FAVORITE, _T(""), _T("M"), FALSE );
 	m_cMenuDrawer.MyAppendMenuSep( hMenu, MF_BYPOSITION | MF_SEPARATOR, 0, NULL, FALSE );
 
 	m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING, F_FILENEW, _T(""), _T("N"), FALSE );
@@ -4026,7 +4007,7 @@ void CEditWnd::InitMenubarMessageFont(void)
 	@brief メニューバーにメッセージを表示する
 	
 	事前にメニューバー表示用フォントが初期化されていなくてはならない．
-	指定できる文字数は最大30バイト．それ以上の場合はうち切って表示する．
+	指定できる文字数は最大30文字．それ以上の場合はうち切って表示する．
 	
 	@author genta
 	@date 2002.12.04
@@ -4065,17 +4046,26 @@ void CEditWnd::PrintMenubarMessage( const TCHAR* msg )
 	rc.top = po.y - m_nCaretPosInfoCharHeight - 2;
 	rc.bottom = rc.top + m_nCaretPosInfoCharHeight;
 	::SetTextColor( hdc, ::GetSysColor( COLOR_MENUTEXT ) );
-	//	Sep. 6, 2003 genta Windows XP(Luna)の場合にはCOLOR_MENUBARを使わなくてはならない
-	COLORREF bkColor =
-		::GetSysColor( IsWinXP_or_later() ? COLOR_MENUBAR : COLOR_MENU );
-	::SetBkColor( hdc, bkColor );
-	/*
-	int			m_pnCaretPosInfoDx[64];	// 文字列描画用文字幅配列
-	for( i = 0; i < _countof( m_pnCaretPosInfoDx ); ++i ){
-		m_pnCaretPosInfoDx[i] = ( m_nCaretPosInfoCharWidth );
+	::SetBkColor( hdc, ::GetSysColor( COLOR_MENUBAR ) );
+	{
+		const WCHAR* pchText = m_pszMenubarMessage;
+		const ULONG cchText = nStrLen;
+		const INT nMaxExtent = rc.right - rc.left;
+		const DWORD dwFlags = ::GetFontLanguageInfo(hdc);
+		INT vDx[MENUBAR_MESSAGE_MAX_LEN] = { 0 };
+		WCHAR vGlyphs[(MENUBAR_MESSAGE_MAX_LEN * 3 / 2) + 16]; // エラーグリフの増分を加味した領域を確保
+
+		GCP_RESULTS results = { sizeof(GCP_RESULTS) };
+		results.lpDx = vDx;
+		results.lpGlyphs = vGlyphs;
+		results.nGlyphs = _countof(vGlyphs);
+		results.nMaxFit = cchText;
+		auto placement = ::GetCharacterPlacement(hdc, pchText, cchText, nMaxExtent, &results, dwFlags);
+
+		if (placement != NULL) {
+			::ExtTextOut(hdc, rc.left, rc.top, ETO_CLIPPED | ETO_OPAQUE, &rc, m_pszMenubarMessage, nStrLen, vDx);
+		}
 	}
-	*/
-	::ExtTextOut( hdc,rc.left,rc.top,ETO_CLIPPED | ETO_OPAQUE,&rc,m_pszMenubarMessage,nStrLen,NULL/*m_pnCaretPosInfoDx*/); //2007.10.17 kobake めんどいので今のところは文字間隔配列を使わない。
 	::SelectObject( hdc, hFontOld );
 	::ReleaseDC( GetHwnd(), hdc );
 }
@@ -4881,7 +4871,7 @@ void CEditWnd::ClearMouseState( void )
 */
 void CEditWnd::CreateAccelTbl( void )
 {
-	if( IsWine() ){
+	{
 		m_hAccelWine = CKeyBind::CreateAccerelator(
 			m_pShareData->m_Common.m_sKeyBind.m_nKeyNameArrNum,
 			m_pShareData->m_Common.m_sKeyBind.m_pKeyNameArr
@@ -4895,7 +4885,7 @@ void CEditWnd::CreateAccelTbl( void )
 		}
 	}
 
-	m_hAccel = m_hAccelWine ? m_hAccelWine : m_pShareData->m_sHandles.m_hAccel;
+	m_hAccel = m_hAccelWine;
 }
 
 /*! ウィンドウ毎に作成したアクセラレータテーブルを破棄する

@@ -584,15 +584,7 @@ LRESULT CControlTray::DispatchEvent(
 		}
 
 		// 2006.07.09 ryoji 最後の方でシャットダウンするアプリケーションにする
-		BOOL (WINAPI *pfnSetProcessShutdownParameters)( DWORD dwLevel, DWORD dwFlags );
-		HINSTANCE hDll;
-		hDll = ::GetModuleHandle(_T("KERNEL32"));
-		if( NULL != hDll ){
-			*(FARPROC*)&pfnSetProcessShutdownParameters = ::GetProcAddress( hDll, "SetProcessShutdownParameters" );
-			if( NULL != pfnSetProcessShutdownParameters ){
-				pfnSetProcessShutdownParameters( 0x180, 0 );
-			}
-		}
+		::SetProcessShutdownParameters(0x180, 0);
 
 		// 2010.08.26 ウィンドウ存在確認
 		::SetTimer( hwnd, IDT_EDITCHECK, IDT_EDITCHECK_INTERVAL, NULL );
@@ -1565,6 +1557,10 @@ int	CControlTray::CreatePopUpMenu_L( void )
 	hMenuPopUp = cMRUFolder.CreateMenu( &m_cMenuDrawer );
 	nEnable = (cMRUFolder.MenuLength() > 0 ? 0 : MF_GRAYED);
 	m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING | MF_POPUP| nEnable, (UINT_PTR)hMenuPopUp, LS( F_FILE_RCNTFLDR_SUBMENU ), _T("D") );
+
+	/* 履歴の管理のメニューを作成 */
+	m_cMenuDrawer.MyAppendMenuSep( hMenu, MF_BYPOSITION | MF_SEPARATOR, 0, NULL, FALSE );
+	m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING, F_FAVORITE, _T(""), _T("M"), FALSE );
 
 	m_cMenuDrawer.MyAppendMenuSep( hMenu, MF_BYPOSITION | MF_SEPARATOR, 0, NULL, FALSE );
 	m_cMenuDrawer.MyAppendMenu( hMenu, MF_BYPOSITION | MF_STRING, F_FILESAVEALL, _T(""), _T("Z"), FALSE );	// Jan. 24, 2005 genta

@@ -252,15 +252,7 @@ bool CProfile::WriteProfile(
 		return false;
 
 	if( szMirrorFile[0] ){
-		BOOL (__stdcall *pfnReplaceFile)(LPCTSTR, LPCTSTR, LPCTSTR, DWORD, LPVOID, LPVOID);
-		HMODULE hModule = ::GetModuleHandle(_T("KERNEL32"));
-		pfnReplaceFile = (BOOL (__stdcall *)(LPCTSTR, LPCTSTR, LPCTSTR, DWORD, LPVOID, LPVOID))
-#ifndef _UNICODE
-			::GetProcAddress(hModule, "ReplaceFileA");
-#else
-			::GetProcAddress(hModule, "ReplaceFileW");
-#endif
-		if( !pfnReplaceFile || !pfnReplaceFile(m_strProfileName.c_str(), szMirrorFile, NULL, 0, NULL, NULL) ){
+		if (!::ReplaceFile(m_strProfileName.c_str(), szMirrorFile, NULL, 0, NULL, NULL)) {
 			if (fexist(m_strProfileName.c_str())) {
 				if (!::DeleteFile(m_strProfileName.c_str())) {
 					return false;
@@ -293,8 +285,8 @@ bool CProfile::_WriteFile(
 		return false;
 	}
 
-	int nSize = (int)vecLine.size();
-	for(int i=0;i<nSize;i++){
+	size_t nSize = vecLine.size();
+	for(size_t i=0;i<nSize;i++){
 		// 出力
 		out.WriteString(vecLine[i].c_str());
 		out.WriteString(L"\n");

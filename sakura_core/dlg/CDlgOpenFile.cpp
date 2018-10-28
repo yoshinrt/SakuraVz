@@ -29,7 +29,6 @@
 #include "charset/CCodePage.h"
 #include "doc/CDocListener.h"
 #include "recent/CRecent.h"
-#include "_os/COsVersionInfo.h"
 #include "dlg/CDialog.h"
 #include "util/window.h"
 #include "util/shell.h"
@@ -53,26 +52,6 @@ static const DWORD p_helpids[] = {	//13100
 //	IDC_STATIC,				-1,
 	0, 0
 };	//@@@ 2002.01.07 add end MIK
-
-// 2005.10.29 ryoji
-// Windows 2000 version of OPENFILENAME.
-// The new version has three extra members.
-// See CommDlg.h
-#if (_WIN32_WINNT >= 0x0500)
-struct OPENFILENAMEZ : public OPENFILENAME {
-};
-#else
-struct OPENFILENAMEZ : public OPENFILENAME {
-  void *        pvReserved;
-  DWORD         dwReserved;
-  DWORD         FlagsEx;
-};
-#define OPENFILENAME_SIZE_VERSION_400 sizeof(OPENFILENAME)
-#endif // (_WIN32_WINNT >= 0x0500)
-
-#ifndef OFN_ENABLESIZING
-	#define OFN_ENABLESIZING	0x00800000
-#endif
 
 static int AddComboCodePages(HWND hdlg, HWND combo, int nSelCode, bool& bInit);
 
@@ -117,7 +96,7 @@ public:
 	CRecentFolder			m_cRecentFolder;
 
 	OPENFILENAME*	m_pOf;
-	OPENFILENAMEZ	m_ofn;		/* 2005.10.29 ryoji OPENFILENAMEZ「ファイルを開く」ダイアログ用構造体 */
+	OPENFILENAME	m_ofn;		/* 2005.10.29 ryoji OPENFILENAME「ファイルを開く」ダイアログ用構造体 */
 	HWND			m_hwndOpenDlg;
 	HWND			m_hwndComboMRU;
 	HWND			m_hwndComboOPENFOLDER;
@@ -499,14 +478,7 @@ UINT_PTR CALLBACK OFNHookProc(
 		case CDN_SELCHANGE :
 			{
 				CDlgOpenFileData* pData = (CDlgOpenFileData*)::GetWindowLongPtr(hdlg, DWLP_USER);
-				// OFNの再設定はNT系ではUnicode版APIのみ有効
-				if( pData->m_ofn.Flags & OFN_ALLOWMULTISELECT &&
-#ifdef _UNICODE
-						IsWin32NT()
-#else
-						!IsWin32NT()
-#endif
-				){
+				if( pData->m_ofn.Flags & OFN_ALLOWMULTISELECT ){
 					DWORD nLength = CommDlg_OpenSave_GetSpec( pData->m_hwndOpenDlg, NULL, 0 );
 					nLength += _MAX_PATH + 2;
 					if( pData->m_ofn.nMaxFile < nLength ){
@@ -1149,11 +1121,11 @@ void CDlgOpenFile::DlgOpenFail(void)
 	@author ryoji
 	@date 2005.10.29
 */
-void CDlgOpenFile::InitOfn( OPENFILENAMEZ* ofn )
+void CDlgOpenFile::InitOfn( OPENFILENAME* ofn )
 {
 	memset_raw(ofn, 0, sizeof(*ofn));
 
-	ofn->lStructSize = IsWinV5forOfn()? sizeof(OPENFILENAMEZ): OPENFILENAME_SIZE_VERSION_400;
+	ofn->lStructSize = sizeof(OPENFILENAME);
 	ofn->lpfnHook = OFNHookProc;
 	ofn->lpTemplateName = MAKEINTRESOURCE(IDD_FILEOPEN);	// <-_T("IDD_FILEOPEN"); 2008/7/26 Uchi
 	ofn->nFilterIndex = 1;	//Jul. 09, 2001 JEPRO		/* 「開く」での最初のワイルドカード */
@@ -1238,7 +1210,7 @@ void CDlgOpenFile::InitLayout( HWND hwndOpenDlg, HWND hwndDlg, HWND hwndBaseCtrl
 	@author Moca
 	@date 2006.09.03 新規作成
 */
-bool CDlgOpenFile::_GetOpenFileNameRecover( OPENFILENAMEZ* ofn )
+bool CDlgOpenFile::_GetOpenFileNameRecover( OPENFILENAME* ofn )
 {
 	BOOL bRet = ::GetOpenFileName( ofn );
 	if( !bRet  ){
@@ -1255,7 +1227,7 @@ bool CDlgOpenFile::_GetOpenFileNameRecover( OPENFILENAMEZ* ofn )
 	@author Moca
 	@date 2006.09.03 新規作成
 */
-bool CDlgOpenFile::GetSaveFileNameRecover( OPENFILENAMEZ* ofn )
+bool CDlgOpenFile::GetSaveFileNameRecover( OPENFILENAME* ofn )
 {
 	BOOL bRet = ::GetSaveFileName( ofn );
 	if( !bRet  ){

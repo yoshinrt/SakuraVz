@@ -1,4 +1,5 @@
-﻿//2007.10.18 kobake 作成
+﻿/*! @file */
+//2007.10.18 kobake 作成
 /*
 	Copyright (C) 2007, kobake
 
@@ -66,19 +67,6 @@ T t_unit(T t)
 }
 
 
-/*
-	2007.10.19 kobake
-	_countofマクロ。_countofが使えない古いコンパイラ用。
-
-	ただし、他の場所でテンプレートごりごり使っているので、
-	どっちにしろ古い環境でビルドは通らない予感。
-*/
-
-#ifndef _countof
-#define _countof(A) (sizeof(A)/sizeof(A[0]))
-#endif
-
-//sizeof
 #define sizeof_raw(V)  sizeof(V)
 #define sizeof_type(V) sizeof(V)
 

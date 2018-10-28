@@ -15,7 +15,6 @@
 #include "CSelectLang.h"
 #include "util/os.h"
 #include "util/module.h"
-#include "_os/COsVersionInfo.h"
 
 #include <new>
 
@@ -98,9 +97,21 @@ HINSTANCE CSelectLang::InitializeLanguageEnvironment( void )
 		// デフォルト情報を作成する
 		psLangInfo = new SSelLangInfo();
 		psLangInfo->hInstance = GetModuleHandle(NULL);
-
+		
 		// 言語情報ダイアログで "System default" に表示する文字列を作成する
-		::LoadString( GetModuleHandle(NULL), STR_SELLANG_NAME, psLangInfo->szLangName, _countof(psLangInfo->szLangName) );
+		auto nCount = ::LoadString( psLangInfo->hInstance, STR_SELLANG_NAME, psLangInfo->szLangName, _countof(psLangInfo->szLangName) );
+		assert(0 < nCount);
+
+		// 言語IDを取得
+		TCHAR szBuf[7];		// "0x" + 4桁 + 番兵
+		nCount = ::LoadString( psLangInfo->hInstance, STR_SELLANG_LANGID, szBuf, _countof(szBuf));
+		assert(nCount == _countof(szBuf) - 1);
+		szBuf[_countof(szBuf) - 1] = _T('\0');
+
+		psLangInfo->wLangId = (WORD)_tcstoul(szBuf, NULL, 16);		// 言語IDを数値化
+		assert(0 < psLangInfo->wLangId);
+
+		psLangInfo->bValid = TRUE;		// メッセージリソースDLLとして有効
 
 		m_psLangInfoList.push_back( psLangInfo );
 	}
@@ -391,21 +402,7 @@ HINSTANCE CSelectLang::ChangeLang( UINT nIndex )
 	m_psLangInfo = psLangInfo;
 
 	// ロケールを設定
-	// SetThreadUILanguageの呼び出しを試みる
-	bool isSuccess = false;
-	if( COsVersionInfo()._IsWinVista_or_later() ) {
-		HMODULE hDll = LoadLibrary( _T("kernel32") );
-		if ( hDll ) {
-			typedef short (CALLBACK* SetThreadUILanguageType)(LANGID);
-			SetThreadUILanguageType _SetThreadUILanguage = (SetThreadUILanguageType)
-					GetProcAddress(hDll, "SetThreadUILanguage");
-			isSuccess = _SetThreadUILanguage && _SetThreadUILanguage( m_psLangInfo->wLangId );
-			FreeLibrary( hDll );
-		}
-	}
-	if ( !isSuccess ) {
-		SetThreadLocale(MAKELCID( m_psLangInfo->wLangId, SORT_DEFAULT ));
-	}
+	::SetThreadUILanguage( m_psLangInfo->wLangId );
 
 	return m_psLangInfo->hInstance;
 }

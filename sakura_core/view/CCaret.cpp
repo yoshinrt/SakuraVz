@@ -537,12 +537,17 @@ void CCaret::ShowEditCaret()
 	SetCaretSize(nCaretWidth,nCaretHeight);
 	POINT ptDrawPos=CalcCaretDrawPos(GetCaretLayoutPos());
 	SetCaretSize(caretSizeOld.cx, caretSizeOld.cy); // 後で比較するので戻す
-	bool bShowCaret = false;
 	if ( m_pEditView->GetTextArea().GetAreaLeft() <= ptDrawPos.x && m_pEditView->GetTextArea().GetAreaTop() <= ptDrawPos.y
 		&& ptDrawPos.x < m_pEditView->GetTextArea().GetAreaRight() && ptDrawPos.y < m_pEditView->GetTextArea().GetAreaBottom() ){
-		// キャレットの表示
-		bShowCaret = true;
+		// 画面内ならキャレットを表示する
+		;
+	}else {
+		// 画面外の場合はキャレットを隠す
+		HideCaret_( m_pEditView->GetHwnd() ); // 2002/07/22 novice
+		m_pEditView->SetIMECompFormPos();
+		return;
 	}
+
 	/* キャレットの幅、高さを決定 */
 	// カーソルのタイプ = win
 	if( 0 == pCommon->m_sGeneral.GetCaretType() ){
@@ -561,10 +566,7 @@ void CCaret::ShowEditCaret()
 			const wchar_t*	pLine = NULL;
 			CLogicInt		nLineLen = CLogicInt(0);
 			const CLayout*	pcLayout = NULL;
-			if( bShowCaret ){
-				// 画面外のときはGetLineStrを呼ばない
-				pLine = pLayoutMgr->GetLineStr( GetCaretLayoutPos().GetY2(), &nLineLen, &pcLayout );
-			}
+			pLine = pLayoutMgr->GetLineStr( GetCaretLayoutPos().GetY2(), &nLineLen, &pcLayout );
 
 			if( NULL != pLine ){
 				/* 指定された桁に対応する行のデータ内の位置を調べる */
@@ -596,9 +598,7 @@ void CCaret::ShowEditCaret()
 		const wchar_t*	pLine = NULL;
 		CLogicInt		nLineLen = CLogicInt(0);
 		const CLayout*	pcLayout = NULL;
-		if( bShowCaret ){
-			pLine= pLayoutMgr->GetLineStr( GetCaretLayoutPos().GetY2(), &nLineLen, &pcLayout );
-		}
+		pLine= pLayoutMgr->GetLineStr( GetCaretLayoutPos().GetY2(), &nLineLen, &pcLayout );
 
 		if( NULL != pLine ){
 			/* 指定された桁に対応する行のデータ内の位置を調べる */
@@ -638,11 +638,6 @@ void CCaret::ShowEditCaret()
 			CreateEditCaret( crCaret, crBack, nCaretWidth, nCaretHeight );	// 2006.12.07 ryoji
 			m_bCaretShowFlag = false; // 2002/07/22 novice
 		}
-		else{
-			/* キャレットはあるし、大きさも変わっていない場合 */
-			/* キャレットを隠す */
-			HideCaret_( m_pEditView->GetHwnd() ); // 2002/07/22 novice
-		}
 	}
 
 	// キャレットサイズ
@@ -651,10 +646,9 @@ void CCaret::ShowEditCaret()
 	/* キャレットの位置を調整 */
 	//2007.08.26 kobake キャレットX座標の計算をUNICODE仕様にした。
 	::SetCaretPos( ptDrawPos.x, ptDrawPos.y );
-	if ( bShowCaret ){
-		/* キャレットの表示 */
-		ShowCaret_( m_pEditView->GetHwnd() ); // 2002/07/22 novice
-	}
+
+	/* キャレットの表示 */
+	ShowCaret_( m_pEditView->GetHwnd() ); // 2002/07/22 novice
 
 	m_crCaret = crCaret;	//	2006.12.07 ryoji
 	m_pEditView->m_crBack2 = crBack;		//	2006.12.07 ryoji

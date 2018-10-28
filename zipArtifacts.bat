@@ -169,21 +169,25 @@ if exist "%OUTFILE_EXE%" (
 	del %OUTFILE_EXE%
 )
 if exist "%WORKDIR%" (
-	rmdir /s /q %WORKDIR%
+	rmdir /s /q "%WORKDIR%"
 )
 if exist "%WORKDIR_ASM%" (
-	rmdir /s /q %WORKDIR_ASM%
+	rmdir /s /q "%WORKDIR_ASM%"
 )
 
 mkdir %WORKDIR%
 mkdir %WORKDIR_LOG%
 mkdir %WORKDIR_EXE%
+mkdir %WORKDIR_EXE%\license\
 mkdir %WORKDIR_EXE%\license\bregonig\
 mkdir %WORKDIR_EXE%\license\ctags\
 mkdir %WORKDIR_INST%
 copy /Y /B %platform%\%configuration%\sakura.exe %WORKDIR_EXE%\
 copy /Y /B %platform%\%configuration%\*.dll      %WORKDIR_EXE%\
 copy /Y /B %platform%\%configuration%\*.pdb      %WORKDIR_EXE%\
+
+: LICENSE
+copy /Y .\LICENSE                                   %WORKDIR_EXE%\license\ > NUL
 
 : bregonig
 set INSTALLER_RESOURCES_BRON=%~dp0installer\temp\bron
@@ -260,10 +264,10 @@ call %ZIP_CMD%       %OUTFILE_ASM%  %WORKDIR_ASM%
 @echo end   zip asm
 
 if exist "%WORKDIR%" (
-	rmdir /s /q %WORKDIR%
+	rmdir /s /q "%WORKDIR%"
 )
 if exist "%WORKDIR_ASM%" (
-	rmdir /s /q %WORKDIR_ASM%
+	rmdir /s /q "%WORKDIR_ASM%"
 )
 
 exit /b 0
@@ -285,5 +289,5 @@ exit /b 0
 @echo    %~nx1 Win32 Release
 @echo    %~nx1 Win32 Debug
 @echo    %~nx1 x64   Release
-@echo    %~nx1 x64   Release
+@echo    %~nx1 x64   Debug
 exit /b 0

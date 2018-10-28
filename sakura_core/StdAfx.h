@@ -1,4 +1,5 @@
-﻿// stdafx.h : 標準のシステム インクルード ファイル、
+﻿/*! @file */
+// stdafx.h : 標準のシステム インクルード ファイル、
 //				または参照回数が多く、かつあまり変更されない
 //				プロジェクト専用のインクルード ファイルを記述します。
 //
@@ -15,6 +16,9 @@
 #ifndef STRICT
 #define STRICT 1
 #endif
+
+// Windows SDKのmin/maxマクロは使いません
+#define NOMINMAX
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 

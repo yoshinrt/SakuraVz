@@ -25,7 +25,6 @@
 #include "window/CSplitBoxWnd.h"
 #include "CImageListMgr.h"
 #include "func/CKeyBind.h"
-#include "_os/COSVersionInfo.h"
 #include "util/window.h"
 
 // メニューアイコンの背景をボタンの色にする
@@ -844,7 +843,7 @@ void CMenuDrawer::MyAppendMenu(
 			// メニュー項目をオーナー描画にして、アイコンを表示する
 			// 2010.03.29 アクセスキーの分を詰めるためいつもオーナードローにする。ただしVista未満限定
 			// Vista以上ではメニューもテーマが適用されるので、オーナードローにすると見た目がXP風になってしまう。
-			if( m_pShareData->m_Common.m_sWindow.m_bMenuIcon || !IsWinVista_or_later() ){
+			if( m_pShareData->m_Common.m_sWindow.m_bMenuIcon ){
 				nFlagAdd = MF_OWNERDRAW;
 			}
 			/* 機能のビットマップの情報を覚えておく */
@@ -855,18 +854,16 @@ void CMenuDrawer::MyAppendMenu(
 #ifdef DRAW_MENU_ICON_BACKGROUND_3DFACE
 		// セパレータかサブメニュー
 		if( nFlag & (MF_SEPARATOR | MF_POPUP) ){
-			if( m_pShareData->m_Common.m_sWindow.m_bMenuIcon || !IsWinVista_or_later() ){
+			if( m_pShareData->m_Common.m_sWindow.m_bMenuIcon ){
 					nFlagAdd = MF_OWNERDRAW;
 			}
 		}
 #endif
 	}
 
-	MENUITEMINFO mii;
-	memset_raw( &mii, 0, sizeof( mii ) );
-	//	Aug. 31, 2001 genta
-	mii.cbSize = SIZEOF_MENUITEMINFO; //Win95対策済みのsizeof(MENUITEMINFO)値
-
+	// メニュー項目に関する情報を設定します。
+	MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
+	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_SUBMENU | MIIM_TYPE;
 	mii.fType = 0;
 	if( MF_OWNERDRAW	& ( nFlag | nFlagAdd ) ) mii.fType |= MFT_OWNERDRAW;
@@ -1165,12 +1162,9 @@ void CMenuDrawer::DrawItem( DRAWITEMSTRUCT* lpdis )
 #ifdef _DEBUG
 	// デバッグ用：メニュー項目に対して、ヘルプがない場合に背景色を青くする
 	TCHAR	szText[1024];
-	MENUITEMINFO mii;
 	// メニュー項目に関する情報を取得します。
-	memset_raw( &mii, 0, sizeof( mii ) );
-
-	mii.cbSize = SIZEOF_MENUITEMINFO; // Win95対策済みのsizeof(MENUITEMINFO)値
-
+	MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
+	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_SUBMENU | MIIM_TYPE;
 	mii.fType = MFT_STRING;
 	_tcscpy( szText, _T("--unknown--") );
@@ -1610,11 +1604,8 @@ LRESULT CMenuDrawer::OnMenuChar( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 	for( i = 0; i < ::GetMenuItemCount( hmenu ); i++ ){
 		TCHAR	szText[1024];
 		// メニュー項目に関する情報を取得します。
-		MENUITEMINFO		mii;
-		memset_raw( &mii, 0, sizeof( mii ) );
-
-		mii.cbSize = SIZEOF_MENUITEMINFO; //Win95対策済みのsizeof(MENUITEMINFO)値
-
+		MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
+		mii.cbSize = sizeof(MENUITEMINFO);
 		mii.fMask = MIIM_CHECKMARKS | MIIM_DATA | MIIM_ID | MIIM_STATE | MIIM_SUBMENU | MIIM_TYPE;
 		mii.fType = MFT_STRING;
 		_tcscpy( szText, _T("--unknown--") );

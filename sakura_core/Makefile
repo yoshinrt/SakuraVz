@@ -24,10 +24,7 @@ RM= cmd /c $(CURDIR)/../sakura/mingw32-del.bat
 
 DEFINES= \
  -DWIN32 \
- -DWINVER=0x500 \
- -D_WIN32_WINNT=0x500 \
- -D_WIN32_IE=0x501 \
- -DNOMINMAX \
+ -D_WIN32_WINNT=_WIN32_WINNT_WIN7 \
  -D_UNICODE \
  -DUNICODE \
  $(MYDEFINES)
@@ -421,7 +418,6 @@ _main/global.o \
 _main/WinMain.o \
 _os/CClipboard.o \
 _os/CDropTarget.o \
-_os/COsVersionInfo.o \
 sakura_rc.o \
 
 GENERATED_FILES= \

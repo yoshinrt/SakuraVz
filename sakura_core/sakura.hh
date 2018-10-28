@@ -1,4 +1,5 @@
-﻿#define HLP000001	1 //サクラエディタ  ヘルプ目次
+﻿/*! @file */
+#define HLP000001	1 //サクラエディタ  ヘルプ目次
 #define HLP000002	2 //機能概要
 #define HLP000003	3 //動作環境
 #define HLP000004	4 //使用条件等
@@ -56,6 +57,7 @@
 #define HLP000027	27 //Oracle SQL*Plusで実行
 #define HLP000121	121 //ブラウズ
 #define HLP000022	22 //ファイルのプロパティ
+#define HLP000373	373 //ファイルの場所を開く
 #define HLP000363	363 //プロファイルマネージャ
 #define HLP000029	29 //最近使ったファイル
 #define HLP000023	23 //最近使ったフォルダ
