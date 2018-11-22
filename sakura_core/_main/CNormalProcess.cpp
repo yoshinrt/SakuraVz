@@ -262,25 +262,42 @@ bool CNormalProcess::InitializeProcess()
 			::CloseHandle( hMutex );
 			hMutex = NULL;
 			
+			CDlgGrep	*dlg = gi.cmGrepRep.GetStringLength() == 0 ?
+				&pEditWnd->m_cDlgGrep : &pEditWnd->m_cDlgGrepReplace;
+			
 			//	Oct. 9, 2003 genta コマンドラインからGERPダイアログを表示させた場合に
 			//	引数の設定がBOXに反映されない
-			pEditWnd->m_cDlgGrep.m_strText = gi.cmGrepKey.GetStringPtr();		/* 検索文字列 */
-			pEditWnd->m_cDlgGrep.m_bSetText = true;
-			int nSize = _countof2(pEditWnd->m_cDlgGrep.m_szFile);
-			_tcsncpy( pEditWnd->m_cDlgGrep.m_szFile, gi.cmGrepFile.GetStringPtr(), nSize );	/* 検索ファイル */
-			pEditWnd->m_cDlgGrep.m_szFile[nSize-1] = _T('\0');
-			nSize = _countof2(pEditWnd->m_cDlgGrep.m_szFolder);
-			_tcsncpy( pEditWnd->m_cDlgGrep.m_szFolder, cmemGrepFolder.GetStringPtr(), nSize );	/* 検索フォルダ */
-			pEditWnd->m_cDlgGrep.m_szFolder[nSize-1] = _T('\0');
-
+			dlg->m_strText = gi.cmGrepKey.GetStringPtr();		/* 検索文字列 */
+			dlg->m_bSetText = true;
+			int nSize = _countof2(dlg->m_szFile);
+			_tcsncpy( dlg->m_szFile, gi.cmGrepFile.GetStringPtr(), nSize );	/* 検索ファイル */
+			dlg->m_szFile[nSize-1] = _T('\0');
+			nSize = _countof2(dlg->m_szFolder);
+			_tcsncpy( dlg->m_szFolder, cmemGrepFolder.GetStringPtr(), nSize );	/* 検索フォルダ */
+			dlg->m_szFolder[nSize-1] = _T('\0');
 			
-			// Feb. 23, 2003 Moca Owner windowが正しく指定されていなかった
-			int nRet = pEditWnd->m_cDlgGrep.DoModal( GetProcessInstance(), pEditWnd->GetHwnd(),  NULL);
-			if( FALSE != nRet ){
-				pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP, true, 0, 0, 0, 0);
+			if( gi.cmGrepRep.GetStringLength() == 0 ){
+				// Grep
+				
+				// Feb. 23, 2003 Moca Owner windowが正しく指定されていなかった
+				int nRet = pEditWnd->m_cDlgGrep.DoModal( GetProcessInstance(), pEditWnd->GetHwnd(),  NULL);
+				if( FALSE != nRet ){
+					pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP, true, 0, 0, 0, 0);
+				}else{
+					// 自分はGrepでない
+					pEditWnd->GetDocument()->SetCurDirNotitle();
+				}
 			}else{
-				// 自分はGrepでない
-				pEditWnd->GetDocument()->SetCurDirNotitle();
+				// Replace
+				pEditWnd->m_cDlgGrepReplace.m_strText2 = gi.cmGrepRep.GetStringPtr();		/* 置換後文字列 */
+				
+				int nRet = pEditWnd->m_cDlgGrepReplace.DoModal( GetProcessInstance(), pEditWnd->GetHwnd(), NULL, ( LPARAM )NULL );
+				if( FALSE != nRet ){
+					pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP_REPLACE, TRUE, 0, 0, 0, 0);
+				}else{
+					// 自分はGrepでない
+					pEditWnd->GetDocument()->SetCurDirNotitle();
+				}
 			}
 			pEditWnd->m_cDlgFuncList.Refresh();	// アウトラインを再解析する
 		}
