@@ -1145,7 +1145,7 @@ bool CControlTray::OpenNewEditor(
 	if( sLoadInfo.bViewMode )cCmdLineBuf.AppendF( _T(" -R") );
 
 	// グループID
-	if( false == bNewWindow ){	// 新規エディタをウインドウで開く
+	if( false == bNewWindow && !( ::GetKeyState( VK_SHIFT ) & 0x8000 )){	// 新規エディタをウインドウで開く
 		// グループIDを親ウィンドウから取得
 		HWND hwndAncestor = MyGetAncestor( hWndParent, GA_ROOTOWNER2 );	// 2007.10.22 ryoji GA_ROOTOWNER -> GA_ROOTOWNER2
 		int nGroup = CAppNodeManager::getInstance()->GetEditNode( hwndAncestor )->GetGroup();
