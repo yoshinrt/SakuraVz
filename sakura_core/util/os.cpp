@@ -383,6 +383,20 @@ BOOL CheckSystemResources( const TCHAR* pszAppName )
 #endif	// (WINVER < _WIN32_WINNT_WIN2K)
 
 
+/*
+	https://docs.microsoft.com/en-us/windows/desktop/api/wow64apiset/nf-wow64apiset-iswow64process
+*/
+BOOL IsWow64()
+{
+	BOOL bIsWow64 = FALSE;
+	if (!IsWow64Process(GetCurrentProcess(),&bIsWow64))
+	{
+		// 失敗したら WOW64 はオフとみなす
+		bIsWow64 = FALSE;
+	}
+	return bIsWow64;
+}
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                        便利クラス                           //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -409,4 +423,53 @@ CCurrentDirectoryBackupPoint::~CCurrentDirectoryBackupPoint()
 }
 
 
+CDisableWow64FsRedirect::CDisableWow64FsRedirect(BOOL isOn)
+:	m_isSuccess(FALSE)
+,	m_OldValue(NULL)
+{
+	if (isOn && IsWow64()) {
+		m_isSuccess = Wow64DisableWow64FsRedirection(&m_OldValue);
+	}
+	else {
+		m_isSuccess = FALSE;
+	}
+}
 
+CDisableWow64FsRedirect::~CDisableWow64FsRedirect()
+{
+	if (m_isSuccess) {
+		Wow64RevertWow64FsRedirection(m_OldValue);
+	}
+}
+
+
+BOOL IsPowerShellAvailable(void)
+{
+#ifndef _WIN64
+	/*
+		64bit OS で 32bit アプリから起動する場合に意図したパスを見つけられるようにするために
+		Wow64 の FileSystem Redirection を一時的にオフにする。
+	*/
+	CDisableWow64FsRedirect wow64Redirect(TRUE);
+#endif
+
+	TCHAR szFileBuff[MAX_PATH];
+	LPTSTR lpFilePart = NULL;
+
+	DWORD ret = ::SearchPath(
+		NULL,					// 検索パス
+		_T("powershell.exe"),	// ファイル名
+		NULL,					// ファイルの拡張子
+		MAX_PATH,				// バッファのサイズ
+		szFileBuff,				// 見つかったファイル名を格納するバッファ
+		&lpFilePart				// ファイルコンポーネント
+	);
+	if( ret != 0 && lpFilePart != NULL)
+	{
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
+}

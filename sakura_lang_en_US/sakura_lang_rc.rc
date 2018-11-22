@@ -2268,6 +2268,9 @@ BEGIN
     F_PROPERTY_FILE         "File Property"
     F_PROFILEMGR            "Profile Maneger"
     F_OPEN_FOLDER_IN_EXPLORER "Open Containing Folder"
+    F_OPEN_COMMAND_PROMPT   "Open Command Propmt"
+    F_OPEN_POWERSHELL           "Open PowerShell"
+    F_OPEN_POWERSHELL_AS_ADMIN  "Open PowerShell As Admin"
 END
 
 STRINGTABLE DISCARDABLE 
