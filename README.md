@@ -1,11 +1,12 @@
 # Sakura Editor VZ 化 fork
 [![Build status](https://ci.appveyor.com/api/projects/status/mf8tx836jtb7epq8/branch/vz_mode?svg=true)](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode)
+[![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
 
 サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+sort%3Aupdated-desc) を参照してください．
 
 機能の on/off を GUI で設定する機能はありませんので，`sakura.ini` を直接編集してください．本 fork のビルドでは，デフォルトで全て有効になっています．
 
-最新バイナリは [AppVeyor](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode) の Configuration:Release;Platform:Win32 (または x64)→ARTIFACTS にあります．
+最新バイナリは [AppVeyor](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode) の Platform:Win32 (または x64)→ARTIFACTS にあります．
 ### 一覧
 
 - [テキストスタック](https://github.com/yoshinrt/sakura#テキストスタック)
@@ -125,8 +126,9 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 - 0x08000000:「すべて置換」ボタンをデフォルトにする
 - 0x04000000: 検索ダイアログにおいて「上検索」「下検索」が押されたとき，検索条件のみセットし，検索動作は行いません．
 
-----
 以下は，サクラエディタ本家の README になります．本 fork には適用されない情報もありますので，ご了承ください．
+
+----
 
 # Sakura Editor
 [![Build status](https://ci.appveyor.com/api/projects/status/xlsp22h1q91mh96j/branch/master?svg=true)](https://ci.appveyor.com/project/sakuraeditor/sakura/branch/master)
