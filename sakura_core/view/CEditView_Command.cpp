@@ -438,7 +438,7 @@ void CEditView::CopyCurLine(
 
 	/* クリップボードに入れるべきテキストデータを、cmemBufに格納する */
 	CNativeW cmemBuf;
-	cmemBuf.SetString( pcLayout->GetPtr(), pcLayout->GetLengthWithoutEOL() );
+	cmemBuf.SetString( pcLayout->GetDocLineRef()->GetPtr(), pcLayout->GetDocLineRef()->GetLengthWithoutEOL());
 	if( pcLayout->GetLayoutEol().GetLen() != 0 ){
 		cmemBuf.AppendString(
 			( neweol == EOL_UNKNOWN ) ?

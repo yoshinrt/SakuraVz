@@ -344,8 +344,28 @@ void CViewCommander::Command_DELETE_LINE( void )
 		ErrorBeep();
 		return;
 	}
-	GetSelect().SetFrom(CLayoutPoint(CLayoutInt(0),GetCaret().GetCaretLayoutPos().GetY2()    ));	//範囲選択開始位置
-	GetSelect().SetTo  (CLayoutPoint(CLayoutInt(0),GetCaret().GetCaretLayoutPos().GetY2() + 1));	//範囲選択終了位置
+	
+	//範囲選択開始位置
+	CLayoutPoint ptPos;
+	
+	GetDocument()->m_cLayoutMgr.LogicToLayout(
+		CLogicPoint(
+			0,
+			pcLayout->GetLogicLineNo()
+		),
+		&ptPos
+	);
+	GetSelect().SetFrom( ptPos );
+	
+	//範囲選択終了位置
+	GetDocument()->m_cLayoutMgr.LogicToLayout(
+		CLogicPoint(
+			pcLayout->GetDocLineRef()->GetLengthWithEOL(),
+			pcLayout->GetLogicLineNo()
+		),
+		&ptPos
+	);
+	GetSelect().SetTo  ( ptPos );
 
 	CLayoutPoint ptCaretPos_OLD = GetCaret().GetCaretLayoutPos();
 
