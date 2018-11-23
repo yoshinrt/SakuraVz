@@ -935,7 +935,10 @@ bool CMacro::HandleCommand(
 				}
 			}
 			
-			pcEditView->GetCommander().HandleCommand( Index, true, 0, 0, 0, 0);
+			pcEditView->GetCommander().HandleCommand( Index, true, 0, 0, 0, 0 );
+			pcEditView->RedrawAll();
+			pcEditView->SendStatusMessage( LS( STR_DLGREPLC_REPLACE ), pcEditView->m_pcEditWnd->m_cDlgReplace.m_nReplaceCnt );
+			
 			return true;
 		}
 		if( Argument[0] == NULL || Argument[0][0] == L'\0' ){
@@ -1025,11 +1028,10 @@ bool CMacro::HandleCommand(
 				pcEditView->m_nCurSearchKeySequence = GetDllShareData().m_Common.m_sSearch.m_nSearchKeySequence;
 				pcEditView->ChangeCurRegexp( backupKeyMark );
 				pcEditView->m_bCurSrchKeyMark = backupKeyMark;
-				if( !backupKeyMark ){
-					pcEditView->Redraw();
-				}
 				pcEditView->m_nCurSearchKeySequence = nBackupSearchKeySequence;
 			}
+			pcEditView->RedrawAll();
+			pcEditView->SendStatusMessage( LS( STR_DLGREPLC_REPLACE ), pcEditView->m_pcEditWnd->m_cDlgReplace.m_nReplaceCnt );
 		}
 		break;
 	case F_GREP_REPLACE:
