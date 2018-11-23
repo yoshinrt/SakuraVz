@@ -564,7 +564,7 @@ void CViewCommander::Command_INSTEXT(
 		if( bLinePaste ){	// 2007.10.04 ryoji
 			/* 挿入ポイント（折り返し単位行頭）にカーソルを移動 */
 			CLogicPoint ptCaretBefore = GetCaret().GetCaretLogicPos();	// 操作前のキャレット位置
-			Command_GOLINETOP( false, 1 );								// 行頭に移動(折り返し単位)
+			Command_GOLINETOP( false, 9 );								// 行頭に移動
 			CLogicPoint ptCaretAfter = GetCaret().GetCaretLogicPos();	// 操作後のキャレット位置
 
 			// 挿入ポイントと元の位置との差分文字数
