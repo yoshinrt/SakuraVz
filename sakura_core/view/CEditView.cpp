@@ -2740,9 +2740,14 @@ void CEditView::CaretUnderLineOFF( bool bDraw, bool bDrawPaint, bool bResetFlag,
 	@date 2002.01.26 hor 新規作成
 	@date 2002.12.04 genta 実体をCEditWndへ移動
 */
-void CEditView::SendStatusMessage( const TCHAR* msg )
+void CEditView::SendStatusMessage( const TCHAR* msg, ... )
 {
-	m_pcEditWnd->SendStatusMessage( msg );
+	va_list pArg;
+	va_start( pArg, msg );
+	
+	m_pcEditWnd->SendStatusMessage( msg, pArg );
+	
+	va_end( pArg );
 }
 
 

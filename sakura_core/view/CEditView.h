@@ -364,7 +364,7 @@ public:
 	bool ExecCmd(const TCHAR* pszCmd, int nFlgOpt, const TCHAR* pszCurDir, COutputAdapter* customOa = NULL ) ;							// 子プロセスの標準出力をリダイレクトする
 	void AddToCmdArr(const TCHAR* szCmd);
 	BOOL ChangeCurRegexp(bool bRedrawIfChanged= true);									// 2002.01.16 hor 正規表現の検索パターンを必要に応じて更新する(ライブラリが使用できないときはFALSEを返す)
-	void SendStatusMessage( const TCHAR* msg );					// 2002.01.26 hor 検索／置換／ブックマーク検索時の状態をステータスバーに表示する
+	void SendStatusMessage( const TCHAR* msg, ... );					// 2002.01.26 hor 検索／置換／ブックマーク検索時の状態をステータスバーに表示する
 	LRESULT SetReconvertStruct(PRECONVERTSTRING pReconv, bool bUnicode, bool bDocumentFeed = false);	/* 再変換用構造体を設定する 2002.04.09 minfu */
 	LRESULT SetSelectionFromReonvert(const PRECONVERTSTRING pReconv, bool bUnicode);				/* 再変換用構造体の情報を元に選択範囲を変更する 2002.04.09 minfu */
 

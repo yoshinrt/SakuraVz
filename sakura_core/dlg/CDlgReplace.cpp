@@ -634,15 +634,8 @@ BOOL CDlgReplace::OnBnClicked( int wID )
 			/* アクティブにする */
 			ActivateFrameWindow( GetHwnd() );
 
-			if( NULL != pcEditView->m_pcEditWnd->m_cStatusBar.GetStatusHwnd() ){
-				const TCHAR *pMsg = LS( STR_DLGREPLC_REPLACE );
-				TCHAR *szBuf = new TCHAR[ _tcsclen( pMsg ) + 16 ];
-				auto_sprintf( szBuf, pMsg, m_nReplaceCnt );
-				pcEditView->SendStatusMessage( szBuf );
-				delete [] szBuf;
-			}else{
-				TopOkMessage( GetHwnd(), LS(STR_DLGREPLC_REPLACE), m_nReplaceCnt);
-			}
+			// ステータスバーに結果表示
+			pcEditView->SendStatusMessage( LS( STR_DLGREPLC_REPLACE ), m_nReplaceCnt );
 
 			if( !m_bCanceled ){
 				if( m_bModal ){		/* モーダルダイアログか */

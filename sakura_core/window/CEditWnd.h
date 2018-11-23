@@ -234,7 +234,7 @@ public:
 	//                           表示                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	void PrintMenubarMessage( const TCHAR* msg );
-	void SendStatusMessage( const TCHAR* msg );		//	Dec. 4, 2002 genta 実体をCEditViewから移動
+	void SendStatusMessage( const TCHAR* msg, va_list pArg = nullptr );		//	Dec. 4, 2002 genta 実体をCEditViewから移動
 
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

@@ -4080,8 +4080,17 @@ void CEditWnd::PrintMenubarMessage( const TCHAR* msg )
 	@date 2002.01.26 hor 新規作成
 	@date 2002.12.04 genta CEditViewより移動
 */
-void CEditWnd::SendStatusMessage( const TCHAR* msg )
+void CEditWnd::SendStatusMessage( const TCHAR* msg, va_list pArg )
 {
+	static const int STATUSMSG_BUF_SIZE = 64;
+	TCHAR szMsgBuf[ STATUSMSG_BUF_SIZE ];
+	
+	if( pArg ){
+		_vstprintf( szMsgBuf, STATUSMSG_BUF_SIZE - 1, msg, pArg );
+		szMsgBuf[ STATUSMSG_BUF_SIZE - 1 ] = '\0';
+		msg = szMsgBuf;
+	}
+	
 	if( NULL == m_cStatusBar.GetStatusHwnd() ){
 		// メニューバーへ
 		PrintMenubarMessage( msg );

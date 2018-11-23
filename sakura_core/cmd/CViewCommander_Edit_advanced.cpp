@@ -943,11 +943,7 @@ void CViewCommander::Command_MERGE(void)
 	}
 	m_pCommanderView->RedrawAll();
 
-	if(j){
-		TopOkMessage( m_pCommanderView->GetHwnd(), LS(STR_ERR_DLGEDITVWCMDNW7), j);
-	}else{
-		InfoMessage( m_pCommanderView->GetHwnd(), LS(STR_ERR_DLGEDITVWCMDNW8) );
-	}
+	m_pCommanderView->SendStatusMessage( LS( STR_ERR_DLGEDITVWCMDNW7 ), j );
 }
 
 
