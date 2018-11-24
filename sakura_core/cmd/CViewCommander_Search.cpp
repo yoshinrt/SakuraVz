@@ -783,7 +783,11 @@ void CViewCommander::Command_REPLACE_ALL()
 	bool bDisplayUpdate = false;
 
 	const bool bDrawSwitchOld = m_pCommanderView->SetDrawSwitch(bDisplayUpdate);
-
+	
+	// 画面上端位置保存
+	CLayoutInt ViewTop = m_pCommanderView->GetTextArea().GetViewTopLine();
+	Command_JUMPHIST_SET();
+	
 	bool bFastMode = false;
 	if( ((Int)GetDocument()->m_cDocLineMgr.GetLineCount() * 10 < (Int)GetDocument()->m_cLayoutMgr.GetLineCount())
 		&& !(bSelectedArea || nPaste) ){
@@ -1517,7 +1521,11 @@ void CViewCommander::Command_REPLACE_ALL()
 		GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();	// 2009.07.25 ryoji
 	}
 	// To Here 2001.12.03 hor
-
+	
+	// 画面位置復帰
+	m_pCommanderView->SyncScrollV( m_pCommanderView->ScrollAtV( ViewTop ));
+	Command_JUMPHIST_PREV();
+	
 	GetEditWindow()->m_cDlgReplace.m_bCanceled = (cDlgCancel.IsCanceled() != FALSE);
 	GetEditWindow()->m_cDlgReplace.m_nReplaceCnt=nReplaceNum;
 	m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
