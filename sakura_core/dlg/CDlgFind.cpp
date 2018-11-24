@@ -203,9 +203,9 @@ void CDlgFind::SetData( void )
 	);
 	
 	// デフォルトボタン設定
-	if( m_nFixedOption & SCH_PREV ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
-	if( m_nFixedOption & SCH_NEXT ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
-	if( m_nFixedOption & SCH_MARK ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_PREV ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_NEXT ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_MARK ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
 	
 	return;
 }

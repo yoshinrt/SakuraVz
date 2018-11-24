@@ -215,11 +215,11 @@ void CDlgReplace::SetData( void )
 	// To Here 2001.12.03 hor
 
 	// デフォルトボタン設定
-	if( m_nFixedOption & SCH_PREV )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
-	if( m_nFixedOption & SCH_NEXT )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
-	if( m_nFixedOption & SCH_MARK )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
-	if( m_nFixedOption & SCH_REPLACE )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCE, 0 );
-	if( m_nFixedOption & SCH_REPLACEA )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCEALL, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_PREV )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHPREV, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_NEXT )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_MARK )		::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_REPLACE )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCE, 0 );
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_REPLACEA )	::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_REPALCEALL, 0 );
 	
 	return;
 }

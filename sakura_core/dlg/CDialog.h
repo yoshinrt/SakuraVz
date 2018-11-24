@@ -151,12 +151,13 @@ public:
 		SCH_CLR_CLIP		= 1 << 12,	//!< クリップボードから貼り付けクリア
 		SCH_SET_CLIP		= 1 << 13,	//!< クリップボードから貼り付けセット
 		
-		SCH_PREV			= 1 << 31,	//!< ↑検索
-		SCH_NEXT			= 1 << 30,	//!< ↓検索
-		SCH_MARK			= 1 << 29,	//!< 該当行マーク
-		SCH_REPLACE			= 1 << 28,	//!< 置換
-		SCH_REPLACEA		= 1 << 27,	//!< すべて置換
-		SCH_SETONLY			= 1 << 26,	//!< 検索条件のみセット(ボタンにはない)
+		SCH_BUTTON_MASK		= 0xF0000000,	//!< デフォルトボタンマスク
+		SCH_PREV			= 0x10000000,	//!< ↑検索
+		SCH_NEXT			= 0x20000000,	//!< ↓検索
+		SCH_MARK			= 0x30000000,	//!< 該当行マーク
+		SCH_REPLACE			= 0x40000000,	//!< 置換
+		SCH_REPLACEA		= 0x50000000,	//!< すべて置換
+		SCH_SETONLY			= 0x60000000,	//!< 検索条件のみセット(ボタンにはない)
 	};
 
 public:
