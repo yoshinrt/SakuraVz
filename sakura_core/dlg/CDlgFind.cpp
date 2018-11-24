@@ -255,11 +255,13 @@ int CDlgFind::GetData( void )
 	m_pShareData->m_Common.m_sSearch.m_bNOTIFYNOTFOUND = m_bNOTIFYNOTFOUND;	// 検索／置換  見つからないときメッセージを表示
 
 	/* 検索文字列 */
-	int nBufferSize = ::GetWindowTextLength( GetItemHwnd(IDC_COMBO_TEXT) ) + 1;
-	std::vector<TCHAR> vText(nBufferSize);
-	::DlgItem_GetText( GetHwnd(), IDC_COMBO_TEXT, &vText[0], nBufferSize);
-	m_strText = to_wchar(&vText[0]);
-
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) != SCH_NODLG ){
+		int nBufferSize = ::GetWindowTextLength( GetItemHwnd(IDC_COMBO_TEXT) ) + 1;
+		std::vector<TCHAR> vText(nBufferSize);
+		::DlgItem_GetText( GetHwnd(), IDC_COMBO_TEXT, &vText[0], nBufferSize);
+		m_strText = to_wchar(&vText[0]);
+	}
+	
 	/* 検索ダイアログを自動的に閉じる */
 	m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgFind = ::IsDlgButtonChecked( GetHwnd(), IDC_CHECK_bAutoCloseDlgFind );
 

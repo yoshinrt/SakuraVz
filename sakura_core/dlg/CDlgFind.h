@@ -13,6 +13,7 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 #include "dlg/CDialog.h"
+#include "view/CEditView.h"
 #include "recent/CRecentSearch.h"
 #include "util/window.h"
 #ifndef SAKURA_CDLGFIND_H_
@@ -48,6 +49,15 @@ public:
 	CFontAutoDeleter		m_cFontText;
 	
 	int	m_nFixedOption;	//!< 検索・置換ダイアログのオプション固定
+	
+	int SetFixedOption( CEditView* pcEditView ){
+		m_lParam = ( LPARAM )pcEditView;
+		
+		SetData();
+		int iRet = GetData();
+		pcEditView->GetCommander().m_pCommanderView->ChangeCurRegexp();
+		return iRet;
+	}
 	
 protected:
 //@@@ 2002.2.2 YAZAKI CShareDataに移動

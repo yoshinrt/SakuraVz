@@ -59,9 +59,13 @@ void CViewCommander::Command_SEARCH_DIALOG( int nOption )
 	
 	// オプション固定の設定
 	GetEditWindow()->m_cDlgFind.m_nFixedOption = nOption;
-
+	
+	if(( nOption & CDialog::SCH_BUTTON_MASK ) == CDialog::SCH_NODLG ){
+		GetEditWindow()->m_cDlgFind.SetFixedOption( m_pCommanderView );
+	}
+	
 	/* 検索ダイアログの表示 */
-	if( NULL == GetEditWindow()->m_cDlgFind.GetHwnd() ){
+	else if( NULL == GetEditWindow()->m_cDlgFind.GetHwnd() ){
 		GetEditWindow()->m_cDlgFind.DoModeless( G_AppInstance(), m_pCommanderView->GetHwnd(), (LPARAM)&GetEditWindow()->GetActiveView() );
 	}
 	else{
