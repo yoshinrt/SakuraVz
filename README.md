@@ -88,11 +88,11 @@ var FuncTable = {};
 
 // 個別のマクロ
 FuncTable.Hoge = function(){
-	MessageBox( "Hoge" );
+  MessageBox( "Hoge" );
 }
 
 FuncTable.Fuga = function(){
-	MessageBox( "Fuga" );
+  MessageBox( "Fuga" );
 }
 
 // 個別のマクロにジャンプ
@@ -124,6 +124,7 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 - 0x40000000:「置換」ボタンをデフォルトにする
 - 0x50000000:「すべて置換」ボタンをデフォルトにする
 - 0x60000000: 検索ダイアログにおいて「上検索」「下検索」が押されたとき，検索条件のみセットし，検索動作は行いません．
+- 0x70000000: 検索ダイアログを表示せず，カーソル位置の単語を検索語に設定します．
 
 以下は，サクラエディタ本家の README になります．本 fork には適用されない情報もありますので，ご了承ください．
 
