@@ -1569,7 +1569,7 @@ public:
 			out = NULL;
 			if( bOldSave ){
 				std::tstring oldFile = fileName;
-				oldFile += _T(".skrold");
+				oldFile += _T(".bak");
 				if( fexist(oldFile.c_str()) ){
 					if( FALSE == ::DeleteFile( oldFile.c_str() ) ){
 						std::wstring msg = LSW(STR_GREP_REP_ERR_DELETE);
