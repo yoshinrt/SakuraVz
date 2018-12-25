@@ -48,6 +48,7 @@ class CPluginIfObj : public CWSHIfObj {
 		F_PL_GETOPTION,							//オプションファイルから値を読む
 		F_PL_GETCOMMANDNO,						//実行中プラグの番号を取得する
 		F_PL_GETSTRING,							//設定ファイルから文字列を読みだす(多言語対応)
+		F_PL_GETPLUGININFO,						//プラグイン情報取得
 	};
 	typedef std::string string;
 	typedef std::wstring wstring;
@@ -148,6 +149,18 @@ public:
 					return true;
 				}
 			}
+		case F_PL_GETPLUGININFO:
+			{
+				int num;
+				if(variant_to_int( Arguments[0], num ) == false) return false;
+				
+				if( num == 0 ){
+					// Jack 名
+					SysString S( m_cPlugin.m_sJack.c_str(), m_cPlugin.m_sJack.size());
+					Wrap( &Result )->Receive( S );
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -208,6 +221,7 @@ MacroFuncInfo CPluginIfObj::m_MacroFuncInfoArr[] =
 	{EFunctionCode(F_PL_GETOPTION),			LTEXT("GetOption"),				{VT_BSTR, VT_BSTR, VT_EMPTY, VT_EMPTY},		VT_BSTR,	NULL }, //オプションファイルから値を読む
 	{EFunctionCode(F_PL_GETCOMMANDNO),		LTEXT("GetCommandNo"),			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //オプションファイルから値を読む
 	{EFunctionCode(F_PL_GETSTRING),			LTEXT("GetString"),				{VT_I4,    VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //設定ファイルから文字列を読む
+	{EFunctionCode(F_PL_GETPLUGININFO),		LTEXT("GetPluginInfo"),			{VT_I4,    VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //プラグイン情報
 	//	終端
 	{F_INVALID,	NULL, {VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_EMPTY,	NULL}
 };

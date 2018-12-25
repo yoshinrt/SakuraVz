@@ -90,6 +90,8 @@ bool CWSHPlugin::InvokePlug( CEditView* view, CPlug& plug, CWSHIfObj::List& para
 		pWsh = wshPlug.m_Wsh;
 	}
 
+	m_sJack = plug.m_sJack;
+
 	CPluginIfObj cPluginIfo(*this);		//Pluginオブジェクトを追加
 	cPluginIfo.AddRef();
 	cPluginIfo.SetPlugIndex( plug.m_id );	//実行中プラグ番号を提供
