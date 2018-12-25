@@ -144,7 +144,10 @@ public:
 public:
 	//! 背景にビットマップを使用するかどうか
 	//! 2010.10.03 背景実装
-	bool IsBkBitmap() const{ return NULL != m_pcEditDoc->m_hBackImg; }
+	bool IsBkBitmap() const{
+		return NULL != m_pcEditDoc->m_hBackImg
+			&& 0 != GetDocument()->m_cDocType.GetDocumentAttribute().m_backImgOpacity;
+	}
 
 public:
 	CEditView* GetEditView()
@@ -180,15 +183,15 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
 	//取得
-	bool MyGetClipboardData( CNativeW&, bool*, bool* = NULL, UINT uMode = 0 );		/* クリップボードからデータを取得 */
+	bool MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, bool* pbLineSelect = NULL, UINT uMode = 0 );			/* クリップボードからデータを取得 */
 
 	//設定
-	bool MySetClipboardData( const ACHAR*, int, bool bColumnSelect, bool = false );	/* クリップボードにデータを設定 */
-	bool MySetClipboardData( const WCHAR*, int, bool bColumnSelect, bool = false );	/* クリップボードにデータを設定 */
+	bool MySetClipboardData( const ACHAR* pszText, int nTextLen, bool bColumnSelect, bool bLineSelect = false );	/* クリップボードにデータを設定 */
+	bool MySetClipboardData( const WCHAR* pszText, int nTextLen, bool bColumnSelect, bool bLineSelect = false );	/* クリップボードにデータを設定 */
 
 	//利用
 	void CopyCurLine( bool bAddCRLFWhenCopy, EEolType neweol, bool bEnableLineModePaste );	/* カーソル行をクリップボードにコピーする */	// 2007.10.08 ryoji
-	void CopySelectedAllLines( const wchar_t*, BOOL );			/* 選択範囲内の全行をクリップボードにコピーする */
+	void CopySelectedAllLines( const wchar_t* pszQuote, BOOL bWithLineNumber );			/* 選択範囲内の全行をクリップボードにコピーする */
 
 	enum {
 		M_DEFAULT,		//!< paste 時デフォルト，設定に依存
@@ -292,7 +295,7 @@ public:
 	//                        スクロール                           //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
-	void AdjustScrollBars();											/* スクロールバーの状態を更新する */
+	void AdjustScrollBars( BOOL bRedraw = TRUE );						/* スクロールバーの状態を更新する */
 	BOOL CreateScrollBar();												/* スクロールバー作成 */	// 2006.12.19 ryoji
 	void DestroyScrollBar();											/* スクロールバー破棄 */	// 2006.12.19 ryoji
 	CLayoutInt GetWrapOverhang( void ) const;							/* 折り返し桁以後のぶら下げ余白計算 */	// 2008.06.08 ryoji
@@ -310,8 +313,8 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                        スクロール                           //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	CLayoutInt  ScrollAtV(CLayoutInt nPos);										/* 指定上端行位置へスクロール */
-	CLayoutInt  ScrollAtH(CLayoutInt nPos);										/* 指定左端桁位置へスクロール */
+	CLayoutInt  ScrollAtV(CLayoutInt nPos, BOOL bRedrawScrollBar = TRUE);		/* 指定上端行位置へスクロール */
+	CLayoutInt  ScrollAtH(CLayoutInt nPos, BOOL bRedrawScrollBar = TRUE);		/* 指定左端桁位置へスクロール */
 	//	From Here Sep. 11, 2004 genta ずれ維持の同期スクロール
 	CLayoutInt  ScrollByV( CLayoutInt vl ){	return ScrollAtV( GetTextArea().GetViewTopLine() + vl );}	/* 指定行スクロール*/
 	CLayoutInt  ScrollByH( CLayoutInt hl ){	return ScrollAtH( GetTextArea().GetViewLeftCol() + hl );}	/* 指定桁スクロール */
@@ -341,9 +344,9 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
 	// 2002/01/19 novice public属性に変更
-	bool GetSelectedDataSimple( CNativeW& );// 選択範囲のデータを取得
+	bool GetSelectedDataSimple( CNativeW& cmemBuf );// 選択範囲のデータを取得
 	bool GetSelectedDataOne( CNativeW& cmemBuf, int nMaxLen );
-	bool GetSelectedData( CNativeW*, BOOL, const wchar_t*, BOOL, bool bAddCRLFWhenCopy, EEolType neweol = EOL_UNKNOWN);/* 選択範囲のデータを取得 */
+	bool GetSelectedData( CNativeW* cmemBuf, BOOL bLineOnly, const wchar_t* pszQuote, BOOL bWithLineNumber, bool bAddCRLFWhenCopy, EEolType neweol = EOL_UNKNOWN);/* 選択範囲のデータを取得 */
 	int IsCurrentPositionSelected( CLayoutPoint ptCaretPos );					/* 指定カーソル位置が選択エリア内にあるか */
 	int IsCurrentPositionSelectedTEST( const CLayoutPoint& ptCaretPos, const CLayoutRange& sSelect ) const;/* 指定カーソル位置が選択エリア内にあるか */
 	// 2006.07.09 genta 行桁指定によるカーソル移動(選択領域を考慮)
@@ -559,7 +562,9 @@ public:
 	//                          その他                             //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
-	BOOL OPEN_ExtFromtoExt( BOOL, BOOL, const TCHAR* [], const TCHAR* [], int, int, const TCHAR* ); // 指定拡張子のファイルに対応するファイルを開く補助関数 // 2003.08.12 Moca
+	BOOL OPEN_ExtFromtoExt( BOOL bCheckOnly, BOOL bBeepWhenMiss,
+							const TCHAR* file_ext[], const TCHAR* open_ext[],
+							int file_extno, int open_extno, const TCHAR* errmes ); // 指定拡張子のファイルに対応するファイルを開く補助関数 // 2003.08.12 Moca
 	//	Jan.  8, 2006 genta 折り返しトグル動作判定
 	enum TOGGLE_WRAP_ACTION {
 		TGWRAP_NONE = 0,
@@ -640,6 +645,7 @@ public:
 	int				m_nVScrollRate;		/* 垂直スクロールバーの縮尺 */
 	HWND			m_hwndHScrollBar;	/* 水平スクロールバーウィンドウハンドル */
 	HWND			m_hwndSizeBox;		/* サイズボックスウィンドウハンドル */
+	HWND			m_hwndSizeBoxPlaceholder;	/* サイズボックス代替スタティックウィンドウハンドル */
 	CSplitBoxWnd*	m_pcsbwVSplitBox;	/* 垂直分割ボックス */
 	CSplitBoxWnd*	m_pcsbwHSplitBox;	/* 水平分割ボックス */
 	CAutoScrollWnd	m_cAutoScrollWnd;	//!< オートスクロール
@@ -748,7 +754,6 @@ public:
 	CLayoutInt		m_nPageViewTop;
 	CLayoutInt		m_nPageViewBottom;
 
-private:
 	DISALLOW_COPY_AND_ASSIGN(CEditView);
 };
 

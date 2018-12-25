@@ -32,12 +32,12 @@ public:
 	*/
 	CTipWnd();
 	~CTipWnd();
-	void Create( HINSTANCE, HWND );	/* 初期化 */
+	void Create( HINSTANCE hInstance, HWND hwndParent );	/* 初期化 */
 
 	/*
 	||  Attributes & Operations
 	*/
-	void Show( int, int, const TCHAR*, RECT* pRect = NULL );	/* Tipを表示 */
+	void Show( int nX, int nY, const TCHAR* szText, RECT* pRect = NULL );	/* Tipを表示 */
 	void Hide( void );	/* Tipを消す */
 	void GetWindowSize(LPRECT pRect);		// 2001/06/19 asa-o ウィンドウのサイズを得る
 
@@ -64,8 +64,8 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	void ComputeWindowSize( HDC, HFONT, const TCHAR*, RECT* );	/* ウィンドウのサイズを決める */
-	void DrawTipText( HDC, HFONT, const TCHAR* );	/* ウィンドウのテキストを表示 */
+	void ComputeWindowSize( HDC hdc, RECT* prcResult );	/* ウィンドウのサイズを決める */
+	void DrawTipText( HDC hdc, const RECT& rcPaint );	/* ウィンドウのテキストを表示 */
 
 	/* 仮想関数 */
 	//	Jan. 9, 2006 genta

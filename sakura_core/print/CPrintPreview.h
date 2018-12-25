@@ -114,7 +114,8 @@ protected:
 	*/
 	void DrawHeaderFooter( HDC hdc, const CMyRect& rect , bool bHeader );
 	CColorStrategy* DrawPageTextFirst( int nPageNum );
-	CColorStrategy* DrawPageText( HDC, int, int, int nPageNum, CDlgCancel*, CColorStrategy* pStrategyStart );
+	CColorStrategy* DrawPageText( HDC hdc, int nOffX, int nOffY, int nPageNum,
+								  CDlgCancel* pCDlgCancel, CColorStrategy* pStrategyStart );
 
 	// 印刷／プレビュー 行描画
 	CColorStrategy* Print_DrawLine(
@@ -266,7 +267,6 @@ protected:
 	bool			m_bLockSetting;				// 設定のロック
 	bool			m_bDemandUpdateSetting;		// 設定の更新要求
 
-private:
 	DISALLOW_COPY_AND_ASSIGN(CPrintPreview);
 };
 

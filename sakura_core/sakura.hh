@@ -666,6 +666,7 @@
 #define HIDC_CHECK_BACKIMG_REP_Y				11426 //背景画像RepeatY
 #define HIDC_EDIT_BACKIMG_OFFSET_X				11427 //背景画像OffsetX
 #define HIDC_EDIT_BACKIMG_OFFSET_Y				11428 //背景画像OffsetY
+#define HIDC_EDIT_BACKIMG_TRANSPARENCY			11429 //背景画像透明度
 #define HIDC_COMBO_SET_COLOR					11430 //強調キーワード１セット名
 #define HIDC_COMBO_SET2_COLOR					11431 //強調キーワード２セット名
 #define HIDC_EDIT_BLOCKCOMMENT_FROM				11440 //ブロックコメント１開始
@@ -828,6 +829,8 @@
 #define HIDC_CHECK_SEP_FOLDER			12023	//フォルダ毎に表示
 #define HIDC_GREP_BUTTON_FOLDER_UP		12024	//Up
 #define HIDC_GREP_CHECK_CP				12025	//コードページ
+#define HIDC_GREP_COMBO_EXCLUDE_FILE	12026	//除外ファイル
+#define HIDC_GREP_COMBO_EXCLUDE_FOLDER	12027	//除外フォルダ
 
 //外部コマンド
 #define HIDC_EXEC_BUTTON_REFERENCE	12100	//参照
