@@ -16,7 +16,6 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-
 #ifndef _CDIALOG_H_
 #define _CDIALOG_H_
 
@@ -191,10 +190,6 @@ protected:
 	HFONT SetMainFont( HWND hTarget );
 };
 
-
-
 ///////////////////////////////////////////////////////////////////////
 #endif /* _CDIALOG_H_ */
-
-
 

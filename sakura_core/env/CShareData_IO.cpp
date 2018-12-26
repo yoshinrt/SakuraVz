@@ -93,7 +93,6 @@ bool CShareData_IO::ShareData_IO_2( bool bRead )
 
 //	MYTRACE( _T("Iniファイル処理-1 所要時間(ミリ秒) = %d\n"), cRunningTimer.Read() );
 
-
 	if( bRead ){
 		if( !cProfile.ReadProfile( szIniFileName ) ){
 			/* 設定ファイルが存在しない */
@@ -558,7 +557,6 @@ void CShareData_IO::ShareData_IO_Common( CDataProfile& cProfile )
 		}
 	}
 	
-	
 	cProfile.IOProfileData( pszSecName, LTEXT("nBackUpType")			, common.m_sBackup.m_nBackUpType );
 	cProfile.IOProfileData( pszSecName, LTEXT("bBackUpType2_Opt1")		, common.m_sBackup.m_nBackUpType_Opt1 );
 	cProfile.IOProfileData( pszSecName, LTEXT("bBackUpType2_Opt2")		, common.m_sBackup.m_nBackUpType_Opt2 );
@@ -579,7 +577,6 @@ void CShareData_IO::ShareData_IO_Common( CDataProfile& cProfile )
 		ShareData_IO_Sub_LogFont( cProfile, pszSecName, L"khlf", L"khps", L"khlfFaceName",
 			common.m_sHelper.m_lf, common.m_sHelper.m_nPointSize );
 	}// Keword Help Font
-	
 	
 	cProfile.IOProfileData( pszSecName, LTEXT("nMRUArrNum_MAX")			, common.m_sGeneral.m_nMRUArrNum_MAX );
 	SetValueLimit( common.m_sGeneral.m_nMRUArrNum_MAX, MAX_MRU );
@@ -758,7 +755,6 @@ void CShareData_IO::ShareData_IO_Common( CDataProfile& cProfile )
 	common.m_sVzMode.IOProfileData( pszSecName, cProfile );
 }
 
-
 // プラグインコマンドを名前から機能番号へ変換
 EFunctionCode GetPlugCmdInfoByName(
 	const WCHAR*	pszFuncName			//!< [in]  プラグインコマンド名
@@ -821,7 +817,6 @@ bool GetPlugCmdInfoByFuncCode(
 	auto_sprintf(pszFuncName, L"%ls/%02d", plugin.m_PluginTable[nID].m_szId, nNo);
 	return true;
 }
-
 
 /*! プラグイン名or機能番号文字列をEFunctionCodeにする
 
@@ -943,7 +938,6 @@ void CShareData_IO::ShareData_IO_CustMenu( CDataProfile& cProfile )
 */
 void CShareData_IO::IO_CustMenu( CDataProfile& cProfile, CommonSetting_CustomMenu& menu, bool bOutCmdName)
 {
-
 	const WCHAR* pszSecName = LTEXT("CustMenu");
 	int		i, j;
 	WCHAR	szKeyName[64];
@@ -1565,7 +1559,6 @@ void CShareData_IO::ShareData_IO_Type_One( CDataProfile& cProfile, STypeConfig& 
 		pos = types.m_cLineComment.getLineCommentPos( 2 );
 		cProfile.IOProfileData( pszSecName, LTEXT("nLineCommentColumn3"), pos );	//Jun. 01, 2001 JEPRO 追加
 		//	To here May 12, 2001 genta
-
 	}
 	// To Here Sep. 28, 2002 genta / YAZAKI
 
@@ -2100,7 +2093,6 @@ void CShareData_IO::ShareData_IO_MainMenu( CDataProfile& cProfile )
 	}
 }
 
-
 /*!
 	@brief 共有データのMainMenuセクションの入出力
 	@param[in,out]	cProfile	INIファイル入出力クラス
@@ -2381,8 +2373,6 @@ void CShareData_IO::IO_ColorSet( CDataProfile* pcProfile, const WCHAR* pszSecNam
 	}
 }
 
-
-
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                         実装補助                            //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -2440,7 +2430,6 @@ void ShareData_IO_Sub_LogFont( CDataProfile& cProfile, const WCHAR* pszSecName,
 	
 	cProfile.IOProfileData( pszSecName, pszKeyFaceName, MakeStringBufferT(lf.lfFaceName) );
 }
-
 
 void CShareData_IO::ShareData_IO_FileTree( CDataProfile& cProfile, SFileTree& fileTree, const WCHAR* pszSecName )
 {

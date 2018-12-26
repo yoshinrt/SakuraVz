@@ -81,9 +81,6 @@ inline void SetDllShareData(DLLSHAREDATA* pShareData)
 
 #include "env/CTextStack.h"	// テキストスタック
 
-
-
-
 //! 共有フラグ
 struct SShare_Flags{
 	BOOL				m_bEditWndChanging;				// 編集ウィンドウ切替中	// 2007.04.03 ryoji
@@ -126,7 +123,6 @@ struct SShare_Version{
 	DWORD				m_dwProductVersionMS;
 	DWORD				m_dwProductVersionLS;
 };
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                   共有メモリ構造体本体                      //
@@ -178,7 +174,6 @@ struct DLLSHAREDATA{
 	//タグファイルの作成ダイアログのオプション
 	TCHAR						m_szTagsCmdLine[_MAX_PATH];	/* TAGSコマンドラインオプション */	//@@@ 2003.05.12 MIK
 	int							m_nTagsOpt;					/* TAGSオプション(チェック) */	//@@@ 2003.05.12 MIK
-
 
 	// -- -- テンポラリ -- -- //
 	//指定行へジャンプダイアログのオプション

@@ -19,7 +19,6 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-
 #include "StdAfx.h"
 #include "CNormalProcess.h"
 #include "CCommandLine.h"
@@ -49,7 +48,6 @@ CNormalProcess::CNormalProcess( HINSTANCE hInstance, LPCTSTR lpCmdLine )
 CNormalProcess::~CNormalProcess()
 {
 }
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                     プロセスハンドラ                        //
@@ -132,7 +130,6 @@ bool CNormalProcess::InitializeProcess()
 			return false;
 		}
 	}
-
 
 	// プラグイン読み込み
 	MY_TRACETIME( cRunningTimer, "Before Init Jack" );
@@ -508,8 +505,6 @@ void CNormalProcess::OnExitProcess()
 	CPluginManager::getInstance()->UnloadAllPlugin();		// Mpve here	2010/7/11 Uchi
 }
 
-
-
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                         実装補助                            //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -546,7 +541,6 @@ HANDLE CNormalProcess::_GetInitializeMutex() const
 	}
 	return hMutex;
 }
-
 
 /*!
 	@brief 複数ファイル読み込み

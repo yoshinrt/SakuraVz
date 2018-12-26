@@ -51,7 +51,6 @@ CDlgFind::CDlgFind()
 	return;
 }
 
-
 /*!
 	コンボボックスのドロップダウンメッセージを捕捉する
 
@@ -89,8 +88,6 @@ void CDlgFind::ChangeView( LPARAM pcEditView )
 	return;
 }
 
-
-
 BOOL CDlgFind::OnInitDialog( HWND hwnd, WPARAM wParam, LPARAM lParam )
 {
 	BOOL bRet = CDialog::OnInitDialog(hwnd, wParam, lParam);
@@ -105,15 +102,11 @@ BOOL CDlgFind::OnInitDialog( HWND hwnd, WPARAM wParam, LPARAM lParam )
 	return bRet;
 }
 
-
-
 BOOL CDlgFind::OnDestroy()
 {
 	m_cFontText.ReleaseOnDestroy();
 	return CDialog::OnDestroy();
 }
-
-
 
 /* ダイアログデータの設定 */
 void CDlgFind::SetData( void )
@@ -131,7 +124,6 @@ void CDlgFind::SetData( void )
 	// Combo_LimitText( GetItemHwnd( IDC_COMBO_TEXT ), _MAX_PATH - 1 );
 	/* コンボボックスのユーザー インターフェイスを拡張インターフェースにする */
 	Combo_SetExtendedUI( GetItemHwnd( IDC_COMBO_TEXT ), TRUE );
-
 
 	/*****************************
 	*         データ設定         *
@@ -210,7 +202,6 @@ void CDlgFind::SetData( void )
 	return;
 }
 
-
 // 検索文字列リストの設定
 //	2010/5/28 Uchi
 void CDlgFind::SetCombosList( void )
@@ -229,7 +220,6 @@ void CDlgFind::SetCombosList( void )
 		::DlgItem_SetText( GetHwnd(), IDC_COMBO_TEXT, m_strText.c_str() );
 	}
 }
-
 
 /* ダイアログデータの取得 */
 int CDlgFind::GetData( void )
@@ -303,8 +293,6 @@ int CDlgFind::GetData( void )
 		return 0;
 	}
 }
-
-
 
 BOOL CDlgFind::OnBnClicked( int wID )
 {
@@ -462,5 +450,4 @@ LPVOID CDlgFind::GetHelpIdTable(void)
 	return (LPVOID)p_helpids;
 }
 //@@@ 2002.01.18 add end
-
 

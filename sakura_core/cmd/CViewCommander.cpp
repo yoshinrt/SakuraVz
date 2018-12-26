@@ -40,7 +40,6 @@ CViewCommander::CViewCommander(CEditView* pEditView) : m_pCommanderView(pEditVie
 	m_pcSMacroMgr = CEditApp::getInstance()->m_pcSMacroMgr;
 }
 
-
 /*!
 	コマンドコードによる処理振り分け
 
@@ -68,7 +67,6 @@ BOOL CViewCommander::HandleCommand(
 	//	Jul.  7, 2007 genta 定数と比較するためにシフトしないで使う
 	int nCommandFrom = nCommand & ~0xffff;
 	nCommand = (EFunctionCode)LOWORD( nCommand );
-
 
 	if( m_pCommanderView->m_nAutoScrollMode && F_AUTOSCROLL != nCommand ){
 		m_pCommanderView->AutoScrollExit();
@@ -473,7 +471,6 @@ BOOL CViewCommander::HandleCommand(
 	case F_FUNCLIST_NEXT:	Command_FUNCLIST_NEXT();break;					// 次の関数リストマーク	2014.01.05
 	case F_FUNCLIST_PREV:	Command_FUNCLIST_PREV();break;					// 前の関数リストマーク	2014.01.05
 
-
 	/* モード切り替え系 */
 	case F_CHGMOD_INS:		Command_CHGMOD_INS();break;		//挿入／上書きモード切り替え
 	case F_CHG_CHARSET:		Command_CHG_CHARSET( (ECodeType)lparam1, lparam2 != 0 );break;	//文字コードセット指定	2010/6/14 Uchi
@@ -649,7 +646,6 @@ BOOL CViewCommander::HandleCommand(
 				return bRet;
 			}
 		}
-
 	}
 
 	/* アンドゥバッファの処理 */
@@ -657,8 +653,6 @@ BOOL CViewCommander::HandleCommand(
 
 	return bRet;
 }
-
-
 
 /*!
 	@date 2014.07.11 新規追加
@@ -677,7 +671,6 @@ void CViewCommander::Sub_BoxSelectLock( int flags )
 		this->Command_BEGIN_BOXSELECT( bSelLock );
 	}
 }
-
 
 CLogicInt CViewCommander::ConvertEol(const wchar_t* pszText, CLogicInt nTextLen, wchar_t* pszConvertedText)
 {
@@ -717,8 +710,6 @@ CLogicInt CViewCommander::ConvertEol(const wchar_t* pszText, CLogicInt nTextLen,
 	}
 	return nConvertedTextLen;
 }
-
-
 
 /*!
 	@brief 検索で見つからないときの警告（メッセージボックス／サウンド）

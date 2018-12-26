@@ -88,7 +88,6 @@ private:
 	DISALLOW_COPY_AND_ASSIGN(CSearchStringPattern);
 };
 
-
 class CSearchAgent{
 public:
 	// 文字列検索
@@ -109,7 +108,6 @@ public:
 		int*	pnMatchLen
 	);
 
-	
 	// 検索条件の情報
 	static void CreateCharCharsArr(
 		const wchar_t*	pszPattern,

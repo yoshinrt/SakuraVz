@@ -84,7 +84,6 @@ CShareData::~CShareData()
 	}
 }
 
-
 static CMutex g_cMutexShareWork( FALSE, GSTR_MUTEX_SAKURA_SHAREWORK );
  
 CMutex& CShareData::GetMutexShareWork(){
@@ -749,13 +748,9 @@ bool CShareData::InitShareData()
 			return false;
 		}
 		//	To Here Oct. 27, 2000 genta
-
 	}
 	return true;
 }
-
-
-
 
 static void ConvertLangString( wchar_t* pBuf, size_t chBufSize, std::wstring& org, std::wstring& to )
 {
@@ -801,11 +796,8 @@ static void ConvertLangValueImpl( char* pBuf, size_t chBufSize, int nStrId, std:
 	index++;
 }
 
-
 #define ConvertLangValue(buf, id)  ConvertLangValueImpl(buf, _countof(buf), id, values, index, bSetValues, true);
 #define ConvertLangValue2(buf, id) ConvertLangValueImpl(buf, _countof(buf), id, values, index, bSetValues, false);
-
-
 
 /*!
 	国際化対応のための文字列を変更する
@@ -995,20 +987,7 @@ BOOL CShareData::ActiveAlreadyOpenedWindow( const TCHAR* pszPath, HWND* phwndOwn
 	else {
 		return FALSE;
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*!
 	アウトプットウインドウに出力(書式付)
@@ -1140,8 +1119,6 @@ BOOL CShareData::IsPrivateSettings( void ){
 	return m_pShareData->m_sFileNameManagement.m_IniFolder.m_bWritePrivate;
 }
 
-
-
 /*
 	CShareData::CheckMRUandOPENFOLDERList
 	MRUとOPENFOLDERリストの存在チェックなど
@@ -1228,7 +1205,6 @@ int CShareData::GetMacroFilename( int idx, TCHAR *pszPath, int nBufLen )
 		_tcscpy( ptr, pszFile );
 		return nAllLen;
 	}
-
 }
 
 /*!	idxで指定したマクロのm_bReloadWhenExecuteを取得する。
@@ -1242,9 +1218,6 @@ bool CShareData::BeReloadWhenExecuteMacro( int idx )
 
 	return m_pShareData->m_Common.m_sMacro.m_MacroTable[idx].m_bReloadWhenExecute;
 }
-
-
-
 
 /*!	@brief 共有メモリ初期化/ツールバー
 
@@ -1305,9 +1278,7 @@ void CShareData::InitToolButtons(DLLSHAREDATA* pShareData)
 	/* ツールバーボタンの数 */
 	pShareData->m_Common.m_sToolBar.m_nToolBarButtonNum = _countof(DEFAULT_TOOL_BUTTONS);
 	pShareData->m_Common.m_sToolBar.m_bToolBarIsFlat = !IsVisualStyle();			/* フラットツールバーにする／しない */	// 2006.06.23 ryoji ビジュアルスタイルでは初期値をノーマルにする
-	
 }
-
 
 /*!	@brief 共有メモリ初期化/ポップアップメニュー
 
@@ -1504,7 +1475,6 @@ void CShareData::InitPopupMenu(DLLSHAREDATA* pShareData)
 /* 言語選択後に共有メモリ内の文字列を更新する */
 void CShareData::RefreshString()
 {
-
 	RefreshKeyAssignString( m_pShareData );
 }
 
@@ -1519,7 +1489,6 @@ std::vector<STypeConfig*>& CShareData::GetTypeSettings()
 {
 	return *m_pvTypeSettings;
 }
-
 
 void CShareData::InitFileTree( SFileTree* setting )
 {

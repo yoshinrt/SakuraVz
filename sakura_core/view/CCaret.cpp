@@ -59,7 +59,6 @@ using namespace std;
 //                         外部依存                            //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-
 inline int CCaret::GetHankakuDx() const
 {
 	return m_pEditView->GetTextMetrics().GetHankakuDx();
@@ -74,7 +73,6 @@ inline int CCaret::GetHankakuDy() const
 {
 	return m_pEditView->GetTextMetrics().GetHankakuDy();
 }
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                      CCaretUnderLine                        //
@@ -93,9 +91,6 @@ void CCaretUnderLine::CaretUnderLineOFF( bool bDraw, bool bDrawPaint, bool bRese
 	if( m_nLockCounter ) return;	//	ロックされていたら何もできない。
 	m_pcEditView->CaretUnderLineOFF( bDraw, bDrawPaint, bResetFlag, m_nUnderLineLockCounter != 0 );
 }
-
-
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //               コンストラクタ・デストラクタ                  //
@@ -123,7 +118,6 @@ CCaret::~CCaret()
 	if( m_hbmpCaret != NULL )
 		DeleteObject( m_hbmpCaret );
 }
-
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                     インターフェース                        //
@@ -199,7 +193,6 @@ CLayoutInt CCaret::MoveCursor(
 	/* キャレット移動 */
 	SetCaretLayoutPos(ptWk_CaretPos);
 
-
 	// カーソル行アンダーラインのOFF
 	bool bDrawPaint = ptWk_CaretPos.GetY2() != m_pEditView->m_nOldUnderLineYBg;
 	m_cUnderLine.SetUnderLineDoNotOFF( bUnderLineDoNotOFF );
@@ -237,7 +230,6 @@ CLayoutInt CCaret::MoveCursor(
 		if( 0 > area.GetViewLeftCol() - nScrollColNum ){
 			nScrollColNum = area.GetViewLeftCol();
 		}
-
 	}
 
 	// 2013.12.30 bScrollがOFFのときは横スクロールしない
@@ -381,7 +373,6 @@ CLayoutInt CCaret::MoveCursor(
 		//	bScroll == FALSEの時にはスクロールしないので，実行しない
 		m_pEditView->SyncScrollV( -nScrollRowNum );	//	方向が逆なので符号反転が必要
 		m_pEditView->SyncScrollH( -nScrollColNum );	//	方向が逆なので符号反転が必要
-
 	}
 
 // 02/09/18 対括弧の強調表示 ai Start	03/02/18 ai mod S
@@ -391,9 +382,7 @@ CLayoutInt CCaret::MoveCursor(
 // 02/09/18 対括弧の強調表示 ai End		03/02/18 ai mod E
 
 	return nScrollRowNum;
-
 }
-
 
 CLayoutInt CCaret::MoveCursorFastMode(
 	const CLogicPoint&		ptWk_CaretPosLogic	//!< [in] 移動先ロジック位置
@@ -424,8 +413,6 @@ CLayoutInt CCaret::MoveCursorToClientPoint( const POINT& ptClientPos, bool test,
 	return nScrollRowNum;
 }
 //_CARETMARGINRATE_CARETMARGINRATE_CARETMARGINRATE
-
-
 
 /*! 正しいカーソル位置を算出する(EOF以降のみ)
 	@param pptPosXY [in,out] カーソルのレイアウト座標
@@ -487,7 +474,6 @@ void CCaret::ShowEditCaret()
 	const CLayoutMgr* pLayoutMgr=&m_pEditDoc->m_cLayoutMgr;
 	CommonSetting* pCommon=&GetDllShareData().m_Common;
 	const STypeConfig* pTypes=&m_pEditDoc->m_cDocType.GetDocumentAttribute();
-
 
 	using namespace WCODE;
 
@@ -655,9 +641,6 @@ void CCaret::ShowEditCaret()
 	m_pEditView->SetIMECompFormPos();
 }
 
-
-
-
 /*! キャレットの行桁位置およびステータスバーの状態表示の更新
 
 	@note ステータスバーの状態の並び方の変更はメッセージを受信する
@@ -673,7 +656,6 @@ void CCaret::ShowCaretPosInfo()
 	const CLayoutMgr* pLayoutMgr=&m_pEditDoc->m_cLayoutMgr;
 	const STypeConfig* pTypes=&m_pEditDoc->m_cDocType.GetDocumentAttribute();
 
-
 	if( !m_pEditView->GetDrawSwitch() ){
 		return;
 	}
@@ -681,12 +663,10 @@ void CCaret::ShowCaretPosInfo()
 	// ステータスバーハンドルを取得
 	HWND hwndStatusBar = m_pEditDoc->m_pcEditWnd->m_cStatusBar.GetStatusHwnd();
 
-
 	// カーソル位置の文字列を取得
 	const CLayout*	pcLayout;
 	CLogicInt		nLineLen;
 	const wchar_t*	pLine = pLayoutMgr->GetLineStr( GetCaretLayoutPos().GetY2(), &nLineLen, &pcLayout );
-
 
 	// -- -- -- -- 文字コード情報 -> pszCodeName -- -- -- -- //
 	const TCHAR* pszCodeName;
@@ -709,13 +689,11 @@ void CCaret::ShowCaretPosInfo()
 	}
 	pszCodeName = cmemCodeName.GetStringPtr();
 
-
 	// -- -- -- -- 改行モード -> szEolMode -- -- -- -- //
 	//	May 12, 2000 genta
 	//	改行コードの表示を追加
 	CEol cNlType = m_pEditDoc->m_cDocEditor.GetNewLineCodeFile();
 	const TCHAR* szEolMode = cNlType.GetName();
-
 
 	// -- -- -- -- キャレット位置 -> ptCaret -- -- -- -- //
 	//
@@ -763,7 +741,6 @@ void CCaret::ShowCaretPosInfo()
 	ptCaret.x++;
 	ptCaret.y++;
 
-
 	// -- -- -- -- キャレット位置の文字情報 -> szCaretChar -- -- -- -- //
 	//
 	TCHAR szCaretChar[32]=_T("");
@@ -790,7 +767,6 @@ void CCaret::ShowCaretPosInfo()
 			}
 		}
 	}
-
 
 	// -- -- -- --  ステータス情報を書き出す -- -- -- -- //
 	//
@@ -876,7 +852,6 @@ void CCaret::ShowCaretPosInfo()
 		statusBar.SetStatusText( 5, SBT_OWNERDRAW, _T("") );
 		statusBar.SetStatusText( 6, 0,             szText_6 );
 	}
-
 }
 
 void CCaret::ClearCaretPosInfoCache()
@@ -985,7 +960,6 @@ CLayoutInt CCaret::Cursor_UPDOWN( CLayoutInt nMoveLines, bool bSelect )
 	return nScrollLines;
 }
 
-
 /*!	キャレットの作成
 
 	@param nCaretColor [in]	キャレットの色種別 (0:通常, 1:IME ON)
@@ -1038,7 +1012,6 @@ void CCaret::CreateEditCaret( COLORREF crCaret, COLORREF crBack, int nWidth, int
 	return;
 }
 
-
 // 2002/07/22 novice
 /*!
 	キャレットの表示
@@ -1050,7 +1023,6 @@ void CCaret::ShowCaret_( HWND hwnd )
 		m_bCaretShowFlag = true;
 	}
 }
-
 
 /*!
 	キャレットの非表示
@@ -1073,7 +1045,6 @@ void CCaret::CopyCaretStatus(CCaret* pCaret) const
 	//※ キャレットのサイズはコピーしない。2002/05/12 YAZAKI
 }
 
-
 POINT CCaret::CalcCaretDrawPos(const CLayoutPoint& ptCaretPos) const
 {
 	int nPosX = m_pEditView->GetTextArea().GetAreaLeft()
@@ -1093,9 +1064,6 @@ POINT CCaret::CalcCaretDrawPos(const CLayoutPoint& ptCaretPos) const
 
 	return CMyPoint(nPosX,nPosY);
 }
-
-
-
 
 /*!
 	行桁指定によるカーソル移動（座標調整付き）

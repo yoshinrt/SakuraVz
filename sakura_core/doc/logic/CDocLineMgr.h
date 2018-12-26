@@ -102,9 +102,6 @@ public:
 	DISALLOW_COPY_AND_ASSIGN(CDocLineMgr);
 };
 
-
 ///////////////////////////////////////////////////////////////////////
 #endif /* _CDOCLINEMGR_H_ */
-
-
 

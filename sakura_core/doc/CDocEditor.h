@@ -57,8 +57,6 @@ public:
 	//セーブ前後
 	void OnAfterSave(const SSaveInfo& sSaveInfo);
 
-
-
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                           状態                              //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -106,7 +104,6 @@ public:
 			CClipboard::HasValidData();
 	}
 };
-
 
 class CDocEditAgent{
 public:
