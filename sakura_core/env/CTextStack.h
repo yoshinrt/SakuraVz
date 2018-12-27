@@ -59,6 +59,11 @@ public:
 	//! 要素数取得
 	int GetSize( void ){ return m_nSize; };
 	
+	//! スタックに push 可能なサイズか?
+	static bool IsPushableSize( int iLen ){
+		return iLen * sizeof( wchar_t ) + sizeof( UINT ) * 3 <= TEXTSTACK_SIZE;
+	}
+	
 	enum {
 		M_CHAR		= 0,	//!< 文字単位
 		M_COLUMN	= 1,	//!< 矩形

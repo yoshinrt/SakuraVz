@@ -2344,9 +2344,13 @@ bool CEditView::MyGetClipboardData( CNativeW& cmemBuf, bool* pbColumnSelect, boo
 	}
 	
 	if( bEnbStack && ( uMode != M_COPYPASTE )){
-		// クリップボードがサクラで copy されたものなら，stack top
-		// と同じ内容であるので，stack top は破棄する
-		if( ::IsClipboardFormatAvailable( CClipboard::GetSakuraFormat())){
+		// クリップボードがサクラで copy されたもの かつ
+		// テキストスタックサイズを超えていないならば，
+		// stack top と同じ内容であるので，stack top は破棄する
+		if(
+			::IsClipboardFormatAvailable( CClipboard::GetSakuraFormat()) &&
+			CTextStack::IsPushableSize( cmemBuf.GetStringLength())
+		){
 			GetDllShareData().m_TextStack.Pop();
 		}
 		
@@ -2418,8 +2422,13 @@ bool CEditView::MySetClipboardData( const WCHAR* pszText, int nTextLen, bool bCo
 		if( !( bResult = cClipboard.SetText(szConvText,iLen,bColumnSelect,bLineSelect)))
 			break;
 		
-		// 以下，テキストスタック有効時のみ処理
-		if( !GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack ) break;
+		if(
+			// テキストスタック無効?
+			!GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack ||
+			
+			// スタックに格納不可能?
+			!CTextStack::IsPushableSize( iLen )
+		) break;
 		
 		// テキストスタックに push
 		bResult = GetDllShareData().m_TextStack.Push(
