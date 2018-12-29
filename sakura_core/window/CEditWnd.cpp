@@ -3974,7 +3974,11 @@ void CEditWnd::PrintMenubarMessage( const TCHAR* msg )
 	rc.top = po.y - m_nCaretPosInfoCharHeight - 2;
 	rc.bottom = rc.top + m_nCaretPosInfoCharHeight;
 	::SetTextColor( hdc, ::GetSysColor( COLOR_MENUTEXT ) );
-	::SetBkColor( hdc, ::GetSysColor( COLOR_MENUBAR ) );
+	auto MenuColor = ::GetPixel( hdc, rc.left - 1, rc.top );
+	::SetBkColor( hdc,
+		MenuColor == ::GetPixel( hdc, rc.left - 1, rc.bottom - 1 ) ?
+			MenuColor : ::GetSysColor( COLOR_MENUBAR )
+	);
 	{
 		const WCHAR* pchText = m_pszMenubarMessage;
 		const ULONG cchText = nStrLen;
