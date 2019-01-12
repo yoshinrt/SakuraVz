@@ -307,19 +307,10 @@ bool CNormalProcess::InitializeProcess()
 		}
 
 		//プラグイン：EditorStartイベント実行
-		CPlug::Array plugs;
-		CWSHIfObj::List params;
-		CJackManager::getInstance()->GetUsablePlug( PP_EDITOR_START, 0, &plugs );
-		for( CPlug::ArrayIter it = plugs.begin(); it != plugs.end(); it++ ){
-			(*it)->Invoke(&pEditWnd->GetActiveView(), params);
-		}
+		CJackManager::getInstance()->InvokePlugins( PP_EDITOR_START, &pEditWnd->GetActiveView() );
 
 		//プラグイン：DocumentOpenイベント実行
-		plugs.clear();
-		CJackManager::getInstance()->GetUsablePlug( PP_DOCUMENT_OPEN, 0, &plugs );
-		for( CPlug::ArrayIter it = plugs.begin(); it != plugs.end(); it++ ){
-			(*it)->Invoke(&pEditWnd->GetActiveView(), params);
-		}
+		CJackManager::getInstance()->InvokePlugins( PP_DOCUMENT_OPEN, &pEditWnd->GetActiveView() );
 
 		if( !bGrepDlg && gi.bGrepStdout ){
 			// 即時終了
@@ -438,16 +429,7 @@ bool CNormalProcess::InitializeProcess()
 	}
 
 	//プラグイン：EditorStartイベント実行
-	CPlug::Array plugs;
-	CWSHIfObj::List params;
-	CJackManager::getInstance()->GetUsablePlug(
-			PP_EDITOR_START,
-			0,
-			&plugs
-		);
-	for( CPlug::ArrayIter it = plugs.begin(); it != plugs.end(); it++ ){
-		(*it)->Invoke(&pEditWnd->GetActiveView(), params);
-	}
+	CJackManager::getInstance()->InvokePlugins(PP_EDITOR_START, &pEditWnd->GetActiveView());
 
 	// 2006.09.03 ryoji オープン後自動実行マクロを実行する
 	if( !( bDebugMode || bGrepMode ) )
@@ -465,11 +447,7 @@ bool CNormalProcess::InitializeProcess()
 	}
 
 	//プラグイン：DocumentOpenイベント実行
-	plugs.clear();
-	CJackManager::getInstance()->GetUsablePlug( PP_DOCUMENT_OPEN, 0, &plugs );
-	for( CPlug::ArrayIter it = plugs.begin(); it != plugs.end(); it++ ){
-		(*it)->Invoke(&pEditWnd->GetActiveView(), params);
-	}
+	CJackManager::getInstance()->InvokePlugins( PP_DOCUMENT_OPEN, &pEditWnd->GetActiveView() );
 
 	// 複数ファイル読み込み
 	OpenFiles( pEditWnd->GetHwnd() );
