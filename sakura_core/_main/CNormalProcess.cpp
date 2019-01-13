@@ -145,12 +145,7 @@ bool CNormalProcess::InitializeProcess()
 	// エディタアプリケーションを作成。2007.10.23 kobake
 	// グループIDを取得
 	int nGroupId = CCommandLine::getInstance()->GetGroupId();
-	if(
-		(
-			GetDllShareData().m_Common.m_sTabBar.m_bNewWindow ||
-			( ::GetKeyState( VK_SHIFT ) & 0x8000 )
-		) && nGroupId == -1
-	){
+	if( GetDllShareData().m_Common.m_sTabBar.m_bNewWindow && nGroupId == -1 ){
 		nGroupId = CAppNodeManager::getInstance()->GetFreeGroupId();
 	}
 	// CEditAppを作成
