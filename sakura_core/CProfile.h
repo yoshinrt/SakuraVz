@@ -68,13 +68,22 @@ public:
 	void SetWritingMode( void ) { m_bRead = false; }
 	bool ReadProfile( const TCHAR* );
 	bool ReadProfileRes( const TCHAR*, const TCHAR*, std::vector<std::wstring>* = NULL );				// 200/5/19 Uchi
-	bool WriteProfile( const TCHAR*, const WCHAR* pszComment);
+	bool WriteProfile( const TCHAR*, const WCHAR* pszComment, bool bHistory = false );
+	
+	static TCHAR *GetHistFileName( TCHAR *szHistFileName, const TCHAR *szIniFileName ){
+		_tcsncpy( szHistFileName, szIniFileName, _MAX_PATH + 1 );
+		if( _tcscat_s( szHistFileName, _MAX_PATH, _T( ".hist" ))){
+			*szHistFileName = '\0';
+			return nullptr;
+		}
+		return szHistFileName;
+	}
 
 	void DUMP( void );
 
 protected:
 	void ReadOneline( const wstring& line );
-	bool _WriteFile( const tstring& strFilename, const std::vector< wstring >& vecLine);
+	bool _WriteFile( const TCHAR *strFilename, const std::vector< wstring >& vecLine);
 
 	bool GetProfileDataImp( const wstring& strSectionName, const wstring& strEntryKey, wstring& strEntryValue);
 

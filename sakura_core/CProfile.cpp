@@ -212,10 +212,11 @@ bool CProfile::ReadProfileRes( const TCHAR* pName, const TCHAR* pType, std::vect
 */
 bool CProfile::WriteProfile(
 	const TCHAR* pszProfileName,
-	const WCHAR* pszComment
+	const WCHAR* pszComment,
+	bool bHistory
 )
 {
-	if( pszProfileName!=NULL ) {
+	if( !bHistory && pszProfileName!=NULL ) {
 		m_strProfileName = pszProfileName;
 	}
     
@@ -225,13 +226,15 @@ bool CProfile::WriteProfile(
 		vecLine.push_back( LTEXT("") );
 	}
 	for(auto iter = m_ProfileData.begin(); iter != m_ProfileData.end(); iter++ ) {
-		//セクション名を書き込む
-		vecLine.push_back( LTEXT("[") + iter->strSectionName + LTEXT("]") );
-		for(auto mapiter = iter->mapEntries.cbegin(); mapiter != iter->mapEntries.end(); mapiter++ ) {
-			//エントリを書き込む
-			vecLine.push_back( mapiter->first + LTEXT("=") + mapiter->second );
+		if(( _tcsncmp( iter->strSectionName.c_str(), _T( "Hist." ), 5 ) == 0 ) ? bHistory : !bHistory ){
+			//セクション名を書き込む
+			vecLine.push_back( LTEXT("[") + iter->strSectionName + LTEXT("]") );
+			for(auto mapiter = iter->mapEntries.cbegin(); mapiter != iter->mapEntries.end(); mapiter++ ) {
+				//エントリを書き込む
+				vecLine.push_back( mapiter->first + LTEXT("=") + mapiter->second );
+			}
+			vecLine.push_back( LTEXT("") );
 		}
-		vecLine.push_back( LTEXT("") );
 	}
 
 	// 別ファイルに書き込んでから置き換える（プロセス強制終了などへの安全対策）
@@ -239,7 +242,7 @@ bool CProfile::WriteProfile(
 	szMirrorFile[0] = _T('\0');
 	TCHAR szPath[_MAX_PATH];
 	LPTSTR lpszName;
-	DWORD nLen = ::GetFullPathName(m_strProfileName.c_str(), _countof(szPath), szPath, &lpszName);
+	DWORD nLen = ::GetFullPathName(pszProfileName, _countof(szPath), szPath, &lpszName);
 	if( 0 < nLen && nLen < _countof(szPath)
 		&& (lpszName - szPath + 11) < _countof(szMirrorFile) )	// path\preuuuu.TMP
 	{
@@ -247,17 +250,17 @@ bool CProfile::WriteProfile(
 		::GetTempFileName(szPath, _T("sak"), 0, szMirrorFile);
 	}
 
-	if( !_WriteFile(szMirrorFile[0]? szMirrorFile: m_strProfileName, vecLine) )
+	if( !_WriteFile(szMirrorFile[0]? szMirrorFile: pszProfileName, vecLine) )
 		return false;
 
 	if( szMirrorFile[0] ){
-		if (!::ReplaceFile(m_strProfileName.c_str(), szMirrorFile, NULL, 0, NULL, NULL)) {
-			if (fexist(m_strProfileName.c_str())) {
-				if (!::DeleteFile(m_strProfileName.c_str())) {
+		if (!::ReplaceFile(pszProfileName, szMirrorFile, NULL, 0, NULL, NULL)) {
+			if (fexist(pszProfileName)) {
+				if (!::DeleteFile(pszProfileName)) {
 					return false;
 				}
 			}
-			if (!::MoveFile(szMirrorFile, m_strProfileName.c_str())) {
+			if (!::MoveFile(szMirrorFile, pszProfileName)) {
 				return false;
 			}
 		}
@@ -275,11 +278,11 @@ bool CProfile::WriteProfile(
 	@date 2004-01-29 genta stream使用をやめてCライブラリ使用に．
 */
 bool CProfile::_WriteFile(
-	const tstring&			strFilename,	//!< [in]  ファイル名
+	const TCHAR				*strFilename,	//!< [in]  ファイル名
 	const vector<wstring>&	vecLine			//!< [out] 文字列格納先
 )
 {
-	CTextOutputStream out(strFilename.c_str());
+	CTextOutputStream out( strFilename );
 	if(!out){
 		return false;
 	}

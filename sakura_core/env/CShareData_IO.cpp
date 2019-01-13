@@ -89,10 +89,16 @@ bool CShareData_IO::ShareData_IO_2( bool bRead )
 	std::tstring strProfileName = to_tchar(CCommandLine::getInstance()->GetProfileName());
 	TCHAR	szIniFileName[_MAX_PATH + 1];
 	CFileNameManager::getInstance()->GetIniFileName( szIniFileName, strProfileName.c_str(), bRead );	// 2007.05.19 ryoji iniファイル名を取得する
+	
+	// ヒストリファイル名
+	TCHAR	szHistFileName[_MAX_PATH + 1];
+	CProfile::GetHistFileName( szHistFileName, szIniFileName );
 
 //	MYTRACE( _T("Iniファイル処理-1 所要時間(ミリ秒) = %d\n"), cRunningTimer.Read() );
 
 	if( bRead ){
+		if( *szHistFileName ) cProfile.ReadProfile( szHistFileName ); // .hist は無くてもよい
+		
 		if( !cProfile.ReadProfile( szIniFileName ) ){
 			/* 設定ファイルが存在しない */
 			LANGID langId = GetUserDefaultUILanguage();
@@ -163,6 +169,7 @@ bool CShareData_IO::ShareData_IO_2( bool bRead )
 	if( !bRead ){
 		// 2014.12.08 sakura.iniの読み取り専用
 		if( !GetDllShareData().m_Common.m_sOthers.m_bIniReadOnly ){
+			if( *szHistFileName ) cProfile.WriteProfile( szHistFileName, LTEXT(" sakura.ini テキストエディタヒストリファイル"), true );
 			cProfile.WriteProfile( szIniFileName, LTEXT(" sakura.ini テキストエディタ設定ファイル") );
 		}
 	}
@@ -183,7 +190,7 @@ void CShareData_IO::ShareData_IO_Mru( CDataProfile& cProfile )
 {
 	DLLSHAREDATA* pShare = &GetDllShareData();
 
-	const WCHAR* pszSecName = LTEXT("MRU");
+	const WCHAR* pszSecName = LTEXT("Hist.MRU");
 	int			i;
 	int			nSize;
 	EditInfo*	pfiWork;
@@ -276,7 +283,7 @@ void CShareData_IO::ShareData_IO_Keys( CDataProfile& cProfile )
 {
 	DLLSHAREDATA* pShare = &GetDllShareData();
 
-	const WCHAR* pszSecName = LTEXT("Keys");
+	const WCHAR* pszSecName = LTEXT("Hist.Keys");
 	int		i;
 	int		nSize;
 	WCHAR	szKeyName[64];
@@ -308,7 +315,7 @@ void CShareData_IO::ShareData_IO_Grep( CDataProfile& cProfile )
 {
 	DLLSHAREDATA* pShare = &GetDllShareData();
 
-	const WCHAR* pszSecName = LTEXT("Grep");
+	const WCHAR* pszSecName = LTEXT("Hist.Grep");
 	int		i;
 	int		nSize;
 	WCHAR	szKeyName[64];
@@ -375,7 +382,7 @@ void CShareData_IO::ShareData_IO_Cmd( CDataProfile& cProfile )
 {
 	DLLSHAREDATA* pShare = &GetDllShareData();
 
-	const WCHAR* pszSecName = LTEXT("Cmd");
+	const WCHAR* pszSecName = LTEXT("Hist.Cmd");
 	int		i;
 	WCHAR	szKeyName[64];
 
