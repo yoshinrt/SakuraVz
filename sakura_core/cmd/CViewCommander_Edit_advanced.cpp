@@ -344,8 +344,7 @@ void CViewCommander::Command_INDENT( const wchar_t* const pData, const CLogicInt
 			CLayoutInt nLineCountPrev = GetDocument()->m_cLayoutMgr.GetLineCount();
 			const CLayout* pcLayout = GetDocument()->m_cLayoutMgr.SearchLineByLayoutY( i );
 			if( NULL == pcLayout ||						//	テキストが無いEOLの行は無視
-				pcLayout->GetLogicOffset() > 0 ||				//	折り返し行は無視
-				pcLayout->GetLengthWithoutEOL() == 0 ){	//	改行のみの行は無視する。
+				pcLayout->GetLogicOffset() > 0 ){				//	折り返し行は無視
 				continue;
 			}
 
