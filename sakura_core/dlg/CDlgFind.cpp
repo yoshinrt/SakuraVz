@@ -78,7 +78,9 @@ HWND CDlgFind::DoModeless( HINSTANCE hInstance, HWND hwndParent, LPARAM lParam )
 	m_bNOTIFYNOTFOUND = m_pShareData->m_Common.m_sSearch.m_bNOTIFYNOTFOUND;	// 検索／置換  見つからないときメッセージを表示
 	m_ptEscCaretPos_PHY = ((CEditView*)lParam)->GetCaret().GetCaretLogicPos();	// 検索開始時のカーソル位置退避
 	((CEditView*)lParam)->m_bSearch = TRUE;							// 検索開始位置の登録有無		02/07/28 ai
-	return CDialog::DoModeless( hInstance, hwndParent, IDD_FIND, lParam, SW_SHOW );
+	return CDialog::DoModeless( hInstance, hwndParent, IDD_FIND, lParam,
+		( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_NODLG ? SW_HIDE : SW_SHOW
+	);
 }
 
 /* モードレス時：検索対象となるビューの変更 */
@@ -199,6 +201,11 @@ void CDlgFind::SetData( void )
 	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_NEXT ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SEARCHNEXT, 0 );
 	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_MARK ) ::PostMessage( GetHwnd(), DM_SETDEFID, IDC_BUTTON_SETMARK, 0 );
 	
+	// 検索文字列のみ設定，ダイアログ即閉じる
+	if(( m_nFixedOption & SCH_BUTTON_MASK ) == SCH_NODLG ) ::PostMessage(
+		GetDlgItem( GetHwnd(), IDC_BUTTON_SEARCHNEXT ), BM_CLICK, 0, 0
+	);
+	
 	return;
 }
 
@@ -245,13 +252,11 @@ int CDlgFind::GetData( void )
 	m_pShareData->m_Common.m_sSearch.m_bNOTIFYNOTFOUND = m_bNOTIFYNOTFOUND;	// 検索／置換  見つからないときメッセージを表示
 
 	/* 検索文字列 */
-	if(( m_nFixedOption & SCH_BUTTON_MASK ) != SCH_NODLG ){
-		int nBufferSize = ::GetWindowTextLength( GetItemHwnd(IDC_COMBO_TEXT) ) + 1;
-		std::vector<TCHAR> vText(nBufferSize);
-		::DlgItem_GetText( GetHwnd(), IDC_COMBO_TEXT, &vText[0], nBufferSize);
-		m_strText = to_wchar(&vText[0]);
-	}
-	
+	int nBufferSize = ::GetWindowTextLength( GetItemHwnd(IDC_COMBO_TEXT) ) + 1;
+	std::vector<TCHAR> vText(nBufferSize);
+	::DlgItem_GetText( GetHwnd(), IDC_COMBO_TEXT, &vText[0], nBufferSize);
+	m_strText = to_wchar(&vText[0]);
+
 	/* 検索ダイアログを自動的に閉じる */
 	m_pShareData->m_Common.m_sSearch.m_bAutoCloseDlgFind = ::IsDlgButtonChecked( GetHwnd(), IDC_CHECK_bAutoCloseDlgFind );
 
