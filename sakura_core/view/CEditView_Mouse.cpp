@@ -444,6 +444,7 @@ normal_action:;
 					ptCaret.x = pNext->GetIndent();
 				}else{
 					ptCaret.x = CLayoutInt(0);
+					GetSelectionInfo().m_bBeginLineSelect = false;
 				}
 				ptCaret.y = ptNewCaret.GetY2() + 1;	// 改行無しEOF行でも MoveCursor() が有効な座標に調整してくれる
 				GetCaret().GetAdjustCursorPos( &ptCaret );
