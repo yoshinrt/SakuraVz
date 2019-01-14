@@ -151,6 +151,7 @@ set OUTFILE_LOG=%BASENAME%-Log.zip
 set OUTFILE_ASM=%BASENAME%-Asm.zip
 set OUTFILE_INST=%BASENAME%-Installer.zip
 set OUTFILE_EXE=%BASENAME%-Exe.zip
+set OUTFILE_EXES=%BASENAME%-ExeOnly.zip
 
 @rem cleanup for local testing
 if exist "%OUTFILE%" (
@@ -167,6 +168,9 @@ if exist "%OUTFILE_INST%" (
 )
 if exist "%OUTFILE_EXE%" (
 	del %OUTFILE_EXE%
+)
+if exist "%OUTFILE_EXES%" (
+	del %OUTFILE_EXES%
 )
 if exist "%WORKDIR%" (
 	rmdir /s /q "%WORKDIR%"
@@ -261,6 +265,7 @@ copy /Y installer\warning.txt        %WORKDIR_EXE%\
 copy /Y installer\warning.txt        %WORKDIR_INST%\
 call %ZIP_CMD%       %OUTFILE_INST%  %WORKDIR_INST%
 call %ZIP_CMD%       %OUTFILE_EXE%   %WORKDIR_EXE%
+call %ZIP_CMD%       %OUTFILE_EXES%  %WORKDIR_EXE%\sakura.exe
 
 @echo start zip asm
 mkdir %WORKDIR_ASM%
