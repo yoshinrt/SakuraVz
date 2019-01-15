@@ -54,6 +54,12 @@ void CViewCommander::Command_SEARCH_DIALOG( int nOption )
 		GetEditWindow()->m_cDlgFind.m_strText = cmemCurText.GetStringPtr();
 	}
 	
+	// 検索条件のみセット && 検索文字列 == "" ならエラー
+	else if(( nOption & CDlgFind::SCH_BUTTON_MASK ) == CDlgFind::SCH_NODLG ){
+		ErrorBeep();
+		return;
+	}
+	
 	// オプション固定の設定
 	GetEditWindow()->m_cDlgFind.m_nFixedOption = nOption;
 	
