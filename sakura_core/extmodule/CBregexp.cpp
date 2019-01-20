@@ -43,101 +43,18 @@
 #include "CBregexp.h"
 #include "charset/charcode.h"
 
-
-// Compile時、行頭置換(len=0)の時にダミー文字列(１つに統一) by かろと
-const wchar_t CBregexp::m_tmpBuf[2] = L"\0";
-
 CBregexp::CBregexp(){
-	m_Re		= nullptr;
-	m_MatchData	= nullptr;
-	
-	m_szMsg[0] = L'\0';
+	m_Re			= nullptr;
+	m_MatchData		= nullptr;
+	m_szMsg			= nullptr;
+	m_szReplaceBuf	= nullptr;
+	m_szReplacement	= nullptr;
+	m_iReplaceBufSize	= 0;
 }
 
-CBregexp::~CBregexp()
-{
+CBregexp::~CBregexp(){
 	//コンパイルバッファを解放
 	ReleaseCompileBuffer();
-}
-
-
-/*! @brief ライブラリに渡すための検索・置換パターンを作成する
-**
-** @note szPattern2: == NULL:検索 != NULL:置換
-**
-** @retval ライブラリに渡す検索パターンへのポインタを返す
-** @note 返すポインタは、呼び出し側で delete すること
-** 
-** @date 2003.05.03 かろと 関数に切り出し
-*/
-wchar_t* CBregexp::MakePatternSub(
-	const wchar_t*	szPattern,	//!< 検索パターン
-	const wchar_t*	szPattern2,	//!< 置換パターン(NULLなら検索)
-	const wchar_t*	szAdd2,		//!< 置換パターンの後ろに付け加えるパターン($1など) 
-	int				nOption		//!< 検索オプション
-) 
-{
-	static const wchar_t DELIMITER = WCODE::BREGEXP_DELIMITER;	//!< デリミタ
-	int nLen;									//!< szPatternの長さ
-	int nLen2;									//!< szPattern2 + szAdd2 の長さ
-
-	// 検索パターン作成
-	wchar_t *szNPattern;		//!< ライブラリ渡し用の検索パターン文字列
-	wchar_t *pPat;				//!< パターン文字列操作用のポインタ
-
-	nLen = wcslen(szPattern);
-	if (szPattern2 == NULL) {
-		// 検索(BMatch)時
-		szNPattern = new wchar_t[ nLen + 15 ];	//	15：「s///option」が余裕ではいるように。
-		pPat = szNPattern;
-		*pPat++ = L'm';
-	}
-	else {
-		// 置換(BSubst)時
-		nLen2 = wcslen(szPattern2) + wcslen(szAdd2);
-		szNPattern = new wchar_t[ nLen + nLen2 + 15 ];
-		pPat = szNPattern;
-		*pPat++ = L's';
-	}
-	*pPat++ = DELIMITER;
-	while (*szPattern != L'\0') { *pPat++ = *szPattern++; }
-	*pPat++ = DELIMITER;
-	if (szPattern2 != NULL) {
-		while (*szPattern2 != L'\0') { *pPat++ = *szPattern2++; }
-		while (*szAdd2 != L'\0') { *pPat++ = *szAdd2++; }
-		*pPat++ = DELIMITER;
-	}
-	*pPat++ = L'k';			// 漢字対応
-	*pPat++ = L'm';			// 複数行対応(但し、呼び出し側が複数行対応でない)
-	// 2006.01.22 かろと 論理逆なので bIgnoreCase -> optCaseSensitiveに変更
-	if( !(nOption & optCaseSensitive) ) {		// 2002/2/1 hor IgnoreCase オプション追加 マージ：aroka
-		*pPat++ = L'i';		// 大文字小文字を同一視(無視)する
-	}
-	// 2006.01.22 かろと 行単位置換のために、全域オプション追加
-	if( (nOption & optGlobal) ) {
-		*pPat++ = L'g';			// 全域(global)オプション、行単位の置換をする時に使用する
-	}
-	if( (nOption & optExtend) ) {
-		*pPat++ = L'x';
-	}
-	if( (nOption & optASCII ) ){
-		*pPat++ = L'a';
-	}
-	if( (nOption & optUnicode ) ){
-		*pPat++ = L'u';
-	}
-	if( (nOption & optDefault ) ){
-		*pPat++ = L'd';
-	}
-	if( (nOption & optLocale ) ){
-		*pPat++ = L'l';
-	}
-	if( (nOption & optR ) ){
-		*pPat++ = L'R';
-	}
-
-	*pPat = L'\0';
-	return szNPattern;
 }
 
 /*!
@@ -149,8 +66,7 @@ wchar_t* CBregexp::MakePatternSub(
 	正規表現DLLに与えられる文字列の末尾は文書末とはいえず、$ がマッチする必要はないだろう。
 	$ が行文字列末尾にマッチしないことは、一括置換での期待しない置換を防ぐために必要である。
 */
-wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wchar_t* const szReplace, int nOption )
-{
+void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring& strModifiedSearch ){
 	static const wchar_t szDotAlternative[] = L"[^\\r\\n]";
 	static const wchar_t szDollarAlternative[] = L"(?<![\\r\\n])(?=\\r|$)";
 
@@ -167,7 +83,6 @@ wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wc
 	}
 	++modifiedSearchSize; // '\0'
 
-	std::wstring strModifiedSearch;
 	strModifiedSearch.reserve( modifiedSearchSize );
 
 	// szSearchを strModifiedSearchへ、ところどころ置換しながら順次コピーしていく。
@@ -251,8 +166,6 @@ wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wc
 		}
 	}
 	strModifiedSearch.append( left, right + 1 ); // right + 1 は '\0' の次を指す(明示的に '\0' をコピー)。
-
-	return this->MakePatternSub( strModifiedSearch.data(), szReplace, L"", nOption );
 }
 
 /*!
@@ -260,7 +173,7 @@ wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wc
 	BREGEXP_W構造体の生成のみを行う．
 
 	@param[in] szPattern0	検索or置換パターン
-	@param[in] szPattern1	置換後文字列パターン(検索時はNULL)
+	@param[in] szPattern1	置換後文字列パターン(検索時はnullptr)
 	@param[in] nOption		検索・置換オプション
 
 	@retval true 成功
@@ -271,51 +184,54 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
 	
-	// match_data 確保
-	m_MatchData = pcre2_match_data_create(
-		1, 						// uint32_t ovecsize
-		NULL					// pcre2_general_context *gcontext
-	); 
-	
 	// ライブラリに渡す検索パターンを作成
 	// 別関数で共通処理に変更 2003.05.03 by かろと
-	wchar_t *szNPattern = NULL;
-	const wchar_t *pszNPattern = NULL;
-	if( bKakomi ){
-		pszNPattern = szPattern0;
-	}else{
-		szNPattern = MakePatternAlternate( szPattern0, szPattern1, nOption );
-		pszNPattern = szNPattern;
+	
+	std::wstring strModifiedSearch;
+	
+	if( !bKakomi ){
+		MakePatternAlternate( szPattern0, strModifiedSearch );
+		szPattern0 = strModifiedSearch.c_str();
 	}
 	
-	m_szMsg[0] = L'\0';		//!< エラー解除
+	// pcre2 opt 生成
+	m_iOption = nOption;
+	int iPcreOpt	= PCRE2_MULTILINE;
+	if( ~nOption & optCaseSensitive	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
 	
-	int			iErrCode;
+	int	iErrCode;
 	PCRE2_SIZE	sizeErrOffset;
 	
-	//if (szPattern1 == NULL) {
-		m_Re = pcre2_compile(
-			( PCRE2_SPTR16 )szPattern0,	// PCRE2_SPTR pattern
-			PCRE2_ZERO_TERMINATED,		// PCRE2_SIZE length
-			PCRE2_MULTILINE,			// uint32_t options
-			&iErrCode,					// int *errorcode
-			&sizeErrOffset,				// PCRE2_SIZE *erroroffset
-			NULL						// pcre2_compile_context *ccontext
-		);
-	/*} else {
-		// 置換実行
-		★置換側のチェック未実装
-		BSubst( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
-	}*/
-	delete [] szNPattern;
-
-	//	メッセージが空文字列でなければ何らかのエラー発生。
-	//	サンプルソース参照
+	m_Re = pcre2_compile(
+		( PCRE2_SPTR )szPattern0,	// PCRE2_SPTR pattern
+		PCRE2_ZERO_TERMINATED,		// PCRE2_SIZE length
+		iPcreOpt,					// uint32_t options
+		&iErrCode,					// int *errorcode
+		&sizeErrOffset,				// PCRE2_SIZE *erroroffset
+		nullptr						// pcre2_compile_context *ccontext
+	);
+	
+	//	何らかのエラー発生。
 	if( m_Re == nullptr ){
 		ReleaseCompileBuffer();
-		pcre2_get_error_message( iErrCode, ( PCRE2_UCHAR *)m_szMsg, MSGBUF_SIZE - 1 );
-		
+		GenerateErrorMessage( iErrCode );
 		return false;
+	}
+	
+	// match_data 確保
+	m_MatchData = pcre2_match_data_create_from_pattern(
+		m_Re, 	// uint32_t ovecsize
+		nullptr	// pcre2_general_context *gcontext
+	); 
+	
+	if( szPattern1 ){
+		// 置換実行
+		//★置換側のチェック未実装
+		//BSubst( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
+		
+		int len = wcslen( szPattern1 );
+		m_szReplacement = new WCHAR[ len + 1 ];
+		wcscpy( m_szReplacement, szPattern1 );
 	}
 	
 	return true;
@@ -325,31 +241,28 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 	JRE32のエミュレーション関数．既にあるコンパイル構造体を利用して検索（1行）を
 	行う．
 
-	@param[in] target 検索対象領域先頭アドレス
-	@param[in] len 検索対象領域サイズ
+	@param[in] szTarget 検索対象領域先頭アドレス
+	@param[in] nLen 検索対象領域サイズ
 	@param[in] nStart 検索開始位置．(先頭は0)
 
 	@retval true Match
 	@retval false No Match または エラー。エラーは GetLastMessage()により判定可能。
 
 */
-bool CBregexp::Match( const wchar_t* target, int len, int nStart )
-{
+bool CBregexp::Match( const wchar_t* szTarget, int nLen, int nStart ){
 	//	DLLが利用可能でないとき、または構造体が未設定の時はエラー終了
-	if( m_Re == NULL ) return false;
+	if( m_Re == nullptr ) return false;
 	
 	// match
 	int iResult = pcre2_match(
 		m_Re,						// const pcre2_code *code
-		( PCRE2_SPTR16 )target,		// PCRE2_SPTR subject
-		len,						// PCRE2_SIZE length
+		( PCRE2_SPTR )szTarget,		// PCRE2_SPTR subject
+		nLen,						// PCRE2_SIZE length
 		nStart,						// PCRE2_SIZE startoffset
 		0/*PCRE2_PARTIAL_HARD*/,	// uint32_t options
 		m_MatchData,				// pcre2_match_data *match_data
-		NULL						// pcre2_match_context *mcontext
+		nullptr						// pcre2_match_context *mcontext
 	);
-	
-	m_szTarget = target;
 	
 	return iResult > 0;
 }
@@ -368,29 +281,73 @@ bool CBregexp::Match( const wchar_t* target, int len, int nStart )
 
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
-int CBregexp::Replace(const wchar_t *szTarget, int nLen, int nStart)
-{
-#ifdef HOGE	// ★未実装
-	int result;
+int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
 	
-	m_szMsg[0] = '\0';		//!< エラー解除
-	result = BSubstEx( NULL, szTarget, szTarget + nStart, szTarget + nLen, &m_pRegExp, m_szMsg );
+	// 必要な output buffer サイズを計算する．
+	// 初期値は，2^n >= nlen * 2 となるサイズで最低 1KB．
 	
-	m_szTarget = szTarget;
-
-	//	メッセージが空文字列でなければ何らかのエラー発生。
-	//	サンプルソース参照
-	if( m_szMsg[0] ) {
+	int iNeededSize = nLen * 2;
+	int iResult;
+	PCRE2_SIZE	OutputLen;
+	m_iStart = nStart;
+	
+	while( 1 ){
+		// 必要サイズ大きすぎ
+		if( iNeededSize >= ( 1 << 30 )) return 0;
+		
+		// buf サイズ更新必要
+		if( m_iReplaceBufSize < iNeededSize ){
+			if( m_szReplaceBuf ) delete [] m_szReplaceBuf;
+			m_szReplaceBuf = nullptr;
+			
+			if( m_iReplaceBufSize == 0 ) m_iReplaceBufSize = 1024; // 最小初期サイズ
+			
+			while( m_iReplaceBufSize < iNeededSize ) m_iReplaceBufSize <<= 1;
+			
+			m_szReplaceBuf = new WCHAR[ m_iReplaceBufSize ];
+		}
+		
+		OutputLen	= m_iReplaceBufSize;
+		
+		// オプション
+		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;
+		if( m_iOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
+		
+		iResult = pcre2_substitute(
+			m_Re,							// const pcre2_code *code
+			( PCRE2_SPTR )szTarget,			// PCRE2_SPTR subject
+			nLen,							// PCRE2_SIZE length
+			nStart,							// PCRE2_SIZE startoffset
+			iOption,						// uint32_t options
+			m_MatchData,					// pcre2_match_data *match_data
+			nullptr,						// pcre2_match_context *mcontext
+			( PCRE2_SPTR )m_szReplacement,	// PCRE2_SPTR replacement,
+			PCRE2_ZERO_TERMINATED,			// PCRE2_SIZE rlength
+			( PCRE2_UCHAR *)m_szReplaceBuf,	// PCRE2_UCHAR *outputbuffer
+			&OutputLen						// PCRE2_SIZE *outlengthptr
+		);
+		
+		if( iResult != PCRE2_ERROR_NOMEMORY ) break;
+		
+		// バッファが足りないので再試行
+		iNeededSize = OutputLen;
+	}
+	
+	// エラー
+	if( iResult < 0 ){
+		m_iReplacedLen	= 0;
 		return 0;
 	}
+	
+	// 正常終了
+	m_iReplacedLen	= OutputLen;
+	return iResult;
+}
 
-	if( result < 0 ) {
-		// 置換するものがなかった
-		return 0;
-	}
-	return result;
-#endif
-	return false;
+// pcre2 エラーメッセージ取得
+void CBregexp::GenerateErrorMessage( int iErrorCode ){
+	if( m_szMsg == nullptr ) m_szMsg = new WCHAR[ MSGBUF_SIZE ];
+	pcre2_get_error_message( iErrorCode, ( PCRE2_UCHAR *)m_szMsg, MSGBUF_SIZE - 1 );
 }
 
 /*!
@@ -410,14 +367,13 @@ bool CheckRegexpSyntax(
 	bool			bShowMessage,
 	int				nOption,
 	bool			bKakomi
-)
-{
+){
 	CBregexp cRegexp;
 
 	if( nOption == -1 ){
 		nOption = CBregexp::optCaseSensitive;
 	}
-	if( !cRegexp.Compile( szPattern, NULL, nOption, bKakomi ) ){	// 2002/2/1 hor追加
+	if( !cRegexp.Compile( szPattern, nullptr, nOption, bKakomi ) ){	// 2002/2/1 hor追加
 		if( bShowMessage ){
 			::MessageBox( hWnd, cRegexp.GetLastMessage(),
 				LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );
