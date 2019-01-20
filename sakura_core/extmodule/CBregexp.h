@@ -1,22 +1,7 @@
 ﻿/*!	@file
 	@brief BREGEXP Library Handler
 
-	Perl5互換正規表現を扱うDLLであるBREGEXP.DLLを利用するためのインターフェース
-
-	@author genta
-	@date Jun. 10, 2001
-	@date Jan. 05, 2002 genta コメント追加
-	@date 2002/2/1 hor
-	@date Jul. 25, 2002 genta 行頭条件の考慮を追加
-*/
-/*
-	Copyright (C) 2001-2002, genta
-	Copyright (C) 2001, novice, hor
-	Copyright (C) 2002, novice, hor, Azumaiya
-	Copyright (C) 2003, かろと
-	Copyright (C) 2005, かろと, aroka
-	Copyright (C) 2006, かろと
-	Copyright (C) 2007, ryoji
+	pcre2 を利用するためのインターフェース
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -42,29 +27,8 @@
 #ifndef _DLL_BREGEXP_H_
 #define _DLL_BREGEXP_H_
 
-#include "bregexp.h"
 #include "CDllHandler.h"
 
-typedef BREGEXP BREGEXP_W;
-
-/*!
-	@brief Perl互換正規表現 BREGEXP.DLL をサポートするクラス
-
-	DLLの動的ロードを行うため、DllHandlerを継承している。
-
-	CJreに近い動作をさせるため、バッファをクラス内に1つ保持し、
-	データの設定と検索の２つのステップに分割するようにしている。
-	Jreエミュレーション関数を使うときは入れ子にならないように注意すること。
-
-	本来はこのような部分は別クラスとして分離すべきだが、その場合このクラスが
-	破棄される前に全てのクラスを破棄する必要がある。
-	その安全性を保証するのが難しいため、現時点では両者を１つのクラスに入れた。
-
-	@note このクラスはThread Safeではない。
-
-	@date 2005.03.19 かろと リファクタリング。クラス内部を隠蔽
-	@date 2006.01.22 かろと オプション追加・名称変更(全て行置換用Globalオプション追加のため)
-*/
 class CBregexp {
 public:
 	CBregexp();
@@ -82,15 +46,9 @@ public:
 		optLocale = 0x40,				//!< Locale(/l)
 		optR = 0x80,					//!< CRLF(/R)
 	};
-	//! 検索パターン定義
-	enum Pattern {
-		PAT_UNKNOWN = 0,		//!< 不明（初期値)
-		PAT_NORMAL = 1,			//!< 通常
-		PAT_TOP = 2,			//!< 行頭"^"
-	};
 
 	//! DLLのバージョン情報を取得
-	const TCHAR* GetVersionT(){ return IsAvailable() ? to_tchar(BRegexpVersion()) : _T(""); }
+	const TCHAR* GetVersionT(){ return _T(""); }
 
 	//	CJreエミュレーション関数
 	//!	検索パターンのコンパイル
@@ -114,9 +72,8 @@ public:
 	    検索に一致した文字列の先頭位置を返す(文字列先頭なら0)
 		@retval 検索に一致した文字列の先頭位置
 	*/
-	CLogicInt GetIndex(void)
-	{
-		return CLogicInt(m_pRegExp->startp[0] - m_szTarget);
+	CLogicInt GetIndex( void ){
+		return CLogicInt( pcre2_get_ovector_pointer( m_MatchData )[ 0 ]);
 	}
 	/*!
 	    検索に一致した文字列の次の位置を返す
@@ -124,7 +81,7 @@ public:
 	*/
 	CLogicInt GetLastIndex(void)
 	{
-		return CLogicInt(m_pRegExp->endp[0] - m_szTarget);
+		return CLogicInt( pcre2_get_ovector_pointer( m_MatchData )[ 1 ] );
 	}
 	/*!
 		検索に一致した文字列の長さを返す
@@ -132,7 +89,8 @@ public:
 	*/
 	CLogicInt GetMatchLen(void)
 	{
-		return CLogicInt(m_pRegExp->endp[0] - m_pRegExp->startp[0]);
+		int *p = ( int *)pcre2_get_ovector_pointer( m_MatchData );
+		return CLogicInt( p[ 1 ] - p[ 0 ]);
 	}
 	/*!
 		置換された文字列の長さを返す
@@ -142,7 +100,8 @@ public:
 		// 置換後文字列が０幅なら outp、outendpもNULLになる
 		// NULLポインタの引き算は問題なく０になる。
 		// outendpは '\0'なので、文字列長は +1不要
-
+		return CLogicInt(0);	// ★未実装
+#ifdef HOGE
 		// Jun. 03, 2005 Karoto
 		//	置換後文字列が0幅の場合にoutpがNULLでもoutendpがNULLでない場合があるので，
 		//	outpのNULLチェックが必要
@@ -152,6 +111,7 @@ public:
 		} else {
 			return CLogicInt(m_pRegExp->outendp - m_pRegExp->outp);
 		}
+#endif
 	}
 	/*!
 		置換された文字列を返す
@@ -159,7 +119,8 @@ public:
 	*/
 	const wchar_t *GetString(void)
 	{
-		return m_pRegExp->outp;
+		return L"";	// ★未実装
+		//return m_pRegExp->outp;
 	}
 	/*! @} */
 	//-----------------------------------------
@@ -167,71 +128,46 @@ public:
 	/*! BREGEXPメッセージを取得する
 		@retval メッセージへのポインタ
 	*/
-	const TCHAR* GetLastMessage() const;// { return m_szMsg; }
+	const TCHAR* GetLastMessage() const { return to_tchar( m_szMsg ); }
 
 protected:
 
 	//!	コンパイルバッファを解放する
 	/*!
-		m_pcRegをBRegfree()に渡して解放する．解放後はNULLにセットする．
+		m_MatchData, m_Re を解放する．解放後はNULLにセットする．
 		元々NULLなら何もしない
 	*/
 	void ReleaseCompileBuffer(void){
-		if( m_pRegExp ){
-			BRegfree( m_pRegExp );
-			m_pRegExp = NULL;
-		}
+		if( m_MatchData ) pcre2_match_data_free( m_MatchData );
+		m_MatchData = nullptr;
+		
+		if( m_Re ) pcre2_code_free( m_Re );
+		m_Re = nullptr;
 	}
 
 private:
 	//	内部関数
 
 	//! 検索パターン作成
-	int CheckPattern( const wchar_t* szPattern );
 	wchar_t* MakePatternSub( const wchar_t* szPattern, const wchar_t* szPattern2, const wchar_t* szAdd2, int nOption );
 	wchar_t* MakePattern( const wchar_t* szPattern, const wchar_t* szPattern2, int nOption );
 	wchar_t* MakePatternAlternate( const wchar_t* const szSearch, const wchar_t* const szReplace, int nOption );
 
 	//	メンバ変数
-	BREGEXP_W*			m_pRegExp;			//!< コンパイル構造体
 	const wchar_t*		m_szTarget;			//!< 対象文字列へのポインタ
-	wchar_t				m_szMsg[80];		//!< BREGEXP_Wからのメッセージを保持する
+	
+	static const int	MSGBUF_SIZE	= 80;
+	wchar_t				m_szMsg[ MSGBUF_SIZE ];	//!< BREGEXP_Wからのメッセージを保持する
 
 	// 静的メンバ変数
 	static const wchar_t	m_tmpBuf[2];	//!< ダミー文字列
 	
+	// pcre2
+	pcre2_match_data	*m_MatchData;
+	pcre2_code			*m_Re;
+	
 	// bregonig.dll I/F
 public:
-	// UNICODEインターフェースを提供する
-	int BMatch(const wchar_t* str, const wchar_t* target,const wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
-		return ::BMatch(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
-	}
-	int BSubst(const wchar_t* str, const wchar_t* target,const wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
-		return ::BSubst(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
-	}
-	int BTrans(const wchar_t* str, wchar_t* target,wchar_t* targetendp,BREGEXP_W** rxp,wchar_t* msg){
-		return ::BTrans(const_cast<TCHAR*>( str ),target,targetendp,rxp,msg);
-	}
-	int BSplit(const wchar_t* str, wchar_t* target,wchar_t* targetendp,int limit,BREGEXP_W** rxp,wchar_t* msg){
-		return ::BSplit(const_cast<TCHAR*>( str ),target,targetendp,limit,rxp,msg);
-	}
-	void BRegfree(BREGEXP_W* rx){
-		return ::BRegfree(rx);
-	}
-	const wchar_t* BRegexpVersion(void){
-		return ::BRegexpVersion();
-	}
-	int BMatchEx(const wchar_t* str, const wchar_t* targetbeg, const wchar_t* target, const wchar_t* targetendp, BREGEXP_W** rxp, wchar_t* msg){
-		return ::BMatchEx(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( targetbeg ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
-	}
-	int BSubstEx(const wchar_t* str, const wchar_t* targetbeg, const wchar_t* target, const wchar_t* targetendp, BREGEXP_W** rxp, wchar_t* msg){
-		return ::BSubstEx(const_cast<TCHAR*>( str ),const_cast<TCHAR*>( targetbeg ),const_cast<TCHAR*>( target ),const_cast<TCHAR*>( targetendp ),rxp,msg);
-	}
-
-	// 関数があるかどうか
-	bool ExistBMatchEx() const{ return true; }
-	bool ExistBSubstEx() const{ return true; }
-	
 	// DLL の名残
 	bool IsAvailable( void ){ return true; }
 	
@@ -245,8 +181,10 @@ public:
 
 //	Jun. 26, 2001 genta
 //!	正規表現ライブラリのバージョン取得
-bool CheckRegexpVersion( HWND hWnd, int nCmpId, bool bShowMsg = false );
+static inline bool CheckRegexpVersion( HWND hWnd, int nCmpId, bool bShowMsg = false ){ return true; };
 bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, int nOption = -1, bool bKakomi = false );// 2002/2/1 hor追加
-bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage );
+static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage ){
+	return true;
+}
 
 #endif

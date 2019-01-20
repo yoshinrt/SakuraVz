@@ -40,20 +40,17 @@
 */
 
 #include "StdAfx.h"
-#include <string>
-#include <stdio.h>
-#include <string.h>
 #include "CBregexp.h"
 #include "charset/charcode.h"
-#include "env/CShareData.h"
-#include "env/DLLSHAREDATA.h"
+
 
 // Compile時、行頭置換(len=0)の時にダミー文字列(１つに統一) by かろと
 const wchar_t CBregexp::m_tmpBuf[2] = L"\0";
 
-CBregexp::CBregexp()
-: m_pRegExp( NULL )
-{
+CBregexp::CBregexp(){
+	m_Re		= nullptr;
+	m_MatchData	= nullptr;
+	
 	m_szMsg[0] = L'\0';
 }
 
@@ -271,13 +268,15 @@ wchar_t* CBregexp::MakePatternAlternate( const wchar_t* const szSearch, const wc
 */
 bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption, bool bKakomi )
 {
-	//	DLLが利用可能でないときはエラー終了
-	if( !IsAvailable() )
-		return false;
-
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
-
+	
+	// match_data 確保
+	m_MatchData = pcre2_match_data_create(
+		1, 						// uint32_t ovecsize
+		NULL					// pcre2_general_context *gcontext
+	); 
+	
 	// ライブラリに渡す検索パターンを作成
 	// 別関数で共通処理に変更 2003.05.03 by かろと
 	wchar_t *szNPattern = NULL;
@@ -288,25 +287,37 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 		szNPattern = MakePatternAlternate( szPattern0, szPattern1, nOption );
 		pszNPattern = szNPattern;
 	}
+	
 	m_szMsg[0] = L'\0';		//!< エラー解除
-	if (szPattern1 == NULL) {
-		// 検索実行
-		BMatch( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
-	} else {
+	
+	int			iErrCode;
+	PCRE2_SIZE	sizeErrOffset;
+	
+	//if (szPattern1 == NULL) {
+		m_Re = pcre2_compile(
+			( PCRE2_SPTR16 )szPattern0,	// PCRE2_SPTR pattern
+			PCRE2_ZERO_TERMINATED,		// PCRE2_SIZE length
+			PCRE2_MULTILINE,			// uint32_t options
+			&iErrCode,					// int *errorcode
+			&sizeErrOffset,				// PCRE2_SIZE *erroroffset
+			NULL						// pcre2_compile_context *ccontext
+		);
+	/*} else {
 		// 置換実行
+		★置換側のチェック未実装
 		BSubst( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
-	}
+	}*/
 	delete [] szNPattern;
 
 	//	メッセージが空文字列でなければ何らかのエラー発生。
 	//	サンプルソース参照
-	if( m_szMsg[0] ){
+	if( m_Re == nullptr ){
 		ReleaseCompileBuffer();
+		pcre2_get_error_message( iErrCode, ( PCRE2_UCHAR *)m_szMsg, MSGBUF_SIZE - 1 );
+		
 		return false;
 	}
 	
-	// 行頭条件チェックは、MakePatternに取り込み 2003.05.03 by かろと
-
 	return true;
 }
 
@@ -324,31 +335,23 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 */
 bool CBregexp::Match( const wchar_t* target, int len, int nStart )
 {
-	int matched;		//!< 検索一致したか? >0:Match, 0:NoMatch, <0:Error
-
 	//	DLLが利用可能でないとき、または構造体が未設定の時はエラー終了
-	if( (!IsAvailable()) || m_pRegExp == NULL ){
-		return false;
-	}
-
-	m_szMsg[0] = '\0';		//!< エラー解除
-	// 拡張関数がない場合は、行の先頭("^")の検索時の特別処理 by かろと
-	//	検索文字列＝NULLを指定すると前回と同一の文字列と見なされる
-	matched = BMatchEx( NULL, target, target + nStart, target + len, &m_pRegExp, m_szMsg );
+	if( m_Re == NULL ) return false;
+	
+	// match
+	int iResult = pcre2_match(
+		m_Re,						// const pcre2_code *code
+		( PCRE2_SPTR16 )target,		// PCRE2_SPTR subject
+		len,						// PCRE2_SIZE length
+		nStart,						// PCRE2_SIZE startoffset
+		0/*PCRE2_PARTIAL_HARD*/,	// uint32_t options
+		m_MatchData,				// pcre2_match_data *match_data
+		NULL						// pcre2_match_context *mcontext
+	);
 	
 	m_szTarget = target;
-			
-	if ( matched < 0 || m_szMsg[0] ) {
-		// BMatchエラー
-		// エラー処理をしていなかったので、nStart>=lenのような場合に、マッチ扱いになり
-		// 無限置換等の不具合になっていた 2003.05.03 by かろと
-		return false;
-	} else if ( matched == 0 ) {
-		// 一致しなかった
-		return false;
-	}
-
-	return true;
+	
+	return iResult > 0;
 }
 
 //<< 2002/03/27 Azumaiya
@@ -367,26 +370,9 @@ bool CBregexp::Match( const wchar_t* target, int len, int nStart )
 */
 int CBregexp::Replace(const wchar_t *szTarget, int nLen, int nStart)
 {
+#ifdef HOGE	// ★未実装
 	int result;
-	//	DLLが利用可能でないとき、または構造体が未設定の時はエラー終了
-	if( !IsAvailable() || m_pRegExp == NULL )
-	{
-		return false;
-	}
-
-	//	From Here 2003.05.03 かろと
-	// nLenが０だと、BSubst()が置換に失敗してしまうので、代用データ(m_tmpBuf)を使う
-	//
-	// 2007.01.19 ryoji 代用データ使用をコメントアウト
-	// 使用すると現状では結果に１バイト余分なゴミが付加される
-	// 置換に失敗するのはnLenが０に限らず nLen = nStart のとき（行頭マッチだけ対策しても．．．）
-	//
-	//if( nLen == 0 ) {
-	//	szTarget = m_tmpBuf;
-	//	nLen = 1;
-	//}
-	//	To Here 2003.05.03 かろと
-
+	
 	m_szMsg[0] = '\0';		//!< エラー解除
 	result = BSubstEx( NULL, szTarget, szTarget + nStart, szTarget + nLen, &m_pRegExp, m_szMsg );
 	
@@ -403,76 +389,8 @@ int CBregexp::Replace(const wchar_t *szTarget, int nLen, int nStart)
 		return 0;
 	}
 	return result;
-}
-//>> 2002/03/27 Azumaiya
-
-const TCHAR* CBregexp::GetLastMessage() const
-{
-	return to_tchar(m_szMsg);
-}
-
-//	From Here Jun. 26, 2001 genta
-/*!
-	与えられた正規表現ライブラリの初期化を行う．
-	メッセージフラグがONで初期化に失敗したときはメッセージを表示する．
-
-	@retval true 初期化成功
-	@retval false 初期化に失敗
-
-	@date 2007.08.12 genta 共通設定からDLL名を取得する
-*/
-bool InitRegexp(
-	HWND		hWnd,			//!< [in] ダイアログボックスのウィンドウハンドル。バージョン番号の設定が不要であればNULL。
-	CBregexp&	rRegexp,		//!< [in] チェックに利用するCBregexpクラスへの参照
-	bool		bShowMessage	//!< [in] 初期化失敗時にエラーメッセージを出すフラグ
-)
-{
-	//	From Here 2007.08.12 genta
-	DLLSHAREDATA* pShareData = &GetDllShareData();
-
-	LPCTSTR RegexpDll = pShareData->m_Common.m_sSearch.m_szRegexpLib;
-	//	To Here 2007.08.12 genta
-
-	EDllResult eDllResult = rRegexp.InitDll(RegexpDll);
-	if( DLL_SUCCESS != eDllResult ){
-		if( bShowMessage ){
-			LPCTSTR pszMsg = _T("");
-			if(eDllResult==DLL_LOADFAILURE){
-				pszMsg = LS(STR_BREGONIG_LOAD);
-			}
-			else if(eDllResult==DLL_INITFAILURE){
-				pszMsg = LS(STR_BREGONIG_INIT);
-			}
-			else{
-				pszMsg = LS(STR_BREGONIG_ERROR);
-				assert(0);
-			}
-			::MessageBox( hWnd, pszMsg, LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );
-		}
-		return false;
-	}
-	return true;
-}
-
-/*!
-	正規表現ライブラリの存在を確認し、あればバージョン情報を指定コンポーネントにセットする。
-	失敗した場合には空文字列をセットする。
-
-	@retval true バージョン番号の設定に成功
-	@retval false 正規表現ライブラリの初期化に失敗
-*/
-bool CheckRegexpVersion(
-	HWND	hWnd,			//!< [in] ダイアログボックスのウィンドウハンドル。バージョン番号の設定が不要であればNULL。
-	int		nCmpId,			//!< [in] バージョン文字列を設定するコンポーネントID
-	bool	bShowMessage	//!< [in] 初期化失敗時にエラーメッセージを出すフラグ
-)
-{
-	CBregexp cRegexp;
-
-	if( hWnd != NULL ){
-		::DlgItem_SetText( hWnd, nCmpId, _T(" "));
-	}
-	return InitRegexp( hWnd, cRegexp, bShowMessage );
+#endif
+	return false;
 }
 
 /*!
@@ -496,9 +414,6 @@ bool CheckRegexpSyntax(
 {
 	CBregexp cRegexp;
 
-	if( !InitRegexp( hWnd, cRegexp, bShowMessage ) ){
-		return false;
-	}
 	if( nOption == -1 ){
 		nOption = CBregexp::optCaseSensitive;
 	}
