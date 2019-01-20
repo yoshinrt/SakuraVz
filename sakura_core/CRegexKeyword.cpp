@@ -246,36 +246,10 @@ BOOL CRegexKeyword::RegexKeyCompile( void )
 		rp = &m_sInfo[i].sRegexKey;
 #endif
 
-		// /re/opt の簡易パース
-		// /re/opt, #re#opt, m/re/opt, m#re#opt
-		// 最後の # / のみ opt の区切りと認識．
+		m_sInfo[i].pBregexp = Compile( pKeyword, &m_sInfo[i].nHead );
 		
-		if( *pKeyword == L'm' ) ++pKeyword;
-		
-		const wchar_t	*pSt = pKeyword + 1;	// 最悪でも != '\0'
-		const wchar_t	*pEd = wcsrchr( pSt + 1, *pKeyword );	// pSt + 1 は最悪でも '\0'
-		
-		if( !pEd ){
-			pEd = wcsrchr( pSt + 1, L'\0' );
-		}
-		
-		// オプション解析，i のみ
-		int iOption = wcschr( pEd, L'i' ) ? 0 : optCaseSensitive;
-		
-		std::wstring strRe( pSt, pEd - pSt );
-		m_sInfo[i].pBregexp = new CBregexp;
-		
-		if( m_sInfo[i].pBregexp->Compile( strRe.c_str(), iOption ))	//エラーがないかチェックする
-		{
-			//先頭以外は検索しなくてよい
-			if( strRe[ 0 ] == L'^' ){
-				m_sInfo[i].nHead = 1;
-			}
-			else
-			{
-				m_sInfo[i].nHead = 0;
-			}
-
+		if( m_sInfo[i].pBregexp ){	//エラーがないかチェックする
+			
 			if( COLORIDX_REGEX1  <= rp->m_nColorIndex
 			 && COLORIDX_REGEX10 >= rp->m_nColorIndex )
 			{
@@ -447,11 +421,51 @@ BOOL CRegexKeyword::RegexIsKeyword(
 	return FALSE;
 }
 
-BOOL CRegexKeyword::RegexKeyCheckSyntax(const wchar_t *s)
-{
-	if( *s == L'm' ) ++s;
-	if( !( *s == L'/' || *s == L'#' )) return false;
-	return s[ 1 ] != L'\0';
+CBregexp *CRegexKeyword::Compile( const wchar_t *szRe, int *pHead ){
+	// /re/opt の簡易パース
+	// /re/opt, #re#opt, m/re/opt, m#re#opt
+	// 最後の # / のみ opt の区切りと認識．
+	
+	// 'm' スキップ
+	if( !szRe || !*szRe ) return nullptr;
+	if( *szRe == L'm' ) ++szRe;
+	
+	// '/' or '#' チェック
+	if( *szRe != L'/' && *szRe != L'#' ) return nullptr;
+	
+	// 後ろの '/' or '#' 検索
+	const wchar_t	*pSt = szRe + 1;
+	if( !*pSt || !pSt[ 1 ]) return nullptr;
+	
+	const wchar_t	*pEd = wcsrchr( pSt + 1, *szRe );
+	
+	if( !pEd ) pEd = wcsrchr( pSt + 1, L'\0' );
+	
+	// オプション解析，i のみ
+	int iOption = wcschr( pEd, L'i' ) ? 0 : optCaseSensitive;
+	
+	std::wstring strRe( pSt, pEd - pSt );
+	CBregexp *re = new CBregexp;
+	
+	// '^' チェック
+	if( pHead ) *pHead = *pSt == L'^' ? 1 : 0;
+	
+	if( re->Compile( strRe.c_str(), iOption )){
+		return re;
+	}
+	
+	delete re;
+	return nullptr;
+}
+
+BOOL CRegexKeyword::RegexKeyCheckSyntax(const wchar_t *s){
+	CBregexp *re = Compile( s );
+	if( re ){
+		delete re;
+		return true;
+	}
+	
+	return false;
 }
 
 //@@@ 2001.11.17 add end MIK

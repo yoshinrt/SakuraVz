@@ -36,15 +36,15 @@ public:
 
 	// 2006.01.22 かろと オプション追加・名称変更
 	enum Option {
-		optNothing			= 0,		//!< オプションなし
-		optCaseSensitive	= 1,		//!< 大文字小文字区別オプション(/iをつけない)
-		optGlobal			= 2,		//!< 全域オプション(/g)
-		optExtend			= 4,		//!< 拡張正規表現(/x)
-		optASCII			= 8,		//!< ASCII(/a)
-		optUnicode			= 0x10,		//!< Unicode(/u)
-		optDefault			= 0x20,		//!< Default(/d)
-		optLocale			= 0x40,		//!< Locale(/l)
-		optR				= 0x80,		//!< CRLF(/R)
+		optNothing			= 0,			//!< オプションなし
+		optCaseSensitive	= 1 << 0,		//!< 大文字小文字区別オプション(/iをつけない)
+		optGlobal			= 1 << 1,		//!< 全域オプション(/g)
+		optExtend			= 1 << 2,		//!< 拡張正規表現(/x)
+		optASCII			= 1 << 3,		//!< ASCII(/a)
+		optUnicode			= 1 << 4,		//!< Unicode(/u)
+		optDefault			= 1 << 5,		//!< Default(/d)
+		optLocale			= 1 << 6,		//!< Locale(/l)
+		optR				= 1 << 7,		//!< CRLF(/R)
 	};
 
 	//! DLLのバージョン情報を取得
@@ -59,7 +59,7 @@ public:
 	bool Compile(const wchar_t *szPattern, int nOption = 0) {
 		return Compile(szPattern, nullptr, nOption);
 	}
-	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption = 0, bool bKakomi = false);	//!< Replace用
+	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption = 0 );	//!< Replace用
 	bool Match(const wchar_t *szTarget, int nLen, int nStart = 0);						//!< 検索を実行する
 	int Replace(const wchar_t *szTarget, int nLen, int nStart = 0);					//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
@@ -183,7 +183,7 @@ public:
 //	Jun. 26, 2001 genta
 //!	正規表現ライブラリのバージョン取得
 static inline bool CheckRegexpVersion( HWND hWnd, int nCmpId, bool bShowMsg = false ){ return true; };
-bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, int nOption = -1, bool bKakomi = false );// 2002/2/1 hor追加
+bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, int nOption = 0 );
 static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage ){
 	return true;
 }

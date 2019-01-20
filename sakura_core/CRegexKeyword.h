@@ -72,6 +72,7 @@ public:
 protected:
 	//! コンパイル
 	BOOL RegexKeyCompile(void);
+	static CBregexp *Compile( const wchar_t *szRe, int *pHead = nullptr );
 	//! 変数初期化
 	BOOL RegexKeyInit( void );
 

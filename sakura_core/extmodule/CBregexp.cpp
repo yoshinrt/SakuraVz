@@ -179,8 +179,7 @@ void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring
 	@retval true 成功
 	@retval false 失敗
 */
-bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption, bool bKakomi )
-{
+bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption ){
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
 	
@@ -189,10 +188,8 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 	
 	std::wstring strModifiedSearch;
 	
-	if( !bKakomi ){
-		MakePatternAlternate( szPattern0, strModifiedSearch );
-		szPattern0 = strModifiedSearch.c_str();
-	}
+	MakePatternAlternate( szPattern0, strModifiedSearch );
+	szPattern0 = strModifiedSearch.c_str();
 	
 	// pcre2 opt 生成
 	m_iOption = nOption;
@@ -365,15 +362,14 @@ bool CheckRegexpSyntax(
 	const wchar_t*	szPattern,
 	HWND			hWnd,
 	bool			bShowMessage,
-	int				nOption,
-	bool			bKakomi
+	int				nOption
 ){
 	CBregexp cRegexp;
 
 	if( nOption == -1 ){
 		nOption = CBregexp::optCaseSensitive;
 	}
-	if( !cRegexp.Compile( szPattern, nullptr, nOption, bKakomi ) ){	// 2002/2/1 hor追加
+	if( !cRegexp.Compile( szPattern, nullptr, nOption )){
 		if( bShowMessage ){
 			::MessageBox( hWnd, cRegexp.GetLastMessage(),
 				LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );

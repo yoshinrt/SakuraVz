@@ -689,15 +689,6 @@ bool CPropTypesRegex::CheckKeywordList(HWND hwndDlg, const TCHAR* szNewKeyWord, 
 	{
 		nRet = ::MYMESSAGEBOX(
 				hwndDlg,
-				MB_OK | MB_ICONSTOP | MB_TOPMOST | MB_DEFBUTTON2,
-				GSTR_APPNAME,
-				LS(STR_PROPTYPEREGEX_KAKOMI) );
-		return false;
-	}
-	if( !CheckRegexpSyntax( to_wchar(szNewKeyWord), hwndDlg, false, -1, true ) )
-	{
-		nRet = ::MYMESSAGEBOX(
-				hwndDlg,
 				MB_YESNO | MB_ICONQUESTION | MB_TOPMOST | MB_DEFBUTTON2,
 				GSTR_APPNAME,
 				LS(STR_PROPTYPEREGEX_INVALID) );
