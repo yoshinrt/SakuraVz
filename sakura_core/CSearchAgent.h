@@ -90,6 +90,28 @@ private:
 
 class CSearchAgent{
 public:
+	/*!
+		@brief SearchWord1Line 用の引数クラス
+	*/
+	class CSearchInfo {
+	public:
+		CSearchInfo(){
+			m_bEOF			= false;
+			m_bGenerated	= false;
+		};
+		
+		~CSearchInfo(){
+			if( m_bGenerated ) delete [] m_szSubject;
+		}
+		
+		wchar_t		*m_szSubject;	// !< 検索対象文字列
+		int			m_iSize;		// !< 検索対象文字列長
+		CLogicInt	m_iLineNo;		// !< 論理行番号
+		CLogicRange	*m_pMatchRange;	// !< hit 範囲
+		bool		m_bEOF;			// !< m_szSubject は最終行を含む
+		bool		m_bGenerated;	// !< m_szSubject は new された
+	};
+	
 	// 文字列検索
 	static const wchar_t* SearchString(
 		const wchar_t*	pLine,
@@ -107,7 +129,14 @@ public:
 		bool	bLoHiCase,
 		int*	pnMatchLen
 	);
-
+	
+	static void CreateWordList(
+		std::vector<std::pair<const wchar_t*, CLogicInt> >&	searchWords,
+		const wchar_t*	pszPattern,
+		int	nPatternLen
+	);
+	
+private:
 	// 検索条件の情報
 	static void CreateCharCharsArr(
 		const wchar_t*	pszPattern,
@@ -115,12 +144,12 @@ public:
 		int**			ppnCharCharsArr
 	);
 	
-	static void CreateWordList(
-		std::vector<std::pair<const wchar_t*, CLogicInt> >&	searchWords,
-		const wchar_t*	pszPattern,
-		int	nPatternLen
+	bool SearchWord1Line(
+		const CSearchStringPattern& Pattern,	//!< 検索パターン
+		CSearchInfo	&Result,
+		int				iStart
 	);
-
+	
 public:
 	CSearchAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }
 
