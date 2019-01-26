@@ -315,31 +315,6 @@ const wchar_t* CSearchAgent::SearchString(
 	return NULL;
 }
 
-/* 検索条件の情報(キー文字列の全角か半角かの配列)作成 */
-void CSearchAgent::CreateCharCharsArr(
-	const wchar_t*	pszPattern,
-	int				nSrcLen,
-	int**			ppnCharCharsArr
-)
-{
-	int		i;
-	int*	pnCharCharsArr;
-	pnCharCharsArr = new int[nSrcLen];
-	for( i = 0; i < nSrcLen; /*i++*/ ){
-		// 2005-09-02 D.S.Koba GetSizeOfChar
-		pnCharCharsArr[i] = CNativeW::GetSizeOfChar( pszPattern, nSrcLen, i );
-		if( 0 == pnCharCharsArr[i] ){
-			pnCharCharsArr[i] = 1;
-		}
-		if( 2 == pnCharCharsArr[i] ){
-			pnCharCharsArr[i + 1] = pnCharCharsArr[i];
-		}
-		i+= pnCharCharsArr[i];
-	}
-	*ppnCharCharsArr = pnCharCharsArr;
-	return;
-}
-
 /*!	単語単位の単語リスト作成
 */
 void CSearchAgent::CreateWordList(
@@ -505,46 +480,66 @@ bool CSearchAgent::PrevOrNextWord(
 	return true;
 }
 
-/*! 
-*/
-/* 見つからない場合は０を返す */
+/*!
+ * @brief 1行内の検索を実行する
+ * @retval true: hit
+ */
 bool CSearchAgent::SearchWord1Line(
 	const CSearchStringPattern& Pattern,	//!< 検索パターン
-	CSearchInfo	&Info,
-	int			iStart
+	CSearchInfo	&Info,						//!< 検索情報
+	int			iStart						//!< 検索開始位置
 ){
 	//正規表現
+	CBregexp *pRegexp = Pattern.GetRegexp();
+	
 	if( Pattern.GetSearchOption().bRegularExp ){
+		if( !pRegexp->Match(
+			Info.m_szSubject,
+			Info.m_iSize,
+			iStart
+		)){
+			return false;
+		}
 		
+		// マッチした行がある
+		Info.m_pMatchRange->SetFromY( Info.m_iLineNo );			// マッチ行
+		Info.m_pMatchRange->SetToY  ( Info.m_iLineNo );			// マッチ行
+		Info.m_pMatchRange->SetToX  ( pRegexp->GetLastIndex());	// マッチ位置 to
+		
+		// マッチ位置 from
+		// \r\n改行時に\nにマッチすると置換できない不具合となるため
+		// 改行文字内でマッチした場合、改行文字の始めからマッチしたことにする
+		Info.m_pMatchRange->SetFromX( CLogicInt(
+			pRegexp->GetIndex() > Info.m_iSizeNoEOL ?
+				Info.m_iSizeNoEOL : pRegexp->GetIndex()
+		));
+		
+		return true;
 	}
 	
 	// 通常検索
-	else{
-		const wchar_t *pResult = SearchString(
-			Info.m_szSubject,
-			Info.m_iSize,
-			iStart,
-			Pattern
-		);
-		
-		if( !pResult ) return false;	// HIT しない
-		
-		Info.m_pMatchRange->SetFromY( Info.m_iLineNo );							// マッチ行
-		Info.m_pMatchRange->SetToY  ( Info.m_iLineNo );							// マッチ行
-		Info.m_pMatchRange->SetFromX( CLogicInt( pResult - Info.m_szSubject ));	// マッチ位置 from
-		Info.m_pMatchRange->SetToX  ( CLogicInt(
-			pResult + Pattern.GetLen() - Info.m_szSubject
-		));	// マッチ位置 to
-		return true;
-	}
+	const wchar_t *pResult = SearchString(
+		Info.m_szSubject,
+		Info.m_iSize,
+		iStart,
+		Pattern
+	);
+	
+	if( !pResult ) return false;	// HIT しない
+	
+	Info.m_pMatchRange->SetFromY( Info.m_iLineNo );							// マッチ行
+	Info.m_pMatchRange->SetToY  ( Info.m_iLineNo );							// マッチ行
+	Info.m_pMatchRange->SetFromX( CLogicInt( pResult - Info.m_szSubject ));	// マッチ位置 from
+	Info.m_pMatchRange->SetToX  ( CLogicInt(
+		pResult + Pattern.GetLen() - Info.m_szSubject
+	));	// マッチ位置 to
+	
+	return true;
 }
 
 /*! 単語検索
-
-	@date 2003.05.22 かろと 行頭処理など見直し
-	@date 2005.11.26 かろと \rや.が\r\nにヒットしないように
-*/
-/* 見つからない場合は０を返す */
+ * @retval 0:見つからない
+ */
 int CSearchAgent::SearchWord(
 	CLogicPoint				ptSerachBegin,	//!< 検索開始位置
 	ESearchDirection		eDirection,		//!< 検索方向
@@ -555,20 +550,17 @@ int CSearchAgent::SearchWord(
 	SearchInfo.m_pMatchRange	= pMatchRange;
 	SearchInfo.m_iLineNo		= ptSerachBegin.GetY2();
 	
-	CDocLine*	pDocLine;
-	CLogicInt	nIdxPos;
-	CLogicInt	nLinePos;
-	
-	nIdxPos		= ptSerachBegin.x;
-	nLinePos	= ptSerachBegin.GetY2();
-	pDocLine	= m_pcDocLineMgr->GetLine( nLinePos );
+	CLogicInt	nIdxPos		= ptSerachBegin.x;
+	CLogicInt	nLinePos	= ptSerachBegin.GetY2();
+	CDocLine*	pDocLine	= m_pcDocLineMgr->GetLine( nLinePos );
 	
 	// 前方検索
 	if( eDirection == SEARCH_FORWARD ){
 		while( NULL != pDocLine ){
 			SearchInfo.m_szSubject	= ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &SearchInfo.m_iSize );
+			SearchInfo.m_iSizeNoEOL = pDocLine->GetLengthWithEOL();
 			SearchInfo.m_iLineNo	= nLinePos;
-
+			
 			if( SearchWord1Line( pattern, SearchInfo, nIdxPos )){
 				return 1;	// hit
 			}
@@ -583,8 +575,9 @@ int CSearchAgent::SearchWord(
 	// 後方検索
 	while( NULL != pDocLine ){
 		SearchInfo.m_szSubject	= ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &SearchInfo.m_iSize );
+		SearchInfo.m_iSizeNoEOL = pDocLine->GetLengthWithEOL();
 		SearchInfo.m_iLineNo	= nLinePos;
-
+		
 		CLogicRange	LastRange;
 		LastRange.SetFromX( CLogicInt( -1 ));
 		CLogicInt	StartPos( CLogicInt( 0 ));
@@ -593,7 +586,10 @@ int CSearchAgent::SearchWord(
 		while( SearchWord1Line( pattern, SearchInfo, StartPos )){
 			if( SearchInfo.m_pMatchRange->GetFrom().x >= nIdxPos ) break;
 			LastRange	= *SearchInfo.m_pMatchRange;
-			StartPos	= LastRange.GetTo().x;
+			
+			// 長さ 0 の場合は再度マッチしないように 1文字進める
+			StartPos	= LastRange.GetFrom().x == LastRange.GetTo().x ?
+				LastRange.GetTo().x + 1 : LastRange.GetTo().x;
 		}
 		
 		// hit した
@@ -607,205 +603,6 @@ int CSearchAgent::SearchWord(
 		nIdxPos = std::numeric_limits<int>::max();
 	}
 	
-	return 0;
-	
-#if 0
-	CLogicInt	nIdxPosOld;
-	const wchar_t*	pLine;
-	int			nLineLen;
-	const wchar_t*	pszRes;
-	CLogicInt	nHitTo;
-	CLogicInt	nHitPos;
-	CLogicInt	nHitPosOld;
-	int			nRetVal = 0;
-	const SSearchOption&	sSearchOption = pattern.GetSearchOption();
-	CBregexp*	pRegexp = pattern.GetRegexp();
-	
-#ifdef MEASURE_SEARCH_TIME
-	long clockStart, clockEnd;
-	clockStart = clock();
-#endif
-
-	//正規表現
-	if( sSearchOption.bRegularExp ){
-		nLinePos = ptSerachBegin.GetY2();		// 検索行＝検索開始行
-		pDocLine = m_pcDocLineMgr->GetLine( nLinePos );
-		// 後方検索
-		if( eDirection == SEARCH_BACKWARD ){
-			//
-			// 後方(↑)検索(正規表現)
-			//
-			nHitTo = ptSerachBegin.x;				// 検索開始位置
-			nIdxPos = 0;
-			while( NULL != pDocLine ){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				nHitPos		= -1;	// -1:この行でマッチ位置なし
-				for (;;) {
-					nHitPosOld = nHitPos;
-					nIdxPosOld = nIdxPos;
-					// 長さ０でマッチしたので、この位置で再度マッチしないように、１文字進める
-					if (nIdxPos == nHitPos) {
-						// 2005-09-02 D.S.Koba GetSizeOfChar
-						nIdxPos += (CNativeW::GetSizeOfChar( pLine, nLineLen, nIdxPos ) == 2 ? 2 : 1);
-					}
-					if (	nIdxPos <= pDocLine->GetLengthWithoutEOL() 
-						&&	pRegexp->Match( pLine, nLineLen, nIdxPos ) ){
-						// 検索にマッチした！
-						nHitPos = pRegexp->GetIndex();
-						nIdxPos = pRegexp->GetLastIndex();
-						if( nHitPos >= nHitTo ){
-							// マッチしたのは、カーソル位置以降だった
-							// すでにマッチした位置があれば、それを返し、なければ前の行へ
-							break;
-						}
-					} else {
-						// マッチしなかった
-						// すでにマッチした位置があれば、それを返し、なければ前の行へ
-						break;
-					}
-				}
-
-				if ( -1 != nHitPosOld ) {
-					// この行でマッチした位置が存在するので、この行で検索終了
-					pMatchRange->SetFromX( nHitPosOld );	// マッチ位置from
-					pMatchRange->SetToX  ( nIdxPosOld );	// マッチ位置to
-					break;
-				} else {
-					// この行でマッチした位置が存在しないので、前の行を検索へ
-					nLinePos--;
-					pDocLine = pDocLine->GetPrevLine();
-					nIdxPos = 0;
-					if( NULL != pDocLine ){
-						nHitTo = pDocLine->GetLengthWithEOL() + 1;		// 前の行のNULL文字(\0)にもマッチさせるために+1 2003.05.16 かろと 
-					}
-				}
-			}
-		}
-		// 前方検索
-		else {
-			//
-			// 前方検索(正規表現)
-			//
-			nIdxPos = ptSerachBegin.x;
-			while( NULL != pDocLine ){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				if(		nIdxPos <= pDocLine->GetLengthWithoutEOL() 
-					&&	pRegexp->Match( pLine, nLineLen, nIdxPos ) ){
-					// マッチした
-					pMatchRange->SetFromX( pRegexp->GetIndex()     );	// マッチ位置from
-					pMatchRange->SetToX  ( pRegexp->GetLastIndex() );	// マッチ位置to
-					break;
-				}
-				++nLinePos;
-				pDocLine = pDocLine->GetNextLine();
-				nIdxPos = 0;
-			}
-		}
-		//
-		// 正規表現検索の後処理
-		if ( pDocLine != NULL ) {
-			// マッチした行がある
-			pMatchRange->SetFromY(nLinePos); // マッチ行
-			pMatchRange->SetToY  (nLinePos); // マッチ行
-			nRetVal = 1;
-			// レイアウト行では改行文字内の位置を表現できないため、マッチ開始位置を補正
-			if (pMatchRange->GetFrom().x > pDocLine->GetLengthWithoutEOL()) {
-				// \r\n改行時に\nにマッチすると置換できない不具合となるため
-				// 改行文字内でマッチした場合、改行文字の始めからマッチしたことにする
-				pMatchRange->SetFromX( pDocLine->GetLengthWithoutEOL() );
-			}
-		}
-	}
-	//普通の検索 (正規表現でも単語単位でもない)
-	else{
-		const int	nPatternLen = pattern.GetLen();
-		// 後方検索
-		if( eDirection == SEARCH_BACKWARD ){
-			nLinePos = ptSerachBegin.GetY2();
-			nHitTo = ptSerachBegin.x;
-
-			nIdxPos = 0;
-			pDocLine = m_pcDocLineMgr->GetLine( nLinePos );
-			while( NULL != pDocLine ){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				nHitPos = -1;
-				for (;;) {
-					nHitPosOld = nHitPos;
-					nIdxPosOld = nIdxPos;
-					pszRes = SearchString(
-						pLine,
-						nLineLen,
-						nIdxPos,
-						pattern
-					);
-					if( NULL != pszRes ){
-						nHitPos = pszRes - pLine;
-						nIdxPos = nHitPos + nPatternLen;	// マッチ文字列長進めるように変更 2005.10.28 Karoto
-						if( nHitPos >= nHitTo ){
-							if( -1 != nHitPosOld ){
-								pMatchRange->SetFromY(nLinePos);	// マッチ行
-								pMatchRange->SetToY  (nLinePos);	// マッチ行
-								pMatchRange->SetFromX(nHitPosOld);	// マッチ位置from
- 								pMatchRange->SetToX  (nIdxPosOld);	// マッチ位置to
-								nRetVal = 1;
-								goto end_of_func;
-							}else{
-								break;
-							}
-						}
-					}else{
-						if( -1 != nHitPosOld ){
-							pMatchRange->SetFromY(nLinePos);	// マッチ行
-							pMatchRange->SetToY  (nLinePos);	// マッチ行
-							pMatchRange->SetFromX(nHitPosOld);	// マッチ位置from
-							pMatchRange->SetToX  (nIdxPosOld);	// マッチ位置to
-							nRetVal = 1;
-							goto end_of_func;
-						}else{
-							break;
-						}
-					}
-				}
-				nLinePos--;
-				pDocLine = pDocLine->GetPrevLine();
-				nIdxPos = 0;
-				if( NULL != pDocLine ){
-					nHitTo = pDocLine->GetLengthWithEOL();
-				}
-			}
-			nRetVal = 0;
-			goto end_of_func;
-		}
-		// 前方検索
-		else{
-			nIdxPos = ptSerachBegin.x;
-			nLinePos = ptSerachBegin.GetY2();
-			pDocLine = m_pcDocLineMgr->GetLine( nLinePos );
-			while( NULL != pDocLine ){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				pszRes = SearchString(
-					pLine,
-					nLineLen,
-					nIdxPos,
-					pattern
-				);
-				if( NULL != pszRes ){
-					pMatchRange->SetFromY(nLinePos);	// マッチ行
-					pMatchRange->SetToY  (nLinePos);	// マッチ行
-					pMatchRange->SetFromX(CLogicInt(pszRes - pLine));							// マッチ位置from (文字単位)
-					pMatchRange->SetToX  (pMatchRange->GetFrom().x + nPatternLen);	// マッチ位置to   (文字単位)
-					nRetVal = 1;
-					goto end_of_func;
-				}
-				++nLinePos;
-				pDocLine = pDocLine->GetNextLine();
-				nIdxPos = 0;
-			}
-			nRetVal = 0;
-			goto end_of_func;
-		}
-	}
-end_of_func:;
 #ifdef MEASURE_SEARCH_TIME
 	clockEnd = clock();
 	TCHAR buf[100];
@@ -813,7 +610,8 @@ end_of_func:;
 	wsprintf( buf, _T("%d"), clockEnd - clockStart);
 	::MessageBox( NULL, buf, GSTR_APPNAME, MB_OK );
 #endif
-#endif
+	
+	return 0;
 }
 
 /* 指定範囲のデータを置換(削除 & データを挿入)

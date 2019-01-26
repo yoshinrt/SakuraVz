@@ -104,12 +104,14 @@ public:
 			if( m_bGenerated ) delete [] m_szSubject;
 		}
 		
+		// (r) は正規表現のみで使用
 		wchar_t		*m_szSubject;	// !< 検索対象文字列
 		int			m_iSize;		// !< 検索対象文字列長
+		int			m_iSizeNoEOL;	// !< (r)検索対象文字列長(EOL除く)
 		CLogicInt	m_iLineNo;		// !< 論理行番号
 		CLogicRange	*m_pMatchRange;	// !< hit 範囲
-		bool		m_bEOF;			// !< m_szSubject は最終行を含む
-		bool		m_bGenerated;	// !< m_szSubject は new された
+		bool		m_bEOF;			// !< (r)m_szSubject は最終行を含む
+		bool		m_bGenerated;	// !< (r)m_szSubject は new された
 	};
 	
 	// 文字列検索
@@ -137,17 +139,10 @@ public:
 	);
 	
 private:
-	// 検索条件の情報
-	static void CreateCharCharsArr(
-		const wchar_t*	pszPattern,
-		int				nSrcLen,
-		int**			ppnCharCharsArr
-	);
-	
 	bool SearchWord1Line(
 		const CSearchStringPattern& Pattern,	//!< 検索パターン
 		CSearchInfo	&Result,
-		int				iStart
+		int	iStart
 	);
 	
 public:
