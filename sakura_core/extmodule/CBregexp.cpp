@@ -174,12 +174,12 @@ void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring
 
 	@param[in] szPattern0	検索or置換パターン
 	@param[in] szPattern1	置換後文字列パターン(検索時はnullptr)
-	@param[in] nOption		検索・置換オプション
+	@param[in] uOption		検索・置換オプション
 
 	@retval true 成功
 	@retval false 失敗
 */
-bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption ){
+bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption ){
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
 	
@@ -192,9 +192,9 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, in
 	szPattern0 = strModifiedSearch.c_str();
 	
 	// pcre2 opt 生成
-	m_iOption = nOption;
+	m_uOption = uOption;
 	int iPcreOpt	= PCRE2_MULTILINE;
-	if( ~nOption & optCaseSensitive	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
+	if( ~uOption & optCaseSensitive	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
 	
 	int	iErrCode;
 	PCRE2_SIZE	sizeErrOffset;
@@ -264,7 +264,34 @@ bool CBregexp::Match( const wchar_t* szTarget, int nLen, int nStart ){
 	return iResult > 0;
 }
 
-//<< 2002/03/27 Azumaiya
+/*! ReplaceBuf 確保・リサイズ
+
+	@param[in] iSize 確保サイズ
+	@retval true: 成功
+*/
+bool CBregexp::ResizeReplaceBuf( int iSize ){
+	
+	if( m_iReplaceBufSize >= iSize )	return true;	// 元々必要サイズ
+	if( iSize >= ( 1 << 30 ))			return false;	// 必要サイズ大きすぎ
+	
+	// buf サイズ更新必要
+	if( m_iReplaceBufSize == 0 ) m_iReplaceBufSize = 1024; // 最小初期サイズ
+	while( m_iReplaceBufSize < iSize ) m_iReplaceBufSize <<= 1;
+	
+	void *p;
+	if( m_szReplaceBuf ){
+		// リサイズ
+		p = realloc( m_szReplaceBuf, m_iReplaceBufSize );
+	}else{
+		// 新規取得
+		p = malloc( m_iReplaceBufSize );
+	}
+	if( !p ) return false;	// 確保失敗
+	
+	m_szReplaceBuf = ( wchar_t *)p;
+	return true;
+}
+
 /*!
 	正規表現による文字列置換
 	既にあるコンパイル構造体を利用して置換（1行）を
@@ -289,26 +316,13 @@ int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
 	m_iStart = nStart;
 	
 	while( 1 ){
-		// 必要サイズ大きすぎ
-		if( iNeededSize >= ( 1 << 30 )) return 0;
-		
-		// buf サイズ更新必要
-		if( m_iReplaceBufSize < iNeededSize ){
-			if( m_szReplaceBuf ) delete [] m_szReplaceBuf;
-			m_szReplaceBuf = nullptr;
-			
-			if( m_iReplaceBufSize == 0 ) m_iReplaceBufSize = 1024; // 最小初期サイズ
-			
-			while( m_iReplaceBufSize < iNeededSize ) m_iReplaceBufSize <<= 1;
-			
-			m_szReplaceBuf = new WCHAR[ m_iReplaceBufSize ];
-		}
+		if( !ResizeReplaceBuf( iNeededSize )) return 0;
 		
 		OutputLen	= m_iReplaceBufSize;
 		
 		// オプション
 		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;
-		if( m_iOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
+		if( m_uOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
 		
 		iResult = pcre2_substitute(
 			m_Re,							// const pcre2_code *code
@@ -353,7 +367,7 @@ void CBregexp::GenerateErrorMessage( int iErrorCode ){
 	@param szPattern [in] チェックする正規表現
 	@param hWnd [in] メッセージボックスの親ウィンドウ
 	@param bShowMessage [in] 初期化失敗時にエラーメッセージを出すフラグ
-	@param nOption [in] 大文字と小文字を無視して比較するフラグ // 2002/2/1 hor追加
+	@param uOption [in] 大文字と小文字を無視して比較するフラグ // 2002/2/1 hor追加
 
 	@retval true 正規表現は規則通り
 	@retval false 文法に誤りがある。または、ライブラリが使用できない。
@@ -362,14 +376,14 @@ bool CheckRegexpSyntax(
 	const wchar_t*	szPattern,
 	HWND			hWnd,
 	bool			bShowMessage,
-	int				nOption
+	UINT			uOption
 ){
 	CBregexp cRegexp;
 
-	if( nOption == -1 ){
-		nOption = CBregexp::optCaseSensitive;
+	if( uOption == -1 ){
+		uOption = CBregexp::optCaseSensitive;
 	}
-	if( !cRegexp.Compile( szPattern, nullptr, nOption )){
+	if( !cRegexp.Compile( szPattern, nullptr, uOption )){
 		if( bShowMessage ){
 			::MessageBox( hWnd, cRegexp.GetLastMessage(),
 				LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );

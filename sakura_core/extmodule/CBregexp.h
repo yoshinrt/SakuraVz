@@ -31,6 +31,8 @@
 
 class CBregexp {
 public:
+	typedef int ( *GetNextLineCallback_t )( void *pParam );
+	
 	CBregexp();
 	~CBregexp();
 
@@ -59,7 +61,7 @@ public:
 	bool Compile(const wchar_t *szPattern, int nOption = 0) {
 		return Compile(szPattern, nullptr, nOption);
 	}
-	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, int nOption = 0 );	//!< Replace用
+	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption = 0 );	//!< Replace用
 	bool Match(const wchar_t *szTarget, int nLen, int nStart = 0);						//!< 検索を実行する
 	int Replace(const wchar_t *szTarget, int nLen, int nStart = 0);					//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
@@ -91,7 +93,7 @@ public:
 	*/
 	CLogicInt GetStringLen( void ){
 		return CLogicInt(
-			m_iReplacedLen - (( m_iOption & optGlobal ) ? m_iStart : GetIndex())
+			m_iReplacedLen - (( m_uOption & optGlobal ) ? m_iStart : GetIndex())
 		);
 	}
 	/*!
@@ -100,7 +102,7 @@ public:
 	*/
 	const wchar_t *GetString( void ){
 		if( m_iReplacedLen == 0 || m_szReplaceBuf == nullptr ) return L"";
-		return m_szReplaceBuf + (( m_iOption & optGlobal ) ? m_iStart : GetIndex());
+		return m_szReplaceBuf + (( m_uOption & optGlobal ) ? m_iStart : GetIndex());
 	}
 	
 	//-----------------------------------------
@@ -111,6 +113,11 @@ public:
 	const TCHAR* GetLastMessage() const { return to_tchar( m_szMsg ? m_szMsg : L"" ); }
 	
 	void GenerateErrorMessage( int iErrorCode );
+	
+	// 次行取得コールバック登録
+	void SetNextLineCallback( GetNextLineCallback_t *func ){
+		m_GetNextLineCallback = func;
+	}
 
 protected:
 
@@ -131,7 +138,7 @@ protected:
 		}
 		
 		if( m_szReplaceBuf ){
-			delete [] m_szReplaceBuf;
+			free( m_szReplaceBuf );
 			m_szReplaceBuf = nullptr;
 		}
 		
@@ -156,16 +163,21 @@ private:
 	static const int	MSGBUF_SIZE	= 80;
 	wchar_t				*m_szMsg;			//!< BREGEXP_Wからのメッセージを保持する
 	
-	int					m_iOption;			// !< オプション
+	UINT				m_uOption;			// !< オプション
 	int					m_iReplaceBufSize;	// !< 置換バッファサイズ
 	wchar_t				*m_szReplaceBuf;	// !< 置換結果バッファ
 	wchar_t				*m_szReplacement;	// !< 置換後文字列
 	int					m_iReplacedLen;		// !< 置換結果文字列長
 	int					m_iStart;			// !< 検索開始位置
 	
+	GetNextLineCallback_t	*m_GetNextLineCallback;	// !< 次行取得コールバック
+	
 	// pcre2
 	pcre2_match_data	*m_MatchData;
 	pcre2_code			*m_Re;
+	
+	//! ReplaceBuf 確保・リサイズ
+	bool ResizeReplaceBuf( int iSize );
 	
 	// bregonig.dll I/F
 public:
@@ -183,7 +195,7 @@ public:
 //	Jun. 26, 2001 genta
 //!	正規表現ライブラリのバージョン取得
 static inline bool CheckRegexpVersion( HWND hWnd, int nCmpId, bool bShowMsg = false ){ return true; };
-bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, int nOption = 0 );
+bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, UINT uOption = 0 );
 static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage ){
 	return true;
 }
