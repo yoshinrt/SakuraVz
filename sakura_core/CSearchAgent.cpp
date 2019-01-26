@@ -486,55 +486,63 @@ bool CSearchAgent::PrevOrNextWord(
  */
 bool CSearchAgent::SearchWord1Line(
 	const CSearchStringPattern& Pattern,	//!< 検索パターン
-	CSearchInfo	&Info,						//!< 検索情報
-	int			iStart						//!< 検索開始位置
+	wchar_t		*szSubject,					//!< 検索対象文字列
+	int			iSubjectSize,				//!< 検索対象文字列長
+	int			iStart,						//!< 検索開始位置
+	CLogicRange	*pMatchRange				//!< hit 範囲，Y は不定
 ){
 	//正規表現
 	CBregexp *pRegexp = Pattern.GetRegexp();
 	
 	if( Pattern.GetSearchOption().bRegularExp ){
-		if( !pRegexp->Match(
-			Info.m_szSubject,
-			Info.m_iSize,
-			iStart
-		)){
+		if( !pRegexp->Match( szSubject, iSubjectSize, iStart, CBregexp::optPartialMatch )){
 			return false;
 		}
 		
 		// マッチした行がある
-		Info.m_pMatchRange->SetFromY( Info.m_iLineNo );			// マッチ行
-		Info.m_pMatchRange->SetToY  ( Info.m_iLineNo );			// マッチ行
-		Info.m_pMatchRange->SetToX  ( pRegexp->GetLastIndex());	// マッチ位置 to
+		// SearchBuf 使用時は SearchBuf 内の index
+		pMatchRange->SetFromX( CLogicInt( pRegexp->GetIndex()));		// マッチ位置 from
+		pMatchRange->SetToX  ( CLogicInt( pRegexp->GetLastIndex()));	// マッチ位置 to
 		
 		// マッチ位置 from
 		// \r\n改行時に\nにマッチすると置換できない不具合となるため
 		// 改行文字内でマッチした場合、改行文字の始めからマッチしたことにする
-		Info.m_pMatchRange->SetFromX( CLogicInt(
-			pRegexp->GetIndex() > Info.m_iSizeNoEOL ?
-				Info.m_iSizeNoEOL : pRegexp->GetIndex()
-		));
+		/* ★暫定
+		pMatchRange->SetFromX( CLogicInt(
+			pRegexp->GetIndex() > iSizeNoEOL ?
+				iSizeNoEOL : pRegexp->GetIndex()
+		));*/
 		
 		return true;
 	}
 	
 	// 通常検索
 	const wchar_t *pResult = SearchString(
-		Info.m_szSubject,
-		Info.m_iSize,
+		szSubject,
+		iSubjectSize,
 		iStart,
 		Pattern
 	);
 	
 	if( !pResult ) return false;	// HIT しない
 	
-	Info.m_pMatchRange->SetFromY( Info.m_iLineNo );							// マッチ行
-	Info.m_pMatchRange->SetToY  ( Info.m_iLineNo );							// マッチ行
-	Info.m_pMatchRange->SetFromX( CLogicInt( pResult - Info.m_szSubject ));	// マッチ位置 from
-	Info.m_pMatchRange->SetToX  ( CLogicInt(
-		pResult + Pattern.GetLen() - Info.m_szSubject
+	pMatchRange->SetFromX( CLogicInt( pResult - szSubject ));	// マッチ位置 from
+	pMatchRange->SetToX  ( CLogicInt(
+		pResult + Pattern.GetLen() - szSubject
 	));	// マッチ位置 to
 	
 	return true;
+}
+
+int CSearchAgent::GetNextLine( wchar_t *&pNextLine, void *pParam ){
+	CDocLine **ppDoc = reinterpret_cast<CDocLine **>( pParam );
+	
+	*ppDoc = ( **ppDoc ).GetNextLine();		// 次行取得
+	if( !*ppDoc ) return 0;					// 次行なし
+	
+	int iLen;
+	pNextLine = ( wchar_t *)( **ppDoc ).GetDocLineStrWithEOL( &iLen );
+	return iLen;
 }
 
 /*! 単語検索
@@ -546,61 +554,88 @@ int CSearchAgent::SearchWord(
 	CLogicRange*			pMatchRange,	//!< [out] マッチ範囲。ロジック単位。
 	const CSearchStringPattern&	pattern		//!< 検索パターン
 ){
-	CSearchInfo SearchInfo;
-	SearchInfo.m_pMatchRange	= pMatchRange;
-	SearchInfo.m_iLineNo		= ptSerachBegin.GetY2();
-	
 	CLogicInt	nIdxPos		= ptSerachBegin.x;
 	CLogicInt	nLinePos	= ptSerachBegin.GetY2();
 	CDocLine*	pDocLine	= m_pcDocLineMgr->GetLine( nLinePos );
 	
+	CDocLine*	pDocLineGetNext;
+	
+	bool bRe = pattern.GetSearchOption().bRegularExp;
+	
+	// 正規表現の場合，次行取得コールバック設定
+	if( bRe ){
+		pattern.GetRegexp()->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
+	}
+	
 	// 前方検索
 	if( eDirection == SEARCH_FORWARD ){
 		while( NULL != pDocLine ){
-			SearchInfo.m_szSubject	= ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &SearchInfo.m_iSize );
-			SearchInfo.m_iSizeNoEOL = pDocLine->GetLengthWithEOL();
-			SearchInfo.m_iLineNo	= nLinePos;
+			int iSubjectSize;
+			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
+			pDocLineGetNext = pDocLine;
 			
-			if( SearchWord1Line( pattern, SearchInfo, nIdxPos )){
-				return 1;	// hit
+			if( SearchWord1Line( pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange )){
+				break;	// hit
 			}
 			
 			++nLinePos;
 			pDocLine = pDocLine->GetNextLine();
 			nIdxPos = 0;
 		}
-		return 0;
 	}
 	
 	// 後方検索
-	while( NULL != pDocLine ){
-		SearchInfo.m_szSubject	= ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &SearchInfo.m_iSize );
-		SearchInfo.m_iSizeNoEOL = pDocLine->GetLengthWithEOL();
-		SearchInfo.m_iLineNo	= nLinePos;
+	else{
+		int iXLimit = -1;	// 検索開始位置
 		
-		CLogicRange	LastRange;
-		LastRange.SetFromX( CLogicInt( -1 ));
-		CLogicInt	StartPos( CLogicInt( 0 ));
-		
-		// 行頭から nIdxPos に達するまで連続で検索し，最後に hit したものが後方検索の結果
-		while( SearchWord1Line( pattern, SearchInfo, StartPos )){
-			if( SearchInfo.m_pMatchRange->GetFrom().x >= nIdxPos ) break;
-			LastRange	= *SearchInfo.m_pMatchRange;
+		while( NULL != pDocLine ){
+			int iSubjectSize;
+			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
+			pDocLineGetNext = pDocLine;
 			
-			// 長さ 0 の場合は再度マッチしないように 1文字進める
-			StartPos	= LastRange.GetFrom().x == LastRange.GetTo().x ?
-				LastRange.GetTo().x + 1 : LastRange.GetTo().x;
+			CLogicRange	LastRange;
+			LastRange.SetFromX( CLogicInt( -1 ));
+			CLogicInt	StartPos( CLogicInt( 0 ));
+			
+			// re 時は複数行が SearchBuf に溜まっていくので，
+			//   行を遡るごとに iXLimit は増加する．
+			// 非 re 時は加算することにあまり意味は無い．
+			iXLimit = iXLimit < 0 ? nIdxPos : iXLimit + iSubjectSize;
+			
+			// 行頭から iXLimit に達するまで連続で検索し，最後に hit したものが後方検索の結果
+			while( SearchWord1Line( pattern, szSubject, iSubjectSize, StartPos, pMatchRange )){
+				if( pMatchRange->GetFrom().x >= iXLimit ) break;
+				LastRange	= *pMatchRange;
+				
+				// 長さ 0 の場合は再度マッチしないように 1文字進める
+				StartPos	= LastRange.GetFrom().x == LastRange.GetTo().x ?
+					LastRange.GetTo().x + 1 : LastRange.GetTo().x;
+				
+				// 正規表現かつ szSearchBuf の続きから検索する場合
+				if( bRe && pattern.GetRegexp()->GetSearchBufLen()){
+					szSubject = nullptr;
+				}
+			}
+			
+			// hit した
+			if( LastRange.GetFrom().x >= 0 ){
+				*pMatchRange = LastRange;
+				break;
+			}
+			
+			--nLinePos;
+			pDocLine = pDocLine->GetPrevLine();
 		}
-		
-		// hit した
-		if( LastRange.GetFrom().x >= 0 ){
-			*pMatchRange = LastRange;
-			return 1;
-		}
-		
-		--nLinePos;
-		pDocLine = pDocLine->GetPrevLine();
-		nIdxPos = std::numeric_limits<int>::max();
+	}
+	
+	if( !pDocLine ) return 0;
+	
+	// Y 補正
+	if( bRe ){
+		pattern.GetRegexp()->GetMatchRange( pMatchRange, nLinePos );
+	}else{
+		pMatchRange->SetFromY( nLinePos );	// マッチ行
+		pMatchRange->SetToY  ( nLinePos );	// マッチ行
 	}
 	
 #ifdef MEASURE_SEARCH_TIME
@@ -611,7 +646,7 @@ int CSearchAgent::SearchWord(
 	::MessageBox( NULL, buf, GSTR_APPNAME, MB_OK );
 #endif
 	
-	return 0;
+	return 1;
 }
 
 /* 指定範囲のデータを置換(削除 & データを挿入)

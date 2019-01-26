@@ -90,18 +90,6 @@ private:
 
 class CSearchAgent{
 public:
-	/*!
-		@brief SearchWord1Line 用の引数クラス
-	*/
-	class CSearchInfo {
-	public:
-		// (r) は正規表現のみで使用
-		wchar_t		*m_szSubject;	// !< 検索対象文字列
-		int			m_iSize;		// !< 検索対象文字列長
-		int			m_iSizeNoEOL;	// !< (r)検索対象文字列長(EOL除く)
-		CLogicInt	m_iLineNo;		// !< 論理行番号
-		CLogicRange	*m_pMatchRange;	// !< hit 範囲
-	};
 	
 	// 文字列検索
 	static const wchar_t* SearchString(
@@ -130,9 +118,14 @@ public:
 private:
 	bool SearchWord1Line(
 		const CSearchStringPattern& Pattern,	//!< 検索パターン
-		CSearchInfo	&Result,
-		int	iStart
+		wchar_t		*szSubject,					//!< 検索対象文字列
+		int			iSubjectSize,				//!< 検索対象文字列長
+		int			iStart,						//!< 検索開始位置
+		CLogicRange	*pMatchRange				//!< hit 範囲
 	);
+	
+	/*! 次行取得 */
+	static int CSearchAgent::GetNextLine( wchar_t *&pNextLine, void *pParam );
 	
 public:
 	CSearchAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }

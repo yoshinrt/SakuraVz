@@ -31,7 +31,8 @@
 
 class CBregexp {
 public:
-	typedef int ( *GetNextLineCallback_t )( void *pParam );
+	// 0: 次行なし 0 >: 取得成功
+	typedef int ( *GetNextLineCallback_t )( wchar_t *&pNextLine, void *pParam );
 	
 	CBregexp();
 	~CBregexp();
@@ -47,6 +48,7 @@ public:
 		optDefault			= 1 << 5,		//!< Default(/d)
 		optLocale			= 1 << 6,		//!< Locale(/l)
 		optR				= 1 << 7,		//!< CRLF(/R)
+		optPartialMatch		= 1 << 8,		//!< partial match
 	};
 
 	//! DLLのバージョン情報を取得
@@ -62,7 +64,7 @@ public:
 		return Compile(szPattern, nullptr, nOption);
 	}
 	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption = 0 );	//!< Replace用
-	bool Match(const wchar_t *szTarget, int nLen, int nStart = 0);						//!< 検索を実行する
+	bool Match(const wchar_t *szTarget, int nLen, int nStart = 0, UINT uOption = 0 );	//!< 検索を実行する
 	int Replace(const wchar_t *szTarget, int nLen, int nStart = 0);					//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
 	/*!
@@ -105,6 +107,9 @@ public:
 		return m_szReplaceBuf + (( m_uOption & optGlobal ) ? m_iStart : GetIndex());
 	}
 	
+	/*! hit レンジ SearchBuf 内-->行番号付き の変換 */
+	void GetMatchRange( CLogicRange *pRange, int iLineOffs = 0 );
+	
 	//-----------------------------------------
 
 	/*! BREGEXPメッセージを取得する
@@ -115,10 +120,14 @@ public:
 	void GenerateErrorMessage( int iErrorCode );
 	
 	// 次行取得コールバック登録
-	void SetNextLineCallback( GetNextLineCallback_t *func ){
-		m_GetNextLineCallback = func;
+	void SetNextLineCallback( GetNextLineCallback_t pFunc, void *pCallbackParam ){
+		m_GetNextLineCallback	= pFunc;
+		m_pCallbackParam		= pCallbackParam;
 	}
-
+	
+	/*! SearchBuf の文字列長取得 */
+	int GetSearchBufLen( void ){ return m_iSearchBufLen; }
+	
 protected:
 
 	//!	コンパイルバッファを解放する
@@ -135,6 +144,11 @@ protected:
 		if( m_Re ){
 			pcre2_code_free( m_Re );
 			m_Re = nullptr;
+		}
+		
+		if( m_szSearchBuf ){
+			free( m_szSearchBuf );
+			m_szSearchBuf = nullptr;
 		}
 		
 		if( m_szReplaceBuf ){
@@ -164,20 +178,28 @@ private:
 	wchar_t				*m_szMsg;			//!< BREGEXP_Wからのメッセージを保持する
 	
 	UINT				m_uOption;			// !< オプション
-	int					m_iReplaceBufSize;	// !< 置換バッファサイズ
+	
+	wchar_t				*m_szSearchBuf;		// !< 検索バッファ
+	int					m_iSearchBufSize;	// !< 検索バッファサイズ
+	int					m_iSearchBufLen;	// !< 検索バッファ有効文字列長
+	std::vector<int>	m_iLineTop;			// !< search buf の各行頭を示す
+	
 	wchar_t				*m_szReplaceBuf;	// !< 置換結果バッファ
+	int					m_iReplaceBufSize;	// !< 置換バッファサイズ
+	
 	wchar_t				*m_szReplacement;	// !< 置換後文字列
 	int					m_iReplacedLen;		// !< 置換結果文字列長
 	int					m_iStart;			// !< 検索開始位置
 	
-	GetNextLineCallback_t	*m_GetNextLineCallback;	// !< 次行取得コールバック
+	GetNextLineCallback_t	m_GetNextLineCallback;	// !< 次行取得コールバック
+	void					*m_pCallbackParam;		// !< コールバックパラメータ
 	
 	// pcre2
 	pcre2_match_data	*m_MatchData;
 	pcre2_code			*m_Re;
 	
-	//! ReplaceBuf 確保・リサイズ
-	bool ResizeReplaceBuf( int iSize );
+	//! Buf 確保・リサイズ
+	static bool ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize );
 	
 	// bregonig.dll I/F
 public:
