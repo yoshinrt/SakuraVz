@@ -406,7 +406,7 @@ int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
 		OutputLen	= m_iReplaceBufSize;
 		
 		// オプション
-		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;
+		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
 		if( m_uOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
 		
 		iResult = pcre2_substitute(
