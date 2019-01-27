@@ -374,8 +374,8 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	既にあるコンパイル構造体を利用して置換（1行）を
 	行う．
 
-	@param[in] szTarget 置換対象データ
-	@param[in] nLen 置換対象データ長
+	@param[in] szTarget 置換対象データ, null の場合 SearchBuf を使用する
+	@param[in] nLen 置換対象データ長，szTarget = nul の場合 m_iSearchBufLen を使用する
 	@param[in] nStart 置換開始位置(0からnLen未満)
 
 	@retval 置換個数
@@ -387,10 +387,18 @@ int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
 	// 必要な output buffer サイズを計算する．
 	// 初期値は，2^n >= nlen * 2 となるサイズで最低 1KB．
 	
-	int iNeededSize = nLen * 2;
-	int iResult;
 	PCRE2_SIZE	OutputLen;
 	m_iStart = nStart;
+	
+	// SearchBuf を使用する?
+	if( szTarget == nullptr ){
+		if( m_szSearchBuf == nullptr || m_iSearchBufLen == 0 ) return 0;
+		szTarget	= m_szSearchBuf;
+		nLen		= m_iSearchBufLen;
+	}
+	
+	int iNeededSize = nLen * 2;
+	int iResult;
 	
 	while( 1 ){
 		if( !ResizeBuf( iNeededSize, m_szReplaceBuf, m_iReplaceBufSize )) return 0;
