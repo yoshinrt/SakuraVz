@@ -159,6 +159,10 @@
 #include "uiparts/CGraphics.h"
 #endif // SAKURA_PCH_MODE_MAX
 
+#define PCRE2_STATIC
+#define PCRE2_CODE_UNIT_WIDTH 16
+#include "pcre2.h"
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。
 

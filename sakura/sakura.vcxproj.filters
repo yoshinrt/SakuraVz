@@ -1091,6 +1091,9 @@
     <ClInclude Include="..\sakura_core\recent\CRecentExcludeFolder.h">
       <Filter>Cpp Source Files\recent</Filter>
     </ClInclude>
+    <ClInclude Include="..\libs\pcre2\include\pcre2.h">
+      <Filter>Other Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\sakura_core\Funccode_x.hsrc">

@@ -1,3 +1,6 @@
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = https://github.com/google/googletest.git
+[submodule "libs/pcre2"]
+	path = libs/pcre2
+	url = https://github.com/yoshinrt/pcre2-win-build.git
