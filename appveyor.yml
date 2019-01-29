@@ -14,14 +14,16 @@ install:
 - cmd: |
     pip install openpyxl --user
     pip install chardet --user
-    msiexec /i externals\cppcheck\cppcheck-1.84-x64-Setup.msi /quiet /qn /norestart /log cppcheck-install.log
-    externals\doxygen\doxygen-1.8.14-setup.exe /silent /suppressmsgboxes
+    echo msiexec /i externals\cppcheck\cppcheck-1.84-x64-Setup.msi /quiet /qn /norestart /log cppcheck-install.log
+    echo externals\doxygen\doxygen-1.8.14-setup.exe /silent /suppressmsgboxes
 
 build_script:
 - cmd: |
-    checkEncoding.bat
+    git submodule init
+    git submodule update
+    echo checkEncoding.bat
     build-all.bat %PLATFORM% %CONFIGURATION%
-    tests\build-and-test.bat %PLATFORM% %CONFIGURATION%
+    echo tests\build-and-test.bat %PLATFORM% %CONFIGURATION%
 
 artifacts:
 - path: 'sakura-*$(platform)-$(configuration)*.zip'
