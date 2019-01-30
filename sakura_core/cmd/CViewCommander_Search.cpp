@@ -81,11 +81,9 @@ void CViewCommander::Command_SEARCH_DIALOG( int nOption )
 	@date 2004.05.30 Moca bChangeCurRegexp=trueで従来通り。falseで、CEditViewの現在設定されている検索パターンを使う
 */
 void CViewCommander::Command_SEARCH_NEXT(
-	bool			bChangeCurRegexp,
-	bool			bRedraw,
-	bool			bReplaceAll,
 	HWND			hwndParent,
 	const WCHAR*	pszNotFoundMessage,
+	UINT			uOption,
 	CLogicRange*	pcSelectLogic		//!< [out] 選択範囲のロジック版。マッチ範囲を返す。すべて置換/高速モードで使用
 )
 {
@@ -120,7 +118,7 @@ void CViewCommander::Command_SEARCH_NEXT(
 	// 2002.01.16 hor
 	// 共通部分のくくりだし
 	// 2004.05.30 Moca CEditViewの現在設定されている検索パターンを使えるように
-	if(bChangeCurRegexp && !m_pCommanderView->ChangeCurRegexp())return;
+	if(( uOption & SEARCH_CHANGE_RE ) && !m_pCommanderView->ChangeCurRegexp()) return;
 	if( 0 == m_pCommanderView->m_strCurSearchKey.size() ){
 		goto end_of_func;
 	}
@@ -163,7 +161,7 @@ void CViewCommander::Command_SEARCH_NEXT(
 			}
 
 			/* 現在の選択範囲を非選択状態に戻す */
-			m_pCommanderView->GetSelectionInfo().DisableSelectArea( bRedraw, false );
+			m_pCommanderView->GetSelectionInfo().DisableSelectArea( uOption & SEARCH_REDRAW, false );
 			bDisableSelect = true;
 		}
 	}
@@ -237,7 +235,7 @@ re_do:;
 			//	2005.06.24 Moca
 			m_pCommanderView->GetSelectionInfo().SetSelectArea( sRangeA );
 
-			if( bRedraw ){
+			if( uOption & SEARCH_REDRAW ){
 				/* 選択領域描画 */
 				m_pCommanderView->GetSelectionInfo().DrawSelectArea();
 			}
@@ -245,9 +243,9 @@ re_do:;
 
 		/* カーソル移動 */
 		//	Sep. 8, 2000 genta
-		if ( !bReplaceAll ) m_pCommanderView->AddCurrentLineToHistory();	// 2002.02.16 hor すべて置換のときは不要
+		if ( !( uOption & SEARCH_REPLACEALL )) m_pCommanderView->AddCurrentLineToHistory();	// 2002.02.16 hor すべて置換のときは不要
 		if( NULL == pcSelectLogic ){
-			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw, _CARETMARGINRATE_JUMP );
+			GetCaret().MoveCursor( sRangeA.GetFrom(), uOption & SEARCH_REDRAW, _CARETMARGINRATE_JUMP );
 			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 		}else{
 			GetCaret().MoveCursorFastMode( pcSelectLogic->GetFrom() );
@@ -265,10 +263,10 @@ re_do:;
 			GetSelect().SetTo(sRangeA.GetFrom());
 
 			/* カーソル移動 */
-			GetCaret().MoveCursor( sRangeA.GetFrom(), bRedraw, _CARETMARGINRATE_JUMP );
+			GetCaret().MoveCursor( sRangeA.GetFrom(), uOption & SEARCH_REDRAW, _CARETMARGINRATE_JUMP );
 			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
 
-			if( bRedraw ){
+			if( uOption & SEARCH_REDRAW ){
 				/* 選択領域描画 */
 				m_pCommanderView->GetSelectionInfo().DrawSelectArea();
 			}
@@ -278,7 +276,7 @@ re_do:;
 				CLogicPoint ptLogic;
 				GetDocument()->m_cLayoutMgr.LayoutToLogic(GetCaret().GetCaretLayoutPos(), &ptLogic);
 				GetCaret().SetCaretLogicPos(ptLogic);
-				m_pCommanderView->DrawBracketCursorLine(bRedraw);
+				m_pCommanderView->DrawBracketCursorLine( uOption & SEARCH_REDRAW );
 			}
 		}
 	}
@@ -288,7 +286,7 @@ end_of_func:;
 	if(GetDllShareData().m_Common.m_sSearch.m_bSearchAll){
 		if(!bFound	&&		// 見つからなかった
 			bRedo	&&		// 最初の検索
-			!bReplaceAll	// 全て置換の実行中じゃない
+			!( uOption & SEARCH_REPLACEALL )	// 全て置換の実行中じゃない
 		){
 			nLineNum	= CLayoutInt(0);
 			nIdx		= CLogicInt(0);
@@ -304,7 +302,7 @@ end_of_func:;
 	else{
 		GetCaret().ShowEditCaret();	// 2002/04/18 YAZAKI
 		GetCaret().ShowCaretPosInfo();	// 2002/04/18 YAZAKI
-		if( !bReplaceAll ){
+		if( !( uOption & SEARCH_REPLACEALL )){
 			m_pCommanderView->SendStatusMessage(LS(STR_ERR_SRNEXT2));
 		}
 // To Here 2002.01.26 hor
@@ -319,13 +317,13 @@ end_of_func:;
 			}
 			AlertNotFound(
 				hwndParent,
-				bReplaceAll,
+				uOption & SEARCH_REPLACEALL,
 				LS(STR_ERR_SRNEXT3),
 				KeyName.GetStringPtr()
 			);
 		}
 		else{
-			AlertNotFound(hwndParent, bReplaceAll, _T("%ls"), pszNotFoundMessage);
+			AlertNotFound(hwndParent, uOption & SEARCH_REPLACEALL, _T("%ls"), pszNotFoundMessage);
 		}
 	}
 }
@@ -589,7 +587,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	const CNativeW	cMemRepKey( GetEditWindow()->m_cDlgReplace.m_strText2.c_str() );
 
 	/* 次を検索 */
-	Command_SEARCH_NEXT( true, true, false, hwndParent, NULL );
+	Command_SEARCH_NEXT( hwndParent, NULL, SEARCH_CHANGE_RE | SEARCH_REDRAW );
 
 	BOOL	bRegularExp = m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	int 	nFlag       = m_pCommanderView->m_sCurSearchOption.bLoHiCase ? 0x01 : 0x00;
@@ -713,7 +711,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 		m_pCommanderView->Redraw();
 
 		/* 次を検索 */
-		Command_SEARCH_NEXT( true, true, false, hwndParent, LSW(STR_ERR_CEDITVIEW_CMD11) );
+		Command_SEARCH_NEXT( hwndParent, LSW(STR_ERR_CEDITVIEW_CMD11), SEARCH_CHANGE_RE | SEARCH_REDRAW );
 	}
 }
 
@@ -859,7 +857,11 @@ void CViewCommander::Command_REPLACE_ALL()
 
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	/* 次を検索 */
-	Command_SEARCH_NEXT( true, bDisplayUpdate, true, 0, NULL, bFastMode ? &cSelectLogic : NULL );
+	Command_SEARCH_NEXT(
+		0, NULL,
+		SEARCH_CHANGE_RE | SEARCH_REPLACEALL | ( bDisplayUpdate ? SEARCH_REDRAW : 0 ),
+		bFastMode ? &cSelectLogic : NULL
+	);
 	// To Here 2001.12.03 hor
 
 	//<< 2002/03/26 Azumaiya
@@ -1125,7 +1127,10 @@ void CViewCommander::Command_REPLACE_ALL()
 						ptNewFrom.y + CLayoutInt(firstLeft < sRangeA.GetFrom().x ? 0 : 1)
 					));
 					// 2004.05.30 Moca 現在の検索文字列を使って検索する
-					Command_SEARCH_NEXT( false, bDisplayUpdate, true, 0, NULL );
+					Command_SEARCH_NEXT(
+						0, NULL,
+						SEARCH_REPLACEALL | ( bDisplayUpdate ? SEARCH_REDRAW : 0 )
+					);
 					continue;
 				}
 			}
@@ -1437,7 +1442,11 @@ void CViewCommander::Command_REPLACE_ALL()
 
 		/* 次を検索 */
 		// 2004.05.30 Moca 現在の検索文字列を使って検索する
-		Command_SEARCH_NEXT( false, bDisplayUpdate, true, 0, NULL, bFastMode ? &cSelectLogic : NULL );
+		Command_SEARCH_NEXT(
+			0, NULL,
+			SEARCH_REPLACEALL | ( bDisplayUpdate ? SEARCH_REDRAW : 0 ),
+			bFastMode ? &cSelectLogic : NULL
+		);
 	}
 
 	if( bFastMode ){
