@@ -52,6 +52,7 @@ public:
 	bool GetLoHiCase() const{ return m_psSearchOption->bLoHiCase; }
 	const SSearchOption& GetSearchOption() const{ return *m_psSearchOption; }
 	CBregexp* GetRegexp() const{ return m_pRegexp; }
+	void SetRegexp( CBregexp *re ){ m_pRegexp = re; }
 #ifdef SEARCH_STRING_KMP
 	const int* GetKMPNextTable() const{ return m_pnNextPossArr; }
 #endif

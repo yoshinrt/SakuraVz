@@ -36,7 +36,9 @@ public:
 	
 	CBregexp();
 	~CBregexp();
-
+	
+	void Copy( CBregexp &re );
+	
 	// 2006.01.22 かろと オプション追加・名称変更
 	enum Option {
 		optNothing			= 0,			//!< オプションなし
@@ -64,8 +66,8 @@ public:
 		return Compile(szPattern, nullptr, nOption);
 	}
 	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption = 0 );	//!< Replace用
-	bool Match(const wchar_t *szTarget, int nLen, int nStart = 0, UINT uOption = 0 );	//!< 検索を実行する
-	int Replace(const wchar_t *szTarget, int nLen, int nStart = 0);					//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
+	bool Match(const wchar_t *szTarget, int nLen, int iStart = 0, UINT uOption = 0 );	//!< 検索を実行する
+	int Replace( const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1, const wchar_t *szReplacement = nullptr );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
 	/*!
 	    検索に一致した文字列の先頭位置を返す(文字列先頭なら0)
@@ -91,11 +93,12 @@ public:
 	}
 	/*!
 		置換された文字列の長さを返す
-		@retval 置換された文字列先頭～文字列末端 までの長さ
+		@retval 置換された文字列長 ★ /g 時は保留
 	*/
 	CLogicInt GetStringLen( void ){
 		return CLogicInt(
-			m_iReplacedLen - (( m_uOption & optGlobal ) ? m_iStart : GetIndex())
+			m_iReplacedLen - m_iSubjectLen + GetMatchLen()
+			//m_iReplacedLen - (( m_uOption & optGlobal ) ? m_iStart : GetIndex())
 		);
 	}
 	/*!
@@ -126,8 +129,16 @@ public:
 	}
 	
 	/*! SearchBuf の文字列長取得 */
-	int GetSearchBufLen( void ){ return m_iSearchBufLen; }
+	int GetSearchBufLen( void ){ return m_iSubjectLen; }
 	
+	/*! 検索 replacement の設定 */
+	void SetReplacement( const wchar_t *szReplacement ){
+		if( m_szReplacement ) delete [] m_szReplacement;
+		
+		int len = wcslen( szReplacement );
+		m_szReplacement = new WCHAR[ len + 1 ];
+		wcscpy( m_szReplacement, szReplacement );
+	}
 protected:
 
 	//!	コンパイルバッファを解放する
@@ -135,37 +146,7 @@ protected:
 		m_MatchData, m_Re を解放する．解放後はnullptrにセットする．
 		元々nullptrなら何もしない
 	*/
-	void ReleaseCompileBuffer(void){
-		if( m_MatchData ){
-			pcre2_match_data_free( m_MatchData );
-			m_MatchData = nullptr;
-		}
-		
-		if( m_Re ){
-			pcre2_code_free( m_Re );
-			m_Re = nullptr;
-		}
-		
-		if( m_szSearchBuf ){
-			free( m_szSearchBuf );
-			m_szSearchBuf = nullptr;
-		}
-		
-		if( m_szReplaceBuf ){
-			free( m_szReplaceBuf );
-			m_szReplaceBuf = nullptr;
-		}
-		
-		if( m_szReplacement ){
-			delete [] m_szReplacement;
-			m_szReplacement = nullptr;
-		}
-		
-		if( m_szMsg ){
-			delete [] m_szMsg;
-			m_szMsg = nullptr;
-		}
-	}
+	void ReleaseCompileBuffer( void );
 
 private:
 	//	内部関数
@@ -178,18 +159,20 @@ private:
 	wchar_t				*m_szMsg;			//!< BREGEXP_Wからのメッセージを保持する
 	
 	UINT				m_uOption;			// !< オプション
+	wchar_t				*m_szSubject;		// !< 最後に検索した文字列
+	int					m_iSubjectLen;		// !< 検索バッファ有効文字列長
 	
 	wchar_t				*m_szSearchBuf;		// !< 検索バッファ
 	int					m_iSearchBufSize;	// !< 検索バッファサイズ
-	int					m_iSearchBufLen;	// !< 検索バッファ有効文字列長
+	
 	std::vector<int>	m_iLineTop;			// !< search buf の各行頭を示す
 	
 	wchar_t				*m_szReplaceBuf;	// !< 置換結果バッファ
 	int					m_iReplaceBufSize;	// !< 置換バッファサイズ
-	
-	wchar_t				*m_szReplacement;	// !< 置換後文字列
 	int					m_iReplacedLen;		// !< 置換結果文字列長
 	int					m_iStart;			// !< 検索開始位置
+	
+	wchar_t				*m_szReplacement;	// !< 置換後文字列
 	
 	GetNextLineCallback_t	m_GetNextLineCallback;	// !< 次行取得コールバック
 	void					*m_pCallbackParam;		// !< コールバックパラメータ

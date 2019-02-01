@@ -424,7 +424,7 @@ BOOL CViewCommander::HandleCommand(
 	case F_SEARCH_BOX:			Command_SEARCH_BOX();break;		// Jan. 13, 2003 MIK					//検索(ボックス)	// 2006.06.04 yukihane Command_SEARCH_BOX()
 	case F_SEARCH_NEXT:			Command_SEARCH_NEXT(													//次を検索
 									(HWND)lparam1, (const WCHAR*)lparam2,
-									bRedraw ? ( SEARCH_CHANGE_RE | SEARCH_REDRAW ) : SEARCH_REDRAW
+									bRedraw ? ( CMDSCH_CHANGE_RE | CMDSCH_REDRAW ) : CMDSCH_REDRAW
 								);break;
 	case F_SEARCH_PREV:			Command_SEARCH_PREV( bRedraw, (HWND)lparam1 );break;						//前を検索
 	case F_REPLACE_DIALOG:	//置換(置換ダイアログ)

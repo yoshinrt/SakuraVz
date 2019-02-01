@@ -44,14 +44,16 @@
 #include "charset/charcode.h"
 
 CBregexp::CBregexp(){
-	m_Re				= nullptr;
-	m_MatchData			= nullptr;
-	m_szMsg				= nullptr;
-	m_szSearchBuf		= nullptr;
-	m_iSearchBufSize	= 0;
-	m_szReplaceBuf		= nullptr;
-	m_iReplaceBufSize	= 0;
-	m_szReplacement		= nullptr;
+	m_Re					= nullptr;
+	m_MatchData				= nullptr;
+	m_szMsg					= nullptr;
+	m_szSearchBuf			= nullptr;
+	m_iSearchBufSize		= 0;
+	m_iSubjectLen			= 0;
+	m_szReplaceBuf			= nullptr;
+	m_iReplaceBufSize		= 0;
+	m_iReplacedLen			= 0;
+	m_szReplacement			= nullptr;
 	
 	m_GetNextLineCallback	= nullptr;
 }
@@ -59,6 +61,68 @@ CBregexp::CBregexp(){
 CBregexp::~CBregexp(){
 	//コンパイルバッファを解放
 	ReleaseCompileBuffer();
+}
+
+void CBregexp::ReleaseCompileBuffer(void){
+	if( m_MatchData ){
+		pcre2_match_data_free( m_MatchData );
+		m_MatchData = nullptr;
+	}
+	
+	if( m_Re ){
+		pcre2_code_free( m_Re );
+		m_Re = nullptr;
+	}
+	
+	if( m_szSearchBuf ){
+		free( m_szSearchBuf );
+		m_szSearchBuf = nullptr;
+	}
+	m_iSearchBufSize		= 0;
+	m_iSubjectLen			= 0;
+	
+	if( m_szReplaceBuf ){
+		free( m_szReplaceBuf );
+		m_szReplaceBuf = nullptr;
+	}
+	m_iReplaceBufSize		= 0;
+	m_iReplacedLen			= 0;
+	
+	if( m_szReplacement ){
+		delete [] m_szReplacement;
+		m_szReplacement = nullptr;
+	}
+	
+	if( m_szMsg ){
+		delete [] m_szMsg;
+		m_szMsg = nullptr;
+	}
+}
+
+// バッファを除くコピー
+void CBregexp::Copy( CBregexp &re ){
+	if( re.m_Re ){
+		m_Re		= pcre2_code_copy( re.m_Re );
+		m_MatchData = pcre2_match_data_create_from_pattern(
+			m_Re, 	// uint32_t ovecsize
+			nullptr	// pcre2_general_context *gcontext
+		);
+	}
+	
+	m_szMsg					= nullptr;
+	m_szSearchBuf			= nullptr;
+	m_iSearchBufSize		= 0;
+	m_iSubjectLen			= 0;
+	m_szReplaceBuf			= nullptr;
+	m_iReplaceBufSize		= 0;
+	m_iReplacedLen			= 0;
+	
+	if( re.m_szReplacement ) SetReplacement( re.m_szReplacement );
+	
+	m_GetNextLineCallback	= re.m_GetNextLineCallback;
+	m_pCallbackParam		= re.m_pCallbackParam;
+	m_uOption				= re.m_uOption;
+	m_iStart				= re.m_iStart;
 }
 
 /*!
@@ -223,16 +287,14 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UI
 	m_MatchData = pcre2_match_data_create_from_pattern(
 		m_Re, 	// uint32_t ovecsize
 		nullptr	// pcre2_general_context *gcontext
-	); 
+	);
 	
 	if( szPattern1 ){
 		// 置換実行
 		//★置換側のチェック未実装
 		//BSubst( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
 		
-		int len = wcslen( szPattern1 );
-		m_szReplacement = new WCHAR[ len + 1 ];
-		wcscpy( m_szReplacement, szPattern1 );
+		SetReplacement( szPattern1 );
 	}
 	
 	return true;
@@ -242,38 +304,33 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UI
 	JRE32のエミュレーション関数．既にあるコンパイル構造体を利用して検索（1行）を
 	行う．
 
-	@param[in] szTarget 検索対象領域先頭アドレス, null の場合 SearchBuf を使用する
-	@param[in] nLen 検索対象領域サイズ，szTarget = nul の場合 m_iSearchBufLen を使用する
-	@param[in] nStart 検索開始位置．(先頭は0)
+	@param[in] szSubject 置換対象データ, null の場合 m_szSubject を使用する
+	@param[in] iSubjectLen 置換対象データ長，szSubject = nul の場合 m_iSubjectLen を使用する
+	@param[in] iStart 検索開始位置．(先頭は0)  -1: m_iStart を使用
 
 	@retval true Match
 	@retval false No Match または エラー
 
 */
-bool CBregexp::Match( const wchar_t* szTarget, int nLen, int nStart, UINT uOption ){
+bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UINT uOption ){
 	//	構造体が未設定の時はエラー終了
 	if( m_Re == nullptr ) return false;
 	
-	// SearchBuf を使用する?
-	if( szTarget == nullptr ){
-		if( m_szSearchBuf == nullptr || m_iSearchBufLen == 0 ) return false;
-		szTarget	= m_szSearchBuf;
-		nLen		= m_iSearchBufLen;
-	}
-	
-	// SearchBuf を使用せず新規に開始
-	else{
-		m_iSearchBufLen = 0;
+	if( szSubject ){
+		m_szSubject		= const_cast<wchar_t *>( szSubject );
+		m_iSubjectLen	= iSubjectLen;
 		m_iLineTop.clear();
 	}
+	
+	if( iStart >= 0 ) m_iStart = iStart;
 	
 	while( 1 ){
 		// match
 		int iResult = pcre2_match(
 			m_Re,						// const pcre2_code *code
-			( PCRE2_SPTR )szTarget,		// PCRE2_SPTR subject
-			nLen,						// PCRE2_SIZE length
-			nStart,						// PCRE2_SIZE startoffset
+			( PCRE2_SPTR )m_szSubject,	// PCRE2_SPTR subject
+			m_iSubjectLen,				// PCRE2_SIZE length
+			m_iStart,					// PCRE2_SIZE startoffset
 			uOption & optPartialMatch ? PCRE2_PARTIAL_HARD : 0,
 										// uint32_t options
 			m_MatchData,				// pcre2_match_data *match_data
@@ -291,26 +348,25 @@ bool CBregexp::Match( const wchar_t* szTarget, int nLen, int nStart, UINT uOptio
 		if( iNextSize == 0 ) return false;
 		
 		// partial 2回目以降
-		if( m_iSearchBufLen ){
-			if( !ResizeBuf( m_iSearchBufLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+		if( m_szSubject == m_szSearchBuf ){
+			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
 				return false;
 		}
 		
 		// partial 初回
 		else{
-			if( !ResizeBuf( nLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
 				return false;
-			memcpy( m_szSearchBuf, szTarget, nLen * sizeof( wchar_t ));
-			m_iSearchBufLen = nLen;
+			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+			m_iSubjectLen = m_iSubjectLen;
 		}
 		
 		// cat
-		m_iLineTop.emplace_back( m_iSearchBufLen );	// 行頭位置記憶
-		memcpy( m_szSearchBuf + m_iSearchBufLen, pNextLine, iNextSize * sizeof( wchar_t ));
-		m_iSearchBufLen += iNextSize;
+		m_iLineTop.emplace_back( m_iSubjectLen );	// 行頭位置記憶
+		memcpy( m_szSearchBuf + m_iSubjectLen, pNextLine, iNextSize * sizeof( wchar_t ));
+		m_iSubjectLen += iNextSize;
 		
-		szTarget	= m_szSearchBuf;
-		nLen		= m_iSearchBufLen;
+		m_szSubject	= m_szSearchBuf;
 	}
 }
 
@@ -374,30 +430,34 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	既にあるコンパイル構造体を利用して置換（1行）を
 	行う．
 
-	@param[in] szTarget 置換対象データ, null の場合 SearchBuf を使用する
-	@param[in] nLen 置換対象データ長，szTarget = nul の場合 m_iSearchBufLen を使用する
-	@param[in] nStart 置換開始位置(0からnLen未満)
+	@param[in] szSubject 置換対象データ, null の場合 m_szSubject を使用する
+	@param[in] iSubjectLen 置換対象データ長，szSubject = nul の場合 m_iSubjectLen を使用する
+	@param[in] iStart 置換開始位置(0からiSubjectLen未満) -1: 前回の検索位置から
+	@param[in] szReplacement 置換後文字列, null の場合 m_szReplacement を使用する
 
 	@retval 置換個数
 
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
-int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
+int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, const wchar_t *szReplacement ){
 	
 	// 必要な output buffer サイズを計算する．
 	// 初期値は，2^n >= nlen * 2 となるサイズで最低 1KB．
 	
 	PCRE2_SIZE	OutputLen;
-	m_iStart = nStart;
 	
 	// SearchBuf を使用する?
-	if( szTarget == nullptr ){
-		if( m_szSearchBuf == nullptr || m_iSearchBufLen == 0 ) return 0;
-		szTarget	= m_szSearchBuf;
-		nLen		= m_iSearchBufLen;
+	if( szSubject == nullptr ){
+		if( m_szSubject == nullptr || m_iSubjectLen == 0 ) return 0;
+		szSubject	= m_szSubject;
+		iSubjectLen	= m_iSubjectLen;
 	}
 	
-	int iNeededSize = nLen * 2;
+	if( iStart < 0 ) iStart = m_iStart;
+	
+	if( !szReplacement ) szReplacement = m_szReplacement;
+	
+	int iNeededSize = iSubjectLen * 2;
 	int iResult;
 	
 	while( 1 ){
@@ -411,13 +471,13 @@ int CBregexp::Replace( const wchar_t *szTarget, int nLen, int nStart ){
 		
 		iResult = pcre2_substitute(
 			m_Re,							// const pcre2_code *code
-			( PCRE2_SPTR )szTarget,			// PCRE2_SPTR subject
-			nLen,							// PCRE2_SIZE length
-			nStart,							// PCRE2_SIZE startoffset
+			( PCRE2_SPTR )szSubject,		// PCRE2_SPTR subject
+			iSubjectLen,					// PCRE2_SIZE length
+			iStart,							// PCRE2_SIZE startoffset
 			iOption,						// uint32_t options
 			m_MatchData,					// pcre2_match_data *match_data
 			nullptr,						// pcre2_match_context *mcontext
-			( PCRE2_SPTR )m_szReplacement,	// PCRE2_SPTR replacement,
+			( PCRE2_SPTR )szReplacement,	// PCRE2_SPTR replacement,
 			PCRE2_ZERO_TERMINATED,			// PCRE2_SIZE rlength
 			( PCRE2_UCHAR *)m_szReplaceBuf,	// PCRE2_UCHAR *outputbuffer
 			&OutputLen						// PCRE2_SIZE *outlengthptr
