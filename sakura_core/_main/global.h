@@ -146,6 +146,7 @@ enum ESearchMode {
 enum ESearchDirection{
 	SEARCH_BACKWARD = 0, //!< 後方検索 (前を検索)
 	SEARCH_FORWARD  = 1, //!< 前方検索 (次を検索) (普通)
+	SEARCH_PARTIAL  = 2, //!< partial 検索
 };
 
 //2007.09.06 kobake 追加

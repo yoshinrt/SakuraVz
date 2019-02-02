@@ -489,13 +489,17 @@ bool CSearchAgent::SearchWord1Line(
 	wchar_t		*szSubject,					//!< 検索対象文字列
 	int			iSubjectSize,				//!< 検索対象文字列長
 	int			iStart,						//!< 検索開始位置
-	CLogicRange	*pMatchRange				//!< hit 範囲，Y は不定
+	CLogicRange	*pMatchRange,				//!< hit 範囲，Y は不定
+	bool		bPartial					//!< partial 検索
 ){
 	//正規表現
 	CBregexp *pRegexp = Pattern.GetRegexp();
 	
 	if( Pattern.GetSearchOption().bRegularExp ){
-		if( !pRegexp->Match( szSubject, iSubjectSize, iStart, CBregexp::optPartialMatch )){
+		if( !pRegexp->Match(
+			szSubject, iSubjectSize, iStart,
+			bPartial ? CBregexp::optPartialMatch : 0
+		)){
 			return false;
 		}
 		
@@ -568,13 +572,16 @@ int CSearchAgent::SearchWord(
 	}
 	
 	// 前方検索
-	if( eDirection == SEARCH_FORWARD ){
+	if( eDirection & SEARCH_FORWARD ){
 		while( NULL != pDocLine ){
 			int iSubjectSize;
 			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
 			pDocLineGetNext = pDocLine;
 			
-			if( SearchWord1Line( pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange )){
+			if( SearchWord1Line(
+				pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange,
+				( eDirection & SEARCH_PARTIAL ) ? true : false
+			)){
 				break;	// hit
 			}
 			
@@ -603,7 +610,10 @@ int CSearchAgent::SearchWord(
 			iXLimit = iXLimit < 0 ? nIdxPos : iXLimit + iSubjectSize;
 			
 			// 行頭から iXLimit に達するまで連続で検索し，最後に hit したものが後方検索の結果
-			while( SearchWord1Line( pattern, szSubject, iSubjectSize, StartPos, pMatchRange )){
+			while( SearchWord1Line(
+				pattern, szSubject, iSubjectSize, StartPos, pMatchRange,
+				( eDirection & SEARCH_PARTIAL ) ? true : false
+			)){
 				if( pMatchRange->GetFrom().x >= iXLimit ) break;
 				LastRange	= *pMatchRange;
 				

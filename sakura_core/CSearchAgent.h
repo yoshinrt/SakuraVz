@@ -122,7 +122,8 @@ private:
 		wchar_t		*szSubject,					//!< 検索対象文字列
 		int			iSubjectSize,				//!< 検索対象文字列長
 		int			iStart,						//!< 検索開始位置
-		CLogicRange	*pMatchRange				//!< hit 範囲
+		CLogicRange	*pMatchRange,				//!< hit 範囲
+		bool		bPartial					//!< partial 検索
 	);
 	
 	/*! 次行取得 */

@@ -207,20 +207,23 @@ re_do:;
 		m_pCommanderView->m_sSearchPattern.SetRegexp( pReResult );
 	}
 	
-	 /* 現在位置より後ろの位置を検索する */
+	ESearchDirection DirOpt = SEARCH_FORWARD;
+	if( !( uOption & CMDSCH_NOPARTIAL )) DirOpt = ( ESearchDirection )( DirOpt | SEARCH_PARTIAL );
+	
+	/* 現在位置より後ろの位置を検索する */
 	// 2004.05.30 Moca 引数をGetShareData()からメンバ変数に変更。他のプロセス/スレッドに書き換えられてしまわないように。
 	if( NULL == pcSelectLogic ){
 		nSearchResult = GetDocument()->m_cLayoutMgr.SearchWord(
 			nLineNum,						// 検索開始レイアウト行
 			nIdx,							// 検索開始データ位置
-			SEARCH_FORWARD,					// 前方検索
+			DirOpt,							// 前方検索
 			&sRangeA,						// マッチレイアウト範囲
 			m_pCommanderView->m_sSearchPattern
 		);
 	}else{
 		nSearchResult = CSearchAgent(&GetDocument()->m_cDocLineMgr).SearchWord(
 			CLogicPoint(nIdx, nLineNumLogic),
-			SEARCH_FORWARD,					// 前方検索
+			DirOpt,							// 前方検索
 			pcSelectLogic,
 			m_pCommanderView->m_sSearchPattern
 		);
@@ -423,7 +426,8 @@ re_do:;							//	hor
 	if( GetDocument()->m_cLayoutMgr.SearchWord(
 		nLineNum,								// 検索開始レイアウト行
 		nIdx,									// 検索開始データ位置
-		SEARCH_BACKWARD,						// 後方検索
+		( ESearchDirection )( SEARCH_BACKWARD | SEARCH_PARTIAL ),
+												// 後方検索
 		&sRangeA,								// マッチレイアウト範囲
 		m_pCommanderView->m_sSearchPattern
 	) ){
@@ -608,10 +612,10 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	BOOL	bRegularExp = m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	int 	nFlag       = m_pCommanderView->m_sCurSearchOption.bLoHiCase ? 0x01 : 0x00;
 	
-	CBregexp ReResult;
+	CBregexp cRegexp;
 	
 	/* 次を検索 */
-	Command_SEARCH_NEXT( hwndParent, NULL, CMDSCH_CHANGE_RE, nullptr, bRegularExp ? &ReResult : nullptr );
+	Command_SEARCH_NEXT( hwndParent, NULL, CMDSCH_CHANGE_RE, nullptr, bRegularExp ? &cRegexp : nullptr );
 
 	/* テキストが選択されているか */
 	if( m_pCommanderView->GetSelectionInfo().IsTextSelected() ){
@@ -655,8 +659,8 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 			// 行削除
 			Command_INSTEXT( false, L"", CLogicInt(0), TRUE );
 		} else if ( bRegularExp ) { /* 検索／置換  1==正規表現 */
-			if( ReResult.Replace( nullptr, 0, -1, cMemRepKey.GetStringPtr())){
-				Command_INSTEXT( false, ReResult.GetString(), ReResult.GetStringLen(), TRUE );
+			if( cRegexp.Replace( nullptr, 0, -1, cMemRepKey.GetStringPtr())){
+				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
 			}
 		}else{
 			Command_INSTEXT( false, cMemRepKey.GetStringPtr(), cMemRepKey.GetStringLength(), TRUE );
@@ -705,7 +709,9 @@ void CViewCommander::Command_REPLACE_ALL()
 		// 置換対象：行削除のときは、クリップボードから貼り付けを無効にする
 		nPaste = FALSE;
 	}
-
+	
+	CBregexp cRegexp;
+	
 	GetEditWindow()->m_cDlgReplace.m_bCanceled=false;
 	GetEditWindow()->m_cDlgReplace.m_nReplaceCnt=0;
 
@@ -823,7 +829,8 @@ void CViewCommander::Command_REPLACE_ALL()
 	Command_SEARCH_NEXT(
 		0, NULL,
 		CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
-		bFastMode ? &cSelectLogic : NULL
+		bFastMode ? &cSelectLogic : NULL,
+		bRegularExp ? &cRegexp : nullptr
 	);
 	// To Here 2001.12.03 hor
 
@@ -914,9 +921,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	CDocLineMgr& rDocLineMgr = GetDocument()->m_cDocLineMgr;
 	CLayoutMgr& rLayoutMgr = GetDocument()->m_cLayoutMgr;
 
-	//  クラス関係をループの中で宣言してしまうと、毎ループごとにコンストラクタ、デストラクタが
-	// 呼ばれて遅くなるので、ここで宣言。
-	CBregexp cRegexp;
 	// 初期化も同様に毎ループごとにやると遅いので、最初に済ましてしまう。
 	if( bRegularExp && nPaste == 0 )
 	{
@@ -928,24 +932,7 @@ void CViewCommander::Command_REPLACE_ALL()
 			::EnableWindow( ::GetParent( ::GetParent( m_pCommanderView->GetHwnd() ) ), TRUE );
 			return;
 		}
-
-		// Nov. 9, 2005 かろと 正規表現で選択始点・終点への挿入方法を変更(再)
-		CNativeW cMemRepKey2;
-		CNativeW cMemMatchStr;
-		cMemMatchStr.SetString(L"$&");
-		if (nReplaceTarget == 1 ) {	//選択始点へ挿入
-			cMemRepKey2 = cmemClip;
-			cMemRepKey2 += cMemMatchStr;
-		} else if (nReplaceTarget == 2) { // 選択終点へ挿入
-			cMemRepKey2 = cMemMatchStr;
-			cMemRepKey2 += cmemClip;
-		} else {
-			cMemRepKey2 = cmemClip;
-		}
-		// 正規表現オプションの設定2006.04.01 かろと
-		int nFlag = (m_pCommanderView->m_sCurSearchOption.bLoHiCase ? CBregexp::optCaseSensitive : CBregexp::optNothing);
-		nFlag |= (bConsecutiveAll ? CBregexp::optNothing : CBregexp::optGlobal);	// 2007.01.16 ryoji
-		cRegexp.Compile(m_pCommanderView->m_strCurSearchKey.c_str(), cMemRepKey2.GetStringPtr(), nFlag);
+		// ★replacement = cmemClip;
 	}
 
 	//$$ 単位混在
@@ -1092,7 +1079,8 @@ void CViewCommander::Command_REPLACE_ALL()
 					// 2004.05.30 Moca 現在の検索文字列を使って検索する
 					Command_SEARCH_NEXT(
 						0, NULL,
-						CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 )
+						CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
+						nullptr, bRegularExp ? &cRegexp : nullptr
 					);
 					continue;
 				}
@@ -1408,7 +1396,8 @@ void CViewCommander::Command_REPLACE_ALL()
 		Command_SEARCH_NEXT(
 			0, NULL,
 			CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
-			bFastMode ? &cSelectLogic : NULL
+			bFastMode ? &cSelectLogic : NULL,
+			bRegularExp ? &cRegexp : nullptr
 		);
 	}
 
