@@ -569,12 +569,6 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	}
 	//2002.02.10 hor
 	int nPaste			=	GetEditWindow()->m_cDlgReplace.m_nPaste;
-	int nReplaceTarget	=	GetEditWindow()->m_cDlgReplace.m_nReplaceTarget;
-
-	if( nPaste && nReplaceTarget == 3 ){
-		// 置換対象：行削除のときは、クリップボードから貼り付けを無効にする
-		nPaste = FALSE;
-	}
 
 	// From Here 2001.12.03 hor
 	if( nPaste && !GetDocument()->m_cDocEditor.IsEnablePaste()){
@@ -620,55 +614,16 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	/* テキストが選択されているか */
 	if( m_pCommanderView->GetSelectionInfo().IsTextSelected() ){
 		// From Here 2001.12.03 hor
-		CLayoutPoint ptTmp(0,0);
-		if ( nPaste || !bRegularExp ) {
-			// 正規表現時は 後方参照($&)で実現するので、正規表現は除外
-			if(nReplaceTarget==1){	//挿入位置へ移動
-				ptTmp = GetSelect().GetTo() - GetSelect().GetFrom();
-				GetSelect().Clear(-1);
-			}
-			else if(nReplaceTarget==2){	//追加位置へ移動
-				// 正規表現を除外したので、「検索後の文字が改行やったら次の行の先頭へ移動」の処理を削除
-				GetCaret().MoveCursor(GetSelect().GetTo(), false);
-				GetSelect().Clear(-1);
-			}
-			else{
-				// 位置指定ないので、何もしない
-			}
-		}
-		// 行削除 選択範囲を行全体に拡大。カーソル位置を行頭へ(正規表現でも実行)
-		if( nReplaceTarget == 3 ){
-			CLogicPoint lineHome;
-			GetDocument()->m_cLayoutMgr.LayoutToLogic(GetSelect().GetFrom(), &lineHome);
-			lineHome.x = CLogicXInt(0); // 行頭
-			CLayoutRange selectFix;
-			GetDocument()->m_cLayoutMgr.LogicToLayout(lineHome, selectFix.GetFromPointer());
-			lineHome.y++; // 次行の行頭
-			GetDocument()->m_cLayoutMgr.LogicToLayout(lineHome, selectFix.GetToPointer());
-			GetCaret().GetAdjustCursorPos(selectFix.GetToPointer());
-			m_pCommanderView->GetSelectionInfo().SetSelectArea(selectFix);
-			m_pCommanderView->GetSelectionInfo().DrawSelectArea();
-			GetCaret().MoveCursor(selectFix.GetFrom(), false);
-			GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();
-		}
 		/* コマンドコードによる処理振り分け */
 		/* テキストを貼り付け */
 		if(nPaste){
 			Command_PASTE(0);
-		} else if( nReplaceTarget == 3 ){
-			// 行削除
-			Command_INSTEXT( false, L"", CLogicInt(0), TRUE );
 		} else if ( bRegularExp ) { /* 検索／置換  1==正規表現 */
 			if( cRegexp.Replace( nullptr, 0, -1, cMemRepKey.GetStringPtr())){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
 			}
 		}else{
 			Command_INSTEXT( false, cMemRepKey.GetStringPtr(), cMemRepKey.GetStringLength(), TRUE );
-		}
-
-		// 挿入後の検索開始位置を調整
-		if(nReplaceTarget==1){
-			GetCaret().SetCaretLayoutPos(GetCaret().GetCaretLayoutPos()+ptTmp);
 		}
 
 		// To Here 2001.12.03 hor
@@ -701,14 +656,9 @@ void CViewCommander::Command_REPLACE_ALL()
 
 	//2002.02.10 hor
 	BOOL nPaste			= GetEditWindow()->m_cDlgReplace.m_nPaste;
-	BOOL nReplaceTarget	= GetEditWindow()->m_cDlgReplace.m_nReplaceTarget;
 	BOOL bRegularExp	= m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	BOOL bSelectedArea	= GetEditWindow()->m_cDlgReplace.m_bSelectedArea;
 	BOOL bConsecutiveAll = GetEditWindow()->m_cDlgReplace.m_bConsecutiveAll;	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji
-	if( nPaste && nReplaceTarget == 3 ){
-		// 置換対象：行削除のときは、クリップボードから貼り付けを無効にする
-		nPaste = FALSE;
-	}
 	
 	CBregexp cRegexp;
 	
@@ -1122,66 +1072,6 @@ void CViewCommander::Command_REPLACE_ALL()
 			}
 		}
 
-		CLayoutPoint ptTmp(0,0);
-		CLogicPoint  ptTmpLogic(0,0);
-
-		if ( nPaste || !bRegularExp ) {
-			// 正規表現時は 後方参照($&)で実現するので、正規表現は除外
-			if( nReplaceTarget == 1 )	//挿入位置セット
-			{
-				if( bFastMode ){
-					ptTmpLogic.x = cSelectLogic.GetTo().x - cSelectLogic.GetFrom().x;
-					ptTmpLogic.y = cSelectLogic.GetTo().y - cSelectLogic.GetFrom().y;
-					cSelectLogic.SetTo(cSelectLogic.GetFrom());
-				}else{
-					ptTmp.x = GetSelect().GetTo().x - GetSelect().GetFrom().x;
-					ptTmp.y = GetSelect().GetTo().y - GetSelect().GetFrom().y;
-					GetSelect().Clear(-1);
-				}
-			}
-			else if( nReplaceTarget == 2 )	//追加位置セット
-			{
-				// 正規表現を除外したので、「検索後の文字が改行やったら次の行の先頭へ移動」の処理を削除
-				if( bFastMode ){
-					GetCaret().MoveCursorFastMode(cSelectLogic.GetTo());
-					cSelectLogic.SetFrom(cSelectLogic.GetTo());
-				}else{
-					GetCaret().MoveCursor(GetSelect().GetTo(), false);
-					GetSelect().Clear(-1);
-				}
-		    }
-			else {
-				// 位置指定ないので、何もしない
-			}
-		}
-		// 行削除 選択範囲を行全体に拡大。カーソル位置を行頭へ(正規表現でも実行)
-		if( nReplaceTarget == 3 ){
-			if( bFastMode ){
-				const CLogicInt y = cSelectLogic.GetFrom().y;
-				cSelectLogic.SetFrom(CLogicPoint(CLogicXInt(0), y)); // 行頭
-				cSelectLogic.SetTo(CLogicPoint(CLogicXInt(0), y + CLogicInt(1))); // 次行の行頭
-				if( GetDocument()->m_cDocLineMgr.GetLineCount() == y + CLogicInt(1) ){
-					const CDocLine* pLine = GetDocument()->m_cDocLineMgr.GetLine(y);
-					if( pLine->GetEol() == EOL_NONE ){
-						// EOFは最終データ行にぶら下がりなので、選択終端は行末
-						cSelectLogic.SetTo(CLogicPoint(pLine->GetLengthWithEOL(), y)); // 対象行の行末
-					}
-				}
-				GetCaret().MoveCursorFastMode(cSelectLogic.GetFrom());
-			}else{
-				CLogicPoint lineHome;
-				GetDocument()->m_cLayoutMgr.LayoutToLogic(GetSelect().GetFrom(), &lineHome);
-				lineHome.x = CLogicXInt(0); // 行頭
-				CLayoutRange selectFix;
-				GetDocument()->m_cLayoutMgr.LogicToLayout(lineHome, selectFix.GetFromPointer());
-				lineHome.y++; // 次行の行頭
-				GetDocument()->m_cLayoutMgr.LogicToLayout(lineHome, selectFix.GetToPointer());
-				GetCaret().GetAdjustCursorPos(selectFix.GetToPointer());
-				m_pCommanderView->GetSelectionInfo().SetSelectArea(selectFix);
-				GetCaret().MoveCursor(selectFix.GetFrom(), false);
-			}
-		}
-
 		/* コマンドコードによる処理振り分け */
 		/* テキストを貼り付け */
 		if( nPaste )
@@ -1202,10 +1092,6 @@ void CViewCommander::Command_REPLACE_ALL()
 				// m_pCommanderView->AdjustScrollBars(); // 2007.07.22 ryoji
 				// m_pCommanderView->Redraw();
 			}
-			++nReplaceNum;
-		}
-		else if( nReplaceTarget == 3 ){
-			Command_INSTEXT( false, L"", CLogicInt(0), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 			++nReplaceNum;
 		}
 		// 2002/01/19 novice 正規表現による文字列置換
@@ -1310,25 +1196,6 @@ void CViewCommander::Command_REPLACE_ALL()
 			*/
 			Command_INSTEXT( false, szREPLACEKEY, nREPLACEKEY, true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 			++nReplaceNum;
-		}
-
-		// 挿入後の位置調整
-		if( nReplaceTarget == 1 )
-		{
-			if( bFastMode ){
-				GetCaret().SetCaretLogicPos(GetCaret().GetCaretLogicPos()+ptTmpLogic);
-			}else{
-				GetCaret().SetCaretLayoutPos(GetCaret().GetCaretLayoutPos()+ptTmp);
-				if (!bBeginBoxSelect)
-				{
-					CLogicPoint p;
-					rLayoutMgr.LayoutToLogic(
-						GetCaret().GetCaretLayoutPos(),
-						&p
-					);
-					GetCaret().SetCaretLogicPos(p);
-				}
-			}
 		}
 
 		if( !bFastMode && 50 <= nReplaceNum && !(bSelectedArea || nPaste) ){
