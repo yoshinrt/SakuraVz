@@ -887,13 +887,16 @@ void CViewCommander::Command_REPLACE_ALL()
 	int nLoopCnt = -1;
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	
+	// partial 設定，block モード時は無効
+	UINT uSearchOpt = CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 );
+	if( bBeginBoxSelect ) uSearchOpt |= CMDSCH_NOPARTIAL;
+	
 	// 置換ループ
 	while( !bCANCEL ){	/* キャンセルされたか */
 		
 		/* 次を検索 */
 		Command_SEARCH_NEXT(
-			0, NULL,
-			CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
+			0, NULL, uSearchOpt,
 			bFastMode ? &cSelectLogic : NULL,
 			bRegularExp ? &cRegexp : nullptr
 		);
