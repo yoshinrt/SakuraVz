@@ -1338,44 +1338,44 @@ int CGrepAgent::DoGrepFile(
 			// 2010.08.25 行頭以外で^にマッチする不具合の修正
 			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex ) ){
 
-					//	パターン発見
-					nIndex = pRegexp->GetIndex();
-					int matchlen = pRegexp->GetMatchLen();
+				//	パターン発見
+				nIndex = pRegexp->GetIndex();
+				int matchlen = pRegexp->GetMatchLen();
 #ifdef _DEBUG
-					if( nIndex <= nIndexPrev ){
-						MYTRACE( _T("ERROR: CEditView::DoGrepFile() nIndex <= nIndexPrev break \n") );
-						break;
-					}
-					nIndexPrev = nIndex;
+				if( nIndex <= nIndexPrev ){
+					MYTRACE( _T("ERROR: CEditView::DoGrepFile() nIndex <= nIndexPrev break \n") );
+					break;
+				}
+				nIndexPrev = nIndex;
 #endif
-					++nHitCount;
-					++(*pnHitCount);
-					if( sGrepOption.nGrepOutputLineType != 2 ){
-						OutputPathInfo(
-							cmemMessage, sGrepOption,
-							pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-							bOutputBaseFolder, bOutputFolderName, bOutFileName
-						);
-						SetGrepResult(
-							cmemMessage, pszDispFilePath, pszCodeName,
-							nLine, nIndex + 1, pLine, nLineLen, nEolCodeLen,
-							pLine + nIndex, matchlen, sGrepOption
-						);
-					}
-					// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
-					//	Jun. 21, 2003 genta 行単位で出力する場合は1つ見つかれば十分
-					if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
-						break;
-					}
-					//	探し始める位置を補正
-					//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
+				++nHitCount;
+				++(*pnHitCount);
+				if( sGrepOption.nGrepOutputLineType != 2 ){
+					OutputPathInfo(
+						cmemMessage, sGrepOption,
+						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
+						bOutputBaseFolder, bOutputFolderName, bOutFileName
+					);
+					SetGrepResult(
+						cmemMessage, pszDispFilePath, pszCodeName,
+						nLine, nIndex + 1, pLine, nLineLen, nEolCodeLen,
+						pLine + nIndex, matchlen, sGrepOption
+					);
+				}
+				// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
+				//	Jun. 21, 2003 genta 行単位で出力する場合は1つ見つかれば十分
+				if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
+					break;
+				}
+				//	探し始める位置を補正
+				//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
+				if( matchlen <= 0 ){
+					matchlen = CNativeW::GetSizeOfChar( pLine, nLineLen, nIndex );
 					if( matchlen <= 0 ){
-						matchlen = CNativeW::GetSizeOfChar( pLine, nLineLen, nIndex );
-						if( matchlen <= 0 ){
-							matchlen = 1;
-						}
+						matchlen = 1;
 					}
-					nIndex += matchlen;
+				}
+				nIndex += matchlen;
 			}
 		}
 		/* 単語のみ検索 */
