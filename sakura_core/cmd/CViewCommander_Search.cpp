@@ -658,7 +658,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	BOOL nPaste			= GetEditWindow()->m_cDlgReplace.m_nPaste;
 	BOOL bRegularExp	= m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	BOOL bSelectedArea	= GetEditWindow()->m_cDlgReplace.m_bSelectedArea;
-	BOOL bConsecutiveAll = GetEditWindow()->m_cDlgReplace.m_bConsecutiveAll;	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji
 	
 	CBregexp cRegexp;
 	
@@ -781,13 +780,13 @@ void CViewCommander::Command_REPLACE_ALL()
 	const wchar_t *szREPLACEKEY;		// 置換後文字列。
 	bool		bColumnSelect = false;	// 矩形貼り付けを行うかどうか。
 	bool		bLineSelect = false;	// ラインモード貼り付けを行うかどうか
-	CNativeW	cmemClip;				// 置換後文字列のデータ（データを格納するだけで、ループ内ではこの形ではデータを扱いません）。
+	CNativeW	cmemReplacement;				// 置換後文字列のデータ（データを格納するだけで、ループ内ではこの形ではデータを扱いません）。
 
 	// クリップボードからのデータ貼り付けかどうか。
 	if( nPaste != 0 )
 	{
 		// クリップボードからデータを取得。
-		if ( !m_pCommanderView->MyGetClipboardData( cmemClip, &bColumnSelect, GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste? &bLineSelect: NULL ) )
+		if ( !m_pCommanderView->MyGetClipboardData( cmemReplacement, &bColumnSelect, GetDllShareData().m_Common.m_sEdit.m_bEnableLineModePaste? &bLineSelect: NULL ) )
 		{
 			ErrorBeep();
 			m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
@@ -831,18 +830,18 @@ void CViewCommander::Command_REPLACE_ALL()
 	else
 	{
 		// 2004.05.14 Moca 全置換の途中で他のウィンドウで置換されるとまずいのでコピーする
-		cmemClip.SetString( GetEditWindow()->m_cDlgReplace.m_strText2.c_str() );
+		cmemReplacement.SetString( GetEditWindow()->m_cDlgReplace.m_strText2.c_str() );
 	}
 
 	CLogicInt nREPLACEKEY;			// 置換後文字列の長さ。
-	szREPLACEKEY = cmemClip.GetStringPtr(&nREPLACEKEY);
+	szREPLACEKEY = cmemReplacement.GetStringPtr(&nREPLACEKEY);
 
 	// 行コピー（MSDEVLineSelect形式）のテキストで末尾が改行になっていなければ改行を追加する
 	// ※レイアウト折り返しの行コピーだった場合は末尾が改行になっていない
 	if( bLineSelect ){
 		if( !WCODE::IsLineDelimiter(szREPLACEKEY[nREPLACEKEY - 1], GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol) ){
-			cmemClip.AppendString(GetDocument()->m_cDocEditor.GetNewLineCode().GetValue2());
-			szREPLACEKEY = cmemClip.GetStringPtr( &nREPLACEKEY );
+			cmemReplacement.AppendString(GetDocument()->m_cDocEditor.GetNewLineCode().GetValue2());
+			szREPLACEKEY = cmemReplacement.GetStringPtr( &nREPLACEKEY );
 		}
 	}
 
@@ -850,8 +849,8 @@ void CViewCommander::Command_REPLACE_ALL()
 		CLogicInt nConvertedTextLen = ConvertEol(szREPLACEKEY, nREPLACEKEY, NULL);
 		wchar_t	*pszConvertedText = new wchar_t[nConvertedTextLen];
 		ConvertEol(szREPLACEKEY, nREPLACEKEY, pszConvertedText);
-		cmemClip.SetString(pszConvertedText, nConvertedTextLen);
-		szREPLACEKEY = cmemClip.GetStringPtr(&nREPLACEKEY);
+		cmemReplacement.SetString(pszConvertedText, nConvertedTextLen);
+		szREPLACEKEY = cmemReplacement.GetStringPtr(&nREPLACEKEY);
 		delete [] pszConvertedText;
 	}
 
@@ -861,20 +860,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	BOOL &bCANCEL = cDlgCancel.m_bCANCEL;
 	CDocLineMgr& rDocLineMgr = GetDocument()->m_cDocLineMgr;
 	CLayoutMgr& rLayoutMgr = GetDocument()->m_cLayoutMgr;
-
-	// 初期化も同様に毎ループごとにやると遅いので、最初に済ましてしまう。
-	if( bRegularExp && nPaste == 0 )
-	{
-		if ( !InitRegexp( m_pCommanderView->GetHwnd(), cRegexp, true ) )
-		{
-			m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
-			::EnableWindow( m_pCommanderView->GetHwnd(), TRUE );
-			::EnableWindow( ::GetParent( m_pCommanderView->GetHwnd() ), TRUE );
-			::EnableWindow( ::GetParent( ::GetParent( m_pCommanderView->GetHwnd() ) ), TRUE );
-			return;
-		}
-		// ★replacement = cmemClip;
-	}
 
 	//$$ 単位混在
 	CLayoutPoint ptOld(0, -1); // 検索後の選択範囲(xはいつもLogic。yは矩形はLayout,通常はLogic)
@@ -1090,99 +1075,11 @@ void CViewCommander::Command_REPLACE_ALL()
 			}
 			++nReplaceNum;
 		}
-		// 2002/01/19 novice 正規表現による文字列置換
-		else if( bRegularExp ) /* 検索／置換  1==正規表現 */
-		{
-			// 物理行、物理行長、物理行での検索マッチ位置
-			const CDocLine* pcDocLine;
-			const wchar_t* pLine;
-			CLogicInt nLogicLineNum;
-			CLogicInt nIdx;
-			CLogicInt nLen;
-			if( bFastMode ){
-				pcDocLine = rDocLineMgr.GetLine(cSelectLogic.GetFrom().GetY2());
-				pLine = pcDocLine->GetPtr();
-				nLogicLineNum = cSelectLogic.GetFrom().GetY2();
-				nIdx = cSelectLogic.GetFrom().GetX2();
-				nLen = pcDocLine->GetLengthWithEOL();
-			}else{
-				const CLayout* pcLayout = rLayoutMgr.SearchLineByLayoutY(GetSelect().GetFrom().GetY2());
-				pcDocLine = pcLayout->GetDocLineRef();
-				pLine = pcDocLine->GetPtr();
-				nLogicLineNum = pcLayout->GetLogicLineNo();
-				nIdx = m_pCommanderView->LineColumnToIndex( pcLayout, GetSelect().GetFrom().GetX2() ) + pcLayout->GetLogicOffset();
-				nLen = pcDocLine->GetLengthWithEOL();
-			}
-			if( !bConsecutiveAll ){	// 一括置換
-				// 2007.01.16 ryoji
-				// 選択範囲置換の場合は行内の選択範囲末尾まで置換範囲を縮める。
-				if( bSelectedArea ){
-					if( bBeginBoxSelect ){	// 矩形選択
-						CLogicInt len = t_min(boxRight.x + colDif, (CLogicInt)(Int)ptOld.x); // 必ず縮める(うっかり先のレイアウト行まで伸ばして次の置換候補を見落としていた)。
-						if (nLen - pcDocLine->GetEol().GetLen() > len) {
-							nLen = len;
-						}
-					} else {	// 通常の選択
-						if( ptColLineP.y+linDif == (Int)ptOld.y ){ //$$ 単位混在
-							if( nLen - pcDocLine->GetEol().GetLen() > ptColLineP.x + colDif )
-								nLen = ptColLineP.GetX2() + CLogicInt(colDif);
-						}
-					}
-				}
-			}
-
-			if( int nReplace = cRegexp.Replace(pLine, nLen, nIdx) ){
-				nReplaceNum += nReplace;
-				CLogicInt exTail; // 置換せずに残す部分の長さ(置換対象となる選択範囲より右側の長さと、置換後文字列である CRegexp::GetString()から除外する長さを兼ねている)。
-				if ( !bConsecutiveAll ) { // 2006.04.01 かろと	// 2007.01.16 ryoji
-					// 行単位での置換処理
-					// 選択範囲を物理行末までにのばす
-					exTail = CLogicInt(0);
-					if( bFastMode ){
-						cSelectLogic.SetTo(CLogicPoint(nLen, nLogicLineNum));
-					}else{
-						rLayoutMgr.LogicToLayout( CLogicPoint(nLen, nLogicLineNum), GetSelect().GetToPointer() );
-					}
-				} else {
-					// From Here Jun. 6, 2005 かろと
-					// 物理行末までINSTEXTする方法は、キャレット位置を調整する必要があり、
-					// キャレット位置の計算が複雑になる。（置換後に改行がある場合に不具合発生）
-					// そこで、INSTEXTする文字列長を調整する方法に変更する（実はこっちの方がわかりやすい）
-					CLogicInt nIdxTo = nIdx + cRegexp.GetMatchLen(); // 検索文字列の末尾
-					if (nIdx == nIdxTo) { // ０文字マッチの時
-						// 無限置換にならないように１文字進める
-						if (nIdxTo < nLen) {
-							// 2005-09-02 D.S.Koba GetSizeOfChar
-							nIdxTo += CLogicInt(CNativeW::GetSizeOfChar(pLine, nLen, nIdxTo) == 2 ? 2 : 1);
-						}
-					}
-					// Oct. 22, 2005 Karoto
-					// \rを置換するとその後ろの\nが消えてしまう問題の対応
-					if (nLen < nIdxTo + pcDocLine->GetEol().GetLen()) {
-						// 改行にかかっていたら、行全体をINSTEXTする。
-						nIdxTo = nLen;
-					}
-					exTail = nLen - nIdxTo;
-					if (nIdxTo != nIdx + cRegexp.GetMatchLen()) { // nIdxToが最初の定義から変更されていたら
-						// それに合わせて選択範囲を変更する。
-						// 選択始点・終点への挿入の場合も０文字マッチと１文字マッチの動作は同じ。
-						if( bFastMode ){
-							cSelectLogic.SetTo(CLogicPoint(nIdxTo, nLogicLineNum));
-						}else{
-							rLayoutMgr.LogicToLayout( CLogicPoint(nIdxTo, nLogicLineNum), GetSelect().GetToPointer() );	// 2007.01.19 ryoji 行位置も取得する
-						}
-					}
-				}
-				if (bBeginBoxSelect) {
-					ptOld   = GetSelect().GetTo();
-					ptOld.x = Int(nLen - exTail);
-				} else {
-					ptOld.x = Int(nLen - exTail); // 2007.01.19 ryoji 追加  // $$ 単位混在 // min(nIdxTo, pcDocLine->GetLengthWithoutEOL()+1) にすべき？
-				}
-
-				// 置換後文字列への書き換え(行末から検索文字列末尾までの文字を除く)
-				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen() - exTail, true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
-				// To Here Jun. 6, 2005 かろと
+		// 正規表現による文字列置換，/g は使わずに 1個ずつ置換
+		else if( bRegularExp ){
+			if( cRegexp.Replace( nullptr, 0, -1, cmemReplacement.GetStringPtr())){
+				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
+				++nReplaceNum;
 			}
 		}
 		else
