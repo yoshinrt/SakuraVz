@@ -401,7 +401,7 @@ void CBregexp::GetMatchRange( CLogicRange *pRange, int iLineOffs ){
 
 /*! ReplaceBuf 確保・リサイズ
 
-	@param[in] iSize 確保サイズ
+	@param[in] iSize 確保サイズ (wchar_t 単位)
 	@retval true: 成功
 */
 bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
@@ -410,18 +410,19 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	if( iSize >= ( 1 << 30 ))	return false;	// 必要サイズ大きすぎ
 	
 	// buf サイズ更新必要
-	if( iBufSize == 0 ) iBufSize = 1024; // 最小初期サイズ
-	while( iBufSize < iSize ) iBufSize <<= 1;
+	int iBufSizeTmp = iBufSize ? iBufSizeTmp : 1024;	// 最小初期サイズ
+	while( iBufSizeTmp < iSize ) iBufSizeTmp <<= 1;
 	
 	void *p;
 	if( pBuf ){
-		p = realloc( pBuf, iBufSize );	// リサイズ
+		p = realloc( pBuf, iBufSizeTmp * sizeof( wchar_t ));	// リサイズ
 	}else{
-		p = malloc( iBufSize );			// 新規取得
+		p = malloc( iBufSizeTmp * sizeof( wchar_t ));			// 新規取得
 	}
 	if( !p ) return false;	// 確保失敗
 	
-	pBuf = ( wchar_t *)p;
+	pBuf		= ( wchar_t *)p;
+	iBufSize	= iBufSizeTmp;
 	return true;
 }
 
