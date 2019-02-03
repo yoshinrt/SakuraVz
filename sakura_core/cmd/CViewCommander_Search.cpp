@@ -773,15 +773,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	/* テキスト選択解除 */
 	/* 現在の選択範囲を非選択状態に戻す */
 	m_pCommanderView->GetSelectionInfo().DisableSelectArea( bDisplayUpdate );
-
-	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
-	/* 次を検索 */
-	Command_SEARCH_NEXT(
-		0, NULL,
-		CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
-		bFastMode ? &cSelectLogic : NULL,
-		bRegularExp ? &cRegexp : nullptr
-	);
 	// To Here 2001.12.03 hor
 
 	//<< 2002/03/26 Azumaiya
@@ -894,17 +885,25 @@ void CViewCommander::Command_REPLACE_ALL()
 	/*CLogicInt*/int		linOldLen = (0);	//検査後の行の長さ
 
 	int nLoopCnt = -1;
-
-	/* テキストが選択されているか */
-	while( (!bFastMode && m_pCommanderView->GetSelectionInfo().IsTextSelected())
-		|| ( bFastMode && cSelectLogic.IsValid() ) )
-	{
-		/* キャンセルされたか */
-		if( bCANCEL )
-		{
-			break;
-		}
-
+	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
+	
+	// 置換ループ
+	while( !bCANCEL ){	/* キャンセルされたか */
+		
+		/* 次を検索 */
+		Command_SEARCH_NEXT(
+			0, NULL,
+			CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
+			bFastMode ? &cSelectLogic : NULL,
+			bRegularExp ? &cRegexp : nullptr
+		);
+		
+		// 検索に引っかからなかったら終了
+		if( !(
+			bFastMode ? cSelectLogic.IsValid() :
+						m_pCommanderView->GetSelectionInfo().IsTextSelected()
+		)) break;
+		
 		/* 処理中のユーザー操作を可能にする */
 		if( !::BlockingHook( hwndCancel ) )
 		{
@@ -1026,12 +1025,6 @@ void CViewCommander::Command_REPLACE_ALL()
 						sRangeA.GetFrom().x,
 						ptNewFrom.y + CLayoutInt(firstLeft < sRangeA.GetFrom().x ? 0 : 1)
 					));
-					// 2004.05.30 Moca 現在の検索文字列を使って検索する
-					Command_SEARCH_NEXT(
-						0, NULL,
-						CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
-						nullptr, bRegularExp ? &cRegexp : nullptr
-					);
 					continue;
 				}
 			}
@@ -1257,15 +1250,6 @@ void CViewCommander::Command_REPLACE_ALL()
 			}
 		}
 		// To Here 2001.12.03 hor
-
-		/* 次を検索 */
-		// 2004.05.30 Moca 現在の検索文字列を使って検索する
-		Command_SEARCH_NEXT(
-			0, NULL,
-			CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 ),
-			bFastMode ? &cSelectLogic : NULL,
-			bRegularExp ? &cRegexp : nullptr
-		);
 	}
 
 	if( bFastMode ){
