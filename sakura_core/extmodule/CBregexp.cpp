@@ -324,6 +324,8 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
+	UINT uPcre2Opt = ( uOption & optPartialMatch ) ? PCRE2_PARTIAL_HARD : 0;
+	
 	while( 1 ){
 		// match
 		int iResult = pcre2_match(
@@ -331,8 +333,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 			( PCRE2_SPTR )m_szSubject,	// PCRE2_SPTR subject
 			m_iSubjectLen,				// PCRE2_SIZE length
 			m_iStart,					// PCRE2_SIZE startoffset
-			uOption & optPartialMatch ? PCRE2_PARTIAL_HARD : 0,
-										// uint32_t options
+			uPcre2Opt,					// uint32_t options
 			m_MatchData,				// pcre2_match_data *match_data
 			nullptr						// pcre2_match_context *mcontext
 		);
@@ -344,8 +345,17 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		wchar_t	*pNextLine;
 		int iNextSize = m_GetNextLineCallback( pNextLine, m_pCallbackParam );
 		
-		// partial match したけど次行がないので失敗
-		if( iNextSize == 0 ) return false;
+		// partial match したけど次行がないので，partial match を外して再検索
+		if( iNextSize == 0 ){
+			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+			continue;
+		}
+		
+		// SIZE_NOPARTIAL bit が立っていたら，partial option を外す
+		if( iNextSize & SIZE_NOPARTIAL ){
+			iNextSize &= ~SIZE_NOPARTIAL;
+			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+		}
 		
 		// partial 2回目以降
 		if( m_szSubject == m_szSearchBuf ){
@@ -410,13 +420,13 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	if( iSize >= ( 1 << 30 ))	return false;	// 必要サイズ大きすぎ
 	
 	// buf サイズ更新必要
-	int iBufSizeTmp = iBufSize ? iBufSizeTmp : 1024;	// 最小初期サイズ
+	int iBufSizeTmp = iBufSize ? iBufSize : 1024;	// 最小初期サイズ
 	while( iBufSizeTmp < iSize ) iBufSizeTmp <<= 1;
 	
 	void *p;
 	if( pBuf ){
 		p = realloc( pBuf, iBufSizeTmp * sizeof( wchar_t ));	// リサイズ
-	}else{
+	}else{	
 		p = malloc( iBufSizeTmp * sizeof( wchar_t ));			// 新規取得
 	}
 	if( !p ) return false;	// 確保失敗

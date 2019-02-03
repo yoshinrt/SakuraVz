@@ -32,7 +32,9 @@
 class CBregexp {
 public:
 	// 0: 次行なし 0 >: 取得成功
+	// SIZE_NOPARTIAL が立っていたら，partial なし (その行が最終行)
 	typedef int ( *GetNextLineCallback_t )( wchar_t *&pNextLine, void *pParam );
+	static const int SIZE_NOPARTIAL = ( 1 << 31 );
 	
 	CBregexp();
 	~CBregexp();

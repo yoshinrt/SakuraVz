@@ -546,6 +546,10 @@ int CSearchAgent::GetNextLine( wchar_t *&pNextLine, void *pParam ){
 	
 	int iLen;
 	pNextLine = ( wchar_t *)( **ppDoc ).GetDocLineStrWithEOL( &iLen );
+	
+	// この行が最終行?
+	if( !( **ppDoc ).GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	
 	return iLen;
 }
 
