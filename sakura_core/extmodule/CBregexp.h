@@ -90,7 +90,7 @@ public:
 		@retval 検索に一致した文字列の長さ
 	*/
 	CLogicInt GetMatchLen( void ){
-		int *p = ( int *)pcre2_get_ovector_pointer( m_MatchData );
+		PCRE2_SIZE *p = pcre2_get_ovector_pointer( m_MatchData );
 		return CLogicInt( p[ 1 ] - p[ 0 ]);
 	}
 	/*!
