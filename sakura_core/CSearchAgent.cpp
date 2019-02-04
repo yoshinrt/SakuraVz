@@ -538,7 +538,7 @@ bool CSearchAgent::SearchWord1Line(
 	return true;
 }
 
-int CSearchAgent::GetNextLine( wchar_t *&pNextLine, void *pParam ){
+int CSearchAgent::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
 	CDocLine **ppDoc = reinterpret_cast<CDocLine **>( pParam );
 	
 	*ppDoc = ( **ppDoc ).GetNextLine();		// 次行取得

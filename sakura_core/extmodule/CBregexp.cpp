@@ -340,9 +340,18 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		if( iResult != PCRE2_ERROR_PARTIAL ) return iResult > 0;
 		
+		// partial 1回目，szSubject を m_szSearchBuf にコピー
+		if( m_szSubject != m_szSearchBuf ){
+			if( !ResizeBuf( m_iSubjectLen, m_szSearchBuf, m_iSearchBufSize ))
+				return false;
+			
+			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+			m_iSubjectLen = m_iSubjectLen;
+		}
+		
 		// partial match したので，次行読み出し
 		if( !m_GetNextLineCallback ) return false;
-		wchar_t	*pNextLine;
+		const wchar_t	*pNextLine;
 		int iNextSize = m_GetNextLineCallback( pNextLine, m_pCallbackParam );
 		
 		// partial match したけど次行がないので，partial match を外して再検索
@@ -357,21 +366,10 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
 		}
 		
-		// partial 2回目以降
-		if( m_szSubject == m_szSearchBuf ){
-			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
-				return false;
-		}
-		
-		// partial 初回
-		else{
-			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
-				return false;
-			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
-			m_iSubjectLen = m_iSubjectLen;
-		}
-		
 		// cat
+		if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+			return false;
+		
 		m_iLineTop.emplace_back( m_iSubjectLen );	// 行頭位置記憶
 		memcpy( m_szSearchBuf + m_iSubjectLen, pNextLine, iNextSize * sizeof( wchar_t ));
 		m_iSubjectLen += iNextSize;
