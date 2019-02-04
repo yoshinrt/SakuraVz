@@ -127,7 +127,7 @@ private:
 	);
 	
 	/*! 次行取得 */
-	static int CSearchAgent::GetNextLine( const wchar_t *&pNextLine, void *pParam );
+	static int GetNextLine( const wchar_t *&pNextLine, void *pParam );
 	
 public:
 	CSearchAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }

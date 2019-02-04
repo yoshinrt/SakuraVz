@@ -130,8 +130,11 @@ public:
 		m_pCallbackParam		= pCallbackParam;
 	}
 	
+	//! Subject を得る
+	wchar_t *GetSubject( void ){ return m_szSubject; }
+	
 	/*! SearchBuf の文字列長取得 */
-	int GetSearchBufLen( void ){ return m_iSubjectLen; }
+	int GetSubjectLen( void ){ return m_iSubjectLen; }
 	
 	/*! 検索 replacement の設定 */
 	void SetReplacement( const wchar_t *szReplacement ){

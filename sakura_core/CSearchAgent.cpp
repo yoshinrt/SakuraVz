@@ -626,7 +626,7 @@ int CSearchAgent::SearchWord(
 					LastRange.GetTo().x + 1 : LastRange.GetTo().x;
 				
 				// 正規表現かつ szSearchBuf の続きから検索する場合
-				if( bRe && pattern.GetRegexp()->GetSearchBufLen()){
+				if( bRe && pattern.GetRegexp()->GetSubjectLen()){
 					szSubject = nullptr;
 				}
 			}

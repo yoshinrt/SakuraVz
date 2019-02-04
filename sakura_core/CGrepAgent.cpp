@@ -28,6 +28,21 @@
 #define ADDTAIL_INTERVAL_MILLISEC 50	// 結果出力の時間間隔
 #define UIFILENAME_INTERVAL_MILLISEC 15	// Cancelダイアログのファイル名表示更新間隔
 
+class CGrepDocInfo {
+public:
+	CGrepDocInfo(
+		CFileLoad	*pFileLoad,
+		CNativeW	*pLineBuf,
+		CEol		*pEol,
+		LONGLONG	*piLine
+	) : m_pFileLoad( pFileLoad ), m_pLineBuf( pLineBuf ), m_pEol( pEol ), m_piLine( piLine ){}
+	
+	CFileLoad	*m_pFileLoad;
+	CNativeW	*m_pLineBuf;
+	CEol		*m_pEol;
+	LONGLONG	*m_piLine;
+};
+
 CGrepAgent::CGrepAgent()
 : m_bGrepMode( false )			/* Grepモードか */
 , m_bGrepRunning( false )		/* Grep処理中 */
@@ -1273,7 +1288,11 @@ int CGrepAgent::DoGrepFile(
 	if( sSearchOption.bWordOnly ){
 		CSearchAgent::CreateWordList( searchWords, pszKey, nKeyLen );
 	}
-
+	
+	// next line callback 設定
+	CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
+	pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
+	
 	// 注意 : cfl.ReadLine が throw する可能性がある
 	while( RESULT_FAILURE != cfl.ReadLine( &cUnicodeBuffer, &cEol ) )
 	{
@@ -1336,8 +1355,14 @@ int CGrepAgent::DoGrepFile(
 			//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
 			// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
 			// 2010.08.25 行頭以外で^にマッチする不具合の修正
-			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex ) ){
-
+			int iLineDisp = nLine;
+			
+			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
+				
+				// SearchBuf を得る
+				pLine		= pRegexp->GetSubject();
+				nLineLen	= pRegexp->GetSubjectLen();
+				
 				//	パターン発見
 				nIndex = pRegexp->GetIndex();
 				int matchlen = pRegexp->GetMatchLen();
@@ -1358,7 +1383,7 @@ int CGrepAgent::DoGrepFile(
 					);
 					SetGrepResult(
 						cmemMessage, pszDispFilePath, pszCodeName,
-						nLine, nIndex + 1, pLine, nLineLen, nEolCodeLen,
+						iLineDisp, nIndex + 1, pLine, nLineLen, nEolCodeLen,
 						pLine + nIndex, matchlen, sGrepOption
 					);
 				}
@@ -1732,6 +1757,11 @@ int CGrepAgent::DoGrepReplaceFile(
 	CNativeW cOutBuffer;
 	// 注意 : cfl.ReadLine が throw する可能性がある
 	CNativeW cUnicodeBuffer;
+	
+	// next line callback 設定
+	CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
+	pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
+	
 	while( RESULT_FAILURE != cfl.ReadLine( &cUnicodeBuffer, &cEol ) )
 	{
 		const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
@@ -1975,3 +2005,18 @@ int CGrepAgent::DoGrepReplaceFile(
 	return nHitCount;
 }
 
+// 次行取得
+int CGrepAgent::GetNextLine( const wchar_t *&m_pNextLine, void *m_pParam ){
+	
+	CGrepDocInfo *pInfo = static_cast<CGrepDocInfo *>( m_pParam );
+	
+	// 次行なし
+	if( pInfo->m_pFileLoad->ReadLine( pInfo->m_pLineBuf, pInfo->m_pEol ) == RESULT_FAILURE ){
+		return 0;
+	}
+	
+	// 次行取得
+	++*pInfo->m_piLine;
+	m_pNextLine = pInfo->m_pLineBuf->GetStringPtr();
+	return pInfo->m_pLineBuf->GetStringLength();
+}
