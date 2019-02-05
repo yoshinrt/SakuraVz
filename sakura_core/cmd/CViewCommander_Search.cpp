@@ -619,7 +619,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 		if(nPaste){
 			Command_PASTE(0);
 		} else if ( bRegularExp ) { /* 検索／置換  1==正規表現 */
-			if( cRegexp.Replace( nullptr, 0, -1, cMemRepKey.GetStringPtr())){
+			if( cRegexp.Replace( nullptr, 0, -1, cMemRepKey.GetStringPtr()) > 0 ){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
 			}
 		}else{
@@ -1077,7 +1077,7 @@ void CViewCommander::Command_REPLACE_ALL()
 		}
 		// 正規表現による文字列置換，/g は使わずに 1個ずつ置換
 		else if( bRegularExp ){
-			if( cRegexp.Replace( nullptr, 0, -1, cmemReplacement.GetStringPtr())){
+			if( cRegexp.Replace( nullptr, 0, -1, cmemReplacement.GetStringPtr()) > 0 ){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 				++nReplaceNum;
 			}

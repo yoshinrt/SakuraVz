@@ -431,7 +431,7 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	@param[in] iStart 置換開始位置(0からiSubjectLen未満) -1: 前回の検索位置から
 	@param[in] szReplacement 置換後文字列
 
-	@retval 置換個数
+	@retval 置換個数，< 0 の場合エラー
 
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
@@ -486,7 +486,7 @@ int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, co
 	// エラー
 	if( iResult < 0 ){
 		m_iReplacedLen	= 0;
-		return 0;
+		return iResult;
 	}
 	
 	// 正常終了
