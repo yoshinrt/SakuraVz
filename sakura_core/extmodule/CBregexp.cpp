@@ -384,32 +384,30 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	}
 }
 
-void CBregexp::GetMatchRange( CLogicRange *pRange, int iLineOffs ){
+void CBregexp::GetMatchRange( CLogicRange *pRangeOut, int iFrom, int iTo, int iLineOffs ){
 	
 	// 行跨ぎなし, X の変換なし
 	if( m_iLineTop.size() == 0 ){
-		pRange->SetFromY( CLogicInt( iLineOffs ));
-		pRange->SetToY	( CLogicInt( iLineOffs ));
+		pRangeOut->SetFromY( CLogicInt( iLineOffs ));
+		pRangeOut->SetToY	( CLogicInt( iLineOffs ));
 	}
 	
 	// 行跨ぎあり
 	else{
 		// 開始行を先頭からリニアサーチ
 		int i;
-		int x = pRange->GetFrom().x;
 		for( i = 0; i < ( int )m_iLineTop.size(); ++i ){
-			if( m_iLineTop[ i ] > x ) break;
+			if( m_iLineTop[ i ] > iFrom ) break;
 		}
-		pRange->SetFromY( CLogicInt( i + iLineOffs ));
-		pRange->SetFromX( CLogicInt( i == 0 ? x : x - m_iLineTop[ i - 1 ]));
+		pRangeOut->SetFromY( CLogicInt( i + iLineOffs ));
+		pRangeOut->SetFromX( CLogicInt( i == 0 ? iFrom : iFrom - m_iLineTop[ i - 1 ]));
 		
 		// 終了を最後からリニアサーチ
-		x = pRange->GetTo().x;
 		for( i = m_iLineTop.size() - 1; i >= 0; --i ){
-			if( m_iLineTop[ i ] < x ) break;
+			if( m_iLineTop[ i ] < iTo ) break;
 		}
-		pRange->SetToY( CLogicInt( i + 1 + iLineOffs ));
-		pRange->SetToX( CLogicInt( i < 0 ? x : x - m_iLineTop[ i ]));
+		pRangeOut->SetToY( CLogicInt( i + 1 + iLineOffs ));
+		pRangeOut->SetToX( CLogicInt( i < 0 ? iTo : iTo - m_iLineTop[ i ]));
 	}
 }
 

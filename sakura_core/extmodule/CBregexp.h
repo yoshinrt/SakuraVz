@@ -113,7 +113,15 @@ public:
 	}
 	
 	/*! hit レンジ SearchBuf 内-->行番号付き の変換 */
-	void GetMatchRange( CLogicRange *pRange, int iLineOffs = 0 );
+	void GetMatchRange( CLogicRange *pRangeOut, const CLogicRange *pRangeIn, int iLineOffs = 0 ){
+		GetMatchRange( pRangeOut, pRangeIn->GetFrom().x, pRangeIn->GetTo().x, iLineOffs );
+	}
+	void GetMatchRange( CLogicRange *pRangeOut, int iFrom, int iTo, int iLineOffs = 0 );
+
+	/*! hit レンジ 取得 */
+	void GetMatchRange( CLogicRange *pRangeOut, int iLineOffs = 0 ){
+		GetMatchRange( pRangeOut, GetIndex(), GetLastIndex(), iLineOffs );
+	}
 	
 	//-----------------------------------------
 
