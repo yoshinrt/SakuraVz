@@ -73,6 +73,9 @@ public:
 	void MarkSearchWord( const CSearchStringPattern& );			//!< 検索条件に該当する行にブックマークをセットする
 
 private:
+	/*! 次行取得 */
+	static int GetNextLine( const wchar_t *&pNextLine, void *pParam );
+	
 	CDocLineMgr* m_pcDocLineMgr;
 };
 

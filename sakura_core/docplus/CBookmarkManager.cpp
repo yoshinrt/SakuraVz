@@ -196,6 +196,22 @@ LPCWSTR CBookmarkManager::GetBookMarks()
 	return szText; // Feb. 17, 2003 genta
 }
 
+// 次行取得
+int CBookmarkManager::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
+	CDocLine **ppDoc = reinterpret_cast<CDocLine **>( pParam );
+	
+	*ppDoc = ( **ppDoc ).GetNextLine();		// 次行取得
+	if( !*ppDoc ) return 0;					// 次行なし
+	
+	int iLen;
+	pNextLine = ( wchar_t *)( **ppDoc ).GetDocLineStrWithEOL( &iLen );
+	
+	// この行が最終行?
+	if( !( **ppDoc ).GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	
+	return iLen;
+}
+
 //! 検索条件に該当する行にブックマークをセットする
 /*
 	@date 2002.01.16 hor
@@ -213,15 +229,33 @@ void CBookmarkManager::MarkSearchWord(
 	if( sSearchOption.bRegularExp ){
 		CBregexp*	pRegexp = pattern.GetRegexp();
 		pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
+		CLogicRange MatchRange;
+		
+		// 次行取得コールバック設定
+		CDocLine*	pDocLineGetNext;
+		pRegexp->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
+		
+		int iLineNo = 0;
+		
 		while( pDocLine ){
 			if(!CBookmarkGetter(pDocLine).IsBookmarked()){
 				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				// 2005.03.19 かろと 前方一致サポートのためのメソッド変更
-				if( pRegexp->Match( pLine, nLineLen, 0 ) ){
-					CBookmarkSetter(pDocLine).SetBookmark(true);
+				
+				pDocLineGetNext = pDocLine;
+				
+				if( pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
+					
+					// match レンジ取得
+					pRegexp->GetMatchRange( &MatchRange, iLineNo );
+					
+					// 先頭行マーク
+					iLineNo = MatchRange.GetFrom().y;
+					pDocLine = m_pcDocLineMgr->GetLine( CLogicInt( iLineNo ));
+					CBookmarkSetter( pDocLine ).SetBookmark( true );
 				}
 			}
 			pDocLine = pDocLine->GetNextLine();
+			++iLineNo;
 		}
 	}
 	/* 1==単語のみ検索 */
