@@ -346,7 +346,10 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 				return false;
 			
 			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
-			m_iSubjectLen = m_iSubjectLen;
+			
+			#ifdef _DEBUG
+				if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
+			#endif
 		}
 		
 		// partial match したので，次行読み出し
@@ -373,6 +376,9 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		m_iLineTop.emplace_back( m_iSubjectLen );	// 行頭位置記憶
 		memcpy( m_szSearchBuf + m_iSubjectLen, pNextLine, iNextSize * sizeof( wchar_t ));
 		m_iSubjectLen += iNextSize;
+		#ifdef _DEBUG
+			if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
+		#endif
 		
 		m_szSubject	= m_szSearchBuf;
 	}

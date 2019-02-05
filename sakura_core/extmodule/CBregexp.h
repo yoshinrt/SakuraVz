@@ -45,13 +45,13 @@ public:
 	enum Option {
 		optNothing			= 0,			//!< オプションなし
 		optCaseSensitive	= 1 << 0,		//!< 大文字小文字区別オプション(/iをつけない)
-		optGlobal			= 1 << 1,		//!< 全域オプション(/g)
-		optExtend			= 1 << 2,		//!< 拡張正規表現(/x)
-		optASCII			= 1 << 3,		//!< ASCII(/a)
-		optUnicode			= 1 << 4,		//!< Unicode(/u)
-		optDefault			= 1 << 5,		//!< Default(/d)
-		optLocale			= 1 << 6,		//!< Locale(/l)
-		optR				= 1 << 7,		//!< CRLF(/R)
+		optGlobal			= 1 << 1,		//!< 全域オプション(/g)	★機能しない
+		optExtend			= 1 << 2,		//!< 拡張正規表現(/x)	★機能しない
+		optASCII			= 1 << 3,		//!< ASCII(/a)			★機能しない
+		optUnicode			= 1 << 4,		//!< Unicode(/u)		★機能しない
+		optDefault			= 1 << 5,		//!< Default(/d)		★機能しない
+		optLocale			= 1 << 6,		//!< Locale(/l)			★機能しない
+		optR				= 1 << 7,		//!< CRLF(/R)			★機能しない
 		optPartialMatch		= 1 << 8,		//!< partial match
 	};
 
@@ -95,7 +95,7 @@ public:
 	}
 	/*!
 		置換された文字列の長さを返す
-		@retval 置換された文字列長 ★ /g 時は保留
+		@retval 置換された文字列長 ★ /g 時は未実装
 	*/
 	CLogicInt GetStringLen( void ){
 		return CLogicInt(
