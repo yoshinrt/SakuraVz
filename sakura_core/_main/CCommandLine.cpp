@@ -444,8 +444,7 @@ void CCommandLine::ParseCommandLine( LPCTSTR pszCmdLineSrc, bool bResponse )
 						m_gi.nGrepOutputLineType = 2;	break;
 					case 'W':
 						// 単語単位で探す
-						//m_gi.sGrepSearchOption.bWordOnly = true;	break;
-						m_gi.sGrepSearchOption.bVzWordSearch = true;	break; // ★暫定
+						m_gi.sGrepSearchOption.bWordOnly = true;	break;
 					case '1':
 						// Grep: 出力形式
 						m_gi.nGrepOutputStyle = 1;	break;

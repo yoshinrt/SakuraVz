@@ -133,7 +133,7 @@ void CDlgReplace::SetData( void )
 	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD,
 		m_nFixedOption & SCH_CLR_WORD ? 0 :
 		m_nFixedOption & SCH_SET_WORD ? 1 :
-		( m_sSearchOption.bWordOnly || m_sSearchOption.bVzWordSearch )
+		m_sSearchOption.bWordOnly
 	);
 
 	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji
@@ -261,8 +261,7 @@ int CDlgReplace::GetData( void )
 
 	// 2001/06/23 N.Nakatani
 	/* 単語単位で探す */
-	m_sSearchOption.bWordOnly     = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) && !GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
-	m_sSearchOption.bVzWordSearch = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) &&  GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
+	m_sSearchOption.bWordOnly = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD ));
 
 	/* 「すべて置換」は置換の繰返し */	// 2007.01.16 ryoji
 	m_bConsecutiveAll = ::IsDlgButtonChecked( GetHwnd(), IDC_CHECK_CONSECUTIVEALL );

@@ -110,12 +110,6 @@ public:
 		int*	pnMatchLen
 	);
 	
-	static void CreateWordList(
-		std::vector<std::pair<const wchar_t*, CLogicInt> >&	searchWords,
-		const wchar_t*	pszPattern,
-		int	nPatternLen
-	);
-	
 private:
 	bool SearchWord1Line(
 		const CSearchStringPattern& Pattern,	//!< 検索パターン

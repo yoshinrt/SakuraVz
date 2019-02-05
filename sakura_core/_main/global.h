@@ -156,19 +156,16 @@ struct SSearchOption{
 	bool	bRegularExp;	//!< true==正規表現
 	bool	bLoHiCase;		//!< true==英大文字小文字の区別
 	bool	bWordOnly;		//!< true==単語のみ検索
-	bool	bVzWordSearch;	//!< Vz 互換単語検索
 	
-	SSearchOption() : bRegularExp(false), bLoHiCase(false), bWordOnly(false), bVzWordSearch(false) { }
+	SSearchOption() : bRegularExp(false), bLoHiCase(false), bWordOnly(false) { }
 	SSearchOption(
 		bool _bRegularExp,
 		bool _bLoHiCase,
-		bool _bWordOnly,
-		bool _bVzWordSearch = false
+		bool _bWordOnly
 	)
 	: bRegularExp(_bRegularExp)
 	, bLoHiCase(_bLoHiCase)
 	, bWordOnly(_bWordOnly)
-	, bVzWordSearch(_bVzWordSearch)
 	{
 	}
 	void Reset()
@@ -176,7 +173,6 @@ struct SSearchOption{
 		bRegularExp = false;
 		bLoHiCase   = false;
 		bWordOnly   = false;
-		bVzWordSearch= false;
 	}
 
 	//演算子

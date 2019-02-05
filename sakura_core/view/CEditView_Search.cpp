@@ -459,45 +459,6 @@ int CEditView::IsSearchString(
 			return 0;
 		}
 	}
-	else if( m_sCurSearchOption.bWordOnly ) { // 単語検索
-		/* 指定位置の単語の範囲を調べる */
-		CLogicInt posWordHead, posWordEnd;
-		if( ! CWordParse::WhereCurrentWord_2( cStr.GetPtr(), CLogicInt(cStr.GetLength()), nPos, &posWordHead, &posWordEnd, NULL, NULL ) ) {
-			return 0; // 指定位置に単語が見つからなかった。
- 		}
-		if( nPos != posWordHead ) {
-			return 0; // 指定位置は単語の始まりではなかった。
-		}
-		const CLogicInt wordLength = posWordEnd - posWordHead;
-		const wchar_t *const pWordHead = cStr.GetPtr() + posWordHead;
-
-		// 比較関数
-		int (*const fcmp)( const wchar_t*, const wchar_t*, size_t ) = m_sCurSearchOption.bLoHiCase ? wcsncmp : wcsnicmp;
-
-		// 検索語を単語に分割しながら指定位置の単語と照合する。
-		int wordIndex = 0;
-		const wchar_t* const searchKeyEnd = m_strCurSearchKey.data() + m_strCurSearchKey.size();
-		for( const wchar_t* p = m_strCurSearchKey.data(); p < searchKeyEnd; ) {
-			CLogicInt begin, end; // 検索語に含まれる単語?の位置。WhereCurrentWord_2()の仕様では空白文字列も単語に含まれる。
-			if( CWordParse::WhereCurrentWord_2( p, CLogicInt(searchKeyEnd - p), CLogicInt(0), &begin, &end, NULL, NULL )
-				&& begin == 0 && begin < end
-			) {
-				if( ! WCODE::IsWordDelimiter( *p ) ) {
-					++wordIndex;
-					// p...(p + end) が検索語に含まれる wordIndex番目の単語。(wordIndexの最初は 1)
-					if( wordLength == end && 0 == fcmp( p, pWordHead, wordLength ) ) {
-						*pnSearchStart = posWordHead;
-						*pnSearchEnd = posWordEnd;
-						return wordIndex;
-					}
-				}
-				p += end;
-			} else {
-				p += CNativeW::GetSizeOfChar( p, searchKeyEnd - p, 0 );
-			}
-		}
-		return 0; // 指定位置の単語と検索文字列に含まれる単語は一致しなかった。
-	}
 	else {
 		const wchar_t* pHit = CSearchAgent::SearchString(cStr.GetPtr(), cStr.GetLength(), nPos, m_sSearchPattern);
 		if( pHit ){

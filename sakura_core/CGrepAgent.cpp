@@ -1283,11 +1283,6 @@ int CGrepAgent::DoGrepFile(
 	/* 検索条件が長さゼロの場合はファイル名だけ返す */
 	// 2002/08/29 ファイルオープンの手前へ移動
 	
-	std::vector<std::pair<const wchar_t*, CLogicInt> > searchWords;
-	if( sSearchOption.bWordOnly ){
-		CSearchAgent::CreateWordList( searchWords, pszKey, nKeyLen );
-	}
-	
 	// next line callback 設定
 	CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
 	pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
@@ -1400,45 +1395,6 @@ int CGrepAgent::DoGrepFile(
 					}
 				}
 				nIndex += matchlen;
-			}
-		}
-		/* 単語のみ検索 */
-		else if( sSearchOption.bWordOnly ){
-			/*
-				2002/02/23 Norio Nakatani
-				単語単位のGrepを試験的に実装。単語はWhereCurrentWord()で判別してますので、
-				英単語やC/C++識別子などの検索条件ならヒットします。
-
-				2002/03/06 YAZAKI
-				Grepにも試験導入。
-				WhereCurrentWordで単語を抽出して、その単語が検索語とあっているか比較する。
-			*/
-			int nMatchLen;
-			int nIdx = 0;
-			// Jun. 26, 2003 genta 無駄なwhileは削除
-			while( ( pszRes = CSearchAgent::SearchStringWord(pLine, nLineLen, nIdx, searchWords, sSearchOption.bLoHiCase, &nMatchLen) ) != NULL ){
-				nIdx = pszRes - pLine + nMatchLen;
-				++nHitCount;
-				++(*pnHitCount);
-				if( sGrepOption.nGrepOutputLineType != 2 ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						//	Jun. 25, 2002 genta
-						//	桁位置は1始まりなので1を足す必要がある
-						nLine, pszRes - pLine + 1, pLine, nLineLen, nEolCodeLen,
-						pszRes, nMatchLen, sGrepOption
-					);
-				}
-
-				// 2010.10.31 ryoji 行単位で出力する場合は1つ見つかれば十分
-				if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
-					break;
-				}
 			}
 		}
 		else {
@@ -1748,11 +1704,6 @@ int CGrepAgent::DoGrepReplaceFile(
 	}
 	int nOutputHitCount = 0;
 
-	std::vector<std::pair<const wchar_t*, CLogicInt> > searchWords;
-	if( sSearchOption.bWordOnly ){
-		CSearchAgent::CreateWordList( searchWords, pszKey, nKeyLen );
-	}
-
 	CNativeW cOutBuffer;
 	// 注意 : cfl.ReadLine が throw する可能性がある
 	CNativeW cUnicodeBuffer;
@@ -1872,54 +1823,6 @@ int CGrepAgent::DoGrepReplaceFile(
 			
 			// 何も引っかからなかったので，nIndex 以降をコピー
 			cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
-		}
-		/* 単語のみ検索 */
-		else if( sSearchOption.bWordOnly ){
-			/*
-				2002/02/23 Norio Nakatani
-				単語単位のGrepを試験的に実装。単語はWhereCurrentWord()で判別してますので、
-				英単語やC/C++識別子などの検索条件ならヒットします。
-
-				2002/03/06 YAZAKI
-				Grepにも試験導入。
-				WhereCurrentWordで単語を抽出して、その単語が検索語とあっているか比較する。
-			*/
-			const wchar_t* pszRes;
-			int nMatchLen;
-			int nIdx = 0;
-			int nOutputPos = 0;
-			// Jun. 26, 2003 genta 無駄なwhileは削除
-			while( pszRes = CSearchAgent::SearchStringWord(pLine, nLineLen, nIdx, searchWords, sSearchOption.bLoHiCase, &nMatchLen) ){
-				nIdx = pszRes - pLine + nMatchLen;
-				if( bOutput ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					/* Grep結果を、cmemMessageに格納する */
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						//	Jun. 25, 2002 genta
-						//	桁位置は1始まりなので1を足す必要がある
-						nLine, pszRes - pLine + 1, pLine, nLineLen, nEolCodeLen,
-						pszRes, nMatchLen,
-						sGrepOption
-					);
-					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
-						bOutput = false;
-					}
-				}
-				output.OutputHead();
-				++nHitCount;
-				++(*pnHitCount);
-				if( 0 < pszRes - pLine - nOutputPos ){
-					cOutBuffer.AppendString( &pLine[nOutputPos], pszRes - pLine - nOutputPos );
-				}
-				cOutBuffer.AppendNativeData( cmGrepReplace );
-				nOutputPos = pszRes - pLine + nMatchLen;
-			}
-			cOutBuffer.AppendString( &pLine[nOutputPos], nLineLen - nOutputPos );
 		}
 		else {
 			/* 文字列検索 */

@@ -105,10 +105,9 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 		if( !m_pRegexp->Compile( pszPattern, nFlag ) ){
 			return false;
 		}
-	}else if( m_psSearchOption->bWordOnly ){
 	}else{
 		// 単語境界キャンセルの解析
-		if( m_psSearchOption->bVzWordSearch ){
+		if( m_psSearchOption->bWordOnly ){
 			
 			if( CSearchAgent::IsAlnum( pszPattern[ 0 ])){
 				// 単語先頭が英数字なら，単語境界
@@ -307,30 +306,6 @@ const wchar_t* CSearchAgent::SearchString(
 #endif
 #endif // defined(SEARCH_STRING_) && !defined(SEARCH_STRING_KMP)
 	return NULL;
-}
-
-/*!	単語単位の単語リスト作成
-*/
-void CSearchAgent::CreateWordList(
-	std::vector<std::pair<const wchar_t*, CLogicInt> >&	searchWords,
-	const wchar_t*	pszPattern,
-	int	nPatternLen
-)
-{
-	for( CLogicInt pos = CLogicInt(0); pos < nPatternLen; ) {
-		CLogicInt begin, end; // 検索語に含まれる単語?の posを基準とした相対位置。WhereCurrentWord_2()の仕様では空白文字列も単語に含まれる。
-		if( CWordParse::WhereCurrentWord_2( pszPattern + pos, nPatternLen - pos, CLogicInt(0), &begin, &end, NULL, NULL )
-			&& begin == 0 && begin < end
-		) {
-			if( ! WCODE::IsWordDelimiter( pszPattern[pos] ) ) {
-				// pszPattern[pos]...pszPattern[pos + end] が検索語に含まれる単語。
-				searchWords.push_back( std::make_pair( pszPattern + pos, end ) );
-			}
-			pos += end;
-		} else {
-			pos += t_max( CLogicInt(1), CNativeW::GetSizeOfChar( pszPattern, nPatternLen, pos ) );
-		}
-	}
 }
 
 /*!	単語単位検索

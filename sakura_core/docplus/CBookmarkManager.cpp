@@ -258,27 +258,6 @@ void CBookmarkManager::MarkSearchWord(
 			++iLineNo;
 		}
 	}
-	/* 1==単語のみ検索 */
-	else if( sSearchOption.bWordOnly ){
-		const wchar_t*	pszPattern = pattern.GetKey();
-		const int	nPatternLen = pattern.GetLen();
-		// 検索語を単語に分割して searchWordsに格納する。
-		std::vector<std::pair<const wchar_t*, CLogicInt> > searchWords; // 単語の開始位置と長さの配列。
-		CSearchAgent::CreateWordList(searchWords, pszPattern, nPatternLen);
-
-		pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
-		while( pDocLine ){
-			if(!CBookmarkGetter(pDocLine).IsBookmarked()){
-				pLine = pDocLine->GetDocLineStrWithEOL(&nLineLen);
-				int nMatchLen;
-				if( CSearchAgent::SearchStringWord(pLine, nLineLen, 0, searchWords, sSearchOption.bLoHiCase, &nMatchLen) ){
-					CBookmarkSetter(pDocLine).SetBookmark(true);
-				}
-			}
-			/* 次の行を見に行く */
-			pDocLine = pDocLine->GetNextLine();
-		}
-	}
 	else{
 		/* 検索条件の情報 */
 		pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );

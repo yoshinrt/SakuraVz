@@ -512,7 +512,7 @@ void CDlgGrep::SetData( void )
 	// 2001/06/23 N.Nakatani 現時点ではGrepでは単語単位の検索はサポートできていません
 	// 2002/03/07 テストサポート
 	/* 一致する単語のみ検索する */
-	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD, m_sSearchOption.bWordOnly || m_sSearchOption.bVzWordSearch );
+	::CheckDlgButton( GetHwnd(), IDC_CHK_WORD, m_sSearchOption.bWordOnly );
 //	::EnableWindow( GetItemHwnd( IDC_CHK_WORD ) , false );	//チェックボックスを使用不可にすも
 
 	/* 文字コード自動判別 */
@@ -651,8 +651,7 @@ int CDlgGrep::GetData( void )
 
 	//2001/06/23 N.Nakatani
 	/* 単語単位で検索 */
-	m_sSearchOption.bWordOnly     = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) && !GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
-	m_sSearchOption.bVzWordSearch = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD )) &&  GetDllShareData().m_Common.m_sVzMode.m_bWordSearch;
+	m_sSearchOption.bWordOnly = (0!=IsDlgButtonChecked( GetHwnd(), IDC_CHK_WORD ));
 
 	/* 正規表現 */
 	m_sSearchOption.bRegularExp = (0!=::IsDlgButtonChecked( GetHwnd(), IDC_CHK_REGULAREXP ));
