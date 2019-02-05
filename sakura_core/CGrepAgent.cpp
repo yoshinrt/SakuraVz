@@ -323,9 +323,8 @@ DWORD CGrepAgent::DoGrep(
 		bool bError;
 		if( bGrepReplace && !bGrepPaste ){
 			// Grep置換
-			// 2015.03.03 Grep置換がoptGlobalじゃないバグを修正
 			bError = !pattern.SetPattern(pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
-				cmemReplace.GetStringPtr(), sSearchOption, &cRegexp, true);
+				cmemReplace.GetStringPtr(), sSearchOption, &cRegexp, false);
 		}else{
 			bError = !pattern.SetPattern(pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
 				sSearchOption, &cRegexp);
@@ -1355,7 +1354,7 @@ int CGrepAgent::DoGrepFile(
 			//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
 			// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
 			// 2010.08.25 行頭以外で^にマッチする不具合の修正
-			int iLineDisp = nLine;
+			LONGLONG iLineDisp = nLine;
 			
 			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
 				
@@ -1807,7 +1806,6 @@ int CGrepAgent::DoGrepReplaceFile(
 		/* 正規表現検索 */
 		if( sSearchOption.bRegularExp ){
 			int nIndex = 0;
-			int nIndexOld = nIndex;
 			int nMatchNum = 0;
 			//	Jun. 21, 2003 genta ループ条件見直し
 			//	マッチ箇所を1行から複数検出するケースを標準に，
@@ -1816,11 +1814,20 @@ int CGrepAgent::DoGrepReplaceFile(
 			//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
 			// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
 			// 2010.08.25 行頭以外で^にマッチする不具合の修正
-			while( nIndex <= nLineLen &&
-				(( !sGrepOption.bGrepPaste && (nMatchNum = pRegexp->Replace( pLine, nLineLen, nIndex ))) || 
-				 ( sGrepOption.bGrepPaste && pRegexp->Match( pLine, nLineLen, nIndex ))) ){
+			LONGLONG iLineDisp = nLine;
+			
+			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
+				
+				// 置換
+				if( !sGrepOption.bGrepPaste ) pRegexp->Replace();
+				
+				// SearchBuf を得る
+				pLine		= pRegexp->GetSubject();
+				nLineLen	= pRegexp->GetSubjectLen();
+				
 				//	パターン発見
-				nIndex = pRegexp->GetIndex();
+				int iMatchIdx = pRegexp->GetIndex();
+				
 				int matchlen = pRegexp->GetMatchLen();
 				if( bOutput ){
 					OutputPathInfo(
@@ -1831,9 +1838,9 @@ int CGrepAgent::DoGrepReplaceFile(
 					/* Grep結果を、cmemMessageに格納する */
 					SetGrepResult(
 						cmemMessage, pszDispFilePath, pszCodeName,
-						nLine, nIndex + 1,
+						iLineDisp, iMatchIdx + 1,
 						pLine, nLineLen, nEolCodeLen,
-						pLine + nIndex, matchlen,
+						pLine + iMatchIdx, matchlen,
 						sGrepOption
 					);
 					// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
@@ -1844,32 +1851,25 @@ int CGrepAgent::DoGrepReplaceFile(
 				output.OutputHead();
 				++nHitCount;
 				++(*pnHitCount);
-				if( !sGrepOption.bGrepPaste ){
-					// gオプションでは行末まで一度に置換済み
-					nHitCount += nMatchNum - 1;
-					*pnHitCount += nMatchNum - 1;
-					cOutBuffer.AppendString( pRegexp->GetString(), pRegexp->GetStringLen() );
-					nIndexOld = nLineLen;
-					break;
+				
+				// hit 位置直前までをコピー
+				cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, iMatchIdx - nIndex );
+				
+				// 置換後文字列をコピー
+				if( sGrepOption.bGrepPaste ){
+					// クリップボード
+					cOutBuffer.AppendNativeData( cmGrepReplace );
+				}else{
+					// regexp 置換結果
+					cOutBuffer.AppendString( pRegexp->GetString(), pRegexp->GetStringLen());
 				}
-				if( 0 < nIndex - nIndexOld ){
-					cOutBuffer.AppendString( &pLine[nIndexOld], nIndex - nIndexOld );
-				}
-				cOutBuffer.AppendNativeData( cmGrepReplace );
-				//	探し始める位置を補正
-				//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
-				if( matchlen <= 0 ){
-					matchlen = CNativeW::GetSizeOfChar( pLine, nLineLen, nIndex );
-					if( matchlen <= 0 ){
-						matchlen = 1;
-					}
-				}
-				nIndex += matchlen;
-				nIndexOld = nIndex;
+				
+				// 次検索開始位置
+				nIndex = iMatchIdx + pRegexp->GetMatchLen();
 			}
-			if( 0 < nLineLen - nIndexOld ){
-				cOutBuffer.AppendString( &pLine[nIndexOld], nLineLen - nIndexOld );
-			}
+			
+			// 何も引っかからなかったので，nIndex 以降をコピー
+			cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
 		}
 		/* 単語のみ検索 */
 		else if( sSearchOption.bWordOnly ){
