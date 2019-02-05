@@ -125,9 +125,8 @@ public:
 	/*! BREGEXPメッセージを取得する
 		@retval メッセージへのポインタ
 	*/
-	const TCHAR* GetLastMessage() const { return to_tchar( m_szMsg ? m_szMsg : L"" ); }
-	
-	void GenerateErrorMessage( int iErrorCode );
+	const wchar_t* GetLastMessage( void );
+	void ShowErrorMsg( HWND hWnd );
 	
 	// 次行取得コールバック登録
 	void SetNextLineCallback( GetNextLineCallback_t pFunc, void *pCallbackParam ){
@@ -158,6 +157,7 @@ private:
 	
 	//	メンバ変数
 	static const int	MSGBUF_SIZE	= 80;
+	int					m_iLastCode;		//!< 最後のエラーコード
 	wchar_t				*m_szMsg;			//!< BREGEXP_Wからのメッセージを保持する
 	
 	UINT				m_uOption;			// !< オプション

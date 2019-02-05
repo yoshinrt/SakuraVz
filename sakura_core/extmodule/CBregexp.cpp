@@ -47,6 +47,7 @@ CBregexp::CBregexp(){
 	m_Re					= nullptr;
 	m_MatchData				= nullptr;
 	m_szMsg					= nullptr;
+	m_iLastCode				= 0;
 	m_szSearchBuf			= nullptr;
 	m_iSearchBufSize		= 0;
 	m_iSubjectLen			= 0;
@@ -255,14 +256,13 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	int iPcreOpt	= PCRE2_MULTILINE;
 	if( ~uOption & optCaseSensitive	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
 	
-	int	iErrCode;
 	PCRE2_SIZE	sizeErrOffset;
 	
 	m_Re = pcre2_compile(
 		( PCRE2_SPTR )szPattern,	// PCRE2_SPTR pattern
 		PCRE2_ZERO_TERMINATED,		// PCRE2_SIZE length
 		iPcreOpt,					// uint32_t options
-		&iErrCode,					// int *errorcode
+		&m_iLastCode,				// int *errorcode
 		&sizeErrOffset,				// PCRE2_SIZE *erroroffset
 		nullptr						// pcre2_compile_context *ccontext
 	);
@@ -270,7 +270,6 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	//	何らかのエラー発生。
 	if( m_Re == nullptr ){
 		ReleaseCompileBuffer();
-		GenerateErrorMessage( iErrCode );
 		return false;
 	}
 	
@@ -311,7 +310,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	while( 1 ){
 		// match
-		int iResult = pcre2_match(
+		int m_iLastCode = pcre2_match(
 			m_Re,						// const pcre2_code *code
 			( PCRE2_SPTR )m_szSubject,	// PCRE2_SPTR subject
 			m_iSubjectLen,				// PCRE2_SIZE length
@@ -321,7 +320,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 			nullptr						// pcre2_match_context *mcontext
 		);
 		
-		if( iResult != PCRE2_ERROR_PARTIAL ) return iResult > 0;
+		if( m_iLastCode != PCRE2_ERROR_PARTIAL ) return m_iLastCode > 0;
 		
 		// partial 1回目，szSubject を m_szSearchBuf にコピー
 		if( m_szSubject != m_szSearchBuf ){
@@ -452,7 +451,6 @@ int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, co
 	if( iStart < 0 ) iStart = m_iStart;
 	
 	int iNeededSize = iSubjectLen * 2;
-	int iResult;
 	
 	while( 1 ){
 		if( !ResizeBuf( iNeededSize, m_szReplaceBuf, m_iReplaceBufSize )) return 0;
@@ -463,7 +461,7 @@ int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, co
 		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
 		if( m_uOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
 		
-		iResult = pcre2_substitute(
+		m_iLastCode = pcre2_substitute(
 			m_Re,							// const pcre2_code *code
 			( PCRE2_SPTR )szSubject,		// PCRE2_SPTR subject
 			iSubjectLen,					// PCRE2_SIZE length
@@ -477,27 +475,38 @@ int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, co
 			&OutputLen						// PCRE2_SIZE *outlengthptr
 		);
 		
-		if( iResult != PCRE2_ERROR_NOMEMORY ) break;
+		if( m_iLastCode != PCRE2_ERROR_NOMEMORY ) break;
 		
 		// バッファが足りないので再試行
 		iNeededSize = OutputLen;
 	}
 	
 	// エラー
-	if( iResult < 0 ){
+	if( m_iLastCode < 0 ){
 		m_iReplacedLen	= 0;
-		return iResult;
+		return m_iLastCode;
 	}
 	
 	// 正常終了
 	m_iReplacedLen	= OutputLen;
-	return iResult;
+	return m_iLastCode;
 }
 
 // pcre2 エラーメッセージ取得
-void CBregexp::GenerateErrorMessage( int iErrorCode ){
-	if( m_szMsg == nullptr ) m_szMsg = new WCHAR[ MSGBUF_SIZE ];
-	pcre2_get_error_message( iErrorCode, ( PCRE2_UCHAR *)m_szMsg, MSGBUF_SIZE - 1 );
+const wchar_t* CBregexp::GetLastMessage( void ){
+	if( m_szMsg == nullptr ) m_szMsg = new wchar_t[ MSGBUF_SIZE ];
+	pcre2_get_error_message( m_iLastCode, ( PCRE2_UCHAR *)m_szMsg, MSGBUF_SIZE - 1 );
+	
+	return m_szMsg;
+}
+
+// エラーメッセージ表示
+void CBregexp::ShowErrorMsg( HWND hWnd ){
+	wchar_t *szMsg = new wchar_t[ MSGBUF_SIZE ];
+	pcre2_get_error_message( m_iLastCode, ( PCRE2_UCHAR *)szMsg, MSGBUF_SIZE - 1 );
+	
+	::MessageBox( hWnd, szMsg, LS( STR_BREGONIG_TITLE ), MB_OK | MB_ICONEXCLAMATION );
+	delete [] szMsg;
 }
 
 /*!
@@ -523,10 +532,7 @@ bool CheckRegexpSyntax(
 		uOption = CBregexp::optCaseSensitive;
 	}
 	if( !cRegexp.Compile( szPattern, uOption )){
-		if( bShowMessage ){
-			::MessageBox( hWnd, cRegexp.GetLastMessage(),
-				LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );
-		}
+		if( bShowMessage ) cRegexp.ShowErrorMsg( hWnd );
 		return false;
 	}
 	return true;
