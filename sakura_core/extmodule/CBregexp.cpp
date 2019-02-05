@@ -434,7 +434,7 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
-int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, const wchar_t *szReplacement ){
+int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, int iSubjectLen, int iStart ){
 	
 	// 必要な output buffer サイズを計算する．
 	// 初期値は，2^n >= nlen * 2 となるサイズで最低 1KB．

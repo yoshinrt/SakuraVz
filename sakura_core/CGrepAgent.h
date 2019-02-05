@@ -103,6 +103,8 @@ public:
 	);
 
 private:
+	class CError_Regex {};
+	
 	// Grep実行
 	int DoGrepTree(
 		CEditView*				pcViewDst,

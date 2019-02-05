@@ -66,7 +66,7 @@ public:
 	//>> 2002/03/27 Azumaiya 正規表現置換にコンパイル関数を使う形式を追加
 	bool Compile(const wchar_t *szPattern, UINT uOption = 0 );
 	bool Match(const wchar_t *szTarget, int nLen, int iStart = 0, UINT uOption = 0 );	//!< 検索を実行する
-	int Replace( const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1, const wchar_t *szReplacement = nullptr );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
+	int Replace( const wchar_t *szReplacement, const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1 );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
 	/*!
 	    検索に一致した文字列の先頭位置を返す(文字列先頭なら0)
@@ -126,7 +126,7 @@ public:
 		@retval メッセージへのポインタ
 	*/
 	const wchar_t* GetLastMessage( void );
-	void ShowErrorMsg( HWND hWnd );
+	void ShowErrorMsg( HWND hWnd = nullptr );
 	
 	// 次行取得コールバック登録
 	void SetNextLineCallback( GetNextLineCallback_t pFunc, void *pCallbackParam ){

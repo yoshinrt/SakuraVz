@@ -223,7 +223,9 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::tstri
 	if( 0 < title.size() ){
 		sTitleOverride = to_tchar(title.c_str());
 	}
-
+	
+	bool bShowError	= true; // 最初の 1回のみエラー表示
+	
 	/*	ネストの深さは、32レベルまで、ひとつのヘッダは、最長256文字まで区別
 		（256文字まで同じだったら同じものとして扱います）
 	*/
@@ -317,8 +319,10 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::tstri
 						wcscpy( szTitle, test[j].szGroupName );
 						break;
 					}
-				}else{
-					if( 0 < test[j].nLength && 0 < pRegex[j].Replace( pLine, nLineLen, 0, test[i].szText )){
+				}else if( 0 < test[j].nLength ){
+					int iRet = pRegex[j].Replace( test[i].szText, pLine, nLineLen, 0 );
+					
+					if( iRet > 0 ){
 						// pLine = "ABC123DEF"
 						// testのszMatch = "\d+"
 						// testのszText = "$&456"
@@ -328,6 +332,11 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::tstri
 						pszText = strText.c_str();
 						wcscpy( szTitle, test[j].szGroupName );
 						break;
+					}else if( iRet < 0 && bShowError ){
+						ErrorMessage( nullptr, LS( STR_DOCOUTLINE_REGEX ),
+							test[i].szText, pRegex[i].GetLastMessage()
+						);
+						bShowError = false;
 					}
 				}
 			}else{

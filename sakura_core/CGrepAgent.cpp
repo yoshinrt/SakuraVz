@@ -1819,7 +1819,9 @@ int CGrepAgent::DoGrepReplaceFile(
 			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
 				
 				// 置換
-				if( !sGrepOption.bGrepPaste ) pRegexp->Replace();
+				if( !sGrepOption.bGrepPaste ){
+					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
+				}
 				
 				// SearchBuf を得る
 				pLine		= pRegexp->GetSubject();
@@ -1983,6 +1985,10 @@ int CGrepAgent::DoGrepReplaceFile(
 	cfl.FileClose();
 	output.Close();
 	} // try
+	catch( CError_Regex ){
+		pRegexp->ShowErrorMsg();
+		return -1;	// ファイル探索も終了
+	}
 	catch( CError_FileOpen ){
 		CNativeW str(LSW(STR_GREP_ERR_FILEOPEN));
 		str.Replace(L"%ts", to_wchar(pszFullPath));
