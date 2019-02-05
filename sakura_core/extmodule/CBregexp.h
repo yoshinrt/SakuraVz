@@ -64,10 +64,7 @@ public:
 	// 2002.01.26 hor    置換後文字列を別引数に
 	// 2002.02.01 hor    大文字小文字を無視するオプション追加
 	//>> 2002/03/27 Azumaiya 正規表現置換にコンパイル関数を使う形式を追加
-	bool Compile(const wchar_t *szPattern, int nOption = 0) {
-		return Compile(szPattern, nullptr, nOption);
-	}
-	bool Compile(const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption = 0 );	//!< Replace用
+	bool Compile(const wchar_t *szPattern, UINT uOption = 0 );
 	bool Match(const wchar_t *szTarget, int nLen, int iStart = 0, UINT uOption = 0 );	//!< 検索を実行する
 	int Replace( const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1, const wchar_t *szReplacement = nullptr );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
@@ -144,14 +141,6 @@ public:
 	/*! SearchBuf の文字列長取得 */
 	int GetSubjectLen( void ){ return m_iSubjectLen; }
 	
-	/*! 検索 replacement の設定 */
-	void SetReplacement( const wchar_t *szReplacement ){
-		if( m_szReplacement ) delete [] m_szReplacement;
-		
-		int len = wcslen( szReplacement );
-		m_szReplacement = new WCHAR[ len + 1 ];
-		wcscpy( m_szReplacement, szReplacement );
-	}
 protected:
 
 	//!	コンパイルバッファを解放する
@@ -184,8 +173,6 @@ private:
 	int					m_iReplaceBufSize;	// !< 置換バッファサイズ
 	int					m_iReplacedLen;		// !< 置換結果文字列長
 	int					m_iStart;			// !< 検索開始位置
-	
-	wchar_t				*m_szReplacement;	// !< 置換後文字列
 	
 	GetNextLineCallback_t	m_GetNextLineCallback;	// !< 次行取得コールバック
 	void					*m_pCallbackParam;		// !< コールバックパラメータ

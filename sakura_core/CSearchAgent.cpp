@@ -102,14 +102,8 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 			nFlag |= CBregexp::optGlobal;
 		}
 		/* 検索パターンのコンパイル */
-		if( pszPattern2 ){
-			if( !m_pRegexp->Compile( pszPattern, pszPattern2, nFlag ) ){
-				return false;
-			}
-		}else{
-			if( !m_pRegexp->Compile( pszPattern, nFlag ) ){
-				return false;
-			}
+		if( !m_pRegexp->Compile( pszPattern, nFlag ) ){
+			return false;
 		}
 	}else if( m_psSearchOption->bWordOnly ){
 	}else{

@@ -53,7 +53,6 @@ CBregexp::CBregexp(){
 	m_szReplaceBuf			= nullptr;
 	m_iReplaceBufSize		= 0;
 	m_iReplacedLen			= 0;
-	m_szReplacement			= nullptr;
 	
 	m_GetNextLineCallback	= nullptr;
 }
@@ -88,11 +87,6 @@ void CBregexp::ReleaseCompileBuffer(void){
 	m_iReplaceBufSize		= 0;
 	m_iReplacedLen			= 0;
 	
-	if( m_szReplacement ){
-		delete [] m_szReplacement;
-		m_szReplacement = nullptr;
-	}
-	
 	if( m_szMsg ){
 		delete [] m_szMsg;
 		m_szMsg = nullptr;
@@ -116,8 +110,6 @@ void CBregexp::Copy( CBregexp &re ){
 	m_szReplaceBuf			= nullptr;
 	m_iReplaceBufSize		= 0;
 	m_iReplacedLen			= 0;
-	
-	if( re.m_szReplacement ) SetReplacement( re.m_szReplacement );
 	
 	m_GetNextLineCallback	= re.m_GetNextLineCallback;
 	m_pCallbackParam		= re.m_pCallbackParam;
@@ -240,14 +232,13 @@ void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring
 	JRE32のエミュレーション関数．空の文字列に対して検索・置換を行うことにより
 	BREGEXP_W構造体の生成のみを行う．
 
-	@param[in] szPattern0	検索or置換パターン
-	@param[in] szPattern1	置換後文字列パターン(検索時はnullptr)
+	@param[in] szPattern	検索or置換パターン
 	@param[in] uOption		検索・置換オプション
 
 	@retval true 成功
 	@retval false 失敗
 */
-bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UINT uOption ){
+bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
 	
@@ -256,8 +247,8 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UI
 	
 	std::wstring strModifiedSearch;
 	
-	MakePatternAlternate( szPattern0, strModifiedSearch );
-	szPattern0 = strModifiedSearch.c_str();
+	MakePatternAlternate( szPattern, strModifiedSearch );
+	szPattern = strModifiedSearch.c_str();
 	
 	// pcre2 opt 生成
 	m_uOption = uOption;
@@ -268,7 +259,7 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UI
 	PCRE2_SIZE	sizeErrOffset;
 	
 	m_Re = pcre2_compile(
-		( PCRE2_SPTR )szPattern0,	// PCRE2_SPTR pattern
+		( PCRE2_SPTR )szPattern,	// PCRE2_SPTR pattern
 		PCRE2_ZERO_TERMINATED,		// PCRE2_SIZE length
 		iPcreOpt,					// uint32_t options
 		&iErrCode,					// int *errorcode
@@ -288,14 +279,6 @@ bool CBregexp::Compile( const wchar_t *szPattern0, const wchar_t *szPattern1, UI
 		m_Re, 	// uint32_t ovecsize
 		nullptr	// pcre2_general_context *gcontext
 	);
-	
-	if( szPattern1 ){
-		// 置換実行
-		//★置換側のチェック未実装
-		//BSubst( pszNPattern, m_tmpBuf, m_tmpBuf+1, &m_pRegExp, m_szMsg );
-		
-		SetReplacement( szPattern1 );
-	}
 	
 	return true;
 }
@@ -446,7 +429,7 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	@param[in] szSubject 置換対象データ, null の場合 m_szSubject を使用する
 	@param[in] iSubjectLen 置換対象データ長，szSubject = nul の場合 m_iSubjectLen を使用する
 	@param[in] iStart 置換開始位置(0からiSubjectLen未満) -1: 前回の検索位置から
-	@param[in] szReplacement 置換後文字列, null の場合 m_szReplacement を使用する
+	@param[in] szReplacement 置換後文字列
 
 	@retval 置換個数
 
@@ -467,8 +450,6 @@ int CBregexp::Replace( const wchar_t *szSubject, int iSubjectLen, int iStart, co
 	}
 	
 	if( iStart < 0 ) iStart = m_iStart;
-	
-	if( !szReplacement ) szReplacement = m_szReplacement;
 	
 	int iNeededSize = iSubjectLen * 2;
 	int iResult;
@@ -541,7 +522,7 @@ bool CheckRegexpSyntax(
 	if( uOption == -1 ){
 		uOption = CBregexp::optCaseSensitive;
 	}
-	if( !cRegexp.Compile( szPattern, nullptr, uOption )){
+	if( !cRegexp.Compile( szPattern, uOption )){
 		if( bShowMessage ){
 			::MessageBox( hWnd, cRegexp.GetLastMessage(),
 				LS(STR_BREGONIG_TITLE), MB_OK | MB_ICONEXCLAMATION );
