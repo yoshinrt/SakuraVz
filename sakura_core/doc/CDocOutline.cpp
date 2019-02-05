@@ -244,7 +244,7 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::tstri
 				return;
 			}
 			if( test[i].nRegexMode == 1 ){
-				if( !pRegex[i].Compile(test[i].szMatch, test[i].szText, test[i].nRegexOption) ){
+				if( !pRegex[i].Compile(test[i].szMatch, test[i].nRegexOption) ){
 					std::wstring str = test[i].szMatch;
 					str += L"\n";
 					str += test[i].szText;
@@ -318,16 +318,13 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::tstri
 						break;
 					}
 				}else{
-					if( 0 < test[j].nLength && 0 < pRegex[j].Replace( pLine, nLineLen, 0 ) ){
+					if( 0 < test[j].nLength && 0 < pRegex[j].Replace( pLine, nLineLen, 0, test[i].szText )){
 						// pLine = "ABC123DEF"
 						// testのszMatch = "\d+"
 						// testのszText = "$&456"
 						// GetString() = "ABC123456DEF"
 						// pszText = "123456"
-						int nIndex = pRegex[j].GetIndex();
-						int nMatchLen = pRegex[j].GetMatchLen();
-						int nTextLen = pRegex[j].GetStringLen() - nLineLen + nMatchLen;
-						strText.assign( pRegex[j].GetString() + nIndex, nTextLen );
+						strText.assign( pRegex[j].GetString(), pRegex[j].GetStringLen());
 						pszText = strText.c_str();
 						wcscpy( szTitle, test[j].szGroupName );
 						break;
