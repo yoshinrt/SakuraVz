@@ -622,6 +622,16 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 			int iRet = cRegexp.Replace( cMemRepKey.GetStringPtr());
 			if( iRet > 0 ){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
+				
+				// マッチ幅が 0 の場合，選択状態にして次の SEARCH_NEXT で引っかからないようにする
+				if( cRegexp.GetMatchLen() == 0 ){
+					m_pCommanderView->GetSelectionInfo().SetSelectArea(
+						CLayoutRange(
+							GetCaret().GetCaretLayoutPos(),
+							GetCaret().GetCaretLayoutPos()
+						)
+					);
+				}
 			}else if( iRet < 0 ){
 				cRegexp.ShowErrorMsg( hwndParent );
 			}
@@ -1085,6 +1095,16 @@ void CViewCommander::Command_REPLACE_ALL()
 			if( iRet > 0 ){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 				++nReplaceNum;
+				
+				// マッチ幅が 0 の場合，選択状態にして次の SEARCH_NEXT で引っかからないようにする
+				if( cRegexp.GetMatchLen() == 0 ){
+					m_pCommanderView->GetSelectionInfo().SetSelectArea(
+						CLayoutRange(
+							GetCaret().GetCaretLayoutPos(),
+							GetCaret().GetCaretLayoutPos()
+						)
+					);
+				}
 			}else if( iRet < 0 ){
 				cRegexp.ShowErrorMsg( nullptr );
 				break;

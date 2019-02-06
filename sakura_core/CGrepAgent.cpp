@@ -1819,6 +1819,9 @@ int CGrepAgent::DoGrepReplaceFile(
 				
 				// 次検索開始位置
 				nIndex = iMatchIdx + pRegexp->GetMatchLen();
+				
+				// 0 幅マッチの場合 1文字進める
+				if( pRegexp->GetMatchLen() == 0 ) ++nIndex;
 			}
 			
 			// 何も引っかからなかったので，nIndex 以降をコピー
