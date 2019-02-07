@@ -274,7 +274,7 @@ public:
 	/* 検索系 */
 	void Command_SEARCH_BOX( void );					/* 検索(ボックス) */	// 2006.06.04 yukihane
 	void Command_SEARCH_DIALOG( int nOption = 0 );		/* 検索(単語検索ダイアログ) */
-	void Command_SEARCH_NEXT( HWND hwndParent, const WCHAR* pszNotFoundMessage, UINT uOption = 0, CLogicRange* pcSelectLogic = nullptr, CBregexp *pReResult = nullptr ); /* 次を検索 */
+	void Command_SEARCH_NEXT( HWND hwndParent, const WCHAR* pszNotFoundMessage, UINT uOption = 0, CLogicRange* pcSelectLogic = nullptr ); /* 次を検索 */
 	
 	void Command_SEARCH_PREV(bool bReDraw, HWND hwndParent);		/* 前を検索 */
 	void Command_REPLACE_DIALOG( int nOption = 0 );		/* 置換(置換ダイアログ) */

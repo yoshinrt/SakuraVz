@@ -39,8 +39,6 @@ public:
 	CBregexp();
 	~CBregexp();
 	
-	void Copy( CBregexp &re );
-	
 	// 2006.01.22 かろと オプション追加・名称変更
 	enum Option {
 		optNothing			= 0,			//!< オプションなし

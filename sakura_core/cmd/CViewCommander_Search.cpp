@@ -84,8 +84,7 @@ void CViewCommander::Command_SEARCH_NEXT(
 	HWND			hwndParent,
 	const WCHAR*	pszNotFoundMessage,
 	UINT			uOption,
-	CLogicRange*	pcSelectLogic,		//!< [out] 選択範囲のロジック版。マッチ範囲を返す。すべて置換/高速モードで使用
-	CBregexp		*pReResult			//!< [out] regexp のマッチ結果を CBregexp で受け取る
+	CLogicRange*	pcSelectLogic		//!< [out] 選択範囲のロジック版。マッチ範囲を返す。すべて置換/高速モードで使用
 )
 {
 	bool		bSelecting;
@@ -194,19 +193,7 @@ void CViewCommander::Command_SEARCH_NEXT(
 	bRedo		= true;		//	hor
 	nIdxOld		= nIdx;		//	hor
 	
-	// 検索キーワード着色等で CBregexp が破壊されないように退避
-	CBregexp *pReTmp;
-	if( pReResult ){
-		pReTmp = m_pCommanderView->m_sSearchPattern.GetRegexp();
-		pReResult->Copy( *pReTmp );
-	}
-	
 re_do:;
-	// 退避していた CBregexp を復帰
-	if( pReResult ){
-		m_pCommanderView->m_sSearchPattern.SetRegexp( pReResult );
-	}
-	
 	ESearchDirection DirOpt = SEARCH_FORWARD;
 	if( !( uOption & CMDSCH_NOPARTIAL )) DirOpt = ( ESearchDirection )( DirOpt | SEARCH_PARTIAL );
 	
@@ -227,11 +214,6 @@ re_do:;
 			pcSelectLogic,
 			m_pCommanderView->m_sSearchPattern
 		);
-	}
-	
-	// CBregexp を退避
-	if( pReResult ){
-		m_pCommanderView->m_sSearchPattern.SetRegexp( pReTmp );
 	}
 	
 	if( nSearchResult ){
@@ -606,10 +588,8 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	BOOL	bRegularExp = m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	int 	nFlag       = m_pCommanderView->m_sCurSearchOption.bLoHiCase ? 0x01 : 0x00;
 	
-	CBregexp cRegexp;
-	
 	/* 次を検索 */
-	Command_SEARCH_NEXT( hwndParent, NULL, CMDSCH_CHANGE_RE, nullptr, bRegularExp ? &cRegexp : nullptr );
+	Command_SEARCH_NEXT( hwndParent, NULL, CMDSCH_CHANGE_RE, nullptr );
 
 	/* テキストが選択されているか */
 	if( m_pCommanderView->GetSelectionInfo().IsTextSelected() ){
@@ -619,12 +599,14 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 		if(nPaste){
 			Command_PASTE(0);
 		} else if ( bRegularExp ) { /* 検索／置換  1==正規表現 */
-			int iRet = cRegexp.Replace( cMemRepKey.GetStringPtr());
+			CBregexp *pRegexp = m_pCommanderView->m_sSearchPattern.GetRegexp();
+			
+			int iRet = pRegexp->Replace( cMemRepKey.GetStringPtr());
 			if( iRet > 0 ){
-				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
+				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), TRUE );
 				
 				// マッチ幅が 0 の場合，1文字選進む
-				if( cRegexp.GetMatchLen() == 0 ){
+				if( pRegexp->GetMatchLen() == 0 ){
 					CLogicPoint Caret = GetCaret().GetCaretLogicPos();
 					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Caret.GetY());
 					
@@ -642,7 +624,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 					GetCaret().MoveCursor( CaretLay, false );
 				}
 			}else if( iRet < 0 ){
-				cRegexp.ShowErrorMsg( hwndParent );
+				pRegexp->ShowErrorMsg( hwndParent );
 			}
 		}else{
 			Command_INSTEXT( false, cMemRepKey.GetStringPtr(), cMemRepKey.GetStringLength(), TRUE );
@@ -680,8 +662,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	BOOL nPaste			= GetEditWindow()->m_cDlgReplace.m_nPaste;
 	BOOL bRegularExp	= m_pCommanderView->m_sCurSearchOption.bRegularExp;
 	BOOL bSelectedArea	= GetEditWindow()->m_cDlgReplace.m_bSelectedArea;
-	
-	CBregexp cRegexp;
 	
 	GetEditWindow()->m_cDlgReplace.m_bCanceled=false;
 	GetEditWindow()->m_cDlgReplace.m_nReplaceCnt=0;
@@ -904,8 +884,7 @@ void CViewCommander::Command_REPLACE_ALL()
 		/* 次を検索 */
 		Command_SEARCH_NEXT(
 			0, NULL, uSearchOpt,
-			bFastMode ? &cSelectLogic : NULL,
-			bRegularExp ? &cRegexp : nullptr
+			bFastMode ? &cSelectLogic : NULL
 		);
 		
 		// 検索に引っかからなかったら終了
@@ -1099,14 +1078,15 @@ void CViewCommander::Command_REPLACE_ALL()
 		}
 		// 正規表現による文字列置換，/g は使わずに 1個ずつ置換
 		else if( bRegularExp ){
+			CBregexp *pRegexp = m_pCommanderView->m_sSearchPattern.GetRegexp();
 			
-			int iRet = cRegexp.Replace( cmemReplacement.GetStringPtr());
+			int iRet = pRegexp->Replace( cmemReplacement.GetStringPtr());
 			if( iRet > 0 ){
-				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
+				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 				++nReplaceNum;
 				
 				// マッチ幅が 0 の場合，1文字選進む
-				if( cRegexp.GetMatchLen() == 0 ){
+				if( pRegexp->GetMatchLen() == 0 ){
 					CLogicPoint Caret = GetCaret().GetCaretLogicPos();
 					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Caret.GetY());
 					
@@ -1126,7 +1106,7 @@ void CViewCommander::Command_REPLACE_ALL()
 					GetCaret().MoveCursor( CaretLay, false );
 				}
 			}else if( iRet < 0 ){
-				cRegexp.ShowErrorMsg( nullptr );
+				pRegexp->ShowErrorMsg( nullptr );
 				break;
 			}
 		}

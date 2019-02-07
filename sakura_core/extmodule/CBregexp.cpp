@@ -100,21 +100,6 @@ void CBregexp::ReleaseCompileBuffer(void){
 	}
 }
 
-// バッファを除くコピー
-void CBregexp::Copy( CBregexp &re ){
-	if( re.m_Re ){
-		m_Re		= pcre2_code_copy( re.m_Re );
-		m_MatchData = pcre2_match_data_create_from_pattern(
-			m_Re, 	// uint32_t ovecsize
-			nullptr	// pcre2_general_context *gcontext
-		);
-	}
-	
-	m_GetNextLineCallback	= re.m_GetNextLineCallback;
-	m_pCallbackParam		= re.m_pCallbackParam;
-	m_uOption				= re.m_uOption;
-}
-
 /*!
 	JRE32のエミュレーション関数．空の文字列に対して検索・置換を行うことにより
 	BREGEXP_W構造体の生成のみを行う．
