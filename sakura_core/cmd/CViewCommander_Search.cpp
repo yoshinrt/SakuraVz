@@ -1111,29 +1111,36 @@ void CViewCommander::Command_REPLACE_ALL()
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 				++nReplaceNum;
 				
-				// マッチ幅が 0 の場合，1文字選択する
+				// マッチ幅が 0 の場合，1文字選進む
 				if( cRegexp.GetMatchLen() == 0 ){
-					CLogicRange Sel;
-					Sel.SetFrom( GetCaret().GetCaretLogicPos());
+					CLogicPoint Caret = GetCaret().GetCaretLogicPos();
 					
-					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Sel.GetFrom().GetY());
+					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Caret.GetY());
 					
-					if( Sel.GetFrom().GetX() < pDocLine->GetLengthWithoutEOL()){
+					bool bSelect = false;
+					if( Caret.GetX() < pDocLine->GetLengthWithoutEOL()){
 						// hit 位置が改行より前なら，一文字右
-						Sel.SetToX( Sel.GetFrom().GetX() + 1 );
-						Sel.SetToY( Sel.GetFrom().GetY());
+						Caret.SetX( Caret.GetX() + 1 );
+						Caret.SetY( Caret.GetY());
 					}else if( pDocLine->GetNextLine()){
 						// 次行があれば，次行先頭
-						Sel.SetToX( CLogicInt( 0 ));
-						Sel.SetToY( Sel.GetFrom().GetY() + 1 );
+						Caret.SetX( CLogicInt( 0 ));
+						Caret.SetY( Caret.GetY() + 1 );
 					}else{
-						// 次行がなければ，この行最後尾
-						Sel.SetToX( Sel.GetFrom().GetX() + pDocLine->GetLengthWithEOL());
-						Sel.SetToY( Sel.GetFrom().GetY());
+						// 次行がなければ，この行最後尾を選択
+						break;
+						Caret.SetX( Caret.GetX() + pDocLine->GetLengthWithEOL());
+						Caret.SetY( Caret.GetY());
+						bSelect = true;
 					}
-					CLayoutRange SelLay;
-					GetDocument()->m_cLayoutMgr.LogicToLayout( Sel, &SelLay );
-					m_pCommanderView->GetSelectionInfo().SetSelectArea( SelLay );
+					CLayoutPoint CaretLay;
+					GetDocument()->m_cLayoutMgr.LogicToLayout( Caret, &CaretLay );
+					
+					if( bSelect ){
+						m_pCommanderView->GetSelectionInfo().SetSelectArea( CLayoutRange( CaretLay, CaretLay ));
+					}else{
+						GetCaret().MoveCursor( CaretLay, false );
+					}
 				}
 			}else if( iRet < 0 ){
 				cRegexp.ShowErrorMsg( nullptr );
