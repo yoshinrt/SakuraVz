@@ -623,14 +623,29 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 			if( iRet > 0 ){
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), TRUE );
 				
-				// マッチ幅が 0 の場合，選択状態にして次の SEARCH_NEXT で引っかからないようにする
+				// マッチ幅が 0 の場合，1文字選択する
 				if( cRegexp.GetMatchLen() == 0 ){
-					m_pCommanderView->GetSelectionInfo().SetSelectArea(
-						CLayoutRange(
-							GetCaret().GetCaretLayoutPos(),
-							GetCaret().GetCaretLayoutPos()
-						)
-					);
+					CLogicRange Sel;
+					Sel.SetFrom( GetCaret().GetCaretLogicPos());
+					
+					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Sel.GetFrom().GetY());
+					
+					if( Sel.GetFrom().GetX() < pDocLine->GetLengthWithoutEOL()){
+						// hit 位置が改行より前なら，一文字右
+						Sel.SetToX( Sel.GetFrom().GetX() + 1 );
+						Sel.SetToY( Sel.GetFrom().GetY());
+					}else if( pDocLine->GetNextLine()){
+						// 次行があれば，次行先頭
+						Sel.SetToX( CLogicInt( 0 ));
+						Sel.SetToY( Sel.GetFrom().GetY() + 1 );
+					}else{
+						// 次行がなければ，この行最後尾
+						Sel.SetToX( Sel.GetFrom().GetX() + pDocLine->GetLengthWithEOL());
+						Sel.SetToY( Sel.GetFrom().GetY());
+					}
+					CLayoutRange SelLay;
+					GetDocument()->m_cLayoutMgr.LogicToLayout( Sel, &SelLay );
+					m_pCommanderView->GetSelectionInfo().SetSelectArea( SelLay );
 				}
 			}else if( iRet < 0 ){
 				cRegexp.ShowErrorMsg( hwndParent );
@@ -1096,14 +1111,29 @@ void CViewCommander::Command_REPLACE_ALL()
 				Command_INSTEXT( false, cRegexp.GetString(), cRegexp.GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
 				++nReplaceNum;
 				
-				// マッチ幅が 0 の場合，選択状態にして次の SEARCH_NEXT で引っかからないようにする
+				// マッチ幅が 0 の場合，1文字選択する
 				if( cRegexp.GetMatchLen() == 0 ){
-					m_pCommanderView->GetSelectionInfo().SetSelectArea(
-						CLayoutRange(
-							GetCaret().GetCaretLayoutPos(),
-							GetCaret().GetCaretLayoutPos()
-						)
-					);
+					CLogicRange Sel;
+					Sel.SetFrom( GetCaret().GetCaretLogicPos());
+					
+					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Sel.GetFrom().GetY());
+					
+					if( Sel.GetFrom().GetX() < pDocLine->GetLengthWithoutEOL()){
+						// hit 位置が改行より前なら，一文字右
+						Sel.SetToX( Sel.GetFrom().GetX() + 1 );
+						Sel.SetToY( Sel.GetFrom().GetY());
+					}else if( pDocLine->GetNextLine()){
+						// 次行があれば，次行先頭
+						Sel.SetToX( CLogicInt( 0 ));
+						Sel.SetToY( Sel.GetFrom().GetY() + 1 );
+					}else{
+						// 次行がなければ，この行最後尾
+						Sel.SetToX( Sel.GetFrom().GetX() + pDocLine->GetLengthWithEOL());
+						Sel.SetToY( Sel.GetFrom().GetY());
+					}
+					CLayoutRange SelLay;
+					GetDocument()->m_cLayoutMgr.LogicToLayout( Sel, &SelLay );
+					m_pCommanderView->GetSelectionInfo().SetSelectArea( SelLay );
 				}
 			}else if( iRet < 0 ){
 				cRegexp.ShowErrorMsg( nullptr );
