@@ -45,14 +45,8 @@ public:
 	enum Option {
 		optNothing			= 0,			//!< オプションなし
 		optCaseSensitive	= 1 << 0,		//!< 大文字小文字区別オプション(/iをつけない)
-		optGlobal			= 1 << 1,		//!< 全域オプション(/g)	★機能しない
-		optExtend			= 1 << 2,		//!< 拡張正規表現(/x)	★機能しない
-		optASCII			= 1 << 3,		//!< ASCII(/a)			★機能しない
-		optUnicode			= 1 << 4,		//!< Unicode(/u)		★機能しない
-		optDefault			= 1 << 5,		//!< Default(/d)		★機能しない
-		optLocale			= 1 << 6,		//!< Locale(/l)			★機能しない
-		optR				= 1 << 7,		//!< CRLF(/R)			★機能しない
-		optPartialMatch		= 1 << 8,		//!< partial match
+		optGlobal			= 1 << 1,		//!< 全域オプション(/g) ★現在機能しない
+		optPartialMatch		= 1 << 2,		//!< partial match
 	};
 
 	//! DLLのバージョン情報を取得
@@ -178,8 +172,9 @@ private:
 	void					*m_pCallbackParam;		// !< コールバックパラメータ
 	
 	// pcre2
-	pcre2_match_data	*m_MatchData;
-	pcre2_code			*m_Re;
+	pcre2_compile_context	*m_Context;
+	pcre2_match_data		*m_MatchData;
+	pcre2_code				*m_Re;
 	
 	//! Buf 確保・リサイズ
 	static bool ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize );

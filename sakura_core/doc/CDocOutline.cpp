@@ -180,18 +180,6 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 							nCaseFlag = 0;
 						}else if( strLine[i] == L'g' ){
 							regexOption |= CBregexp::optGlobal;
-						}else if( strLine[i] == L'x' ){
-							regexOption |= CBregexp::optExtend;
-						}else if( strLine[i] == L'a' ){
-							regexOption |= CBregexp::optASCII;
-						}else if( strLine[i] == L'u' ){
-							regexOption |= CBregexp::optUnicode;
-						}else if( strLine[i] == L'd' ){
-							regexOption |= CBregexp::optDefault;
-						}else if( strLine[i] == L'l' ){
-							regexOption |= CBregexp::optLocale;
-						}else if( strLine[i] == L'R' ){
-							regexOption |= CBregexp::optR;
 						}
 					}
 					regexOption |= nCaseFlag;

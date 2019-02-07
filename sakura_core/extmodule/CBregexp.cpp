@@ -56,11 +56,17 @@ CBregexp::CBregexp(){
 	m_iReplacedLen			= 0;
 	
 	m_GetNextLineCallback	= nullptr;
+	
+	// context 設定
+	m_Context = pcre2_compile_context_create( nullptr );
+	pcre2_set_newline( m_Context, PCRE2_NEWLINE_ANYCRLF );
 }
 
 CBregexp::~CBregexp(){
 	//コンパイルバッファを解放
 	ReleaseCompileBuffer();
+	
+	if( m_Context ) pcre2_compile_context_free( m_Context );
 }
 
 void CBregexp::ReleaseCompileBuffer(void){
@@ -119,117 +125,6 @@ void CBregexp::Copy( CBregexp &re ){
 }
 
 /*!
-	CBregexp::MakePattern()の代替。
-	* エスケープされておらず、文字集合と \Q...\Eの中にない . を [^\r\n] に置換する。
-	* エスケープされておらず、文字集合と \Q...\Eの中にない $ を (?<![\r\n])(?=\r|$) に置換する。
-	これは「改行」の意味を LF のみ(BREGEXP.DLLの仕様)から、CR, LF, CRLF に拡張するための変更である。
-	また、$ は改行の後ろ、行文字列末尾にマッチしなくなる。最後の一行の場合をのぞいて、
-	正規表現DLLに与えられる文字列の末尾は文書末とはいえず、$ がマッチする必要はないだろう。
-	$ が行文字列末尾にマッチしないことは、一括置換での期待しない置換を防ぐために必要である。
-*/
-void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring& strModifiedSearch ){
-	static const wchar_t szDotAlternative[] = L"[^\\r\\n]";
-	static const wchar_t szDollarAlternative[] = L"(?<![\\r\\n])(?=\\r|$)";
-
-	// すべての . を [^\r\n] へ、すべての $ を (?<![\r\n])(?=\r|$) へ置換すると仮定して、strModifiedSearchの最大長を決定する。
-	std::wstring::size_type modifiedSearchSize = 0;
-	for( const wchar_t* p = szSearch; *p; ++p ) {
-		if( *p == L'.') {
-			modifiedSearchSize += (sizeof szDotAlternative) / (sizeof szDotAlternative[0]) - 1;
-		} else if( *p == L'$' ) {
-			modifiedSearchSize += (sizeof szDollarAlternative) / (sizeof szDollarAlternative[0]) - 1;
-		} else {
-			modifiedSearchSize += 1;
-		}
-	}
-	++modifiedSearchSize; // '\0'
-
-	strModifiedSearch.reserve( modifiedSearchSize );
-
-	// szSearchを strModifiedSearchへ、ところどころ置換しながら順次コピーしていく。
-	enum State {
-		DEF = 0, /* DEFULT 一番外側 */
-		D_E,     /* DEFAULT_ESCAPED 一番外側で \の次 */
-		D_C,     /* DEFAULT_SMALL_C 一番外側で \cの次 */
-		CHA,     /* CHARSET 文字クラスの中 */
-		C_E,     /* CHARSET_ESCAPED 文字クラスの中で \の次 */
-		C_C,     /* CHARSET_SMALL_C 文字クラスの中で \cの次 */
-		QEE,     /* QEESCAPE \Q...\Eの中 */
-		Q_E,     /* QEESCAPE_ESCAPED \Q...\Eの中で \の次 */
-		NUMBER_OF_STATE,
-		_EC = -1, /* ENTER CHARCLASS charsetLevelをインクリメントして CHAへ */
-		_XC = -2, /* EXIT CHARCLASS charsetLevelをデクリメントして CHAか DEFへ */
-		_DT = -3, /* DOT (特殊文字としての)ドットを置き換える */
-		_DL = -4, /* DOLLAR (特殊文字としての)ドルを置き換える */
-	};
-	enum CharClass {
-		OTHER = 0,
-		DOT,    /* . */
-		DOLLAR, /* $ */
-		SMALLC, /* c */
-		LARGEQ, /* Q */
-		LARGEE, /* E */
-		LBRCKT, /* [ */
-		RBRCKT, /* ] */
-		ESCAPE, /* \ */
-		NUMBER_OF_CHARCLASS
-	};
-	static const State state_transition_table[NUMBER_OF_STATE][NUMBER_OF_CHARCLASS] = {
-	/*        OTHER   DOT  DOLLAR  SMALLC LARGEQ LARGEE LBRCKT RBRCKT ESCAPE*/
-	/* DEF */ {DEF,  _DT,   _DL,    DEF,   DEF,   DEF,   _EC,   DEF,   D_E},
-	/* D_E */ {DEF,  DEF,   DEF,    D_C,   QEE,   DEF,   DEF,   DEF,   DEF},
-	/* D_C */ {DEF,  DEF,   DEF,    DEF,   DEF,   DEF,   DEF,   DEF,   D_E},
-	/* CHA */ {CHA,  CHA,   CHA,    CHA,   CHA,   CHA,   _EC,   _XC,   C_E},
-	/* C_E */ {CHA,  CHA,   CHA,    C_C,   CHA,   CHA,   CHA,   CHA,   CHA},
-	/* C_C */ {CHA,  CHA,   CHA,    CHA,   CHA,   CHA,   CHA,   CHA,   C_E},
-	/* QEE */ {QEE,  QEE,   QEE,    QEE,   QEE,   QEE,   QEE,   QEE,   Q_E},
-	/* Q_E */ {QEE,  QEE,   QEE,    QEE,   QEE,   DEF,   QEE,   QEE,   Q_E}
-	};
-	State state = DEF;
-	int charsetLevel = 0; // ブラケットの深さ。POSIXブラケット表現など、エスケープされていない [] が入れ子になることがある。
-	const wchar_t *left = szSearch, *right = szSearch;
-	for( ; *right; ++right ) { // CNativeW::GetSizeOfChar()は使わなくてもいいかな？
-		const wchar_t ch = *right;
-		const CharClass charClass =
-			ch == L'.'  ? DOT:
-			ch == L'$'  ? DOLLAR:
-			ch == L'c'  ? SMALLC:
-			ch == L'Q'  ? LARGEQ:
-			ch == L'E'  ? LARGEE:
-			ch == L'['  ? LBRCKT:
-			ch == L']'  ? RBRCKT:
-			ch == L'\\' ? ESCAPE:
-			OTHER;
-		const State nextState = state_transition_table[state][charClass];
-		if(0 <= nextState) {
-			state = nextState;
-		} else switch(nextState) {
-			case _EC: // ENTER CHARSET
-				charsetLevel += 1;
-				state = CHA;
-			break;
-			case _XC: // EXIT CHARSET
-				charsetLevel -= 1;
-				state = 0 < charsetLevel ? CHA : DEF;
-			break;
-			case _DT: // DOT(match anything)
-				strModifiedSearch.append( left, right );
-				left = right + 1;
-				strModifiedSearch.append( szDotAlternative );
-			break;
-			case _DL: // DOLLAR(match end of line)
-				strModifiedSearch.append( left, right );
-				left = right + 1;
-				strModifiedSearch.append( szDollarAlternative );
-			break;
-			default: // バグ。enum Stateに見逃しがある。
-			break;
-		}
-	}
-	strModifiedSearch.append( left, right + 1 ); // right + 1 は '\0' の次を指す(明示的に '\0' をコピー)。
-}
-
-/*!
 	JRE32のエミュレーション関数．空の文字列に対して検索・置換を行うことにより
 	BREGEXP_W構造体の生成のみを行う．
 
@@ -242,14 +137,6 @@ void CBregexp::MakePatternAlternate( const wchar_t* const szSearch, std::wstring
 bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
-	
-	// ライブラリに渡す検索パターンを作成
-	// 別関数で共通処理に変更 2003.05.03 by かろと
-	
-	std::wstring strModifiedSearch;
-	
-	MakePatternAlternate( szPattern, strModifiedSearch );
-	szPattern = strModifiedSearch.c_str();
 	
 	// pcre2 opt 生成
 	m_uOption = uOption;
@@ -264,7 +151,7 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 		iPcreOpt,					// uint32_t options
 		&m_iLastCode,				// int *errorcode
 		&sizeErrOffset,				// PCRE2_SIZE *erroroffset
-		nullptr						// pcre2_compile_context *ccontext
+		m_Context					// pcre2_compile_context *ccontext
 	);
 	
 	//	何らかのエラー発生。
@@ -306,7 +193,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
-	UINT uPcre2Opt = ( uOption & optPartialMatch ) ? PCRE2_PARTIAL_HARD : 0;
+	UINT uPcre2Opt = ( uOption & optPartialMatch ) ? ( PCRE2_PARTIAL_HARD | PCRE2_NOTEOL ) : 0;
 	
 	while( 1 ){
 		// match
@@ -341,7 +228,8 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		// partial match したけど次行がないので，partial match を外して再検索
 		if( iNextSize == 0 ){
-			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+			uPcre2Opt	&= ~( PCRE2_PARTIAL_HARD | PCRE2_NOTEOL );
+			uOption		&= ~optPartialMatch;
 			continue;
 		}
 		
@@ -459,7 +347,8 @@ int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, i
 		
 		// オプション
 		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
-		if( m_uOption & optGlobal ) iOption |= PCRE2_SUBSTITUTE_GLOBAL;
+		if( m_uOption & optGlobal )			iOption |= PCRE2_SUBSTITUTE_GLOBAL;
+		if( m_uOption & optPartialMatch )	iOption |= PCRE2_NOTEOL;
 		
 		m_iLastCode = pcre2_substitute(
 			m_Re,							// const pcre2_code *code
