@@ -110,18 +110,9 @@ void CBregexp::Copy( CBregexp &re ){
 		);
 	}
 	
-	m_szMsg					= nullptr;
-	m_szSearchBuf			= nullptr;
-	m_iSearchBufSize		= 0;
-	m_iSubjectLen			= 0;
-	m_szReplaceBuf			= nullptr;
-	m_iReplaceBufSize		= 0;
-	m_iReplacedLen			= 0;
-	
 	m_GetNextLineCallback	= re.m_GetNextLineCallback;
 	m_pCallbackParam		= re.m_pCallbackParam;
 	m_uOption				= re.m_uOption;
-	m_iStart				= re.m_iStart;
 }
 
 /*!
