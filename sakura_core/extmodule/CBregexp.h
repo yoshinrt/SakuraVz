@@ -1,7 +1,7 @@
 ﻿/*!	@file
-	@brief BREGEXP Library Handler
+	@brief PCRE2 Library Handler
 
-	pcre2 を利用するためのインターフェース
+	PCRE2 を利用するためのインターフェース
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages

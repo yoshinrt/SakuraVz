@@ -1,22 +1,7 @@
 ﻿/*!	@file
-	@brief BREGEXP Library Handler
+	@brief PCRE2 Library Handler
 
-	Perl5互換正規表現を扱うDLLであるBREGEXP.DLLを利用するためのインターフェース
-
-	@author genta
-	@date Jun. 10, 2001
-	@date 2002/2/1 hor		ReleaseCompileBufferを適宜追加
-	@date Jul. 25, 2002 genta 行頭条件を考慮した検索を行うように．(置換はまだ)
-	@date 2003.05.22 かろと 正規な正規表現に近づける
-	@date 2005.03.19 かろと リファクタリング。クラス内部を隠蔽。
-*/
-/*
-	Copyright (C) 2001-2002, genta
-	Copyright (C) 2002, novice, hor, Azumaiya
-	Copyright (C) 2003, かろと
-	Copyright (C) 2005, かろと
-	Copyright (C) 2006, かろと
-	Copyright (C) 2007, ryoji
+	PCRE2 を利用するためのインターフェース
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
