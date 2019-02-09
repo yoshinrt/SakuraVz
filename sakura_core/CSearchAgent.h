@@ -100,15 +100,6 @@ public:
 		const CSearchStringPattern& pattern,
 		bool			bVzWordSearch = true
 	);
-	// 単語単位で文字列検索
-	static const wchar_t* SearchStringWord(
-		const wchar_t*	pLine,
-		int				nLineLen,
-		int				nIdxPos,
-		const std::vector<std::pair<const wchar_t*, CLogicInt> >& searchWords,
-		bool	bLoHiCase,
-		int*	pnMatchLen
-	);
 	
 private:
 	bool SearchWord1Line(

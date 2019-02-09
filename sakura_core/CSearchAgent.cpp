@@ -308,41 +308,6 @@ const wchar_t* CSearchAgent::SearchString(
 	return NULL;
 }
 
-/*!	単語単位検索
-*/
-const wchar_t* CSearchAgent::SearchStringWord(
-	const wchar_t*	pLine,
-	int				nLineLen,
-	int				nIdxPos,
-	const std::vector<std::pair<const wchar_t*, CLogicInt> >& searchWords,
-	bool	bLoHiCase,
-	int*	pnMatchLen
-)
-{
-	CLogicInt nNextWordFrom = CLogicInt(nIdxPos);
-	CLogicInt nNextWordFrom2;
-	CLogicInt nNextWordTo2;
-	while( CWordParse::WhereCurrentWord_2( pLine, CLogicInt(nLineLen), nNextWordFrom, &nNextWordFrom2, &nNextWordTo2, NULL, NULL ) ){
-		size_t nSize = searchWords.size();
-		for( size_t iSW = 0; iSW < nSize; ++iSW ) {
-			if( searchWords[iSW].second == nNextWordTo2 - nNextWordFrom2 ){
-				/* 1==大文字小文字の区別 */
-				if( (!bLoHiCase && 0 == auto_memicmp( &(pLine[nNextWordFrom2]) , searchWords[iSW].first, searchWords[iSW].second ) ) ||
-					(bLoHiCase && 0 == auto_memcmp( &(pLine[nNextWordFrom2]) , searchWords[iSW].first, searchWords[iSW].second ) )
-				){
-					*pnMatchLen = searchWords[iSW].second;
-					return &pLine[nNextWordFrom2];
-				}
-			}
-		}
-		if( !CWordParse::SearchNextWordPosition( pLine, CLogicInt(nLineLen), nNextWordFrom, &nNextWordFrom, FALSE ) ){
-			break;	//	次の単語が無い。
-		}
-	}
-	*pnMatchLen = 0;
-	return NULL;
-}
-
 /* 現在位置の単語の範囲を調べる */
 // 2001/06/23 N.Nakatani WhereCurrentWord()変更 WhereCurrentWord_2をコールするようにした
 bool CSearchAgent::WhereCurrentWord(
