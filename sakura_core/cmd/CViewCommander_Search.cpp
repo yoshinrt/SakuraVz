@@ -693,12 +693,9 @@ void CViewCommander::Command_REPLACE_ALL()
 	CLayoutInt ViewTop = m_pCommanderView->GetTextArea().GetViewTopLine();
 	Command_JUMPHIST_SET();
 	
-	bool bFastMode = false;
-	if( ((Int)GetDocument()->m_cDocLineMgr.GetLineCount() * 10 < (Int)GetDocument()->m_cLayoutMgr.GetLineCount())
-		&& !(bSelectedArea || nPaste) ){
-		// 1行あたり10レイアウト行以上で、選択・ペーストでない場合
-		bFastMode = true;
-	}
+	// 選択・ペーストでない場合
+	bool bFastMode = !( bBeginBoxSelect || nPaste );
+	
 	int	nAllLineNum; // $$単位混在
 	if( bFastMode ){
 		nAllLineNum = (Int)GetDocument()->m_cDocLineMgr.GetLineCount();
@@ -1119,23 +1116,6 @@ void CViewCommander::Command_REPLACE_ALL()
 			++nReplaceNum;
 		}
 
-		if( !bFastMode && 50 <= nReplaceNum && !(bSelectedArea || nPaste) ){
-			bFastMode = true;
-			nAllLineNum = (Int)GetDocument()->m_cDocLineMgr.GetLineCount();
-			nAllLineNumOrg = nAllLineNumLogicOrg;
-			for( nShiftCount = 0; 300 < nAllLineNum; nShiftCount++ ){
-				nAllLineNum/=2;
-			}
-			Progress_SetRange( hwndProgress, 0, nAllLineNum + 1 );
-			int nDiff = nAllLineNumOrg - (Int)GetDocument()->m_cDocLineMgr.GetLineCount();
-			if( 0 <= nDiff ){
-				nNewPos = (nDiff + (Int)cSelectLogic.GetFrom().GetY2()) >> nShiftCount;
-			}else{
-				nNewPos = ::MulDiv((Int)cSelectLogic.GetFrom().GetY(), nAllLineNum, (Int)GetDocument()->m_cDocLineMgr.GetLineCount());
-			}
-			Progress_SetPos( hwndProgress, nNewPos +1 );
-			Progress_SetPos( hwndProgress, nNewPos );
-		}
 		// 最後に置換した位置を記憶
 		if( bFastMode ){
 			ptLastLogic = GetCaret().GetCaretLogicPos();
