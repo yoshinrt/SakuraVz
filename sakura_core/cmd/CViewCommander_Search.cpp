@@ -685,9 +685,7 @@ void CViewCommander::Command_REPLACE_ALL()
 	}
 
 	/* 表示処理ON/OFF */
-	bool bDisplayUpdate = false;
-
-	const bool bDrawSwitchOld = m_pCommanderView->SetDrawSwitch(bDisplayUpdate);
+	const bool bDrawSwitchOld = m_pCommanderView->SetDrawSwitch( false );
 	
 	// 画面上端位置保存
 	CLayoutInt ViewTop = m_pCommanderView->GetTextArea().GetViewTopLine();
@@ -756,13 +754,12 @@ void CViewCommander::Command_REPLACE_ALL()
 			&ptColLineP
 		);
 		//選択範囲開始位置へ移動
-		GetCaret().MoveCursor( sRangeA.GetFrom(), bDisplayUpdate );
+		GetCaret().MoveCursor( sRangeA.GetFrom(), false );
 	}
 	else{
 		/* ファイル全体置換 */
 		/* ファイルの先頭に移動 */
-	//	HandleCommand( F_GOFILETOP, bDisplayUpdate, 0, 0, 0, 0 );
-		Command_GOFILETOP(bDisplayUpdate);
+		Command_GOFILETOP( false );
 	}
 
 	CLayoutPoint ptLast = GetCaret().GetCaretLayoutPos();
@@ -770,7 +767,7 @@ void CViewCommander::Command_REPLACE_ALL()
 
 	/* テキスト選択解除 */
 	/* 現在の選択範囲を非選択状態に戻す */
-	m_pCommanderView->GetSelectionInfo().DisableSelectArea( bDisplayUpdate );
+	m_pCommanderView->GetSelectionInfo().DisableSelectArea( false );
 	// To Here 2001.12.03 hor
 
 	//<< 2002/03/26 Azumaiya
@@ -872,7 +869,7 @@ void CViewCommander::Command_REPLACE_ALL()
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	
 	// partial 設定，block モード時は無効
-	UINT uSearchOpt = CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL | ( bDisplayUpdate ? CMDSCH_REDRAW : 0 );
+	UINT uSearchOpt = CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL;
 	if( bBeginBoxSelect ) uSearchOpt |= CMDSCH_NOPARTIAL;
 	
 	// 置換ループ
@@ -1006,7 +1003,7 @@ void CViewCommander::Command_REPLACE_ALL()
 
 				if (out) {
 					//次の検索開始位置へシフト
-					m_pCommanderView->GetSelectionInfo().DisableSelectArea(bDisplayUpdate); // 2016.01.13 範囲選択をクリアしないと位置移動できていなかった
+					m_pCommanderView->GetSelectionInfo().DisableSelectArea( false ); // 2016.01.13 範囲選択をクリアしないと位置移動できていなかった
 					GetCaret().SetCaretLayoutPos(CLayoutPoint(
 						sRangeA.GetFrom().x,
 						ptNewFrom.y + CLayoutInt(firstLeft < sRangeA.GetFrom().x ? 0 : 1)
