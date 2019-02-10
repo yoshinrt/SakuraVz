@@ -691,11 +691,8 @@ void CViewCommander::Command_REPLACE_ALL()
 		Command_JUMPHIST_SET();
 	}
 	
-	// 選択・ペーストでない場合
-	bool bFastMode = !( bBeginBoxSelect || nPaste );
-	
 	int	nAllLineNum; // $$単位混在
-	if( bFastMode ){
+	if( !bBeginBoxSelect ){
 		nAllLineNum = (Int)GetDocument()->m_cDocLineMgr.GetLineCount();
 	}else{
 		nAllLineNum = (Int)GetDocument()->m_cLayoutMgr.GetLineCount();
@@ -879,7 +876,7 @@ void CViewCommander::Command_REPLACE_ALL()
 		) <= 0 ) break;
 		
 		// 選択
-		if( !bFastMode ){
+		if( bBeginBoxSelect || nPaste ){
 			CLayoutRange cSelectLayout;
 			rLayoutMgr.LogicToLayout( cSelectLogic, &cSelectLayout );
 			
@@ -905,7 +902,7 @@ void CViewCommander::Command_REPLACE_ALL()
 		// 時間ごとに進歩状況描画だと時間取得分遅くなると思うが、そちらの方が自然だと思うので・・・。
 		// と思ったけど、逆にこちらの方が自然ではないので、やめる。
 		{
-			if( bFastMode ){
+			if( !bBeginBoxSelect ){
 				int nDiff = nAllLineNumOrg - (Int)GetDocument()->m_cDocLineMgr.GetLineCount();
 				if( 0 <= nDiff ){
 					nNewPos = (nDiff + (Int)cSelectLogic.GetFrom().GetY2()) >> nShiftCount;
@@ -1026,15 +1023,7 @@ void CViewCommander::Command_REPLACE_ALL()
 				lineCnt = rDocLineMgr.GetLineCount();
 
 				// 検索後の範囲終端
-				CLogicPoint ptOldTmp;
-				if( bFastMode ){
-					ptOldTmp = cSelectLogic.GetTo();
-				}else{
-					rLayoutMgr.LayoutToLogic(
-						GetSelect().GetTo(),
-						&ptOldTmp
-					);
-				}
+				CLogicPoint ptOldTmp = cSelectLogic.GetTo();
 				ptOld.x=(CLayoutInt)ptOldTmp.x; //$$ レイアウト型に無理やりロジック型を代入。気持ち悪い
 				ptOld.y=(CLayoutInt)ptOldTmp.y;
 
@@ -1083,7 +1072,7 @@ void CViewCommander::Command_REPLACE_ALL()
 			
 			int iRet = pRegexp->Replace( cmemReplacement.GetStringPtr());
 			if( iRet > 0 ){
-				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
+				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 				++nReplaceNum;
 				
 				// マッチ幅が 0 の場合，1文字選進む
@@ -1116,7 +1105,7 @@ void CViewCommander::Command_REPLACE_ALL()
 			/* 本当は元コードを使うべきなんでしょうが、無駄な処理を避けるために直接たたく。
 			** →m_nSelectXXXが-1の時に m_pCommanderView->ReplaceData_CEditViewを直接たたくと動作不良となるため直接たたくのやめた。2003.05.18 かろと
 			*/
-			Command_INSTEXT( false, szREPLACEKEY, nREPLACEKEY, true, false, bFastMode, bFastMode ? &cSelectLogic : NULL );
+			Command_INSTEXT( false, szREPLACEKEY, nREPLACEKEY, true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 			++nReplaceNum;
 		}
 
@@ -1157,7 +1146,7 @@ void CViewCommander::Command_REPLACE_ALL()
 		// To Here 2001.12.03 hor
 	}
 
-	if( bFastMode && 0 < nReplaceNum ){
+	if( !bBeginBoxSelect && 0 < nReplaceNum ){
 		// CLayoutMgrの更新(変更有の場合)
 		rLayoutMgr._DoLayout(false);
 		GetEditWindow()->ClearViewCaretPosInfo();
