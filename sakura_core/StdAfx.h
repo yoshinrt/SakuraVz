@@ -82,6 +82,7 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <utility>
 #endif // ifndef SAKURA_PCH_MODE_MIN
 
 #define PCRE2_STATIC

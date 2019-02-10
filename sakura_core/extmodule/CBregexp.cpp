@@ -99,10 +99,65 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	//	BREGEXP_W構造体の解放
 	ReleaseCompileBuffer();
 	
+	// 単語単位検索のパターン変形
+	std::wstring WordSearchPat;
+	if( uOption & optWordSearch ){
+		Substitute( szPattern, L"([!-/:-@\\[-`\\{-~])", L"\\\\$1", &WordSearchPat, optGlobal );
+		
+		// 行末が '*' なら削る
+		if(
+			WordSearchPat.length() >= 2 &&
+			WordSearchPat[ WordSearchPat.length() - 2 ] == L'\\' &&
+			WordSearchPat[ WordSearchPat.length() - 1 ] == L'*'
+		){
+			WordSearchPat.pop_back();
+			WordSearchPat.pop_back();
+		}
+		
+		// 行末が \w なら \b を追加
+		else if(
+			WordSearchPat.length() >= 1 &&
+			WordSearchPat[ WordSearchPat.length() - 1 ] < 256 && (
+				iswalnum( WordSearchPat[ WordSearchPat.length() - 1 ]) ||
+				WordSearchPat[ WordSearchPat.length() - 1 ] == L'_'
+			)
+		){
+			WordSearchPat += L"\\b";
+		}
+		
+		// 先頭が '*' なら削る
+		if(
+			WordSearchPat.length() >= 2 &&
+			WordSearchPat[ 0 ] == L'\\' &&
+			WordSearchPat[ 1 ] == L'*'
+		){
+			szPattern = WordSearchPat.c_str() + 2;
+		}
+		
+		// 行頭が \w なら \b を追加
+		else if(
+			WordSearchPat[ 0 ] < 256 && (
+				iswalnum( WordSearchPat[ 0 ]) ||
+				WordSearchPat[ 0 ] == L'_'
+			)
+		){
+			WordSearchPat.insert( 0, L"\\b" );
+			szPattern = WordSearchPat.c_str();
+		}
+		
+		else{
+			szPattern = WordSearchPat.c_str();
+		}
+	}
+	
 	// pcre2 opt 生成
 	m_uOption = uOption;
 	int iPcreOpt	= PCRE2_MULTILINE;
-	if( uOption & optLiteral	) iPcreOpt = PCRE2_LITERAL;		// 基本検索
+	if( uOption & optLiteral	){
+		iPcreOpt = PCRE2_LITERAL;		// 基本検索
+	}else if( uOption & optWordSearch ){
+		iPcreOpt = 0;
+	}
 	if( uOption & optIgnoreCase	) iPcreOpt |= PCRE2_CASELESS;	// 大文字小文字区別オプション
 	
 	PCRE2_SIZE	sizeErrOffset;
@@ -159,7 +214,10 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	if( iStart >= 0 ) m_iStart = iStart;
 	
 	UINT uPcre2Opt = 0;
-	if(( uOption & ( optPartialMatch | optWordSearch | optLiteral )) == optPartialMatch ){
+	if(
+		( m_uOption & ( optWordSearch | optLiteral )) == 0 &&
+		( uOption & optPartialMatch )
+	){
 		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
 	}
 	
@@ -393,4 +451,22 @@ bool CheckRegexpSyntax(
 	}
 	return true;
 }
+
+// 簡易的な subst
+int CBregexp::Substitute(
+	const wchar_t *szSubject, const wchar_t *szPattern,
+	const wchar_t *szReplacement, std::wstring *pResult, UINT uOption
+){
+	CBregexp Re;
+	int iRet;
+	
+	if( Re.Compile( szPattern, uOption ) &&
+		( iRet = Re.Replace( szReplacement, szSubject, wcslen( szSubject ), 0 )) >= 0
+	){
+		pResult->assign( Re.m_szReplaceBuf );
+		return iRet;
+	}
+	return -1;
+}
+
 //	To Here Jun. 26, 2001 genta

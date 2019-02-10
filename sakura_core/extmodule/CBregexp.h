@@ -134,6 +134,12 @@ public:
 	/*! SearchBuf の文字列長取得 */
 	int GetSubjectLen( void ){ return m_iSubjectLen; }
 	
+	// 簡易的な subst
+	int Substitute(
+		const wchar_t *szSubject, const wchar_t *szPattern,
+		const wchar_t *szReplacement, std::wstring *pResult, UINT uOption = 0
+	);
+	
 protected:
 
 	//!	コンパイルバッファを解放する
