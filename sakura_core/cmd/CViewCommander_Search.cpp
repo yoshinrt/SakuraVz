@@ -1034,7 +1034,9 @@ void CViewCommander::Command_REPLACE_ALL()
 				}
 			}
 		}
-
+		
+		bool bReZeroMatch = false;	// 正規表現 0 幅マッチした
+		
 		/* コマンドコードによる処理振り分け */
 		/* テキストを貼り付け */
 		if( nPaste ){
@@ -1054,26 +1056,8 @@ void CViewCommander::Command_REPLACE_ALL()
 				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 				++nReplaceNum;
 				
-				// マッチ幅が 0 の場合，1文字選進む
-				if( pRegexp->GetMatchLen() == 0 ){
-					CLogicPoint Caret = GetCaret().GetCaretLogicPos();
-					CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Caret.GetY());
-					
-					if( Caret.GetX() < pDocLine->GetLengthWithoutEOL()){
-						// hit 位置が改行より前なら，一文字右
-						Caret.SetX( Caret.GetX() + 1 );
-						Caret.SetY( Caret.GetY());
-					}else if( pDocLine->GetNextLine()){
-						// 次行があれば，次行先頭
-						Caret.SetX( CLogicInt( 0 ));
-						Caret.SetY( Caret.GetY() + 1 );
-					}else{
-						break;
-					}
-					CLayoutPoint CaretLay;
-					GetDocument()->m_cLayoutMgr.LogicToLayout( Caret, &CaretLay );
-					GetCaret().MoveCursor( CaretLay, false );
-				}
+				// マッチ幅が 0 の場合，1文字選進める
+				if( pRegexp->GetMatchLen() == 0 ) bReZeroMatch = true;
 			}else if( iRet < 0 ){
 				pRegexp->ShowErrorMsg( nullptr );
 				break;
@@ -1117,7 +1101,26 @@ void CViewCommander::Command_REPLACE_ALL()
 				}
 			}
 		}
-		// To Here 2001.12.03 hor
+		
+		// マッチ幅が 0 の場合，1文字選進める
+		if( bReZeroMatch ){
+			CLogicPoint Caret = GetCaret().GetCaretLogicPos();
+			CDocLine *pDocLine = GetDocument()->m_cLayoutMgr.m_pcDocLineMgr->GetLine( Caret.GetY());
+			
+			if( Caret.GetX() < pDocLine->GetLengthWithoutEOL()){
+				// hit 位置が改行より前なら，一文字右
+				Caret.SetX( Caret.GetX() + 1 );
+				Caret.SetY( Caret.GetY());
+			}else if( pDocLine->GetNextLine()){
+				// 次行があれば，次行先頭
+				Caret.SetX( CLogicInt( 0 ));
+				Caret.SetY( Caret.GetY() + 1 );
+			}else{
+				// 最終行の改行以後，break
+				break;
+			}
+			GetCaret().SetCaretLogicPos( Caret );
+		}
 	}
 
 	if( !bBeginBoxSelect && 0 < nReplaceNum ){
