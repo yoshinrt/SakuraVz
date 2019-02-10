@@ -441,32 +441,18 @@ int CEditView::IsSearchString(
 {
 	*pnSearchStart = nPos;	// 2002.02.08 hor
 
-	if( m_sCurSearchOption.bRegularExp ){
-		/* 行頭ではない? */
-		/* 行頭検索チェックは、CBregexpクラス内部で実施するので不要 2003.11.01 かろと */
+	/* 行頭ではない? */
+	/* 行頭検索チェックは、CBregexpクラス内部で実施するので不要 2003.11.01 かろと */
 
-		/* 位置を0でMatchInfo呼び出すと、行頭文字検索時に、全て true　となり、
-		** 画面全体が検索文字列扱いになる不具合修正
-		** 対策として、行頭を MacthInfoに教えないといけないので、文字列の長さ・位置情報を与える形に変更
-		** 2003.05.04 かろと
-		*/
-		if( m_CurRegexp.Match( cStr.GetPtr(), cStr.GetLength(), nPos ) ){
-			*pnSearchStart = m_CurRegexp.GetIndex();	// 2002.02.08 hor
-			*pnSearchEnd = m_CurRegexp.GetLastIndex();
-			return 1;
-		}
-		else{
-			return 0;
-		}
-	}
-	else {
-		const wchar_t* pHit = CSearchAgent::SearchString(cStr.GetPtr(), cStr.GetLength(), nPos, m_sSearchPattern);
-		if( pHit ){
-			*pnSearchStart = pHit - cStr.GetPtr();
-			*pnSearchEnd = *pnSearchStart + m_sSearchPattern.GetLen();
-			return 1;
-		}
-		return 0; // この行はヒットしなかった
+	/* 位置を0でMatchInfo呼び出すと、行頭文字検索時に、全て true　となり、
+	** 画面全体が検索文字列扱いになる不具合修正
+	** 対策として、行頭を MacthInfoに教えないといけないので、文字列の長さ・位置情報を与える形に変更
+	** 2003.05.04 かろと
+	*/
+	if( m_CurRegexp.Match( cStr.GetPtr(), cStr.GetLength(), nPos ) ){
+		*pnSearchStart = m_CurRegexp.GetIndex();	// 2002.02.08 hor
+		*pnSearchEnd = m_CurRegexp.GetLastIndex();
+		return 1;
 	}
 	return 0;
 }

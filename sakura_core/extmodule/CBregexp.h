@@ -45,6 +45,8 @@ public:
 		optIgnoreCase		= 1 << 0,		//!< ignore case
 		optGlobal			= 1 << 1,		//!< 全域オプション(/g) ★現在機能しない
 		optPartialMatch		= 1 << 2,		//!< partial match
+		optLiteral			= 1 << 3,		//!< 基本検索
+		optWordSearch		= 1 << 4,		//!< 単語検索
 	};
 
 	//! DLLのバージョン情報を取得

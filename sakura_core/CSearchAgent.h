@@ -31,8 +31,6 @@ class CDocLineMgr;
 struct DocLineReplaceArg;
 class CBregexp;
 
-#define SEARCH_STRING_SUNDAY_QUICK
-
 class CSearchStringPattern
 {
 public:
@@ -41,58 +39,21 @@ public:
 	~CSearchStringPattern();
 	void Reset();
 	bool SetPattern( HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const SSearchOption& sSearchOption, CBregexp* pRegexp, bool bGlobal = false );
-	const wchar_t* GetKey() const{ return m_pszKey; }
-	const wchar_t* GetCaseKey() const{ return m_pszCaseKeyRef; }
-	int GetLen() const{ return m_nPatternLen; }
 	bool GetIgnoreCase() const{ return !m_psSearchOption->bLoHiCase; }
-	bool GetLoHiCase() const{ return m_psSearchOption->bLoHiCase; }
 	const SSearchOption& GetSearchOption() const{ return *m_psSearchOption; }
 	CBregexp* GetRegexp() const{ return m_pRegexp; }
 	void SetRegexp( CBregexp *re ){ m_pRegexp = re; }
-#ifdef SEARCH_STRING_SUNDAY_QUICK
-	const int* GetUseCharSkipMap() const{ return m_pnUseCharSkipArr; }
-
-	static int GetMapIndex( wchar_t c );
-#endif
-
-	UINT m_uVzWordSearch;		//!< Vz 互換ワードサーチの境界
-	enum {
-		WORDSEARCH_TOP	= 0x1,	//!< 単語先頭は境界
-		WORDSEARCH_TAIL	= 0x2,	//!< 単語終端は境界
-	};
 
 private:
 	// 外部依存
-	const wchar_t*	m_pszKey;
 	const SSearchOption* m_psSearchOption;
 	mutable CBregexp* m_pRegexp;
-
-	const wchar_t* m_pszCaseKeyRef;
-
-	// 内部バッファ
-	wchar_t* m_pszPatternCase;
-	int  m_nPatternLen;
-#ifdef SEARCH_STRING_KMP
-	int* m_pnNextPossArr;
-#endif
-#ifdef SEARCH_STRING_SUNDAY_QUICK
-	int* m_pnUseCharSkipArr;
-#endif
 
 	DISALLOW_COPY_AND_ASSIGN(CSearchStringPattern);
 };
 
 class CSearchAgent{
 public:
-	
-	// 文字列検索
-	static const wchar_t* SearchString(
-		const wchar_t*	pLine,
-		int				nLineLen,
-		int				nIdxPos,
-		const CSearchStringPattern& pattern,
-		bool			bVzWordSearch = true
-	);
 	
 private:
 	bool SearchWord1Line(

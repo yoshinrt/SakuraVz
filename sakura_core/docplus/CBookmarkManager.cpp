@@ -226,55 +226,35 @@ void CBookmarkManager::MarkSearchWord(
 	int			nLineLen;
 
 	/* 1==正規表現 */
-	if( sSearchOption.bRegularExp ){
-		CBregexp*	pRegexp = pattern.GetRegexp();
-		pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
-		CLogicRange MatchRange;
-		
-		// 次行取得コールバック設定
-		CDocLine*	pDocLineGetNext;
-		pRegexp->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
-		
-		int iLineNo = 0;
-		
-		while( pDocLine ){
-			if(!CBookmarkGetter(pDocLine).IsBookmarked()){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
+	CBregexp*	pRegexp = pattern.GetRegexp();
+	pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
+	CLogicRange MatchRange;
+	
+	// 次行取得コールバック設定
+	CDocLine*	pDocLineGetNext;
+	pRegexp->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
+	
+	int iLineNo = 0;
+	
+	while( pDocLine ){
+		if(!CBookmarkGetter(pDocLine).IsBookmarked()){
+			pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
+			
+			pDocLineGetNext = pDocLine;
+			
+			if( pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
 				
-				pDocLineGetNext = pDocLine;
+				// match レンジ取得
+				pRegexp->GetMatchRange( &MatchRange, iLineNo );
 				
-				if( pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
-					
-					// match レンジ取得
-					pRegexp->GetMatchRange( &MatchRange, iLineNo );
-					
-					// 先頭行マーク
-					iLineNo = MatchRange.GetFrom().y;
-					pDocLine = m_pcDocLineMgr->GetLine( CLogicInt( iLineNo ));
-					CBookmarkSetter( pDocLine ).SetBookmark( true );
-				}
+				// 先頭行マーク
+				iLineNo = MatchRange.GetFrom().y;
+				pDocLine = m_pcDocLineMgr->GetLine( CLogicInt( iLineNo ));
+				CBookmarkSetter( pDocLine ).SetBookmark( true );
 			}
-			pDocLine = pDocLine->GetNextLine();
-			++iLineNo;
 		}
-	}
-	else{
-		/* 検索条件の情報 */
-		pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
-		while( NULL != pDocLine ){
-			if(!CBookmarkGetter(pDocLine).IsBookmarked()){
-				pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
-				if( CSearchAgent::SearchString(
-					pLine,
-					nLineLen,
-					0,
-					pattern
-				) ){
-					CBookmarkSetter(pDocLine).SetBookmark(true);
-				}
-			}
-			pDocLine = pDocLine->GetNextLine();
-		}
+		pDocLine = pDocLine->GetNextLine();
+		++iLineNo;
 	}
 }
 

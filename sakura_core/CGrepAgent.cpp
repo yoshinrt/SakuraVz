@@ -1130,10 +1130,8 @@ int CGrepAgent::DoGrepFile(
 {
 	int		nHitCount;
 	LONGLONG	nLine;
-	const wchar_t*	pszRes; // 2002/08/29 const付加
 	ECodeType	nCharCode;
 	const wchar_t*	pCompareData; // 2002/08/29 const付加
-	int		nColumn;
 	BOOL	bOutFileName;
 	bOutFileName = FALSE;
 	CEol	cEol;
@@ -1331,113 +1329,64 @@ int CGrepAgent::DoGrepFile(
 		int nHitCountOldLine = *pnHitCount;
 
 		/* 正規表現検索 */
-		if( sSearchOption.bRegularExp ){
-			int nIndex = 0;
+		int nIndex = 0;
 #ifdef _DEBUG
-			int nIndexPrev = -1;
+		int nIndexPrev = -1;
 #endif
 
-			//	Jun. 21, 2003 genta ループ条件見直し
-			//	マッチ箇所を1行から複数検出するケースを標準に，
-			//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
-			//	ループ継続・打ち切り条件(nGrepOutputLineType)を逆にした．
-			//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
-			// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
-			// 2010.08.25 行頭以外で^にマッチする不具合の修正
-			LONGLONG iLineDisp = nLine;
+		//	Jun. 21, 2003 genta ループ条件見直し
+		//	マッチ箇所を1行から複数検出するケースを標準に，
+		//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
+		//	ループ継続・打ち切り条件(nGrepOutputLineType)を逆にした．
+		//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
+		// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
+		// 2010.08.25 行頭以外で^にマッチする不具合の修正
+		LONGLONG iLineDisp = nLine;
+		
+		while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
 			
-			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
-				
-				// SearchBuf を得る
-				pLine		= pRegexp->GetSubject();
-				nLineLen	= pRegexp->GetSubjectLen();
-				
-				//	パターン発見
-				nIndex = pRegexp->GetIndex();
-				int matchlen = pRegexp->GetMatchLen();
+			// SearchBuf を得る
+			pLine		= pRegexp->GetSubject();
+			nLineLen	= pRegexp->GetSubjectLen();
+			
+			//	パターン発見
+			nIndex = pRegexp->GetIndex();
+			int matchlen = pRegexp->GetMatchLen();
 #ifdef _DEBUG
-				if( nIndex <= nIndexPrev ){
-					MYTRACE( _T("ERROR: CEditView::DoGrepFile() nIndex <= nIndexPrev break \n") );
-					break;
-				}
-				nIndexPrev = nIndex;
+			if( nIndex <= nIndexPrev ){
+				MYTRACE( _T("ERROR: CEditView::DoGrepFile() nIndex <= nIndexPrev break \n") );
+				break;
+			}
+			nIndexPrev = nIndex;
 #endif
-				++nHitCount;
-				++(*pnHitCount);
-				if( sGrepOption.nGrepOutputLineType != 2 ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						iLineDisp, nIndex + 1, pLine, nLineLen, nEolCodeLen,
-						pLine + nIndex, matchlen, sGrepOption
-					);
-				}
-				// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
-				//	Jun. 21, 2003 genta 行単位で出力する場合は1つ見つかれば十分
-				if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
-					break;
-				}
-				//	探し始める位置を補正
-				//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
-				if( matchlen <= 0 ){
-					matchlen = CNativeW::GetSizeOfChar( pLine, nLineLen, nIndex );
-					if( matchlen <= 0 ){
-						matchlen = 1;
-					}
-				}
-				nIndex += matchlen;
-			}
-		}
-		else {
-			/* 文字列検索 */
-			int nColumnPrev = 0;
-			//	Jun. 21, 2003 genta ループ条件見直し
-			//	マッチ箇所を1行から複数検出するケースを標準に，
-			//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
-			//	ループ継続・打ち切り条件(nGrepOutputLineType)を逆にした．
-			for (;;) {
-				pszRes = CSearchAgent::SearchString(
-					pCompareData,
-					nLineLen,
-					0,
-					pattern
+			++nHitCount;
+			++(*pnHitCount);
+			if( sGrepOption.nGrepOutputLineType != 2 ){
+				OutputPathInfo(
+					cmemMessage, sGrepOption,
+					pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
+					bOutputBaseFolder, bOutputFolderName, bOutFileName
 				);
-				if(!pszRes)break;
-
-				nColumn = pszRes - pCompareData + 1;
-
-				++nHitCount;
-				++(*pnHitCount);
-				if( sGrepOption.nGrepOutputLineType != 2 ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						nLine, nColumn + nColumnPrev, pCompareData, nLineLen, nEolCodeLen,
-						pszRes, nKeyLen, sGrepOption
-					);
-				}
-				
-				//	Jun. 21, 2003 genta 行単位で出力する場合は1つ見つかれば十分
-				if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
-					break;
-				}
-				//	探し始める位置を補正
-				//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
-				//	nClom : マッチ位置
-				//	matchlen : マッチした文字列の長さ
-				int nPosDiff = nColumn += nKeyLen - 1;
-				pCompareData += nPosDiff;
-				nLineLen -= nPosDiff;
-				nColumnPrev += nPosDiff;
+				SetGrepResult(
+					cmemMessage, pszDispFilePath, pszCodeName,
+					iLineDisp, nIndex + 1, pLine, nLineLen, nEolCodeLen,
+					pLine + nIndex, matchlen, sGrepOption
+				);
 			}
+			// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
+			//	Jun. 21, 2003 genta 行単位で出力する場合は1つ見つかれば十分
+			if ( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ) {
+				break;
+			}
+			//	探し始める位置を補正
+			//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
+			if( matchlen <= 0 ){
+				matchlen = CNativeW::GetSizeOfChar( pLine, nLineLen, nIndex );
+				if( matchlen <= 0 ){
+					matchlen = 1;
+				}
+			}
+			nIndex += matchlen;
 		}
 		// 2014.09.23 否ヒット行を出力
 		if( sGrepOption.nGrepOutputLineType == 2 ){
@@ -1661,7 +1610,7 @@ int CGrepAgent::DoGrepReplaceFile(
 	CEol	cEol;
 	int		nEolCodeLen;
 	int		nOldPercent = 0;
-	int	nKeyLen = pattern.GetLen();
+	int	nKeyLen = wcslen( pszKey );
 	const TCHAR*	pszCodeName = _T("");
 
 	const STypeConfigMini* type;
@@ -1750,127 +1699,76 @@ int CGrepAgent::DoGrepReplaceFile(
 		}
 
 		/* 正規表現検索 */
-		if( sSearchOption.bRegularExp ){
-			int nIndex = 0;
-			int nMatchNum = 0;
-			//	Jun. 21, 2003 genta ループ条件見直し
-			//	マッチ箇所を1行から複数検出するケースを標準に，
-			//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
-			//	ループ継続・打ち切り条件(bGrepOutputLine)を逆にした．
-			//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
-			// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
-			// 2010.08.25 行頭以外で^にマッチする不具合の修正
-			LONGLONG iLineDisp = nLine;
+		int nIndex = 0;
+		int nMatchNum = 0;
+		//	Jun. 21, 2003 genta ループ条件見直し
+		//	マッチ箇所を1行から複数検出するケースを標準に，
+		//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
+		//	ループ継続・打ち切り条件(bGrepOutputLine)を逆にした．
+		//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
+		// From Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
+		// 2010.08.25 行頭以外で^にマッチする不具合の修正
+		LONGLONG iLineDisp = nLine;
+		
+		while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
 			
-			while( nIndex <= nLineLen && pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optPartialMatch )){
-				
-				// 置換
-				if( !sGrepOption.bGrepPaste ){
-					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
-				}
-				
-				// SearchBuf を得る
-				pLine		= pRegexp->GetSubject();
-				nLineLen	= pRegexp->GetSubjectLen();
-				
-				//	パターン発見
-				int iMatchIdx = pRegexp->GetIndex();
-				
-				int matchlen = pRegexp->GetMatchLen();
-				if( bOutput ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					/* Grep結果を、cmemMessageに格納する */
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						iLineDisp, iMatchIdx + 1,
-						pLine, nLineLen, nEolCodeLen,
-						pLine + iMatchIdx, matchlen,
-						sGrepOption
-					);
-					// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
-					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
-						bOutput = false;
-					}
-				}
-				output.OutputHead();
-				++nHitCount;
-				++(*pnHitCount);
-				
-				// hit 位置直前までをコピー
-				cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, iMatchIdx - nIndex );
-				
-				// 置換後文字列をコピー
-				if( sGrepOption.bGrepPaste ){
-					// クリップボード
-					cOutBuffer.AppendNativeData( cmGrepReplace );
-				}else{
-					// regexp 置換結果
-					cOutBuffer.AppendString( pRegexp->GetString(), pRegexp->GetStringLen());
-				}
-				
-				// 次検索開始位置
-				nIndex = iMatchIdx + pRegexp->GetMatchLen();
-				
-				// 0 幅マッチの場合 1文字進める
-				if( pRegexp->GetMatchLen() == 0 ) ++nIndex;
+			// 置換
+			if( !sGrepOption.bGrepPaste ){
+				if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 			}
 			
-			// 何も引っかからなかったので，nIndex 以降をコピー
-			cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
-		}
-		else {
-			/* 文字列検索 */
-			int nColumnPrev = 0;
-			const wchar_t*	pCompareData = pLine;
-			int nCompareLen = nLineLen;
-			//	Jun. 21, 2003 genta ループ条件見直し
-			//	マッチ箇所を1行から複数検出するケースを標準に，
-			//	マッチ箇所を1行から1つだけ検出する場合を例外ケースととらえ，
-			//	ループ継続・打ち切り条件(bGrepOutputLine)を逆にした．
-			for(;;){
-				const wchar_t* pszRes = CSearchAgent::SearchString( pCompareData, nCompareLen, 0, pattern );
-				if(!pszRes)break;
-
-				int	nColumn = pszRes - pCompareData;
-				if( bOutput ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					/* Grep結果を、cmemMessageに格納する */
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						nLine, nColumn + nColumnPrev + 1, pLine, nLineLen, nEolCodeLen,
-						pszRes, nKeyLen,
-						sGrepOption
-					);
-					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
-						bOutput = false;
-					}
+			// SearchBuf を得る
+			pLine		= pRegexp->GetSubject();
+			nLineLen	= pRegexp->GetSubjectLen();
+			
+			//	パターン発見
+			int iMatchIdx = pRegexp->GetIndex();
+			
+			int matchlen = pRegexp->GetMatchLen();
+			if( bOutput ){
+				OutputPathInfo(
+					cmemMessage, sGrepOption,
+					pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
+					bOutputBaseFolder, bOutputFolderName, bOutFileName
+				);
+				/* Grep結果を、cmemMessageに格納する */
+				SetGrepResult(
+					cmemMessage, pszDispFilePath, pszCodeName,
+					iLineDisp, iMatchIdx + 1,
+					pLine, nLineLen, nEolCodeLen,
+					pLine + iMatchIdx, matchlen,
+					sGrepOption
+				);
+				// To Here 2005.03.19 かろと もはやBREGEXP構造体に直接アクセスしない
+				if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
+					bOutput = false;
 				}
-				output.OutputHead();
-				++nHitCount;
-				++(*pnHitCount);
-				if( nColumn ){
-					cOutBuffer.AppendString( pCompareData, nColumn );
-				}
+			}
+			output.OutputHead();
+			++nHitCount;
+			++(*pnHitCount);
+			
+			// hit 位置直前までをコピー
+			cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, iMatchIdx - nIndex );
+			
+			// 置換後文字列をコピー
+			if( sGrepOption.bGrepPaste ){
+				// クリップボード
 				cOutBuffer.AppendNativeData( cmGrepReplace );
-				//	探し始める位置を補正
-				//	2003.06.10 Moca マッチした文字列の後ろから次の検索を開始する
-				//	nClom : マッチ位置
-				//	matchlen : マッチした文字列の長さ
-				int nPosDiff = nColumn + nKeyLen;
-				pCompareData += nPosDiff;
-				nCompareLen -= nPosDiff;
-				nColumnPrev += nPosDiff;
+			}else{
+				// regexp 置換結果
+				cOutBuffer.AppendString( pRegexp->GetString(), pRegexp->GetStringLen());
 			}
-			cOutBuffer.AppendString( &pLine[nColumnPrev], nLineLen - nColumnPrev );
+			
+			// 次検索開始位置
+			nIndex = iMatchIdx + pRegexp->GetMatchLen();
+			
+			// 0 幅マッチの場合 1文字進める
+			if( pRegexp->GetMatchLen() == 0 ) ++nIndex;
 		}
+		
+		// 何も引っかからなかったので，nIndex 以降をコピー
+		cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
 		output.AppendBuffer(cOutBuffer);
 
 		if( 0 < cmemMessage.GetStringLength() &&

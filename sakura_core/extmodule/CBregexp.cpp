@@ -102,7 +102,8 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	// pcre2 opt 生成
 	m_uOption = uOption;
 	int iPcreOpt	= PCRE2_MULTILINE;
-	if( uOption & optIgnoreCase	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
+	if( uOption & optLiteral	) iPcreOpt = PCRE2_LITERAL;		// 基本検索
+	if( uOption & optIgnoreCase	) iPcreOpt |= PCRE2_CASELESS;	// 大文字小文字区別オプション
 	
 	PCRE2_SIZE	sizeErrOffset;
 	
@@ -157,7 +158,10 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
-	UINT uPcre2Opt = ( uOption & optPartialMatch ) ? ( PCRE2_PARTIAL_HARD | PCRE2_NOTEOL ) : 0;
+	UINT uPcre2Opt = 0;
+	if(( uOption & ( optPartialMatch | optWordSearch | optLiteral )) == optPartialMatch ){
+		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
+	}
 	
 	while( 1 ){
 		// match
