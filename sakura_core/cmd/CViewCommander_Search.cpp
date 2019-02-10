@@ -688,8 +688,11 @@ void CViewCommander::Command_REPLACE_ALL()
 	const bool bDrawSwitchOld = m_pCommanderView->SetDrawSwitch( false );
 	
 	// 画面上端位置保存
-	CLayoutInt ViewTop = m_pCommanderView->GetTextArea().GetViewTopLine();
-	Command_JUMPHIST_SET();
+	CLayoutInt ViewTop;
+	if( !bSelectedArea ){
+		ViewTop = m_pCommanderView->GetTextArea().GetViewTopLine();
+		Command_JUMPHIST_SET();
+	}
 	
 	// 選択・ペーストでない場合
 	bool bFastMode = !( bBeginBoxSelect || nPaste );
@@ -761,9 +764,6 @@ void CViewCommander::Command_REPLACE_ALL()
 		/* ファイルの先頭に移動 */
 		Command_GOFILETOP( false );
 	}
-
-	CLayoutPoint ptLast = GetCaret().GetCaretLayoutPos();
-	CLogicPoint ptLastLogic = GetCaret().GetCaretLogicPos();
 
 	/* テキスト選択解除 */
 	/* 現在の選択範囲を非選択状態に戻す */
@@ -1113,13 +1113,6 @@ void CViewCommander::Command_REPLACE_ALL()
 			++nReplaceNum;
 		}
 
-		// 最後に置換した位置を記憶
-		if( bFastMode ){
-			ptLastLogic = GetCaret().GetCaretLogicPos();
-		}else{
-			ptLast = GetCaret().GetCaretLayoutPos();
-		}
-
 		/* 置換後の位置を確認 */
 		if( bSelectedArea )
 		{
@@ -1157,18 +1150,13 @@ void CViewCommander::Command_REPLACE_ALL()
 		// To Here 2001.12.03 hor
 	}
 
-	if( bFastMode ){
-		if( 0 < nReplaceNum ){
-			// CLayoutMgrの更新(変更有の場合)
-			rLayoutMgr._DoLayout(false);
-			GetEditWindow()->ClearViewCaretPosInfo();
-			if( GetDocument()->m_nTextWrapMethodCur == WRAP_NO_TEXT_WRAP ){
-				rLayoutMgr.CalculateTextWidth();
-			}
+	if( bFastMode && 0 < nReplaceNum ){
+		// CLayoutMgrの更新(変更有の場合)
+		rLayoutMgr._DoLayout(false);
+		GetEditWindow()->ClearViewCaretPosInfo();
+		if( GetDocument()->m_nTextWrapMethodCur == WRAP_NO_TEXT_WRAP ){
+			rLayoutMgr.CalculateTextWidth();
 		}
-		rLayoutMgr.LogicToLayout( ptLastLogic, &ptLast );
-		GetCaret().MoveCursor( ptLast, true );
-		GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();	// 2009.07.25 ryoji
 	}
 	//>> 2002/03/26 Azumaiya
 
@@ -1193,10 +1181,9 @@ void CViewCommander::Command_REPLACE_ALL()
 	/* カーソル・選択範囲復元 */
 	if((!bSelectedArea) ||			// ファイル全体置換
 	   (cDlgCancel.IsCanceled())) {		// キャンセルされた
-		// 最後に置換した文字列の右へ
-		if( !bFastMode ){
-			GetCaret().MoveCursor( ptLast, true );
-		}
+		// 画面位置復帰
+		m_pCommanderView->SyncScrollV( m_pCommanderView->ScrollAtV( ViewTop ));
+		Command_JUMPHIST_PREV();
 	}
 	else{
 		if (bBeginBoxSelect) {
@@ -1223,11 +1210,6 @@ void CViewCommander::Command_REPLACE_ALL()
 		GetCaret().m_nCaretPosX_Prev = GetCaret().GetCaretLayoutPos().GetX2();	// 2009.07.25 ryoji
 	}
 	// To Here 2001.12.03 hor
-	
-	// 画面位置復帰
-	m_pCommanderView->SyncScrollV( m_pCommanderView->ScrollAtV( ViewTop ));
-	Command_JUMPHIST_PREV();
-	
 	GetEditWindow()->m_cDlgReplace.m_bCanceled = (cDlgCancel.IsCanceled() != FALSE);
 	GetEditWindow()->m_cDlgReplace.m_nReplaceCnt=nReplaceNum;
 	m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
