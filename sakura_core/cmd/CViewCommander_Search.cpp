@@ -594,7 +594,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 		/* コマンドコードによる処理振り分け */
 		/* テキストを貼り付け */
 		if(nPaste){
-			Command_PASTE(0);
+			Command_PASTE( 0x40/*COPYPASTE*/ );
 		} else if ( bRegularExp ) { /* 検索／置換  1==正規表現 */
 			CBregexp *pRegexp = m_pCommanderView->m_sSearchPattern.GetRegexp();
 			
