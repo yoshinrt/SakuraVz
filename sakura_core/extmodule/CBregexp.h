@@ -42,7 +42,7 @@ public:
 	// 2006.01.22 かろと オプション追加・名称変更
 	enum Option {
 		optNothing			= 0,			//!< オプションなし
-		optCaseSensitive	= 1 << 0,		//!< 大文字小文字区別オプション(/iをつけない)
+		optIgnoreCase		= 1 << 0,		//!< ignore case
 		optGlobal			= 1 << 1,		//!< 全域オプション(/g) ★現在機能しない
 		optPartialMatch		= 1 << 2,		//!< partial match
 	};

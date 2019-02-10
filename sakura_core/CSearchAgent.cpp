@@ -87,7 +87,7 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 		if( !InitRegexp( hwnd, *m_pRegexp, true ) ){
 			return false;
 		}
-		int nFlag = (GetLoHiCase() ? CBregexp::optCaseSensitive : CBregexp::optNothing);
+		int nFlag = (GetLoHiCase() ? 0 : CBregexp::optIgnoreCase );
 		if( bGlobal ){
 			nFlag |= CBregexp::optGlobal;
 		}

@@ -780,8 +780,7 @@ int CDlgGrep::GetData( void )
 	if( 0 < m_strText.size() ){
 		// From Here Jun. 26, 2001 genta
 		//	正規表現ライブラリの差し替えに伴う処理の見直し
-		int nFlag = 0;
-		nFlag |= m_sSearchOption.bLoHiCase ? 0x01 : 0x00;
+		int nFlag = m_sSearchOption.bLoHiCase ? 0 : CBregexp::optIgnoreCase;
 		if( m_sSearchOption.bRegularExp  && !CheckRegexpSyntax( m_strText.c_str(), GetHwnd(), true, nFlag) ){
 			return FALSE;
 		}

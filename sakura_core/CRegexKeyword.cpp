@@ -442,7 +442,7 @@ CBregexp *CRegexKeyword::Compile( const wchar_t *szRe, int *pHead ){
 	if( !pEd ) pEd = wcsrchr( pSt + 1, L'\0' );
 	
 	// オプション解析，i のみ
-	int iOption = wcschr( pEd, L'i' ) ? 0 : optCaseSensitive;
+	int iOption = wcschr( pEd, L'i' ) ? optIgnoreCase : 0;
 	
 	std::wstring strRe( pSt, pEd - pSt );
 	CBregexp *re = new CBregexp;

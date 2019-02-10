@@ -102,7 +102,7 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	// pcre2 opt 生成
 	m_uOption = uOption;
 	int iPcreOpt	= PCRE2_MULTILINE;
-	if( ~uOption & optCaseSensitive	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
+	if( uOption & optIgnoreCase	) iPcreOpt |= PCRE2_CASELESS;		// 大文字小文字区別オプション
 	
 	PCRE2_SIZE	sizeErrOffset;
 	
@@ -378,9 +378,8 @@ bool CheckRegexpSyntax(
 ){
 	CBregexp cRegexp;
 
-	if( uOption == -1 ){
-		uOption = CBregexp::optCaseSensitive;
-	}
+	if( uOption == -1 ) uOption = 0;
+	
 	if( !cRegexp.Compile( szPattern, uOption )){
 		if( bShowMessage ) cRegexp.ShowErrorMsg( hWnd );
 		return false;

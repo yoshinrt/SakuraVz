@@ -583,7 +583,6 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	const CNativeW	cMemRepKey( GetEditWindow()->m_cDlgReplace.m_strText2.c_str() );
 
 	BOOL	bRegularExp = m_pCommanderView->m_sCurSearchOption.bRegularExp;
-	int 	nFlag       = m_pCommanderView->m_sCurSearchOption.bLoHiCase ? 0x01 : 0x00;
 	
 	/* 次を検索 */
 	Command_SEARCH_NEXT( hwndParent, NULL, CMDSCH_CHANGE_RE, nullptr );

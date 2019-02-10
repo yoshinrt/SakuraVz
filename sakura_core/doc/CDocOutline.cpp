@@ -71,7 +71,7 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 	bRegex = false;
 	bool bRegexReplace = false;
 	title = L"";
-	int regexOption = CBregexp::optCaseSensitive;
+	int regexOption = 0;
 
 	// 通常モード
 	// key1,key2 /// GroupName,Lv=1
@@ -173,16 +173,14 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 				}else if( 7 <= strLine.length() && 0 == _wcsnicmp( strLine.c_str() + 1, L"Title=", 6 ) ){
 					title = strLine.c_str() + 7;
 				}else if( 13 < strLine.length() && 0 == _wcsnicmp( strLine.c_str() + 1, L"RegexOption=", 12 ) ){
-					int nCaseFlag = CBregexp::optCaseSensitive;
 					regexOption = 0;
 					for( int i = 13; i < (int)strLine.length(); i++ ){
 						if( strLine[i] == L'i' ){
-							nCaseFlag = 0;
+							regexOption |= CBregexp::optIgnoreCase;
 						}else if( strLine[i] == L'g' ){
 							regexOption |= CBregexp::optGlobal;
 						}
 					}
-					regexOption |= nCaseFlag;
 				}
 			}
 		}
