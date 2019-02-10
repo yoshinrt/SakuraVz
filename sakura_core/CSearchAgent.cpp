@@ -73,7 +73,7 @@ void CSearchStringPattern::Reset(){
 	m_uVzWordSearch	= 0;
 }
 
-bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const wchar_t* pszPattern2, const SSearchOption& sSearchOption, CBregexp* regexp, bool bGlobal)
+bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const SSearchOption& sSearchOption, CBregexp* regexp, bool bGlobal)
 {
 	Reset();
 	m_pszCaseKeyRef = m_pszKey = pszPattern;

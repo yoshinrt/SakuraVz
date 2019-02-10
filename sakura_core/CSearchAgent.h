@@ -31,7 +31,6 @@ class CDocLineMgr;
 struct DocLineReplaceArg;
 class CBregexp;
 
-// #define SEARCH_STRING_KMP
 #define SEARCH_STRING_SUNDAY_QUICK
 
 class CSearchStringPattern
@@ -41,10 +40,7 @@ public:
 	CSearchStringPattern(HWND, const wchar_t* pszPattern, int nPatternLen, const SSearchOption& sSearchOption, CBregexp* pRegexp);
 	~CSearchStringPattern();
 	void Reset();
-	bool SetPattern(HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const SSearchOption& sSearchOption, CBregexp* pRegexp){
-		return SetPattern(hwnd, pszPattern, nPatternLen, NULL, sSearchOption, pRegexp, false);
-	}
-	bool SetPattern(HWND, const wchar_t* pszPattern, int nPatternLen, const wchar_t* pszPattern2, const SSearchOption& sSearchOption, CBregexp* pRegexp, bool bGlobal);
+	bool SetPattern( HWND hwnd, const wchar_t* pszPattern, int nPatternLen, const SSearchOption& sSearchOption, CBregexp* pRegexp, bool bGlobal = false );
 	const wchar_t* GetKey() const{ return m_pszKey; }
 	const wchar_t* GetCaseKey() const{ return m_pszCaseKeyRef; }
 	int GetLen() const{ return m_nPatternLen; }
@@ -53,9 +49,6 @@ public:
 	const SSearchOption& GetSearchOption() const{ return *m_psSearchOption; }
 	CBregexp* GetRegexp() const{ return m_pRegexp; }
 	void SetRegexp( CBregexp *re ){ m_pRegexp = re; }
-#ifdef SEARCH_STRING_KMP
-	const int* GetKMPNextTable() const{ return m_pnNextPossArr; }
-#endif
 #ifdef SEARCH_STRING_SUNDAY_QUICK
 	const int* GetUseCharSkipMap() const{ return m_pnUseCharSkipArr; }
 

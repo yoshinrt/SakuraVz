@@ -320,15 +320,10 @@ DWORD CGrepAgent::DoGrep(
 	CSearchStringPattern pattern;
 	{
 		/* 検索パターンのコンパイル */
-		bool bError;
-		if( bGrepReplace && !bGrepPaste ){
-			// Grep置換
-			bError = !pattern.SetPattern(pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
-				cmemReplace.GetStringPtr(), sSearchOption, &cRegexp, false);
-		}else{
-			bError = !pattern.SetPattern(pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
-				sSearchOption, &cRegexp);
-		}
+		bool bError = !pattern.SetPattern(
+			pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
+			sSearchOption, &cRegexp
+		);
 		if( bError ){
 			this->m_bGrepRunning = false;
 			pcViewDst->m_bDoing_UndoRedo = false;
