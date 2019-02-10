@@ -638,16 +638,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 	}
 }
 
-/*! すべて置換実行
-
-	@date 2003.05.22 かろと 無限マッチ対策．行頭・行末処理など見直し
-	@date 2006.03.31 かろと 行置換機能追加
-	@date 2007.01.16 ryoji 行置換機能を全置換のオプションに変更
-	@date 2009.09.20 genta 左下～右上で矩形選択された領域の置換が行われない
-	@date 2010.09.17 ryoji ラインモード貼り付け処理を追加
-	@date 2011.12.18 Moca オプション・検索キーをDllShareDataからm_cDlgReplace/EditViewベースに変更。文字列長制限の撤廃
-	@date 2013.05.10 Moca fastMode
-*/
+/*! すべて置換実行 */
 void CViewCommander::Command_REPLACE_ALL()
 {
 	// m_sSearchOption選択のための先に適用
@@ -1046,23 +1037,11 @@ void CViewCommander::Command_REPLACE_ALL()
 
 		/* コマンドコードによる処理振り分け */
 		/* テキストを貼り付け */
-		if( nPaste )
-		{
-			if ( !bColumnSelect )
-			{
-				/* 本当は Command_INSTEXT を使うべきなんでしょうが、無駄な処理を避けるために直接たたく。
-				** →m_nSelectXXXが-1の時に m_pCommanderView->ReplaceData_CEditViewを直接たたくと動作不良となるため
-				**   直接たたくのやめた。2003.05.18 by かろと
-				*/
+		if( nPaste ){
+			if ( !bColumnSelect ){
 				Command_INSTEXT( false, szREPLACEKEY, nREPLACEKEY, TRUE, bLineSelect );
-			}
-			else
-			{
+			}else{
 				Command_PASTEBOX(szREPLACEKEY, nREPLACEKEY);
-				// 2013.06.11 再描画しないように
-				// 再描画を行わないとどんな結果が起きているのか分からずみっともないので・・・。
-				// m_pCommanderView->AdjustScrollBars(); // 2007.07.22 ryoji
-				// m_pCommanderView->Redraw();
 			}
 			++nReplaceNum;
 		}
@@ -1099,12 +1078,7 @@ void CViewCommander::Command_REPLACE_ALL()
 				pRegexp->ShowErrorMsg( nullptr );
 				break;
 			}
-		}
-		else
-		{
-			/* 本当は元コードを使うべきなんでしょうが、無駄な処理を避けるために直接たたく。
-			** →m_nSelectXXXが-1の時に m_pCommanderView->ReplaceData_CEditViewを直接たたくと動作不良となるため直接たたくのやめた。2003.05.18 かろと
-			*/
+		}else{
 			Command_INSTEXT( false, szREPLACEKEY, nREPLACEKEY, true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 			++nReplaceNum;
 		}
