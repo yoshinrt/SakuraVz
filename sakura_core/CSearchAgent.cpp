@@ -34,9 +34,6 @@ CSearchStringPattern::CSearchStringPattern() :
 	m_pRegexp(NULL),
 	m_pszCaseKeyRef(NULL),
 	m_pszPatternCase(NULL),
-#ifdef SEARCH_STRING_KMP
-	m_pnNextPossArr(NULL),
-#endif
 #ifdef SEARCH_STRING_SUNDAY_QUICK
 	m_pnUseCharSkipArr(NULL)
 #endif
@@ -49,9 +46,6 @@ CSearchStringPattern::CSearchStringPattern() :
 	m_pRegexp(NULL),
 	m_pszCaseKeyRef(NULL),
 	m_pszPatternCase(NULL),
-#ifdef SEARCH_STRING_KMP
-	m_pnNextPossArr(NULL),
-#endif
 #ifdef SEARCH_STRING_SUNDAY_QUICK
 	m_pnUseCharSkipArr(NULL)
 #endif
@@ -72,10 +66,6 @@ void CSearchStringPattern::Reset(){
 
 	delete [] m_pszPatternCase;
 	m_pszPatternCase = NULL;
-#ifdef SEARCH_STRING_KMP
-	delete [] m_pnNextPossArr;
-	m_pnNextPossArr = NULL;
-#endif
 #ifdef SEARCH_STRING_SUNDAY_QUICK
 	delete [] m_pnUseCharSkipArr;
 	m_pnUseCharSkipArr = NULL;
@@ -136,24 +126,6 @@ bool CSearchStringPattern::SetPattern(HWND hwnd, const wchar_t* pszPattern, int 
 			}
 			m_pszPatternCase[nPatternLen] = L'\0';
 		}
-
-#ifdef SEARCH_STRING_KMP
-	// "ABCDE" => {-1, 0, 0, 0, 0}
-	// "AAAAA" => {-1, 0, 1, 2, 3}
-	// "AABAA" => {-1, 0, 0, 0, 0}
-	// "ABABA" => {-1, 0, 0, 2, 0}
-//	if( GetIgnoreCase() ){
-		m_pnNextPossArr = new int[nPatternLen + 1];
-		int* next = m_pnNextPossArr;
-		const wchar_t* key = m_pszPatternCase;
-		for( int i = 0, k = -1; i < nPatternLen; ++i, ++k ){
-			next[i] = k;
-			while( -1 < k && key[i] != key[k] ){
-				k = next[k];
-			}
-		}
-//	}
-#endif
 
 #ifdef SEARCH_STRING_SUNDAY_QUICK
 		const int BM_MAPSIZE = 0x200;
@@ -257,53 +229,6 @@ const wchar_t* CSearchAgent::SearchString(
 			nPos += useSkipMap[index];
 		}
 	}
-#else
-#ifdef SEARCH_STRING_KMP
-	/* 大文字小文字を区別しない、かつ、検索語が5文字以下の場合は通常の検索を行う
-	 * そうでない場合はKMP＋SUNDAY QUICKアルゴリズムを使った検索を行う */
-	if ( !bLoHiCase || nPatternLen > 5 ) {
-		const wchar_t pattern0 = pszPattern[0];
-		const int* const nextTable = pattern.GetKMPNextTable();
-		for( int nPos = nIdxPos; nPos <= nCompareTo; ){
-			if( toLoHiLower(bLoHiCase, pLine[nPos]) != pattern0 ){
-#ifdef SEARCH_STRING_SUNDAY_QUICK
-				int index = CSearchStringPattern::GetMapIndex((wchar_t)toLoHiLower( bLoHiCase, pLine[nPos + nPatternLen]) );
-				nPos += useSkipMap[index];
-#else
-				nPos++;
-#endif
-				continue;
-			}
-			// 途中まで一致ならずらして継続(KMP)
-			int i = 1;
-			nPos++;
-			while ( 0 < i ){
-				while( i < nPatternLen && toLoHiLower( bLoHiCase, pLine[nPos] ) == pszPattern[i] ){
-					i++;
-					nPos++;
-				}
-				if( i >= nPatternLen ){
-					return &pLine[nPos - nPatternLen];
-				}
-				i = nextTable[i];
-			}
-			assert( 0 == i ); // -1チェック
-		}
-	} else {
-#endif
-		// 通常版
-		int	nPos;
-		for( nPos = nIdxPos; nPos <= nCompareTo; nPos += CNativeW::GetSizeOfChar(pLine, nLineLen, nPos) ){
-			int n = bLoHiCase?
-						wmemcmp( &pLine[nPos], pszPattern, nPatternLen ):
-						wmemicmp( &pLine[nPos], pszPattern, nPatternLen );
-			if( n == 0 ){
-				return &pLine[nPos];
-			}
-		}
-#ifdef SEARCH_STRING_KMP
-	}
-#endif
 #endif // defined(SEARCH_STRING_) && !defined(SEARCH_STRING_KMP)
 	return NULL;
 }
