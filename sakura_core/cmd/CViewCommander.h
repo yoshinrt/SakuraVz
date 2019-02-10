@@ -70,7 +70,6 @@ private:
 		CMDSCH_CHANGE_RE	= 1 << 0,
 		CMDSCH_REDRAW		= 1 << 1,
 		CMDSCH_REPLACEALL	= 1 << 2,
-		CMDSCH_NOPARTIAL	= 1 << 3,
 	};
 	
 	// -- -- -- -- 以下、コマンド処理関数群 -- -- -- -- //

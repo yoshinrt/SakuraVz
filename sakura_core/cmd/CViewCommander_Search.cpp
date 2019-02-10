@@ -194,23 +194,20 @@ void CViewCommander::Command_SEARCH_NEXT(
 	nIdxOld		= nIdx;		//	hor
 	
 re_do:;
-	ESearchDirection DirOpt = SEARCH_FORWARD;
-	if( !( uOption & CMDSCH_NOPARTIAL )) DirOpt = ( ESearchDirection )( DirOpt | SEARCH_PARTIAL );
-	
 	/* 現在位置より後ろの位置を検索する */
 	// 2004.05.30 Moca 引数をGetShareData()からメンバ変数に変更。他のプロセス/スレッドに書き換えられてしまわないように。
 	if( NULL == pcSelectLogic ){
 		nSearchResult = GetDocument()->m_cLayoutMgr.SearchWord(
 			nLineNum,						// 検索開始レイアウト行
 			nIdx,							// 検索開始データ位置
-			DirOpt,							// 前方検索
+			SEARCH_FORWARD,					// 前方検索
 			&sRangeA,						// マッチレイアウト範囲
 			m_pCommanderView->m_sSearchPattern
 		);
 	}else{
 		nSearchResult = CSearchAgent(&GetDocument()->m_cDocLineMgr).SearchWord(
 			CLogicPoint(nIdx, nLineNumLogic),
-			DirOpt,							// 前方検索
+			SEARCH_FORWARD,					// 前方検索
 			pcSelectLogic,
 			m_pCommanderView->m_sSearchPattern
 		);
@@ -869,23 +866,28 @@ void CViewCommander::Command_REPLACE_ALL()
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	
 	// partial 設定，block モード時は無効
-	UINT uSearchOpt = CMDSCH_CHANGE_RE | CMDSCH_REPLACEALL;
-	if( bBeginBoxSelect ) uSearchOpt |= CMDSCH_NOPARTIAL;
+	ESearchDirection SearchWordOpt = SEARCH_FORWARD;
+	if( !bBeginBoxSelect ) SearchWordOpt = ( ESearchDirection )( SearchWordOpt | SEARCH_PARTIAL );
 	
 	// 置換ループ
 	while( !bCANCEL ){	/* キャンセルされたか */
 		
-		/* 次を検索 */
-		Command_SEARCH_NEXT(
-			0, NULL, uSearchOpt,
-			bFastMode ? &cSelectLogic : NULL
-		);
+		// 次を検索，検索に引っかからなかったら終了
+		if( CSearchAgent( &GetDocument()->m_cDocLineMgr ).SearchWord(
+			GetCaret().GetCaretLogicPos(), SearchWordOpt,
+			&cSelectLogic, m_pCommanderView->m_sSearchPattern
+		) <= 0 ) break;
 		
-		// 検索に引っかからなかったら終了
-		if( !(
-			bFastMode ? cSelectLogic.IsValid() :
-						m_pCommanderView->GetSelectionInfo().IsTextSelected()
-		)) break;
+		// 選択
+		if( !bFastMode ){
+			CLayoutRange cSelectLayout;
+			rLayoutMgr.LogicToLayout( cSelectLogic, &cSelectLayout );
+			
+			GetCaret().MoveCursor( cSelectLayout.GetFrom(), false );
+			GetCaret().m_nCaretPosX_Prev = cSelectLayout.GetFrom().GetX2();
+			
+			m_pCommanderView->GetSelectionInfo().SetSelectArea( cSelectLayout );
+		}
 		
 		/* 処理中のユーザー操作を可能にする */
 		if( !::BlockingHook( hwndCancel ) )
@@ -1004,10 +1006,15 @@ void CViewCommander::Command_REPLACE_ALL()
 				if (out) {
 					//次の検索開始位置へシフト
 					m_pCommanderView->GetSelectionInfo().DisableSelectArea( false ); // 2016.01.13 範囲選択をクリアしないと位置移動できていなかった
-					GetCaret().SetCaretLayoutPos(CLayoutPoint(
-						sRangeA.GetFrom().x,
-						ptNewFrom.y + CLayoutInt(firstLeft < sRangeA.GetFrom().x ? 0 : 1)
-					));
+					
+					CLogicPoint cNextPoint;
+					rLayoutMgr.LayoutToLogic(
+						CLayoutPoint(
+							sRangeA.GetFrom().x,
+							ptNewFrom.y + CLayoutInt(firstLeft < sRangeA.GetFrom().x ? 0 : 1)
+						), &cNextPoint
+					);
+					GetCaret().SetCaretLogicPos( cNextPoint );
 					continue;
 				}
 			}
