@@ -118,6 +118,9 @@ bool CBregexp::Compile( const wchar_t *szPattern, UINT uOption ){
 	//	何らかのエラー発生。
 	if( m_Re == nullptr ){
 		ReleaseCompileBuffer();
+		#ifdef _DEBUG
+			ShowErrorMsg();
+		#endif
 		return false;
 	}
 	
