@@ -640,6 +640,11 @@ void CDlgGrep::SetDataFromThisText( bool bChecked )
 */
 int CDlgGrep::GetData( void )
 {
+	if( 0 == ::GetWindowTextLength( GetItemHwnd(IDC_COMBO_TEXT) ) ){
+		WarningMessage(	GetHwnd(), LS(STR_DLGREPLC_REPSTR) );
+		return FALSE;
+	}
+	
 	/* サブフォルダからも検索する*/
 	m_bSubFolder = ::IsDlgButtonChecked( GetHwnd(), IDC_CHK_SUBFOLDER );
 

@@ -124,28 +124,8 @@ private:
 		bool&					bOutputBaseFolder,
 		int*					pnHitCount,			//!< [i/o] ヒット数の合計
 		CNativeW&				cmemMessage,
-		CNativeW&				cUnicodeBuffer
-	);
-
-	// Grep実行
-	int DoGrepFile(
-		CEditView*				pcViewDst,
-		CDlgCancel*				pcDlgCancel,
-		const wchar_t*			pszKey,
-		const TCHAR*			pszFile,
-		const SSearchOption&	sSearchOption,
-		const SGrepOption&		sGrepOption,
-		const CSearchStringPattern& pattern,
-		CBregexp*				pRegexp,		//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
-		int*					pnHitCount,
-		const TCHAR*			pszFullPath,
-		const TCHAR*			pszBaseFolder,
-		const TCHAR*			pszFolder,
-		const TCHAR*			pszRelPath,
-		bool&					bOutputBaseFolder,
-		bool&					bOutputFolderName,
-		CNativeW&				cmemMessage,
-		CNativeW&				cUnicodeBuffer
+		CNativeW&				cUnicodeBuffer,
+		CNativeW&				cOutBuffer
 	);
 
 	int DoGrepReplaceFile(
@@ -166,7 +146,8 @@ private:
 		bool&					bOutputBaseFolder,
 		bool&					bOutputFolderName,
 		CNativeW&				cmemMessage,
-		CNativeW&				cUnicodeBuffer
+		CNativeW&				cUnicodeBuffer,
+		CNativeW&				cOutBuffer
 	);
 
 	// Grep結果をpszWorkに格納
