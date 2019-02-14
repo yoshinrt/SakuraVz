@@ -282,8 +282,10 @@ void CBregexp::GetMatchRange( CLogicRange *pRangeOut, int iFrom, int iTo, int iL
 	
 	// 行跨ぎなし, X の変換なし
 	if( m_iLineTop.size() == 0 ){
+		pRangeOut->SetFromX( CLogicInt( iFrom ));
 		pRangeOut->SetFromY( CLogicInt( iLineOffs ));
-		pRangeOut->SetToY	( CLogicInt( iLineOffs ));
+		pRangeOut->SetToX  ( CLogicInt( iTo ));
+		pRangeOut->SetToY  ( CLogicInt( iLineOffs ));
 	}
 	
 	// 行跨ぎあり
