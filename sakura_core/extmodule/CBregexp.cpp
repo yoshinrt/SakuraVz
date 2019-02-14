@@ -336,8 +336,7 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 
 /*!
 	正規表現による文字列置換
-	既にあるコンパイル構造体を利用して置換（1行）を
-	行う．
+	既にあるコンパイル構造体を利用して置換（1行）を行う．
 
 	@param[in] szSubject 置換対象データ, null の場合 m_szSubject を使用する
 	@param[in] iSubjectLen 置換対象データ長，szSubject = nul の場合 m_iSubjectLen を使用する
@@ -349,9 +348,6 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
 int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, int iSubjectLen, int iStart ){
-	
-	// 必要な output buffer サイズを計算する．
-	// 初期値は，2^n >= nlen * 2 となるサイズで最低 1KB．
 	
 	PCRE2_SIZE	OutputLen;
 	
