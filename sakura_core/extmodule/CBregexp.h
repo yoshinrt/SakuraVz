@@ -40,13 +40,13 @@ public:
 	~CBregexp();
 	
 	// 2006.01.22 かろと オプション追加・名称変更
-	enum Option {
+	enum Option {							//						いつ指定?
 		optNothing			= 0,			//!< オプションなし
-		optIgnoreCase		= 1 << 0,		//!< ignore case
-		optGlobal			= 1 << 1,		//!< 全域オプション(/g) ★現在機能しない
-		optPartialMatch		= 1 << 2,		//!< partial match
-		optLiteral			= 1 << 3,		//!< 基本検索
-		optWordSearch		= 1 << 4,		//!< 単語検索
+		optIgnoreCase		= 1 << 0,		//!< ignore case		compile
+		optGlobal			= 1 << 1,		//!< 全域オプション(/g)	replace
+		optPartialMatch		= 1 << 2,		//!< partial match		match
+		optLiteral			= 1 << 3,		//!< 基本検索			compile
+		optWordSearch		= 1 << 4,		//!< 単語検索			compile
 	};
 
 	//! DLLのバージョン情報を取得
@@ -60,17 +60,21 @@ public:
 	//>> 2002/03/27 Azumaiya 正規表現置換にコンパイル関数を使う形式を追加
 	bool Compile(const wchar_t *szPattern, UINT uOption = 0 );
 	bool Match(const wchar_t *szTarget, int nLen, int iStart = 0, UINT uOption = 0 );	//!< 検索を実行する
-	int Replace( const wchar_t *szReplacement, const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1 );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
+	int Replace( const wchar_t *szReplacement, const wchar_t *szSubject = nullptr, int iSubjectLen = 0, int iStart = -1, UINT uOption = 0 );	//!< 置換を実行する	// 2007.01.16 ryoji 戻り値を置換個数に変更
 
 	/*!
 	    検索に一致した文字列の先頭位置を返す(文字列先頭なら0)
+	    global 時は常に検索開始位置
 		@retval 検索に一致した文字列の先頭位置
 	*/
 	CLogicInt GetIndex( void ){
-		return CLogicInt( pcre2_get_ovector_pointer( m_MatchData )[ 0 ]);
+		return CLogicInt(
+			m_uOption & optGlobal ? m_iStart :
+									pcre2_get_ovector_pointer( m_MatchData )[ 0 ]
+		);
 	}
 	/*!
-	    検索に一致した文字列の次の位置を返す
+	    検索に一致した文字列終端の次の位置を返す
 		@retval 検索に一致した文字列の次の位置
 	*/
 	CLogicInt GetLastIndex( void ){
@@ -81,17 +85,15 @@ public:
 		@retval 検索に一致した文字列の長さ
 	*/
 	CLogicInt GetMatchLen( void ){
-		PCRE2_SIZE *p = pcre2_get_ovector_pointer( m_MatchData );
-		return CLogicInt( p[ 1 ] - p[ 0 ]);
+		return GetLastIndex() - GetIndex();
 	}
 	/*!
 		置換された文字列の長さを返す
-		@retval 置換された文字列長 ★ /g 時は未実装
+		@retval 置換された文字列長
 	*/
 	CLogicInt GetStringLen( void ){
 		return CLogicInt(
 			m_iReplacedLen - m_iSubjectLen + GetMatchLen()
-			//m_iReplacedLen - (( m_uOption & optGlobal ) ? m_iStart : GetIndex())
 		);
 	}
 	/*!
@@ -100,7 +102,7 @@ public:
 	*/
 	const wchar_t *GetString( void ){
 		if( m_iReplacedLen == 0 || m_szReplaceBuf == nullptr ) return L"";
-		return m_szReplaceBuf + (( m_uOption & optGlobal ) ? m_iStart : GetIndex());
+		return m_szReplaceBuf + GetIndex();
 	}
 	
 	/*! hit レンジ SearchBuf 内-->行番号付き の変換 */

@@ -213,11 +213,9 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
+	m_uOption |= uOption;
 	UINT uPcre2Opt = 0;
-	if(
-		( m_uOption & ( optWordSearch | optLiteral )) == 0 &&
-		( uOption & optPartialMatch )
-	){
+	if(( m_uOption & ( optWordSearch | optLiteral | optPartialMatch )) == optPartialMatch ){
 		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
 	}
 	
@@ -347,7 +345,7 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 
 	@date	2007.01.16 ryoji 戻り値を置換個数に変更
 */
-int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, int iSubjectLen, int iStart ){
+int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, int iSubjectLen, int iStart, UINT uOption ){
 	
 	PCRE2_SIZE	OutputLen;
 	
@@ -361,6 +359,8 @@ int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, i
 	if( iStart < 0 ) iStart = m_iStart;
 	
 	int iNeededSize = iSubjectLen * 2;
+	
+	m_uOption |= uOption;
 	
 	while( 1 ){
 		if( !ResizeBuf( iNeededSize, m_szReplaceBuf, m_iReplaceBufSize )) return 0;
