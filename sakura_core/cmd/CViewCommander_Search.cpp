@@ -853,8 +853,16 @@ void CViewCommander::Command_REPLACE_ALL()
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	
 	// partial 設定，block モード時は無効
+	UINT uReplaceOpt = 0;
 	ESearchDirection SearchWordOpt = SEARCH_FORWARD;
-	if( !bBeginBoxSelect ) SearchWordOpt = ( ESearchDirection )( SearchWordOpt | SEARCH_PARTIAL );
+	if( !bBeginBoxSelect ){
+		SearchWordOpt = ( ESearchDirection )( SearchWordOpt | SEARCH_PARTIAL );
+		
+		// 標準・単語検索時は /g
+		if( !m_pCommanderView->m_sSearchPattern.GetSearchOption().bRegularExp ){
+			uReplaceOpt = CBregexp::optGlobal;
+		}
+	}
 	
 	// 置換ループ
 	while( !bCANCEL ){	/* キャンセルされたか */
@@ -1047,13 +1055,19 @@ void CViewCommander::Command_REPLACE_ALL()
 			++nReplaceNum;
 		}
 		// 正規表現による文字列置換，/g は使わずに 1個ずつ置換
-		else if( bRegularExp ){
+		else if( !bBeginBoxSelect ){
 			CBregexp *pRegexp = m_pCommanderView->m_sSearchPattern.GetRegexp();
 			
-			int iRet = pRegexp->Replace( cmemReplacement.GetStringPtr());
+			int iRet = pRegexp->Replace( cmemReplacement.GetStringPtr(), nullptr, 0, -1, uReplaceOpt );
 			if( iRet > 0 ){
+				
+				// /g 時の選択範囲修正
+				if( uReplaceOpt & CBregexp::optGlobal ){
+					pRegexp->GetMatchRange( &cSelectLogic, cSelectLogic.GetFrom().y );
+				}
+				
 				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
-				++nReplaceNum;
+				nReplaceNum += iRet;
 				
 				// マッチ幅が 0 の場合，1文字選進める
 				if( pRegexp->GetMatchLen() == 0 ) bReZeroMatch = true;
