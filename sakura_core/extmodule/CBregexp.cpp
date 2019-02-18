@@ -307,6 +307,26 @@ void CBregexp::GetMatchRange( CLogicRange *pRangeOut, int iFrom, int iTo, int iL
 	}
 }
 
+//! match した行全体を得る，grep 結果表示用
+void CBregexp::GetMatchLine( const wchar_t **ppLine, int *piLen ){
+	// 行跨ぎなし, X の変換なし
+	if( m_iLineTop.size() == 0 ){
+		*ppLine	= m_szSubject;
+		*piLen	= m_iSubjectLen;
+		return;
+	}
+	
+	// 行またぎあり
+	CLogicRange Range;
+	GetMatchRange( &Range );
+	
+	int iFrom	= Range.GetFrom().y == 0 ? 0 : m_iLineTop[ Range.GetFrom().y - 1 ];
+	int iTo		= Range.GetTo().y == m_iLineTop.size() ? m_iSubjectLen : m_iLineTop[ Range.GetFrom().y ];
+	
+	*ppLine	= m_szSubject + iFrom;
+	*piLen	= iTo - iFrom;
+}
+
 /*! ReplaceBuf 確保・リサイズ
 
 	@param[in] iSize 確保サイズ (wchar_t 単位)
@@ -466,5 +486,3 @@ int CBregexp::Substitute(
 	}
 	return -1;
 }
-
-//	To Here Jun. 26, 2001 genta

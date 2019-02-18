@@ -1370,16 +1370,20 @@ int CGrepAgent::DoGrepReplaceFile(
 					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 				}
 				
-				// SearchBuf を得る
-				pLine		= pRegexp->GetSubject();
-				nLineLen	= pRegexp->GetSubjectLen();
-				
 				//	パターン発見
-				int iMatchIdx = sGrepOption.nGrepOutputLineType == 2/*非該当行*/ ? 0 : pRegexp->GetIndex();
+				int iMatchIdx = 0;
+				int iMatchLen = 0;
+				
+				if( sGrepOption.nGrepOutputLineType == 0/*該当部分*/ ){
+					iMatchIdx = pRegexp->GetIndex();
+					iMatchLen = pRegexp->GetMatchLen();
+				}else{
+					pRegexp->GetMatchLine( &pLine, &nLineLen );
+				}
+				
 				++nHitCount;
 				++(*pnHitCount);
 				
-				int matchlen = pRegexp->GetMatchLen();
 				if( bOutput ){
 					OutputPathInfo(
 						cmemMessage, sGrepOption,
@@ -1391,7 +1395,7 @@ int CGrepAgent::DoGrepReplaceFile(
 						cmemMessage, pszDispFilePath, pszCodeName,
 						iLineDisp, iMatchIdx + 1,
 						pLine, nLineLen, nEolCodeLen,
-						pLine + iMatchIdx, matchlen,
+						pLine + iMatchIdx, iMatchLen,
 						sGrepOption
 					);
 					

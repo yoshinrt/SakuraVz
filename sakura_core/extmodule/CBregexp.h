@@ -116,6 +116,9 @@ public:
 		GetMatchRange( pRangeOut, GetIndex(), GetLastIndex(), iLineOffs );
 	}
 	
+	//! match した行全体を得る，grep 結果表示用
+	void GetMatchLine( const wchar_t **ppLine, int *piLen );
+	
 	//-----------------------------------------
 
 	/*! BREGEXPメッセージを取得する
