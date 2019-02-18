@@ -213,9 +213,11 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
-	m_uOption |= uOption;
 	UINT uPcre2Opt = 0;
-	if(( m_uOption & ( optWordSearch | optLiteral | optPartialMatch )) == optPartialMatch ){
+	if(( m_uOption & ( optWordSearch | optLiteral )) || !( uOption & optPartialMatch )){
+		m_uOption &= ~optPartialMatch;
+	}else{
+		m_uOption |= optPartialMatch;
 		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
 	}
 	
