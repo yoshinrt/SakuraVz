@@ -2,7 +2,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/mf8tx836jtb7epq8/branch/vz_mode?svg=true)](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode)
 [![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
 
-サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+sort%3Aupdated-desc) を参照してください．
+サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+-label%3Arefactoring+sort%3Aupdated-desc) を参照してください．
 
 機能の on/off を GUI で設定する機能はありませんので，`sakura.ini` を直接編集してください．本 fork のビルドでは，デフォルトで全て有効になっています．
 
@@ -19,6 +19,7 @@
 - [JavaScript ファイルを共通にするためのマクロ関数](https://github.com/yoshinrt/sakura#javascriptファイルを共通にするためのマクロ関数)
 - [カーソル位置周辺の情報を取得するマクロ関数](https://github.com/yoshinrt/sakura#カーソル位置周辺の情報を取得するマクロ関数)
 - [検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加](https://github.com/yoshinrt/sakura#検索置換ダイアログのオプションデフォルトボタンを固定できるパラメータ追加)
+- [コマンドラインオプションでGREP置換ダイアログ呼び出し](https://github.com/yoshinrt/sakura#コマンドラインオプションでGREP置換ダイアログ呼び出し)
 
 
 ### テキストスタック
@@ -41,7 +42,7 @@
 - 正規表現エンジンとして [PCRE2](https://www.pcre.org/current/doc/html/pcre2.html) を内蔵しています．bregonig.dll 等の外部 DLL は使用できません．
 - サクラエディタ標準の「単語単位で検索」仕様は削除されました．正規表現を使用してください．
 - 上記に代わり Vz 互換の「単語単位で検索」仕様を追加しました．`*` で単語境界のチェックをキャンセルします．
-  - 例: ```AB*``` で，AB から始まる単語にマッチします
+  - 例: `AB*` で，AB から始まる単語にマッチします
 - 置換の「置換対象」は削除されました．正規表現を使用してください．
 - 置換の「すべて置換は置換の繰り返し」は削除されました．
 
@@ -84,11 +85,13 @@ ReplaceAll();
 `sakura.ini`: `bVzModeNoAskWhenFileUpdate=1` で有効になります
 
 ### JavaScriptファイルを共通にするためのマクロ関数
-複数のマクロで JavaScript ファイルを共通にすることを可能にするため，実行中のマクロ情報を取得する関数 `GetMacroInfo( mode )` を追加しました．`mode` には以下の値のいずれかを指定します．
+標準では 1マクロ = 1 JavaScript ファイル ですが，マクロファイル管理の容易化のため，1 JavaScript ファイルを複数のマクロ・プラグインで共有することができる仕組みを追加しました．
 
-- 0: 「共通設定」→「マクロ」の「マクロ名」に設定された文字列を取得します．
-- 1: 「共通設定」→「マクロ」の「番号」を取得します．
-- 2: 「共通設定」→「マクロ」の「ファイル名」を取得します．
+- 実行中のマクロ情報を取得する関数 `GetMacroInfo( mode )` を追加しました．`mode` には以下の値のいずれかを指定します．
+  - 0: 「共通設定」→「マクロ」の「マクロ名」に設定された文字列を取得します．
+  - 1: 「共通設定」→「マクロ」の「番号」を取得します．
+  - 2: 「共通設定」→「マクロ」の「ファイル名」を取得します．
+- プラグインとして呼ばれたときのジャック名を取得する関数 `Plugin.GetPluginInfo( 0 )` を追加しました．引数は 0 を指定してください．
 
 以下のようなマクロを組むことで，1つの *.js ファイルを複数のマクロで共有することができます．共通設定→マクロ の設定で，「マクロ名」に `Hoge` または `Fuga` を指定し，ファイル名は同じものを指定します．
 
@@ -104,9 +107,17 @@ FuncTable.Fuga = function(){
   MessageBox( "Fuga" );
 }
 
+// DocumentOpen プラグイン
+FuncTable.PluginDocumentOpen = function(){
+  MessageBox( "Plugin: DocumentOpen" );
+}
+
 // 個別のマクロにジャンプ
-if( FuncTable[ GetMacroInfo()]) FuncTable[ GetMacroInfo()]();
-else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + GetMacroInfo( 2 ));
+var FuncName = typeof( Plugin ) != "undefined" ?
+  "Plugin" + Plugin.GetPluginInfo( 0/*JackName*/ ) : GetMacroInfo();
+
+if( FuncTable[ FuncName ]) FuncTable[ FuncName ]();
+else throw new Error( "見つかりません: " + FuncName + "\nfile:" + GetMacroInfo( 2 ));
 ```
 
 ### カーソル位置周辺の情報を取得するマクロ関数
@@ -134,6 +145,16 @@ else throw new Error( "見つかりません: " + GetMacroInfo() + "\nfile:" + G
 - 0x50000000:「すべて置換」ボタンをデフォルトにする
 - 0x60000000: 検索ダイアログにおいて「上検索」「下検索」が押されたとき，検索条件のみセットし，検索動作は行いません．
 - 0x70000000: 検索ダイアログを表示せず，カーソル位置の単語を検索語に設定します．
+
+### コマンドラインオプションでGREP置換ダイアログ呼び出し
+
+コマンドラインオプションで，`-grepdlg` と `-grepr=` オプションを同時に指定することで，GREP 置換ダイアログを呼び出せるようになりました．
+
+例:
+```
+sakura.exe -grepmode -grepdlg -GREPR="a"
+```
+
 
 以下は，サクラエディタ本家の README になります．本 fork には適用されない情報もありますので，ご了承ください．
 
