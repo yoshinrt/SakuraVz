@@ -1125,18 +1125,47 @@ void CEditView::OnMOUSEMOVE( WPARAM fwKeys, int xPos_, int yPos_ )
 		GetSelectionInfo().m_ptMouseRollPosOld = ptMouse; // マウス範囲選択前回位置(XY座標)
 	}
 	else{
+		// ライン選択モード
+		bool bLineSel		= ptMouse.x < GetTextArea().GetAreaLeft() || m_dwTripleClickCheck;
+		bool bLineSelFix	= bLineSel;
+		
+		// 編集エリアをドラッグ時の行・文字単位選択切り替え
+		if( !bLineSel && GetDllShareData().m_Common.m_sVzMode.m_nSelectMode == ESelectMode::T_Always ){
+			CLayoutPoint	ptLayout;
+			CLogicPoint		ptLogic;
+			CLogicPoint		ptLogicPrev;
+			
+			// 現座標
+			GetTextArea().ClientToLayout( ptMouse, &ptLayout );
+			GetDocument()->m_cLayoutMgr.LayoutToLogic( ptLayout, &ptLogic );
+			
+			// 旧座標
+			GetTextArea().ClientToLayout( GetSelectionInfo().m_ptMouseRollPosOld, &ptLayout );
+			GetDocument()->m_cLayoutMgr.LayoutToLogic( ptLayout, &ptLogicPrev );
+			
+			if( ptLogic.GetY() != ptLogicPrev.GetY()){
+				// 前回 Y と差分があれば行選択モード
+				GetSelectionInfo().m_bBeginLineSelect = bLineSel = true;
+			}else if( ptLogic.GetX() != ptLogicPrev.GetX()){
+				// 前回 X と差分があれば文字選択モード
+				GetSelectionInfo().m_bBeginLineSelect = bLineSel = false;
+			}
+		}
+		
 		/* 座標指定によるカーソル移動 */
-		if(( ptMouse.x < GetTextArea().GetAreaLeft() || m_dwTripleClickCheck )&& GetSelectionInfo().m_bBeginLineSelect ){	// 行単位選択中
+		if( bLineSel && GetSelectionInfo().m_bBeginLineSelect ){	// 行単位選択中
 			// 2007.11.15 nasukoji	上方向の行選択時もマウスカーソルの位置の行が選択されるようにする
 			CMyPoint nNewPos(0, ptMouse.y);
 
 			// 1行の高さ
-			int nLineHeight = GetTextMetrics().GetHankakuDy();
-
-			// 選択開始行以下へのドラッグ時は1行下にカーソルを移動する
-			if( GetTextArea().GetViewTopLine() + (ptMouse.y - GetTextArea().GetAreaTop()) / nLineHeight >= GetSelectionInfo().m_sSelectBgn.GetTo().y)
-				nNewPos.y += nLineHeight;
-
+			if( bLineSelFix ){
+				int nLineHeight = GetTextMetrics().GetHankakuDy();
+				
+				// 選択開始行以下へのドラッグ時は1行下にカーソルを移動する
+				if( GetTextArea().GetViewTopLine() + (ptMouse.y - GetTextArea().GetAreaTop()) / nLineHeight >= GetSelectionInfo().m_sSelectBgn.GetTo().y)
+					nNewPos.y += nLineHeight;
+			}
+			
 			// カーソルを移動
 			nNewPos.x = GetTextArea().GetAreaLeft() - GetTextMetrics().GetCharPxWidth(GetTextArea().GetViewLeftCol());
 			GetCaret().MoveCursorToClientPoint( nNewPos, false, &ptNewCursor );
