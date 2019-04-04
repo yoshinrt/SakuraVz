@@ -1,35 +1,57 @@
-﻿#include <gtest/gtest.h>
+﻿/*! @file */
+/*
+	Copyright (C) 2018-2019 Sakura Editor Organization
+
+	This software is provided 'as-is', without any express or implied
+	warranty. In no event will the authors be held liable for any damages
+	arising from the use of this software.
+
+	Permission is granted to anyone to use this software for any purpose,
+	including commercial applications, and to alter it and redistribute it
+	freely, subject to the following restrictions:
+
+		1. The origin of this software must not be misrepresented;
+		   you must not claim that you wrote the original software.
+		   If you use this software in a product, an acknowledgment
+		   in the product documentation would be appreciated but is
+		   not required.
+
+		2. Altered source versions must be plainly marked as such,
+		   and must not be misrepresented as being the original software.
+
+		3. This notice may not be removed or altered from any source
+		   distribution.
+*/
+#include <gtest/gtest.h>
 
 #define NOMINMAX
 #include <tchar.h>
 #include <Windows.h>
+#include "parse/CWordParse.h"
 
 // テスト対象関数のヘッダファイル
 //#include "util/string_ex.h" //依存関係が多いのでテスト対象の関数定義のみ抜き出し
-BOOL IsMailAddress(const wchar_t* pszBuf, int nBufLen, int* pnAddressLenfth);
-
-// 変更前実装の定義
-// ※関数定義は IsMailAddress_20160427.cpp を参照。
-BOOL IsMailAddress_20160427(const wchar_t* pszBuf, int nBufLen, int* pnAddressLenfth);
+BOOL IsMailAddress(const wchar_t* pszBuf, int nBufLen, int* pnAddressLength);
 
 //////////////////////////////////////////////////////////////////////
 // テストマクロ
 
+// 新動作 = PR #421 導入によって変更されるはずだった IsMailAddress()
+// 旧動作 = PR #421 導入前、revert 後の IsMailAddress()
+//
+// PR #421 導入によって IsMailAddress() の単体テストが実装されたが、
+// PR #421 の revert によって消された単体テストを復活する。
+// 将来 IsMailAddress() の仕様を変更する場合はこの単体テストを必要に応じて修正すればよい。
+
 // 新旧動作比較用マクロ1(TRUE, FALSE向け)
 // ASSERT_SAME: 旧実装と新実装で動作が変わらないことを期待
 #define ASSERT_SAME(expected, szTarget, cchTarget, pchMatchedLen) \
-		EXPECT_##expected(_OLD_IMPL(szTarget, cchTarget, pchMatchedLen)); \
-		ASSERT_##expected(_NEW_IMPL(szTarget, cchTarget, pchMatchedLen));
+		EXPECT_##expected(IsMailAddress(szTarget, cchTarget, pchMatchedLen))
 
 // 新旧動作比較用マクロ2(TRUE, FALSE向け)
 // ASSERT_CHANGE: 旧実装と新実装で動作が変わることを期待
 #define ASSERT_CHANGE(expected, szTarget, cchTarget, pchMatchedLen) \
-		EXPECT_NE(expected, _OLD_IMPL(szTarget, cchTarget, pchMatchedLen)); \
-		ASSERT_##expected(_NEW_IMPL(szTarget, cchTarget, pchMatchedLen));
-
-// テスト対象の新旧関数をマクロに当てる
-#define _OLD_IMPL IsMailAddress_20160427
-#define _NEW_IMPL IsMailAddress
+		EXPECT_NE(expected, IsMailAddress(szTarget, cchTarget, pchMatchedLen))
 
 //////////////////////////////////////////////////////////////////////
 // テストコード
@@ -179,9 +201,6 @@ TEST(testIsMailAddress, CheckAwithAtmark)
 
 //////////////////////////////////////////////////////////////////////
 // テストマクロの後始末
-
-#undef _OLD_IMPL
-#undef _NEW_IMPL
 
 #undef ASSERT_SAME
 #undef ASSERT_CHANGE

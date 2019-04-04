@@ -10,6 +10,14 @@ platform:
   - Win32
 #  - MinGW
 
+# see "Skip commits" at https://www.appveyor.com/docs/how-to/filtering-commits/#commit-files-github-and-bitbucket-only
+skip_commits:
+  files:
+    - '*.md'
+    - .gitignore
+    - .editorconfig
+    - 'azure-pipelines*.yml'
+
 install:
 - cmd: |
     pip install openpyxl --user
@@ -26,4 +34,6 @@ build_script:
     echo tests\build-and-test.bat %PLATFORM% %CONFIGURATION%
 
 artifacts:
-- path: 'sakura-*$(platform)-$(configuration)*.zip'
+  - path: 'sakura-*$(platform)-$(configuration)*.zip'
+  - path: 'sakura-*$(platform)-$(configuration)*.zip.md5'
+  - path: 'sha256.txt'

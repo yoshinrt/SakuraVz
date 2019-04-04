@@ -142,16 +142,26 @@ if not "%RELEASE_PHASE%" == "" (
 @rem build WORKDIR
 @rem ----------------------------------------------------------------
 set WORKDIR=%BASENAME%
-set WORKDIR_LOG=%WORKDIR%\Log
-set WORKDIR_EXE=%WORKDIR%\EXE
-set WORKDIR_INST=%WORKDIR%\Installer
-set WORKDIR_ASM=%BASENAME%-Asm
-set OUTFILE=%BASENAME%-All.zip
-set OUTFILE_LOG=%BASENAME%-Log.zip
-set OUTFILE_ASM=%BASENAME%-Asm.zip
-set OUTFILE_INST=%BASENAME%-Installer.zip
-set OUTFILE_EXE=%BASENAME%-Exe.zip
-set OUTFILE_EXES=%BASENAME%-ExeOnly.zip
+
+set RELDIR_LOG=Log
+set RELDIR_EXE=EXE
+set RELDIR_DEV=DEV
+set RELDIR_INST=Installer
+set RELDIR_ASM=Asm
+
+set WORKDIR_LOG=%WORKDIR%\%RELDIR_LOG%
+set WORKDIR_EXE=%WORKDIR%\%RELDIR_EXE%
+set WORKDIR_DEV=%WORKDIR%\%RELDIR_DEV%
+set WORKDIR_INST=%WORKDIR%\%RELDIR_INST%
+set WORKDIR_ASM=%WORKDIR%\%RELDIR_ASM%
+
+set OUTFILE=%~dp0%BASENAME%-All.zip
+set OUTFILE_LOG=%~dp0%BASENAME%-Log.zip
+set OUTFILE_ASM=%~dp0%BASENAME%-Asm.zip
+set OUTFILE_INST=%~dp0%BASENAME%-Installer.zip
+set OUTFILE_EXE=%~dp0%BASENAME%-Exe.zip
+set OUTFILE_EXES=%~dp0%BASENAME%-ExeOnly.zip
+set OUTFILE_DEV=%~dp0%BASENAME%-Dev.zip
 
 @rem cleanup for local testing
 if exist "%OUTFILE%" (
@@ -172,6 +182,9 @@ if exist "%OUTFILE_EXE%" (
 if exist "%OUTFILE_EXES%" (
 	del %OUTFILE_EXES%
 )
+if exist "%OUTFILE_DEV%" (
+	del %OUTFILE_DEV%
+)
 if exist "%WORKDIR%" (
 	rmdir /s /q "%WORKDIR%"
 )
@@ -185,10 +198,11 @@ mkdir %WORKDIR_EXE%
 mkdir %WORKDIR_EXE%\license\
 mkdir %WORKDIR_EXE%\license\bregonig\
 mkdir %WORKDIR_EXE%\license\ctags\
+mkdir %WORKDIR_DEV%
 mkdir %WORKDIR_INST%
 copy /Y /B %platform%\%configuration%\sakura.exe %WORKDIR_EXE%\
 copy /Y /B %platform%\%configuration%\*.dll      %WORKDIR_EXE%\
-copy /Y /B %platform%\%configuration%\*.pdb      %WORKDIR_EXE%\
+copy /Y /B %platform%\%configuration%\*.pdb      %WORKDIR_DEV%\
 
 : LICENSE
 copy /Y .\LICENSE                                   %WORKDIR_EXE%\license\ > NUL
@@ -206,8 +220,8 @@ copy /Y /B %INSTALLER_RESOURCES_CTAGS%\license\*.*  %WORKDIR_EXE%\license\ctags\
 copy /Y /B help\macro\macro.chm    %WORKDIR_EXE%\
 copy /Y /B help\plugin\plugin.chm  %WORKDIR_EXE%\
 copy /Y /B help\sakura\sakura.chm  %WORKDIR_EXE%\
-copy /Y /B html\sakura-doxygen.chm %WORKDIR_EXE%\
-copy /Y /B html\sakura-doxygen.chi %WORKDIR_EXE%\
+copy /Y /B html\sakura-doxygen.chm %WORKDIR_DEV%\
+copy /Y /B html\sakura-doxygen.chi %WORKDIR_DEV%\
 
 copy /Y /B installer\Output-%platform%\*.exe       %WORKDIR_INST%\
 copy /Y msbuild-%platform%-%configuration%.log     %WORKDIR_LOG%\
@@ -252,9 +266,9 @@ if "%ALPHA%" == "1" (
 	copy /Y installer\warning-alpha.txt   %WORKDIR%\
 )
 @rem temporally disable to zip all files to a file to workaround #514.
-@rem call %ZIP_CMD%       %OUTFILE%      %WORKDIR%
+@rem pushd %WORKDIR% && call %ZIP_CMD%       %OUTFILE%      .             && popd
 
-call %ZIP_CMD%       %OUTFILE_LOG%  %WORKDIR_LOG%
+pushd %WORKDIR_LOG%  && call %ZIP_CMD%       %OUTFILE_LOG%  .  && popd
 
 @rem copy text files for warning after zipping %OUTFILE% because %WORKDIR% is the parent directory of %WORKDIR_EXE% and %WORKDIR_INST%.
 if "%ALPHA%" == "1" (
@@ -263,14 +277,16 @@ if "%ALPHA%" == "1" (
 )
 copy /Y installer\warning.txt        %WORKDIR_EXE%\
 copy /Y installer\warning.txt        %WORKDIR_INST%\
-call %ZIP_CMD%       %OUTFILE_INST%  %WORKDIR_INST%
-call %ZIP_CMD%       %OUTFILE_EXE%   %WORKDIR_EXE%
-call %ZIP_CMD%       %OUTFILE_EXES%  %WORKDIR_EXE%\sakura.exe
+
+pushd %WORKDIR_INST% && call %ZIP_CMD%       %OUTFILE_INST% .  && popd
+pushd %WORKDIR_EXE%  && call %ZIP_CMD%       %OUTFILE_EXE%  .  && popd
+pushd %WORKDIR_EXE%  && call %ZIP_CMD%       %OUTFILE_EXES% sakura.exe && popd
+pushd %WORKDIR_DEV%  && call %ZIP_CMD%       %OUTFILE_DEV%  .  && popd
 
 @echo start zip asm
 mkdir %WORKDIR_ASM%
 copy /Y sakura\%platform%\%configuration%\*.asm %WORKDIR_ASM%\ > NUL
-call %ZIP_CMD%       %OUTFILE_ASM%  %WORKDIR_ASM%
+pushd %WORKDIR_ASM%  && call %ZIP_CMD%       %OUTFILE_ASM%  .  && popd
 
 @echo end   zip asm
 
@@ -280,6 +296,13 @@ if exist "%WORKDIR%" (
 if exist "%WORKDIR_ASM%" (
 	rmdir /s /q "%WORKDIR_ASM%"
 )
+
+
+@echo start generate MD5 hash
+certutil -hashfile %OUTFILE_EXE% MD5  | find /v "MD5" | find /v "CertUtil" > %OUTFILE_EXE%.md5
+certutil -hashfile %OUTFILE_INST% MD5 | find /v "MD5" | find /v "CertUtil" > %OUTFILE_INST%.md5
+@echo end generate MD5 hash
+
 
 exit /b 0
 
