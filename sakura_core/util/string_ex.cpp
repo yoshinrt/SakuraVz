@@ -1115,9 +1115,6 @@ inline static bool IsMailAddressLocalPart(
 				return true; // ここは準正常終了。正常終了とはあえて区別しない。
 			}
 			return false; // 末尾以外に現れるエスケープされてない二重引用符は不正
-		case L' ': // スペース
-		case L'\t':
-			return false;
 		}
 		pszScan++;
 	}
