@@ -1133,17 +1133,26 @@ void CEditView::OnMOUSEMOVE( WPARAM fwKeys, int xPos_, int yPos_ )
 		if( !bLineSel && GetDllShareData().m_Common.m_sVzMode.m_nSelectMode == ESelectMode::T_Always ){
 			CLayoutPoint	ptLayout;
 			CLogicPoint		ptLogic;
+			CLogicPoint		ptLogicSt;
 			CLogicPoint		ptLogicPrev;
-			
-			// 現座標
-			GetTextArea().ClientToLayout( ptMouse, &ptLayout );
-			GetDocument()->m_cLayoutMgr.LayoutToLogic( ptLayout, &ptLogic );
 			
 			// 旧座標
 			GetTextArea().ClientToLayout( GetSelectionInfo().m_ptMouseRollPosOld, &ptLayout );
 			GetDocument()->m_cLayoutMgr.LayoutToLogic( ptLayout, &ptLogicPrev );
 			
-			if( ptLogic.GetY() != ptLogicPrev.GetY()){
+			// 現座標
+			GetTextArea().ClientToLayout( ptMouse, &ptLayout );
+			GetDocument()->m_cLayoutMgr.LayoutToLogic( ptLayout, &ptLogic );
+			
+			// 原点
+			if( GetSelectionInfo().IsTextSelected()){
+				GetDocument()->m_cLayoutMgr.LayoutToLogic( GetSelectionInfo().m_sSelectBgn.GetFrom(), &ptLogicSt );
+			}
+			
+			if( GetSelectionInfo().IsTextSelected() && ptLogicSt.GetY() == ptLogic.GetY()){
+				// 選択開始行に戻ってきたなら文字選択モード
+				GetSelectionInfo().m_bBeginLineSelect = bLineSel = false;
+			}else if( ptLogic.GetY() != ptLogicPrev.GetY()){
 				// 前回 Y と差分があれば行選択モード
 				GetSelectionInfo().m_bBeginLineSelect = bLineSel = true;
 			}else if( ptLogic.GetX() != ptLogicPrev.GetX()){
@@ -1282,7 +1291,7 @@ LRESULT CEditView::OnMOUSEWHEEL2( WPARAM wParam, LPARAM lParam, bool bHorizontal
 	zDelta = (short) HIWORD(wParam);	// wheel rotation
 //	xPos = (short) LOWORD(lParam);		// horizontal position of pointer
 //	yPos = (short) HIWORD(lParam);		// vertical position of pointer
-//	MYTRACE( _T("CEditView::DispatchEvent() WM_MOUSEWHEEL fwKeys=%xh zDelta=%d xPos=%d yPos=%d \n"), fwKeys, zDelta, xPos, yPos );
+//	MYTRACE( _T("CEditView::DispatchEvent() WM_MOUSEWHEEL fwKeys=%xh zDelta=%2d xPos=%2d yPos=%2d \n"), fwKeys, zDelta, xPos, yPos );
 
 	if( bHorizontalMsg ){
 		if( 0 < zDelta ){
