@@ -196,7 +196,7 @@ mkdir %WORKDIR%
 mkdir %WORKDIR_LOG%
 mkdir %WORKDIR_EXE%
 mkdir %WORKDIR_EXE%\license\
-mkdir %WORKDIR_EXE%\license\bregonig\
+: mkdir %WORKDIR_EXE%\license\bregonig\
 mkdir %WORKDIR_EXE%\license\ctags\
 mkdir %WORKDIR_DEV%
 mkdir %WORKDIR_INST%
@@ -209,7 +209,7 @@ copy /Y .\LICENSE                                   %WORKDIR_EXE%\license\ > NUL
 
 : bregonig
 set INSTALLER_RESOURCES_BRON=%~dp0installer\temp\bron
-copy /Y %INSTALLER_RESOURCES_BRON%\*.txt            %WORKDIR_EXE%\license\bregonig\
+: copy /Y %INSTALLER_RESOURCES_BRON%\*.txt            %WORKDIR_EXE%\license\bregonig\
 
 : ctags.exe
 set INSTALLER_RESOURCES_CTAGS=%~dp0installer\temp\ctags

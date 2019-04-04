@@ -20,6 +20,7 @@ set CONFIGURATION=%2
 set DEST_DIR=%PLATFORM%\%CONFIGURATION%
 set OUT_DIR=%~dp0..\%DEST_DIR%
 
+goto skip_bregonig
 : ---- bron412 ---- :
 set BREGONIG_DLL=bregonig.dll
 set BRON_ZIP=..\installer\externals\bregonig\bron412.zip
@@ -36,6 +37,7 @@ if not exist "%OUT_DIR%\%BREGONIG_DLL%" (
 	)
 	copy /Y /B "%BRON_DIR%\%BREGONIG_DLL%" "%OUT_DIR%\" > NUL
 )
+:skip_bregonig
 
 : ---- ctags.exe ---- :
 set CTAGS_EXE=ctags.exe
