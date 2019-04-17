@@ -314,7 +314,7 @@ int CSearchAgent::SearchWord(
 	
 	// Y 補正
 	if( bRe ){
-		pattern.GetRegexp()->GetMatchRange( pMatchRange, nLinePos );
+		pattern.GetRegexp()->GetMatchRange( pMatchRange, pMatchRange, nLinePos );
 	}else{
 		pMatchRange->SetFromY( nLinePos );	// マッチ行
 		pMatchRange->SetToY  ( nLinePos );	// マッチ行
