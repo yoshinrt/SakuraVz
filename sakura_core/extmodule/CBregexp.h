@@ -167,7 +167,7 @@ private:
 	
 	UINT				m_uOption;			// !< オプション
 	wchar_t				*m_szSubject;		// !< 最後に検索した文字列
-	int					m_iSubjectLen;		// !< 検索バッファ有効文字列長
+	int					m_iSubjectLen;		// !< *m_szSubject 文字列長
 	
 	wchar_t				*m_szSearchBuf;		// !< 検索バッファ
 	int					m_iSearchBufSize;	// !< 検索バッファサイズ
