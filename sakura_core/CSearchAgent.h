@@ -62,7 +62,7 @@ private:
 		int			iSubjectSize,				//!< 検索対象文字列長
 		int			iStart,						//!< 検索開始位置
 		CLogicRange	*pMatchRange,				//!< hit 範囲
-		bool		bPartial					//!< partial 検索
+		UINT		uOption = 0					//!< grep オプション
 	);
 	
 	/*! 次行取得 */
@@ -77,8 +77,14 @@ public:
 
 	bool PrevOrNextWord( CLogicInt nLineNum, CLogicInt nIdx, CLogicInt* pnColumnNew,
 						 BOOL bLEFT, BOOL bStopsBothEnds );	/* 現在位置の左右の単語の先頭位置を調べる */
-	//	Jun. 26, 2001 genta	正規表現ライブラリの差し替え
-	int SearchWord( CLogicPoint ptSerachBegin, ESearchDirection eDirection, CLogicRange* pMatchRange, const CSearchStringPattern& pattern ); /* 単語検索 */
+	
+	int SearchWord(
+		CLogicPoint				ptSerachBegin,	//!< 検索開始位置
+		ESearchDirection		eDirection,		//!< 検索方向
+		CLogicRange*			pMatchRange,	//!< [out] マッチ範囲。ロジック単位。
+		const CSearchStringPattern&	pattern,	//!< 検索パターン
+		UINT					uOption = 0		//!< grep オプション
+	);
 
 	void ReplaceData( DocLineReplaceArg* pArg );
 	

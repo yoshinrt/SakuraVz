@@ -177,15 +177,12 @@ bool CSearchAgent::SearchWord1Line(
 	int			iSubjectSize,				//!< 検索対象文字列長
 	int			iStart,						//!< 検索開始位置
 	CLogicRange	*pMatchRange,				//!< hit 範囲，Y は不定
-	bool		bPartial					//!< partial 検索
+	UINT		uOption						//!< grep オプション
 ){
 	//正規表現
 	CBregexp *pRegexp = Pattern.GetRegexp();
 	
-	if( !pRegexp->Match(
-		szSubject, iSubjectSize, iStart,
-		bPartial ? CBregexp::optPartialMatch : 0
-	)){
+	if( !pRegexp->Match( szSubject, iSubjectSize, iStart, uOption )){
 		return false;
 	}
 	
@@ -193,15 +190,6 @@ bool CSearchAgent::SearchWord1Line(
 	// SearchBuf 使用時は SearchBuf 内の index
 	pMatchRange->SetFromX( CLogicInt( pRegexp->GetIndex()));		// マッチ位置 from
 	pMatchRange->SetToX  ( CLogicInt( pRegexp->GetLastIndex()));	// マッチ位置 to
-	
-	// マッチ位置 from
-	// \r\n改行時に\nにマッチすると置換できない不具合となるため
-	// 改行文字内でマッチした場合、改行文字の始めからマッチしたことにする
-	/* ★暫定
-	pMatchRange->SetFromX( CLogicInt(
-		pRegexp->GetIndex() > iSizeNoEOL ?
-			iSizeNoEOL : pRegexp->GetIndex()
-	));*/
 	
 	return true;
 }
@@ -228,7 +216,8 @@ int CSearchAgent::SearchWord(
 	CLogicPoint				ptSerachBegin,	//!< 検索開始位置
 	ESearchDirection		eDirection,		//!< 検索方向
 	CLogicRange*			pMatchRange,	//!< [out] マッチ範囲。ロジック単位。
-	const CSearchStringPattern&	pattern		//!< 検索パターン
+	const CSearchStringPattern&	pattern,	//!< 検索パターン
+	UINT					uOption			//!< grep オプション
 ){
 	CLogicInt	nIdxPos		= ptSerachBegin.x;
 	CLogicInt	nLinePos	= ptSerachBegin.GetY2();
@@ -250,10 +239,7 @@ int CSearchAgent::SearchWord(
 			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
 			pDocLineGetNext = pDocLine;
 			
-			if( SearchWord1Line(
-				pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange,
-				( eDirection & SEARCH_PARTIAL ) ? true : false
-			)){
+			if( SearchWord1Line( pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange, uOption )){
 				break;	// hit
 			}
 			
@@ -282,10 +268,7 @@ int CSearchAgent::SearchWord(
 			iXLimit = iXLimit < 0 ? nIdxPos : iXLimit + iSubjectSize;
 			
 			// 行頭から iXLimit に達するまで連続で検索し，最後に hit したものが後方検索の結果
-			while( SearchWord1Line(
-				pattern, szSubject, iSubjectSize, StartPos, pMatchRange,
-				( eDirection & SEARCH_PARTIAL ) ? true : false
-			)){
+			while( SearchWord1Line( pattern, szSubject, iSubjectSize, StartPos, pMatchRange, uOption )){
 				if( pMatchRange->GetFrom().x >= iXLimit ) break;
 				LastRange	= *pMatchRange;
 				

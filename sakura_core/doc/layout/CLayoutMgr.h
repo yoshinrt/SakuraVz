@@ -197,7 +197,14 @@ public:
 	int PrevWord( CLayoutInt nLineNum, CLogicInt nIdx, CLayoutPoint* pptLayoutNew, BOOL bStopsBothEnds ){ return PrevOrNextWord(nLineNum, nIdx, pptLayoutNew, TRUE, bStopsBothEnds); }	/* 現在位置の左右の単語の先頭位置を調べる */
 	int NextWord( CLayoutInt nLineNum, CLogicInt nIdx, CLayoutPoint* pptLayoutNew, BOOL bStopsBothEnds ){ return PrevOrNextWord(nLineNum, nIdx, pptLayoutNew, FALSE, bStopsBothEnds); }	/* 現在位置の左右の単語の先頭位置を調べる */
 
-	int SearchWord( CLayoutInt nLine, CLogicInt nIdx, ESearchDirection eSearchDirection, CLayoutRange* pMatchRange, const CSearchStringPattern& );	/* 単語検索 */
+	int SearchWord(
+		CLayoutInt				nLine,				//!< [in] 検索開始レイアウト行
+		CLogicInt				nIdx,				//!< [in] 検索開始データ位置
+		ESearchDirection		eSearchDirection,	//!< [in] 検索方向
+		CLayoutRange*			pMatchRange,		//!< [out] マッチレイアウト範囲
+		const CSearchStringPattern&	pattern,
+		UINT					uOption = 0			//!< grep オプション
+	);
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                        単位の変換                           //

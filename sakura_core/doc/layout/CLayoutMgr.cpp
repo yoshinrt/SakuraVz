@@ -731,7 +731,8 @@ int CLayoutMgr::SearchWord(
 	CLogicInt				nIdx,				//!< [in] 検索開始データ位置
 	ESearchDirection		eSearchDirection,	//!< [in] 検索方向
 	CLayoutRange*			pMatchRange,		//!< [out] マッチレイアウト範囲
-	const CSearchStringPattern&	pattern
+	const CSearchStringPattern&	pattern,
+	UINT					uOption				//!< grep オプション
 )
 {
 	int			nRetCode;
@@ -747,7 +748,8 @@ int CLayoutMgr::SearchWord(
 		CLogicPoint(pLayout->GetLogicOffset() + nIdx, pLayout->GetLogicLineNo()),
 		eSearchDirection,
 		&cLogicRange, //pMatchRange,
-		pattern
+		pattern,
+		uOption
 	);
 
 	// 論理位置→レイアウト位置変換
