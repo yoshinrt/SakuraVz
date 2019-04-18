@@ -2,8 +2,8 @@ version: 1.0.{build}
 image: Visual Studio 2017
 
 configuration:
-  - Release
 #  - Debug
+  - Release
 
 platform:
   - x64
@@ -17,19 +17,16 @@ skip_commits:
     - .gitignore
     - .editorconfig
     - 'azure-pipelines*.yml'
+    - 'ci/azure-pipelines/template*.yml'
 
 install:
 - cmd: |
     pip install openpyxl --user
-    pip install chardet --user
-    echo msiexec /i externals\cppcheck\cppcheck-1.84-x64-Setup.msi /quiet /qn /norestart /log cppcheck-install.log
-    echo externals\doxygen\doxygen-1.8.14-setup.exe /silent /suppressmsgboxes
 
 build_script:
 - cmd: |
     git submodule init
     git submodule update
-    echo checkEncoding.bat
     build-all.bat %PLATFORM% %CONFIGURATION%
     echo tests\build-and-test.bat %PLATFORM% %CONFIGURATION%
 
