@@ -246,6 +246,11 @@ int CSearchAgent::SearchWord(
 			++nLinePos;
 			pDocLine = pDocLine->GetNextLine();
 			nIdxPos = 0;
+			
+			// 次の行を読んだので optNotBol 解除．
+			// optNotBol は，ReplaceAll でしか使用しない，
+			//   つまり前方検索しか無いので後方検索には無い．
+			uOption &= ~CBregexp::optNotBol;
 		}
 	}
 	

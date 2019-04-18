@@ -1054,6 +1054,23 @@ void CViewCommander::Command_REPLACE_ALL()
 			
 			int iRet = pRegexp->Replace( cmemReplacement.GetStringPtr());
 			if( iRet > 0 ){
+				// NotBol 指定
+				// 置換後の文字列長 == 0 かつ置換対象最後尾が \n でなければ，
+				//   置換号に行頭となる文字列は置換前は行頭ではなかった
+				DEBUG_TRACE( L"len:%d x:%d\n",
+					rDocLineMgr.GetLine( cSelectLogic.GetTo().y )->GetLengthWithEOL(),
+					cSelectLogic.GetTo().x
+				);
+				if(
+					pRegexp->GetStringLen() == 0 &&
+					cSelectLogic.GetTo().x != 0 &&
+					rDocLineMgr.GetLine( cSelectLogic.GetTo().y )->GetLengthWithEOL() != cSelectLogic.GetTo().x
+				){
+					uSearchWordOpt |= CBregexp::optNotBol;
+				}else{
+					uSearchWordOpt &= ~CBregexp::optNotBol;
+				}
+				
 				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 				++nReplaceNum;
 				

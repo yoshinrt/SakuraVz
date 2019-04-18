@@ -221,6 +221,13 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
 	}
 	
+	if( uOption & optNotBol ){
+		m_uOption	|= optNotBol;
+		uPcre2Opt	|= PCRE2_NOTBOL;
+	}else{
+		m_uOption	&= ~optNotBol;
+	}
+	
 	while( 1 ){
 		// match
 		int m_iLastCode = pcre2_match(
@@ -395,6 +402,7 @@ int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, i
 		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
 		if( m_uOption & optGlobal )			iOption |= PCRE2_SUBSTITUTE_GLOBAL;
 		if( m_uOption & optPartialMatch )	iOption |= PCRE2_NOTEOL;
+		if( m_uOption & optNotBol )			iOption |= PCRE2_NOTBOL;
 		
 		m_iLastCode = pcre2_substitute(
 			m_Re,							// const pcre2_code *code

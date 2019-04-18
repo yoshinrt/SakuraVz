@@ -47,6 +47,7 @@ public:
 		optPartialMatch		= 1 << 2,		//!< partial match		match
 		optLiteral			= 1 << 3,		//!< 基本検索			compile
 		optWordSearch		= 1 << 4,		//!< 単語検索			compile
+		optNotBol			= 1 << 5,		//!< sbj 先頭は非行頭	match
 	};
 
 	//! DLLのバージョン情報を取得
