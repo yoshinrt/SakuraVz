@@ -2512,7 +2512,7 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		}
 		return true;
 	
-	case F_GetCursorPosX:
+	case F_GetCursorPosXLogic:
 		// Logic X
 		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetX2());
 		return true;
