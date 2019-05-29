@@ -1371,13 +1371,10 @@ int CGrepAgent::DoGrepReplaceFile(
 				}
 				
 				//	パターン発見
-				int iMatchIdx = 0;
-				int iMatchLen = 0;
+				int iMatchIdx = pRegexp->GetIndex();
+				int iMatchLen = pRegexp->GetMatchLen();
 				
-				if( sGrepOption.nGrepOutputLineType == 0/*該当部分*/ ){
-					iMatchIdx = pRegexp->GetIndex();
-					iMatchLen = pRegexp->GetMatchLen();
-				}else{
+				if( sGrepOption.nGrepOutputLineType != 0/*該当部分*/ ){
 					pRegexp->GetMatchLine( &pLine, &nLineLen );
 				}
 				
