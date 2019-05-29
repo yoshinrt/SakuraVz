@@ -88,7 +88,7 @@ public:
 				if( nWordLen <= 0 ) return false;
 				std::wstring strWord = std::wstring(word, nWordLen);
 				if( CHokanMgr::AddKouhoUnique( m_pHokanMgr->m_vKouho, strWord ) ){
-					Wrap( &Result )->Receive( m_pHokanMgr->m_vKouho.size() );
+					Wrap( &Result )->Receive(( int )m_pHokanMgr->m_vKouho.size() );
 				}else{
 					Wrap( &Result )->Receive( -1 );
 				}

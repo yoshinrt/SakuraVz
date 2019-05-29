@@ -107,6 +107,12 @@ struct Variant
 		Data.vt = VT_I4;
 		return Data.lVal = i;
 	}
+	
+	double Receive( double v ){
+		::VariantClear( &Data ); 
+		Data.vt = VT_R8;
+		return Data.dblVal = v;
+	}
 };
 /*
 #if sizeof(SysString) != 4

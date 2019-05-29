@@ -2512,6 +2512,20 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		}
 		return true;
 	
+	case F_GetCursorPosX:
+	case F_GetCursorPosXReal: {
+		// Layout X
+		double dPos = ( double )( Int )View->GetCaret().GetCaretLayoutPos().GetX2()
+			/ ( Int )View->GetTextMetrics().GetLayoutXDefault();
+		
+		if( LOWORD( ID ) == F_GetCursorPosX ){
+			Wrap( &Result )->Receive(( int )( dPos + 0.5 ));
+		}else{
+			Wrap( &Result )->Receive( dPos );
+		}
+		return true;
+	}
+	
 	case F_GetCursorPosXLogic:
 		// Logic X
 		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetX2());
