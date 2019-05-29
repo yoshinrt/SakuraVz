@@ -158,9 +158,6 @@ protected:
 private:
 	//	内部関数
 
-	//! 検索パターン作成
-	void MakePatternAlternate( const wchar_t* const szSearch, std::wstring& strModifiedSearch );
-	
 	//	メンバ変数
 	static const int	MSGBUF_SIZE	= 80;
 	int					m_iLastCode;		//!< 最後のエラーコード
