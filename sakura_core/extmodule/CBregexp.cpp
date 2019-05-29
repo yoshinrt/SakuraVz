@@ -218,7 +218,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		m_uOption &= ~optPartialMatch;
 	}else{
 		m_uOption |= optPartialMatch;
-		uPcre2Opt |= PCRE2_PARTIAL_HARD | PCRE2_NOTEOL;
+		uPcre2Opt |= PCRE2_PARTIAL_HARD;
 	}
 	
 	if( uOption & optNotBol ){
@@ -229,6 +229,13 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	}
 	
 	while( 1 ){
+		// 行末が EOL の場合，PCRE2_NOTEOL を足す
+		if( IsEolTail( m_szSubject, m_iSubjectLen )){
+			uPcre2Opt |= PCRE2_NOTEOL;
+		}else{
+			uPcre2Opt &= ~PCRE2_NOTEOL;
+		}
+		
 		// match
 		int m_iLastCode = pcre2_match(
 			m_Re,						// const pcre2_code *code
@@ -261,7 +268,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		// partial match したけど次行がないので，partial match を外して再検索
 		if( iNextSize == 0 ){
-			uPcre2Opt	&= ~( PCRE2_PARTIAL_HARD | PCRE2_NOTEOL );
+			uPcre2Opt	&= ~PCRE2_PARTIAL_HARD;
 			uOption		&= ~optPartialMatch;
 			continue;
 		}
@@ -399,17 +406,23 @@ int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, i
 		OutputLen	= m_iReplaceBufSize;
 		
 		// オプション
-		int iOption = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
-		if( m_uOption & optGlobal )			iOption |= PCRE2_SUBSTITUTE_GLOBAL;
-		if( m_uOption & optPartialMatch )	iOption |= PCRE2_NOTEOL;
-		if( m_uOption & optNotBol )			iOption |= PCRE2_NOTBOL;
+		UINT uPcre2Opt = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH | PCRE2_SUBSTITUTE_EXTENDED;
+		if( m_uOption & optGlobal )			uPcre2Opt |= PCRE2_SUBSTITUTE_GLOBAL;
+		if( m_uOption & optNotBol )			uPcre2Opt |= PCRE2_NOTBOL;
+		
+		// 行末が EOL の場合，PCRE2_NOTEOL を足す
+		if( IsEolTail( szSubject, iSubjectLen )){
+			uPcre2Opt |= PCRE2_NOTEOL;
+		}else{
+			uPcre2Opt &= ~PCRE2_NOTEOL;
+		}
 		
 		m_iLastCode = pcre2_substitute(
 			m_Re,							// const pcre2_code *code
 			( PCRE2_SPTR )szSubject,		// PCRE2_SPTR subject
 			iSubjectLen,					// PCRE2_SIZE length
 			iStart,							// PCRE2_SIZE startoffset
-			iOption,						// uint32_t options
+			uPcre2Opt,						// uint32_t options
 			m_MatchData,					// pcre2_match_data *match_data
 			nullptr,						// pcre2_match_context *mcontext
 			( PCRE2_SPTR )szReplacement,	// PCRE2_SPTR replacement,

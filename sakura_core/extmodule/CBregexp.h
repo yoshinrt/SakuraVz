@@ -191,6 +191,11 @@ private:
 	//! Buf 確保・リサイズ
 	static bool ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize );
 	
+	// 行末が EOL かどうか
+	bool IsEolTail( const wchar_t* szStr, int iLen ){
+		return iLen > 0 && szStr[ iLen - 1 ] == L'\n';
+	}
+	
 	// bregonig.dll I/F
 public:
 	// DLL の名残
