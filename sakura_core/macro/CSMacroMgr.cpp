@@ -480,6 +480,7 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_GetCursorPosYLogic,		L"GetCursorPosYLogic",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置Y Logic
 	{F_IsCursorEOF,				L"IsCursorEOF",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOF?
 	{F_IsCursorEOL,				L"IsCursorEOL",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOL?
+	{F_GetCursorChar,			L"GetCursorChar",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //カーソル位置の 1文字取得
 
 	//	終端
 	//	Jun. 27, 2002 genta

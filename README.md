@@ -128,6 +128,7 @@ else throw new Error( "見つかりません: " + FuncName + "\nfile:" + GetMacr
  - `GetCursorPosXLogic()`: カーソル位置の行頭からの論理桁位置 (行頭 = 0) を返します．
  - `GetCursorPosY()`: カーソル位置のファイル先頭からの表示行位置 (先頭行 = 0) を返します．
  - `GetCursorPosYLogic()`: カーソル位置のファイル先頭からの論理行位置 (先頭行 = 0) を返します．
+ - `GetCursorChar()`: カーソル位置の 1文字を取得します．
  - `IsCursorEOL()`: カーソル位置が EOL の場合，非 0 を返します．
  - `IsCursorEOF()`: カーソル位置が EOF の場合，非 0 を返します．
 

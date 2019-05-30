@@ -2582,6 +2582,36 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		);
 		return true;
 	
+	case F_GetCursorChar:
+		{
+			int iLen = 0;
+			int x;
+			const wchar_t *pStr;
+			
+			if(
+				// 現在行が総行数を超えていないことを確認
+				View->GetCaret().GetCaretLogicPos().GetY2() <
+				View->m_pcEditDoc->m_cDocLineMgr.GetLineCount()
+			){
+				pStr = View->m_pcEditDoc->m_cDocLineMgr.GetLine(
+					View->GetCaret().GetCaretLogicPos().GetY2()
+				)->GetDocLineStrWithEOL( &iLen );
+				
+				x = View->GetCaret().GetCaretLogicPos().GetX2();
+				if( x >= iLen ) x = iLen - 1;
+			}
+			
+			if( iLen ){
+				SysString sysstr( pStr + x, 1 );
+				Wrap( &Result )->Receive( sysstr );
+			}else{
+				// 空文字
+				SysString sysstr( static_cast<TCHAR *>( nullptr ), 0 );
+				Wrap( &Result )->Receive( sysstr );
+			}
+		}
+		return true;
+	
 	default:
 		return false;
 	}
