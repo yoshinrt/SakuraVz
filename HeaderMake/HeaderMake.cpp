@@ -275,6 +275,9 @@ next:
 		"// Don't edit this file manually.\n\n",
 		GetFileTitlePointer(in_file)
 	);
+	
+	int iVal = 0;
+	
 	if(mode==MODE_ENUM)fprintf(out,"enum %s{\n",enum_name); //enum開始
 	while(NULL!=fgets(line,_countof(line),in))
 	{
@@ -310,6 +313,12 @@ next:
 		strncpy_s(value,_countof(value),p,q-p);
 		value[q-p]='\0';
 		p=q;
+		
+		if( *value ){
+			iVal = atoi( value );
+		}else{
+			_itoa_s( ++iVal, value, 10 );
+		}
 
 		//出力
 		if(*id && *value){
