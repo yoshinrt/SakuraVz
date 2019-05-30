@@ -579,9 +579,10 @@ F_GETMACROINFO		= 40059,	// 実行中のマクロ名等の情報を返す
 F_GetCursorPosX		= 40060,	// カーソル位置 X (ルーラ単位，整数)
 F_GetCursorPosXReal	= 40061,	// カーソル位置 X (ルーラ単位，float)
 F_GetCursorPosXLogic	= 40062,	// カーソル位置 X (Logic 単位)
-F_GetCursorPosY		= 40063,	// カーソル位置 Y (Logic 単位)
-F_IsCursorEOF		= 40064,	// カーソル位置 EOF?
-F_IsCursorEOL		= 40065,	// カーソル位置 EOL?
+F_GetCursorPosY		= 40063,	// カーソル位置 Y (Layout 単位)
+F_GetCursorPosYLogic	= 40064,	// カーソル位置 Y (Logic 単位)
+F_IsCursorEOF		= 40065,	// カーソル位置 EOF?
+F_IsCursorEOL		= 40066,	// カーソル位置 EOL?
 
 //	= 2005,.01.10 genta ISearch用補助コード
 //	2007.07.07 genta 16bit以内に収めないと状況コードと衝突するのでコードを変更

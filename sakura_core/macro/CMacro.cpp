@@ -2533,6 +2533,11 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		
 	case F_GetCursorPosY:
 		// Logic Y
+		Wrap( &Result )->Receive(( Int )View->GetCaret().GetCaretLayoutPos().GetY2());
+		return true;
+		
+	case F_GetCursorPosYLogic:
+		// Logic Y
 		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetY2());
 		return true;
 		
