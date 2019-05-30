@@ -935,7 +935,6 @@ void CViewCommander::Command_WndScrollDown( void )
 				GetCaret().Cursor_UPDOWN( (GetDocument()->m_cLayoutMgr.GetLineCount() - nCaretMarginY) - GetCaret().GetCaretLayoutPos().GetY2(), FALSE );
 			else
 				GetCaret().Cursor_UPDOWN( CLayoutInt(-1), FALSE);
-			GetCaret().ShowCaretPosInfo();
 		}
 	}
 	if( bCaretOff ){
@@ -973,7 +972,6 @@ void CViewCommander::Command_WndScrollUp(void)
 				GetCaret().Cursor_UPDOWN( nCaretMarginY + 1, FALSE );
 			else
 				GetCaret().Cursor_UPDOWN( CLayoutInt(1), FALSE );
-			GetCaret().ShowCaretPosInfo();
 		}
 	}
 	if( bCaretOff ){

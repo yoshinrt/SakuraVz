@@ -67,9 +67,9 @@ struct CDlgOpenFile_CommonItemDialog final
 								 std::vector<std::tstring>* pFileNames,
 								 LPCWSTR fileName,
 								 const std::vector<COMDLG_FILTERSPEC>& specs );
-	bool DoModalSaveDlgImpl0( const TCHAR* pszPath );
+	bool DoModalSaveDlgImpl0( TCHAR* pszPath );
 	HRESULT DoModalSaveDlgImpl1( IFileSaveDialog* pFileSaveDialog,
-								 const TCHAR* pszPath );
+								 TCHAR* pszPath );
 
 	HINSTANCE		m_hInstance;	/* アプリケーションインスタンスのハンドル */
 	HWND			m_hwndParent;	/* オーナーウィンドウのハンドル */
@@ -567,10 +567,10 @@ HRESULT CDlgOpenFile_CommonItemDialog::Customize()
 	if (m_customizeSetting.bUseEol) {
 		hr = StartVisualGroup(CtrlId::LABEL_EOL, LS(STR_FILEDIALOG_EOL)); RETURN_IF_FAILED
 		hr = AddComboBox(CtrlId::COMBO_EOL); RETURN_IF_FAILED
-		hr = AddControlItem(CtrlId::COMBO_EOL, 0, LS(STR_DLGOPNFL1)); RETURN_IF_FAILED
-		hr = AddControlItem(CtrlId::COMBO_EOL, 1, L"CR+LF"); RETURN_IF_FAILED
-		hr = AddControlItem(CtrlId::COMBO_EOL, 2, L"LF (UNIX)"); RETURN_IF_FAILED
-		hr = AddControlItem(CtrlId::COMBO_EOL, 3, L"CR (Mac)"); RETURN_IF_FAILED
+		hr = AddControlItem(CtrlId::COMBO_EOL, EOL_NONE, LS(STR_DLGOPNFL1)); RETURN_IF_FAILED
+		hr = AddControlItem(CtrlId::COMBO_EOL, EOL_CRLF, L"CR+LF"); RETURN_IF_FAILED
+		hr = AddControlItem(CtrlId::COMBO_EOL, EOL_LF, L"LF (UNIX)"); RETURN_IF_FAILED
+		hr = AddControlItem(CtrlId::COMBO_EOL, EOL_CR, L"CR (Mac)"); RETURN_IF_FAILED
 		hr = SetSelectedControlItem(CtrlId::COMBO_EOL, 0); RETURN_IF_FAILED
 		hr = EndVisualGroup(); RETURN_IF_FAILED
 	}
@@ -731,7 +731,7 @@ bool CDlgOpenFile_CommonItemDialog::DoModalOpenDlg(
 
 HRESULT CDlgOpenFile_CommonItemDialog::DoModalSaveDlgImpl1(
 	IFileSaveDialog* pFileSaveDialog,
-	const TCHAR* pszPath)
+	TCHAR* pszPath)
 {
 	//カレントディレクトリを保存。関数から抜けるときに自動でカレントディレクトリは復元される。
 	CCurrentDirectoryBackupPoint cCurDirBackup;
@@ -753,6 +753,7 @@ HRESULT CDlgOpenFile_CommonItemDialog::DoModalSaveDlgImpl1(
 	specs[2].pszName = strs[2].c_str();
 	specs[2].pszSpec = _T("*.*");
 #define RETURN_IF_FAILED if (FAILED(hr)) { /* __debugbreak(); */ return hr; }
+	hr = pFileSaveDialog->SetDefaultExtension(_T("txt")); RETURN_IF_FAILED
 	hr = pFileSaveDialog->SetFileTypes(specs.size(), &specs[0]); RETURN_IF_FAILED
 	ComPtr<IShellItem> psiFolder;
 	SHCreateItemFromParsingName(m_szInitialDir, NULL, IID_PPV_ARGS(&psiFolder));
@@ -765,12 +766,22 @@ HRESULT CDlgOpenFile_CommonItemDialog::DoModalSaveDlgImpl1(
 		hr = Customize(); RETURN_IF_FAILED
 	}
 	hr = pFileSaveDialog->Show(m_hwndParent); RETURN_IF_FAILED
+
+	if (SUCCEEDED(hr)) {
+		ComPtr<IShellItem> pShellItem;
+		hr = pFileSaveDialog->GetResult(&pShellItem); RETURN_IF_FAILED
+		PWSTR pszFilePath;
+		hr = pShellItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath); RETURN_IF_FAILED
+		wcscpy(pszPath, pszFilePath);
+		CoTaskMemFree(pszFilePath);
+	}
+
 #undef RETURN_IF_FAILED
 
 	return S_OK;
 }
 
-bool CDlgOpenFile_CommonItemDialog::DoModalSaveDlgImpl0( const TCHAR* pszPath )
+bool CDlgOpenFile_CommonItemDialog::DoModalSaveDlgImpl0( TCHAR* pszPath )
 {
 	using namespace Microsoft::WRL;
 	ComPtr<IFileSaveDialog> pFileDialog;
@@ -812,6 +823,7 @@ bool CDlgOpenFile_CommonItemDialog::DoModalSaveDlg( SSaveInfo* pSaveInfo, bool b
 	else {
 		m_nCharCode = pSaveInfo->eCharCode;
 		m_bBom = pSaveInfo->bBomExist;
+		m_cEol = pSaveInfo->cEol;
 		m_customizeSetting.bCustomize = true;
 		m_customizeSetting.bUseCharCode = true;
 		m_customizeSetting.bUseEol = true;
@@ -857,7 +869,11 @@ HRESULT CDlgOpenFile_CommonItemDialog::OnItemSelected(
 			}
 			SetControlState(CtrlId::CHECK_BOM, state);
 			SetCheckButtonState(CtrlId::CHECK_BOM, bChecked ? TRUE : FALSE);
+			m_nCharCode = static_cast<ECodeType>(dwIDItem);
 		}
+		break;
+	case CtrlId::COMBO_EOL:
+		m_cEol = static_cast<EEolType>(dwIDItem);
 		break;
 	case CtrlId::COMBO_MRU:
 		if (dwIDItem != 0) {
@@ -888,6 +904,9 @@ HRESULT CDlgOpenFile_CommonItemDialog::OnCheckButtonToggled(
 	case CtrlId::CHECK_CP:
 		SetControlState(CtrlId::CHECK_CP, CDCS_VISIBLE);
 		AddComboCodePages(m_nCharCode);
+		break;
+	case CtrlId::CHECK_BOM:
+		m_bBom = bChecked ? true : false;
 		break;
 	}
 	return S_OK;

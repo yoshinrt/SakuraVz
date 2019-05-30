@@ -50,10 +50,10 @@ if not "%APPVEYOR_BUILD_NUMBER%" == "" (
 	set BUILD_NUMBER=buildLocal
 )
 
-@echo checking APPVEYOR_REPO_TAG_NAME %APPVEYOR_REPO_TAG_NAME%
-if not "%APPVEYOR_REPO_TAG_NAME%" == "" (
+@echo checking GIT_TAG_NAME %GIT_TAG_NAME%
+if not "%GIT_TAG_NAME%" == "" (
 	@rem replace '/' with '_'
-	set TEMP_NAME1=!APPVEYOR_REPO_TAG_NAME:/=_!
+	set TEMP_NAME1=!GIT_TAG_NAME:/=_!
 	@echo TEMP_NAME1 = !TEMP_NAME1!
 	
 	@rem replace ' ' with '_'
@@ -299,8 +299,9 @@ if exist "%WORKDIR_ASM%" (
 
 
 @echo start generate MD5 hash
-certutil -hashfile %OUTFILE_EXE% MD5  | find /v "MD5" | find /v "CertUtil" > %OUTFILE_EXE%.md5
-certutil -hashfile %OUTFILE_INST% MD5 | find /v "MD5" | find /v "CertUtil" > %OUTFILE_INST%.md5
+set CMD_FIND=%SystemRoot%\System32\find.exe
+certutil -hashfile %OUTFILE_EXE% MD5  | %CMD_FIND% /v "MD5" | %CMD_FIND% /v "CertUtil" > %OUTFILE_EXE%.md5
+certutil -hashfile %OUTFILE_INST% MD5 | %CMD_FIND% /v "MD5" | %CMD_FIND% /v "CertUtil" > %OUTFILE_INST%.md5
 @echo end generate MD5 hash
 
 

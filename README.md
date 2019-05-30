@@ -170,6 +170,8 @@ sakura.exe -grepmode -grepdlg -GREPR="a"
 [![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
 [![CodeFactor](https://www.codefactor.io/repository/github/sakura-editor/sakura/badge)](https://www.codefactor.io/repository/github/sakura-editor/sakura)
 [![Build Status](https://dev.azure.com/sakuraeditor/sakura/_apis/build/status/sakura-editor.sakura?branchName=master)](https://dev.azure.com/sakuraeditor/sakura/_build/latest?definitionId=3&branchName=master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sakura-editor_sakura&metric=alert_status)](https://sonarcloud.io/dashboard?id=sakura-editor_sakura)
+[![Star History](https://img.shields.io/badge/star-histroy-yellow.svg)](https://star-history.t9t.io/#sakura-editor/sakura)
 
 <!-- TOC -->
 
@@ -180,15 +182,19 @@ sakura.exe -grepmode -grepdlg -GREPR="a"
     - [Build Requirements](#build-requirements)
         - [Visual Studio Community 2017](#visual-studio-community-2017)
             - [Visual Studio Install options required](#visual-studio-install-options-required)
+        - [Visual Studio Community 2019 に関しては対応を検討中です。](#visual-studio-community-2019-に関しては対応を検討中です)
     - [How to build](#how-to-build)
         - [詳細情報](#詳細情報)
     - [PR(Pull Request) を簡単にローカルに取得する方法](#prpull-request-を簡単にローカルに取得する方法)
+    - [CI Build (Azure Pipelines)](#ci-build-azure-pipelines)
+        - [ビルドの仕組み (Azure Pipelines)](#ビルドの仕組み-azure-pipelines)
     - [CI Build (AppVeyor)](#ci-build-appveyor)
-        - [ビルドの仕組み](#ビルドの仕組み)
+        - [ビルドの仕組み (AppVeyor)](#ビルドの仕組み-appveyor)
         - [ビルド成果物を利用する上での注意事項](#ビルド成果物を利用する上での注意事項)
         - [ビルド成果物のダウンロード(バイナリ、インストーラなど)](#ビルド成果物のダウンロードバイナリインストーラなど)
             - [master の 最新](#master-の-最新)
             - [master の 最新以外](#master-の-最新以外)
+    - [開発情報](#開発情報)
         - [単体テスト](#単体テスト)
         - [デバッグ方法](#デバッグ方法)
     - [変更履歴](#変更履歴)
@@ -213,7 +219,10 @@ https://github.com/sakura-editor/sakura/wiki
 
 ## Build Requirements
 ### Visual Studio Community 2017
-- [Visual Studio Community 2017](https://www.visualstudio.com/downloads/)
+
+現状では Visual Studio Community 2017 を使用しています。
+
+- [Visual Studio Community 2017](https://visualstudio.microsoft.com/vs/older-downloads/)
 
 #### Visual Studio Install options required
 - Windows SDK
@@ -222,6 +231,13 @@ https://github.com/sakura-editor/sakura/wiki
 - C++ に関する Windows XP サポート
 
 More information: https://github.com/sakura-editor/sakura/issues/6
+
+### Visual Studio Community 2019 に関しては対応を検討中です。
+
+- [Visual Studio Community 2019](https://www.visualstudio.com/downloads/)
+
+Visual Studio 2017/2019 の両対応に関しては  [#866](https://github.com/sakura-editor/sakura/issues/866) で対処済みです。  
+[仕組みに関してはこちらを参照](vcx-props/project-PlatformToolset.md)
 
 ## How to build
 
@@ -236,10 +252,15 @@ More information: https://github.com/sakura-editor/sakura/issues/6
 
 - [PR(Pull Request) を簡単にローカルに取得する方法](get-PR.md)
 
+## CI Build (Azure Pipelines)
+
+### ビルドの仕組み (Azure Pipelines)
+
+[azure-pipelines.md](azure-pipelines.md) でビルドの仕組みを説明しています。
 
 ## CI Build (AppVeyor)
 
-### ビルドの仕組み
+### ビルドの仕組み (AppVeyor)
 
 [appveyor.md](appveyor.md) でビルドの仕組みを説明しています。
 
@@ -270,6 +291,8 @@ More information: https://github.com/sakura-editor/sakura/issues/6
 以下から取得したいビルドを選択後、同様にしてダウンロードできます。  
 https://ci.appveyor.com/project/sakuraeditor/sakura/history
 
+## 開発情報
+
 ### 単体テスト
 
 [単体テスト](unittest.md) を参照
@@ -294,5 +317,5 @@ https://ci.appveyor.com/project/sakuraeditor/sakura/history
 
 ## マクロのサンプル
 
-[tools/macro](こちら)でマクロのサンプルを提供してます。  
+[こちら](tools/macro)でマクロのサンプルを提供してます。  
 もしサンプルを作ってもいいよ～という方がおられましたら PR の作成お願いします。

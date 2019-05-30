@@ -18,10 +18,13 @@ skip_commits:
     - .editorconfig
     - 'azure-pipelines*.yml'
     - 'ci/azure-pipelines/template*.yml'
+    - '.github/*.md'
+    - '.github/ISSUE_TEMPLATE/*.md'
 
 install:
 - cmd: |
     pip install openpyxl --user
+    C:\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-gtest"
 
 build_script:
 - cmd: |
