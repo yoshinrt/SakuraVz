@@ -196,18 +196,27 @@ LPCWSTR CBookmarkManager::GetBookMarks()
 	return szText; // Feb. 17, 2003 genta
 }
 
-// 次行取得
-int CBookmarkManager::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
-	CDocLine **ppDoc = reinterpret_cast<CDocLine **>( pParam );
+// GetNextLine 用 param
+class CGetNextLineInfoBM {
+public:
+	CDocLine	*m_pDoc;
+	CLogicInt	m_iLineNo;
 	
-	*ppDoc = ( **ppDoc ).GetNextLine();		// 次行取得
-	if( !*ppDoc ) return 0;					// 次行なし
+	CGetNextLineInfoBM( CDocLine *pDoc, int iLineNo ) : m_pDoc( pDoc ), m_iLineNo( iLineNo ){};
+};
+
+int CBookmarkManager::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
+	CGetNextLineInfoBM& DocInfo = *reinterpret_cast<CGetNextLineInfoBM *>( pParam );
+	
+	DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();		// 次行取得
+	if( !DocInfo.m_pDoc ) return 0;						// 次行なし
 	
 	int iLen;
-	pNextLine = ( wchar_t *)( **ppDoc ).GetDocLineStrWithEOL( &iLen );
+	pNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
 	
 	// この行が最終行?
-	if( !( **ppDoc ).GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	++DocInfo.m_iLineNo;
 	
 	return iLen;
 }
@@ -221,26 +230,23 @@ void CBookmarkManager::MarkSearchWord(
 )
 {
 	const SSearchOption&	sSearchOption = pattern.GetSearchOption();
-	CDocLine*	pDocLine;
 	const wchar_t*	pLine;
 	int			nLineLen;
 
 	/* 1==正規表現 */
 	CBregexp*	pRegexp = pattern.GetRegexp();
-	pDocLine = m_pcDocLineMgr->GetLine( CLogicInt(0) );
+	CGetNextLineInfoBM	DocInfo( m_pcDocLineMgr->GetLine( CLogicInt( 0 )), CLogicInt( 0 ));
+	
 	CLogicRange MatchRange;
 	
 	// 次行取得コールバック設定
-	CDocLine*	pDocLineGetNext;
-	pRegexp->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
+	pRegexp->SetNextLineCallback( GetNextLine, &DocInfo );
 	
-	int iLineNo = 0;
-	
-	while( pDocLine ){
-		if(!CBookmarkGetter(pDocLine).IsBookmarked()){
-			pLine = pDocLine->GetDocLineStrWithEOL( &nLineLen );
+	while( DocInfo.m_pDoc ){
+		if(!CBookmarkGetter(DocInfo.m_pDoc).IsBookmarked()){
+			pLine = DocInfo.m_pDoc->GetDocLineStrWithEOL( &nLineLen );
 			
-			pDocLineGetNext = pDocLine;
+			CLogicInt iLineNo = DocInfo.m_iLineNo;	// 検索開始行
 			
 			if( pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
 				
@@ -249,12 +255,11 @@ void CBookmarkManager::MarkSearchWord(
 				
 				// 先頭行マーク
 				iLineNo = MatchRange.GetFrom().y;
-				pDocLine = m_pcDocLineMgr->GetLine( CLogicInt( iLineNo ));
-				CBookmarkSetter( pDocLine ).SetBookmark( true );
+				DocInfo.m_pDoc = m_pcDocLineMgr->GetLine( iLineNo );
+				CBookmarkSetter( DocInfo.m_pDoc ).SetBookmark( true );
 			}
 		}
-		pDocLine = pDocLine->GetNextLine();
-		++iLineNo;
+		DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();
+		++DocInfo.m_iLineNo;
 	}
 }
-

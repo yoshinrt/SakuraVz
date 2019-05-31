@@ -194,17 +194,27 @@ bool CSearchAgent::SearchWord1Line(
 	return true;
 }
 
-int CSearchAgent::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
-	CDocLine **ppDoc = reinterpret_cast<CDocLine **>( pParam );
+// GetNextLine 用 param
+class CGetNextLineInfo {
+public:
+	CDocLine	*m_pDoc;
+	CLogicInt	m_iLineNo;
 	
-	*ppDoc = ( **ppDoc ).GetNextLine();		// 次行取得
-	if( !*ppDoc ) return 0;					// 次行なし
+	CGetNextLineInfo( CDocLine *pDoc, int iLineNo ) : m_pDoc( pDoc ), m_iLineNo( iLineNo ){};
+};
+
+int CSearchAgent::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
+	CGetNextLineInfo& DocInfo = *reinterpret_cast<CGetNextLineInfo *>( pParam );
+	
+	DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();		// 次行取得
+	if( !DocInfo.m_pDoc ) return 0;						// 次行なし
 	
 	int iLen;
-	pNextLine = ( wchar_t *)( **ppDoc ).GetDocLineStrWithEOL( &iLen );
+	pNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
 	
 	// この行が最終行?
-	if( !( **ppDoc ).GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	++DocInfo.m_iLineNo;
 	
 	return iLen;
 }
@@ -220,31 +230,31 @@ int CSearchAgent::SearchWord(
 	UINT					uOption			//!< grep オプション
 ){
 	CLogicInt	nIdxPos		= ptSerachBegin.x;
-	CLogicInt	nLinePos	= ptSerachBegin.GetY2();
-	CDocLine*	pDocLine	= m_pcDocLineMgr->GetLine( nLinePos );
-	
-	CDocLine*	pDocLineGetNext;
+	CLogicInt	iLineNo		= ptSerachBegin.GetY2();
+	CGetNextLineInfo	DocInfo( m_pcDocLineMgr->GetLine( iLineNo ), iLineNo );
 	
 	bool bRe = pattern.GetSearchOption().bRegularExp;
 	
 	// 正規表現の場合，次行取得コールバック設定
 	if( bRe ){
-		pattern.GetRegexp()->SetNextLineCallback( GetNextLine, &pDocLineGetNext );
+		pattern.GetRegexp()->SetNextLineCallback( GetNextLine, &DocInfo );
 	}
 	
 	// 前方検索
 	if( eDirection & SEARCH_FORWARD ){
-		while( NULL != pDocLine ){
+		while( NULL != DocInfo.m_pDoc ){
 			int iSubjectSize;
-			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
-			pDocLineGetNext = pDocLine;
+			wchar_t *szSubject = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iSubjectSize );
 			
+			iLineNo = DocInfo.m_iLineNo; // 検索開始行
 			if( SearchWord1Line( pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange, uOption )){
 				break;	// hit
 			}
 			
-			++nLinePos;
-			pDocLine = pDocLine->GetNextLine();
+			if( !DocInfo.m_pDoc ) break;	// GetNextLine 中で EOF に達した
+			
+			++DocInfo.m_iLineNo;
+			DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();
 			nIdxPos = 0;
 			
 			// 次の行を読んだので optNotBol 解除．
@@ -258,10 +268,9 @@ int CSearchAgent::SearchWord(
 	else{
 		int iXLimit = -1;	// 検索開始位置
 		
-		while( NULL != pDocLine ){
+		while( NULL != DocInfo.m_pDoc ){
 			int iSubjectSize;
-			wchar_t *szSubject = ( wchar_t *)pDocLine->GetDocLineStrWithEOL( &iSubjectSize );
-			pDocLineGetNext = pDocLine;
+			wchar_t *szSubject = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iSubjectSize );
 			
 			CLogicRange	LastRange;
 			LastRange.SetFromX( CLogicInt( -1 ));
@@ -271,6 +280,8 @@ int CSearchAgent::SearchWord(
 			//   行を遡るごとに iXLimit は増加する．
 			// 非 re 時は加算することにあまり意味は無い．
 			iXLimit = iXLimit < 0 ? nIdxPos : iXLimit + iSubjectSize;
+			
+			iLineNo = DocInfo.m_iLineNo; // 検索開始行
 			
 			// 行頭から iXLimit に達するまで連続で検索し，最後に hit したものが後方検索の結果
 			while( SearchWord1Line( pattern, szSubject, iSubjectSize, StartPos, pMatchRange, uOption )){
@@ -291,19 +302,21 @@ int CSearchAgent::SearchWord(
 				break;
 			}
 			
-			--nLinePos;
-			pDocLine = pDocLine->GetPrevLine();
+			if( !DocInfo.m_pDoc ) break;	// GetNextLine 中で EOF に達した
+			
+			--DocInfo.m_iLineNo;
+			DocInfo.m_pDoc = DocInfo.m_pDoc->GetPrevLine();
 		}
 	}
 	
-	if( !pDocLine ) return 0;
+	if( !DocInfo.m_pDoc ) return 0;
 	
 	// Y 補正
 	if( bRe ){
-		pattern.GetRegexp()->GetMatchRange( pMatchRange, pMatchRange, nLinePos );
+		pattern.GetRegexp()->GetMatchRange( pMatchRange, pMatchRange, iLineNo );
 	}else{
-		pMatchRange->SetFromY( nLinePos );	// マッチ行
-		pMatchRange->SetToY  ( nLinePos );	// マッチ行
+		pMatchRange->SetFromY( iLineNo );	// マッチ行
+		pMatchRange->SetToY  ( iLineNo );	// マッチ行
 	}
 	
 #ifdef MEASURE_SEARCH_TIME
