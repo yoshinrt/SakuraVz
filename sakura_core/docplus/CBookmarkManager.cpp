@@ -235,31 +235,45 @@ void CBookmarkManager::MarkSearchWord(
 
 	/* 1==正規表現 */
 	CBregexp*	pRegexp = pattern.GetRegexp();
-	CGetNextLineInfoBM	DocInfo( m_pcDocLineMgr->GetLine( CLogicInt( 0 )), CLogicInt( 0 ));
+	CLogicInt	iLineNo( 0 );
+	CDocLine	*pDoc;
+	CGetNextLineInfoBM	DocInfo( pDoc = m_pcDocLineMgr->GetLine( iLineNo ), iLineNo );
 	
 	CLogicRange MatchRange;
 	
 	// 次行取得コールバック設定
 	pRegexp->SetNextLineCallback( GetNextLine, &DocInfo );
 	
-	while( DocInfo.m_pDoc ){
-		if(!CBookmarkGetter(DocInfo.m_pDoc).IsBookmarked()){
-			pLine = DocInfo.m_pDoc->GetDocLineStrWithEOL( &nLineLen );
+	while( pDoc ){
+		if( !CBookmarkGetter( pDoc ).IsBookmarked()){
+			pLine = pDoc->GetDocLineStrWithEOL( &nLineLen );
 			
-			CLogicInt iLineNo = DocInfo.m_iLineNo;	// 検索開始行
+			// 検索開始行
+			DocInfo.m_pDoc		= pDoc;
+			DocInfo.m_iLineNo	= iLineNo;
 			
-			if( pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
+			if( !pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
+				// partial match 中に EOF に達した
+				if( !DocInfo.m_pDoc ) break;
 				
-				// match レンジ取得
-				pRegexp->GetMatchRange( &MatchRange, iLineNo );
+				// partial match で消費した次行
+				pDoc	= DocInfo.m_pDoc->GetNextLine();
+				iLineNo	= DocInfo.m_iLineNo + 1;
 				
-				// 先頭行マーク
-				iLineNo = MatchRange.GetFrom().y;
-				DocInfo.m_pDoc = m_pcDocLineMgr->GetLine( iLineNo );
-				CBookmarkSetter( DocInfo.m_pDoc ).SetBookmark( true );
+				continue;
 			}
+			
+			// match レンジ取得
+			pRegexp->GetMatchRange( &MatchRange, iLineNo );
+			
+			// 先頭行マーク
+			iLineNo = MatchRange.GetFrom().y;
+			pDoc = m_pcDocLineMgr->GetLine( iLineNo );
+			CBookmarkSetter( pDoc ).SetBookmark( true );
 		}
-		DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();
-		++DocInfo.m_iLineNo;
+		
+		// 検索開始行の次行
+		pDoc = pDoc->GetNextLine();
+		++iLineNo;
 	}
 }
