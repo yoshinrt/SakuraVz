@@ -233,7 +233,8 @@ int CSearchAgent::SearchWord(
 	CLogicInt	iLineNo		= ptSerachBegin.GetY2();
 	CGetNextLineInfo	DocInfo( m_pcDocLineMgr->GetLine( iLineNo ), iLineNo );
 	
-	bool bRe = pattern.GetSearchOption().bRegularExp;
+	bool bRe	= pattern.GetSearchOption().bRegularExp;
+	bool bHit	= false;
 	
 	// 正規表現の場合，次行取得コールバック設定
 	if( bRe ){
@@ -248,6 +249,7 @@ int CSearchAgent::SearchWord(
 			
 			iLineNo = DocInfo.m_iLineNo; // 検索開始行
 			if( SearchWord1Line( pattern, szSubject, iSubjectSize, nIdxPos, pMatchRange, uOption )){
+				bHit = true;
 				break;	// hit
 			}
 			
@@ -299,6 +301,7 @@ int CSearchAgent::SearchWord(
 			// hit した
 			if( LastRange.GetFrom().x >= 0 ){
 				*pMatchRange = LastRange;
+				bHit = true;
 				break;
 			}
 			
@@ -309,7 +312,7 @@ int CSearchAgent::SearchWord(
 		}
 	}
 	
-	if( !DocInfo.m_pDoc ) return 0;
+	if( !bHit ) return 0;
 	
 	// Y 補正
 	if( bRe ){
