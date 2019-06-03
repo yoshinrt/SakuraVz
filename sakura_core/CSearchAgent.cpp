@@ -230,8 +230,9 @@ int CSearchAgent::SearchWord(
 	UINT					uOption			//!< grep オプション
 ){
 	CLogicInt	nIdxPos		= ptSerachBegin.x;
+	CDocLine	*pDoc;
 	CLogicInt	iLineNo		= ptSerachBegin.GetY2();
-	CGetNextLineInfo	DocInfo( m_pcDocLineMgr->GetLine( iLineNo ), iLineNo );
+	CGetNextLineInfo	DocInfo( pDoc = m_pcDocLineMgr->GetLine( iLineNo ), iLineNo );
 	
 	bool bRe	= pattern.GetSearchOption().bRegularExp;
 	bool bHit	= false;
@@ -270,9 +271,9 @@ int CSearchAgent::SearchWord(
 	else{
 		int iXLimit = -1;	// 検索開始位置
 		
-		while( NULL != DocInfo.m_pDoc ){
+		while( NULL != pDoc ){
 			int iSubjectSize;
-			wchar_t *szSubject = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iSubjectSize );
+			wchar_t *szSubject = ( wchar_t *)pDoc->GetDocLineStrWithEOL( &iSubjectSize );
 			
 			CLogicRange	LastRange;
 			LastRange.SetFromX( CLogicInt( -1 ));
@@ -283,7 +284,9 @@ int CSearchAgent::SearchWord(
 			// 非 re 時は加算することにあまり意味は無い．
 			iXLimit = iXLimit < 0 ? nIdxPos : iXLimit + iSubjectSize;
 			
-			iLineNo = DocInfo.m_iLineNo; // 検索開始行
+			// 検索開始行
+			DocInfo.m_pDoc		= pDoc;
+			DocInfo.m_iLineNo	= iLineNo;
 			
 			// 行頭から iXLimit に達するまで連続で検索し，最後に hit したものが後方検索の結果
 			while( SearchWord1Line( pattern, szSubject, iSubjectSize, StartPos, pMatchRange, uOption )){
@@ -305,10 +308,8 @@ int CSearchAgent::SearchWord(
 				break;
 			}
 			
-			if( !DocInfo.m_pDoc ) break;	// GetNextLine 中で EOF に達した
-			
-			--DocInfo.m_iLineNo;
-			DocInfo.m_pDoc = DocInfo.m_pDoc->GetPrevLine();
+			--iLineNo;
+			pDoc = pDoc->GetPrevLine();
 		}
 	}
 	
