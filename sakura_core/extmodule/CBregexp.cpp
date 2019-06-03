@@ -213,12 +213,17 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	
 	if( iStart >= 0 ) m_iStart = iStart;
 	
+	// partial match opt 設定
 	UINT uPcre2Opt = 0;
-	if(( m_uOption & ( optWordSearch | optLiteral )) || !( uOption & optPartialMatch )){
-		m_uOption &= ~optPartialMatch;
-	}else{
+	if(
+		!( m_uOption & ( optWordSearch | optLiteral )) &&
+		( uOption & optPartialMatch ) &&
+		m_GetNextLineCallback
+	){
 		m_uOption |= optPartialMatch;
 		uPcre2Opt |= PCRE2_PARTIAL_HARD;
+	}else{
+		m_uOption &= ~optPartialMatch;
 	}
 	
 	if( uOption & optNotBol ){
@@ -249,27 +254,13 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		if( m_iLastCode != PCRE2_ERROR_PARTIAL ) return m_iLastCode > 0;
 		
-		// partial 1回目，szSubject を m_szSearchBuf にコピー
-		if( m_szSubject != m_szSearchBuf ){
-			if( !ResizeBuf( m_iSubjectLen, m_szSearchBuf, m_iSearchBufSize ))
-				return false;
-			
-			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
-			
-			#ifdef _DEBUG
-				if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
-			#endif
-		}
-		
 		// partial match したので，次行読み出し
-		if( !m_GetNextLineCallback ) return false;
 		const wchar_t	*pNextLine;
 		int iNextSize = m_GetNextLineCallback( pNextLine, m_pCallbackParam );
 		
 		// partial match したけど次行がないので，partial match を外して再検索
 		if( iNextSize == 0 ){
 			uPcre2Opt	&= ~PCRE2_PARTIAL_HARD;
-			uOption		&= ~optPartialMatch;
 			continue;
 		}
 		
@@ -277,6 +268,18 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		if( iNextSize & SIZE_NOPARTIAL ){
 			iNextSize &= ~SIZE_NOPARTIAL;
 			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+		}
+		
+		// partial 1回目，szSubject を m_szSearchBuf にコピー
+		if( m_szSubject != m_szSearchBuf ){
+			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+				return false;
+			
+			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+			
+			#ifdef _DEBUG
+				if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
+			#endif
 		}
 		
 		// cat
