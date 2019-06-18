@@ -1091,6 +1091,7 @@
     <ClInclude Include="..\libs\pcre2\include\pcre2.h">
       <Filter>Other Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\sakura_core\openmp.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\sakura_core\Funccode_x.hsrc">

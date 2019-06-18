@@ -283,8 +283,6 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 {
 	BOOL bRet = FALSE;
 	BOOL bOnlyExpansion = TRUE;		// 最大幅の拡大のみをチェックする
-	CLayoutInt nMaxLen = CLayoutInt(0);
-	CLayoutInt nMaxLineNum = CLayoutInt(0);
 
 	CLayoutInt nLines = GetLineCount();		// テキストのレイアウト行数
 
@@ -302,15 +300,6 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 	else
 		nEnd++;					// 算出終了行の次行
 
-	CLayout* pLayout;
-
-	// 算出開始レイアウト行を探す
-	// 2013.05.13 SearchLineByLayoutYを使う
-	if( nStart == 0 ){
-		pLayout = m_pLayoutTop;
-	}else{
-		pLayout = SearchLineByLayoutY(nStart);
-	}
 #if 0
 	if( nStart * 2 < nLines ){
 		// 前方からサーチ
@@ -338,30 +327,69 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 #endif
 
 	// レイアウト行の最大幅を取り出す
-	for( CLayoutInt i = nStart; i < nEnd; i++ ){
-		if( !pLayout )
-			break;
-
-		// レイアウト行の長さを算出する
-		if( bCalLineLen ){
-			CLayoutInt nWidth = pLayout->CalcLayoutWidth(*this) + CLayoutInt(pLayout->GetLayoutEol().GetLen()>0?1+m_nSpacing:0);
-			pLayout->SetLayoutWidth( nWidth );
+	CLayoutInt *nMaxLenL		= new CLayoutInt[ OmpMaxThreadNum ];
+	CLayoutInt *nMaxLineNumL	= new CLayoutInt[ OmpMaxThreadNum ];
+	
+	#pragma omp parallel for
+	for( int iProcs = 0; iProcs < OmpMaxThreadNum; ++iProcs ){
+		
+		CLayoutInt nMaxLen		= CLayoutInt(0);
+		CLayoutInt nMaxLineNum	= CLayoutInt(0);
+		
+		CLayoutInt nStartL	= ( nEnd - nStart ) *   OmpThreadId       / OmpMaxThreadNum + nStart;
+		CLayoutInt nEndL	= ( nEnd - nStart ) * ( OmpThreadId + 1 ) / OmpMaxThreadNum + nStart;
+		
+		CLayout* pLayout;
+		
+		// 算出開始レイアウト行を探す
+		if( nStartL == 0 ){
+			pLayout = m_pLayoutTop;
+		}else{
+			pLayout = SearchLineByLayoutY( nStartL );
 		}
-
-		// 最大幅を更新
-		if( nMaxLen < pLayout->GetLayoutWidth() ){
-			nMaxLen = pLayout->GetLayoutWidth();
-			nMaxLineNum = i;		// 最大幅のレイアウト行
-
-			// アプリケーションの最大幅となったら算出は停止
-			if( nMaxLen >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
+		
+		for( CLayoutInt i = nStartL; i < nEndL; i++ ){
+			if( !pLayout )
 				break;
+			
+			// レイアウト行の長さを算出する
+			if( bCalLineLen ){
+				CLayoutInt nWidth = pLayout->CalcLayoutWidth(*this) + CLayoutInt(pLayout->GetLayoutEol().GetLen()>0?1+m_nSpacing:0);
+				pLayout->SetLayoutWidth( nWidth );
+			}
+			
+			// 最大幅を更新
+			if( nMaxLen < pLayout->GetLayoutWidth() ){
+				nMaxLen = pLayout->GetLayoutWidth();
+				nMaxLineNum = i;		// 最大幅のレイアウト行
+				
+				// アプリケーションの最大幅となったら算出は停止
+				if( nMaxLen >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
+					break;
+			}
+			
+			// 次のレイアウト行のデータ
+			pLayout = pLayout->GetNextLayout();
 		}
-
-		// 次のレイアウト行のデータ
-		pLayout = pLayout->GetNextLayout();
+		
+		nMaxLenL    [ OmpThreadId ] = nMaxLen;
+		nMaxLineNumL[ OmpThreadId ] = nMaxLineNum;
 	}
-
+	
+	// reduction
+	CLayoutInt nMaxLen		= nMaxLenL[ 0 ];
+	CLayoutInt nMaxLineNum	= nMaxLineNumL[ 0 ];
+	
+	for( int i = 1; i < OmpMaxThreadNum; ++i ){
+		if( nMaxLen < nMaxLenL[ i ]){
+			nMaxLen = nMaxLenL[ i ];
+			nMaxLineNum = nMaxLineNumL[ i ];		// 最大幅のレイアウト行
+		}
+	}
+	
+	delete [] nMaxLenL;
+	delete [] nMaxLineNumL;
+	
 	// テキストの幅の変化をチェック
 	if( Int(nMaxLen) ){
 		// 最大幅が拡大した または 最大幅の拡大のみチェックでない
