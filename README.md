@@ -199,6 +199,7 @@ sakura.exe -grepmode -grepdlg -GREPR="a"
         - [デバッグ方法](#デバッグ方法)
     - [変更履歴](#変更履歴)
     - [マクロのサンプル](#マクロのサンプル)
+    - [静的コード解析](#静的コード解析)
 
 <!-- /TOC -->
 
@@ -319,3 +320,10 @@ https://ci.appveyor.com/project/sakuraeditor/sakura/history
 
 [こちら](tools/macro)でマクロのサンプルを提供してます。  
 もしサンプルを作ってもいいよ～という方がおられましたら PR の作成お願いします。
+
+## 静的コード解析
+
+- CodeFactor を利用しています。
+    - [cpplint.py](CPPLINT.md) で cpp のスタイルのチェックを行っています。
+
+
