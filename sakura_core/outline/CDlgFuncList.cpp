@@ -1543,11 +1543,7 @@ void CDlgFuncList::SetTree(bool tagjump, bool nolabel)
 		/*	pcFuncInfoに登録されている行数、桁を確認して、選択するアイテムを考える
 		*/
 		bool bFileSelect = false;
-		if(
-			pcFuncInfo->m_cmemFileName.GetStringPtr() &&
-			*pcFuncInfo->m_cmemFileName.GetStringPtr() != L'\0' &&
-			m_pcFuncInfoArr->m_szFilePath[0]
-		){
+		if( pcFuncInfo->m_cmemFileName.GetStringPtr() && m_pcFuncInfoArr->m_szFilePath[0] ){
 			if( 0 == auto_stricmp( pcFuncInfo->m_cmemFileName.GetStringPtr(), m_pcFuncInfoArr->m_szFilePath.c_str() ) ){
 				bFileSelect = true;
 			}
