@@ -729,6 +729,7 @@ public:
 	bool	m_bWordSearch;				//!< Vz 互換の単語検索
 	bool	m_bNoAskWhenFileUpdate;		//!< 外部で編集されたとき，未変更なら問い合わせしない
 	int		m_nSelectMode;				//!< 選択モード
+	int		m_nLargeFileSize;			//!< 巨大ファイルモードにするサイズ
 	
 	void Initialize( void ){
 		m_bEnableTextStack		= true;
@@ -736,6 +737,7 @@ public:
 		m_bWordSearch			= true;
 		m_bNoAskWhenFileUpdate	= true;
 		m_nSelectMode			= ESelectMode::T_Always;
+		m_nLargeFileSize		= 10 * 1024 * 1024;
 	}
 	
 	//! VzMode の ini 入出力
@@ -745,6 +747,7 @@ public:
 		cProfile.IOProfileData( pszSecName, L"bVzModeWordSearch",			m_bWordSearch );
 		cProfile.IOProfileData( pszSecName, L"bVzModeNoAskWhenFileUpdate",	m_bNoAskWhenFileUpdate );
 		cProfile.IOProfileData( pszSecName, L"nVzModeSelectMode",			m_nSelectMode );
+		cProfile.IOProfileData( pszSecName, L"nVzModeLargeFileSize",		m_nLargeFileSize );
 	}
 };
 
