@@ -27,3 +27,4 @@ sha256.txt
 tags
 testData_*.txt
 UpgradeLog.htm
+*.vcxproj.user
