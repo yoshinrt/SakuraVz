@@ -112,14 +112,11 @@ CFileLoad::CFileLoad( const SEncodingConfig& encode )
 
 	m_hFile			= NULL;
 	m_nFileSize		= 0;
-	m_nFileDataLen	= 0;
 	m_CharCode		= CODE_DEFAULT;
 	m_pCodeBase		= NULL;////
 	m_encodingTrait = ENCODING_TRAIT_ASCII;
 	m_bBomExist		= false;	// Jun. 08, 2003 Moca
 	m_nFlag 		= 0;
-	m_nReadLength	= 0;
-	m_eMode			= FLMODE_CLOSE;	// Jun. 08, 2003 Moca
 	m_hMap			= nullptr;
 
 	m_nLineIndex	= -1;
@@ -187,7 +184,6 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 		throw CError_FileOpen(CError_FileOpen::TOO_BIG);
 	}
 	m_nFileSize = fileSize.QuadPart;
-//	m_eMode = FLMODE_OPEN;
 	
 	if( m_nFileSize ){
 		if(
@@ -219,7 +215,6 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 	m_encodingTrait = CCodePage::GetEncodingTrait(m_CharCode);
 	m_nFlag = nFlag;
 
-	m_nFileDataLen = m_nFileSize;
 	bool bBom = false;
 	if( 0 < m_nFileSize ){
 		CMemory headData(m_pReadBuf, ( int )t_min( m_nFileSize, ( LONGLONG )10 ));
@@ -243,7 +238,6 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 	}
 	
 	// To Here Jun. 13, 2003 Moca BOMの除去
-	m_eMode = FLMODE_READY;
 //	m_cmemLine.AllocBuffer( 256 );
 	m_pCodeBase->GetEol( &m_memEols[0], EOL_NEL );
 	m_pCodeBase->GetEol( &m_memEols[1], EOL_LS );
@@ -293,12 +287,9 @@ void CFileLoad::FileClose( void )
 	m_nReadBufOffSet	= 0;
 	
 	m_nFileSize		=  0;
-	m_nFileDataLen	=  0;
 	m_CharCode		= CODE_DEFAULT;
 	m_bBomExist		= false; // From Here Jun. 08, 2003
 	m_nFlag 		=  0;
-	m_nReadLength	=  0;
-	m_eMode			= FLMODE_CLOSE;
 	m_nLineIndex	= -1;
 }
 
@@ -356,12 +347,6 @@ EConvertResult CFileLoad::ReadLine_core(
 {
 	EConvertResult eRet = RESULT_COMPLETE;
 
-#ifdef _DEBUG
-	if( m_eMode < FLMODE_READY ){
-		MYTRACE( _T("CFileLoad::ReadLine(): m_eMode = %d\n"), m_eMode );
-		return RESULT_FAILURE;
-	}
-#endif
 	//行データバッファ (文字コード変換無しの生のデータ)
 	m_cLineBuffer.SetRawDataHoldBuffer("",0);
 
@@ -382,7 +367,6 @@ EConvertResult CFileLoad::ReadLine_core(
 	);
 	
 	if( pLine ) m_cLineBuffer.AppendRawData( pLine, nBufLineLen + nEolLen );
-	m_nReadLength += m_cLineBuffer.GetRawLength();
 
 	// 文字コード変換 cLineBuffer -> pUnicodeBuffer
 	EConvertResult eConvertResult = CIoBridge::FileToImpl(m_cLineBuffer,pUnicodeBuffer,m_pCodeBase,m_nFlag);
@@ -414,10 +398,10 @@ EConvertResult CFileLoad::ReadLine_core(
 */
 int CFileLoad::GetPercent( void ){
 	int nRet;
-	if( 0 == m_nFileDataLen || m_nReadLength > m_nFileDataLen ){
+	if( 0 == m_nFileSize || m_nReadBufOffSet > m_nFileSize ){
 		nRet = 100;
 	}else{
-		nRet = static_cast<int>(m_nReadLength * 100 / m_nFileDataLen);
+		nRet = static_cast<int>(m_nReadBufOffSet * 100 / m_nFileSize);
 	}
 	return nRet;
 }

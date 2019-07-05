@@ -100,9 +100,6 @@ protected:
 	const char* GetNextLineCharCode(const char*	pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, int* pnEolLen, int* pnBufferNext);
 	EConvertResult ReadLine_core(CNativeW* pUnicodeBuffer, CEol* pcEol);
 
-	int Read(void* pBuf, size_t nSize); // inline
-	DWORD FilePointer(DWORD offset, DWORD origin); // inline
-
 	/* メンバオブジェクト */
 	const SEncodingConfig* m_pEencoding;
 
@@ -111,8 +108,6 @@ protected:
 	HANDLE	m_hMap;		//!< メモリマップドファイルハンドル
 	
 	LONGLONG	m_nFileSize;	// ファイルサイズ(64bit)
-	LONGLONG	m_nFileDataLen;	// ファイルデータ長からBOM長を引いたバイト数
-	LONGLONG	m_nReadLength;	// 現在までにロードしたデータの合計バイト数(BOM長を含まない)
 	int		m_nLineIndex;	// 現在ロードしている論理行(0開始)
 	ECodeType	m_CharCode;		// 文字コード
 	CCodeBase*	m_pCodeBase;	////
@@ -122,15 +117,6 @@ protected:
 	int		m_nMaxEolLen;	//!< EOLの長さ
 	bool	m_bBomExist;	// ファイルのBOMが付いているか Jun. 08, 2003 Moca 
 	int		m_nFlag;		// 文字コードの変換オプション
-	//	Jun. 13, 2003 Moca
-	//	状態をenumとしてわかりやすく．
-	enum enumFileLoadMode{
-		FLMODE_CLOSE = 0, //!< 初期状態
-		FLMODE_OPEN, //!< ファイルオープンのみ
-		FLMODE_READY, //!< 順アクセスOK
-		FLMODE_READBUFEND //!<ファイルの終端までバッファに入れた
-	};
-	enumFileLoadMode	m_eMode;		// 現在の読み込み状態
 
 	// 読み込みバッファ系
 	const char*	m_pReadBuf;		// 読み込みバッファへのポインタ
@@ -149,24 +135,5 @@ protected:
 inline BOOL CFileLoad::GetFileTime( FILETIME* pftCreate, FILETIME* pftLastAccess, FILETIME* pftLastWrite ){
 	return ::GetFileTime( m_hFile, pftCreate, pftLastAccess, pftLastWrite );
 }
-
-// protected
-inline int CFileLoad::Read( void* pBuf, size_t nSize )
-{
-	DWORD ReadSize;
-	if( !::ReadFile( m_hFile, pBuf, nSize, &ReadSize, NULL ) )
-		throw CError_FileRead();
-	return (int)ReadSize;
-}
-
-// protected
-inline DWORD CFileLoad::FilePointer( DWORD offset, DWORD origin )
-{
-	DWORD fp;
-	if( INVALID_SET_FILE_POINTER == ( fp = ::SetFilePointer( m_hFile, offset, NULL, FILE_BEGIN ) ) )
-		throw CError_FileRead();
-	return fp;
-}
-
 #endif /* SAKURA_CFILELOAD_H_ */
 
