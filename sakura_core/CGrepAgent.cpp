@@ -1366,7 +1366,7 @@ int CGrepAgent::DoGrepReplaceFile(
 				if( !bMatch ) break;
 				
 				// 置換
-				if( !sGrepOption.bGrepPaste ){
+				if( sGrepOption.bGrepReplace && !sGrepOption.bGrepPaste ){
 					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 				}
 				
