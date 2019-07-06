@@ -601,3 +601,19 @@ const char* CFileLoad::GetNextLineCharCode(
 
 	return &pData[nbgn];
 }
+
+// 指定位置以降の行頭を検索
+size_t CFileLoad::GetNextLineTop( size_t uPos ){
+	size_t	nLineLen;	// 不使用
+	CEol	cEol;		// 不使用
+	int		nEolLen;	// 不使用
+	
+	if( !uPos ) return 0;
+	if( uPos == m_nFileSize ) return uPos;
+	
+	--uPos;
+	
+	GetNextLineCharCode( m_pReadBuf, m_nFileSize, &nLineLen, &uPos, &cEol, &nEolLen );
+	return uPos;
+}
+

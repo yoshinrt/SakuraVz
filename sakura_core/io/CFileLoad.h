@@ -100,6 +100,9 @@ public:
 	// 並列実行用コピー
 	void Copy( CFileLoad& Src );
 	
+	// 次の行頭を検索
+	size_t GetNextLineTop( size_t uPos );
+	
 protected:
 	void _Init( void );
 	
