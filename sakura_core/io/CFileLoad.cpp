@@ -372,7 +372,6 @@ EConvertResult CFileLoad::ReadLine_core(
 	//	Oct. 19, 2002 genta while条件を整理
 	size_t		nBufLineLen;
 	int			nEolLen;
-	size_t		nBufferNext;
 	
 	const char* pLine = GetNextLineCharCode(
 		m_pReadBuf,
@@ -380,8 +379,7 @@ EConvertResult CFileLoad::ReadLine_core(
 		&nBufLineLen,      //[out]改行を含まない長さ
 		&m_nReadBufOffSet, //[i/o]オフセット
 		pcEol,
-		&nEolLen,
-		&nBufferNext
+		&nEolLen
 	);
 	
 	if( pLine ) m_cLineBuffer.AppendRawData( pLine, nBufLineLen + nEolLen );
@@ -433,14 +431,12 @@ const char* CFileLoad::GetNextLineCharCode(
 	size_t*		pnLineLen,	//!< [out]	1行のバイト数を返すただしEOLは含まない
 	size_t*		pnBgn,		//!< [i/o]	検索文字列のバイト単位のオフセット位置
 	CEol*		pcEol,		//!< [i/o]	EOL
-	int*		pnEolLen,	//!< [out]	EOLのバイト数 (Unicodeで困らないように)
-	size_t*		pnBufferNext//!< [out]	次回持越しバッファ長(EOLの断片)
+	int*		pnEolLen	//!< [out]	EOLのバイト数 (Unicodeで困らないように)
 ){
 	size_t nbgn = *pnBgn;
 	size_t i;
 
 	pcEol->SetType( EOL_NONE );
-	*pnBufferNext = 0;
 
 	if( nDataLen <= nbgn ){
 		*pnLineLen = 0;
@@ -490,7 +486,6 @@ const char* CFileLoad::GetNextLineCharCode(
 					for( k = 0; k < (int)_countof(eEolEx); k++ ){
 						size_t nCompLen = t_min( nDataLen - i, ( size_t )m_memEols[k].GetRawLength());
 						if( 0 != nCompLen && 0 == memcmp(m_memEols[k].GetRawPtr(), pData + i, nCompLen) ){
-							*pnBufferNext = t_max(*pnBufferNext, nCompLen);
 							bSet = true;
 						}
 					}
@@ -597,11 +592,6 @@ const char* CFileLoad::GetNextLineCharCode(
 		// EOLがなかった場合
 		if( i != nDataLen ){
 			i = nDataLen;		// 最後の半端なバイトを落とさないように
-		}
-	}else{
-		// CRの場合は、CRLFかもしれないので次のバッファへ送る
-		if( *pcEol == EOL_CR ){
-			*pnBufferNext = neollen;
 		}
 	}
 
