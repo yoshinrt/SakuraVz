@@ -68,7 +68,10 @@ public:
 	CDocLine* AddNewLine();						//!< 最下部に新しい行を挿入
 	void DeleteAllLine();						//!< 全ての行を削除する
 	void DeleteLine( CDocLine* );				//!< 行の削除
-
+	
+	// CDocLineMgr 同士の連結，pAppendData 側のデータはクリアされる
+	void Cat( CDocLineMgr *pAppendData );
+	
 	//デバッグ
 	void DUMP();
 
