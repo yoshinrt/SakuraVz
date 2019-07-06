@@ -81,6 +81,16 @@ CDocLine* CDocLineMgr::AddNewLine()
 	return pcDocLineNew;
 }
 
+//! 文字列を指定して最下部に新しい行を挿入
+CDocLine* CDocLineMgr::AddNewLine( const wchar_t* pData, int nDataLen ){
+	//チェーン適用
+	CDocLine* pcDocLine = AddNewLine();
+	//インスタンス設定
+	pcDocLine->SetDocLineString( pData, nDataLen );
+	
+	return pcDocLine;
+}
+
 //! 全ての行を削除する
 void CDocLineMgr::DeleteAllLine()
 {
