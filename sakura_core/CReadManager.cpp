@@ -77,60 +77,99 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 	}
 
 	EConvertResult eRet = RESULT_COMPLETE;
-
+	
+	std::vector<CFileLoad>		cfl( OmpMaxThreadNum );
+	std::vector<CDocLineMgr>	cDocMgr( OmpMaxThreadNum );
+	
 	try{
-		CFileLoad cfl(type->m_encoding);
-
+		cfl[ 0 ].SetEncodingConfig( type->m_encoding );
+		
 		bool bBigFile;
-#ifdef _WIN64
-		bBigFile = true;
-#else
-		bBigFile = false;
-#endif
+		#ifdef _WIN64
+			bBigFile = true;
+		#else
+			bBigFile = false;
+		#endif
 		// ファイルを開く
 		// ファイルを閉じるにはFileCloseメンバ又はデストラクタのどちらかで処理できます
 		//	Jul. 28, 2003 ryoji BOMパラメータ追加
-		cfl.FileOpen( pszPath, bBigFile, eCharCode, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
+		cfl[ 0 ].FileOpen( pszPath, bBigFile, eCharCode, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
 		pFileInfo->SetBomExist( bBom );
-
+		
 		/* ファイル時刻の取得 */
 		FILETIME	FileTime;
-		if( cfl.GetFileTime( NULL, NULL, &FileTime ) ){
+		if( cfl[ 0 ].GetFileTime( NULL, NULL, &FileTime )){
 			pFileInfo->SetFileTime( FileTime );
 		}
-
-		// ReadLineはファイルから 文字コード変換された1行を読み出します
-		// エラー時はthrow CError_FileRead を投げます
-		int				nLineNum = 0;
-		CEol			cEol;
-		CNativeW		cUnicodeBuffer;
-		EConvertResult	eRead;
-		while( RESULT_FAILURE != (eRead = cfl.ReadLine( &cUnicodeBuffer, &cEol )) ){
-			if(eRead==RESULT_LOSESOME){
-				eRet = RESULT_LOSESOME;
+		
+		for( int i = 1; i < OmpMaxThreadNum; ++i ){
+			// cfl インスタンスコピー
+			cfl[ i ].Copy( cfl[ 0 ]);
+		}
+		
+		#pragma omp parallel for
+		for( int iThread = 0; iThread < OmpMaxThreadNum; ++iThread ){
+			
+			// 処理開始・終了位置探索
+			size_t	uBeginPos;
+			if( iThread == 0 ){
+				uBeginPos = 0;
+			}else{
+				uBeginPos = cfl[ iThread ].GetNextLineTop(
+					cfl[ iThread ].GetFileSize() * iThread / OmpMaxThreadNum
+				);
 			}
-			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
-			int		nLineLen = cUnicodeBuffer.GetStringLength();
-			++nLineNum;
-			CDocEditAgent(pcDocLineMgr).AddLineStrX( pLine, nLineLen );
-			//経過通知
-			if(nLineNum%512==0){
-				NotifyProgress(cfl.GetPercent());
-				// 処理中のユーザー操作を可能にする
-				if( !::BlockingHook( NULL ) ){
-					throw CAppExitException(); //中断検出
+			
+			size_t	uEndPos;
+			if( iThread == OmpMaxThreadNum - 1 ){
+				uEndPos = cfl[ iThread ].GetFileSize();
+			}else{
+				uEndPos = cfl[ iThread ].GetNextLineTop(
+					cfl[ iThread ].GetFileSize() * ( iThread + 1 ) / OmpMaxThreadNum
+				);
+			}
+			
+			cfl[ iThread ].SetBufLimit( uBeginPos, uEndPos );
+			#ifdef DEBUG
+				MYTRACE( L"pid:%d range:%u - %u\n", iThread, ( UINT )uBeginPos, ( UINT )uEndPos );
+			#endif
+			
+			// ReadLineはファイルから 文字コード変換された1行を読み出します
+			// エラー時はthrow CError_FileRead を投げます
+			int				nLineNum = 0;
+			CEol			cEol;
+			CNativeW		cUnicodeBuffer;
+			EConvertResult	eRead;
+			
+			while( RESULT_FAILURE != (eRead = cfl[ iThread ].ReadLine( &cUnicodeBuffer, &cEol ))){
+				if(eRead==RESULT_LOSESOME){
+					eRet = RESULT_LOSESOME;
+				}
+				const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
+				int		nLineLen = cUnicodeBuffer.GetStringLength();
+				++nLineNum;
+				cDocMgr[ iThread ].AddNewLine( pLine, nLineLen );
+				//経過通知
+				if( nLineNum % 512 == 0 ){
+					if( iThread == 0 ) NotifyProgress( cfl[ 0 ].GetPercent());
+					// 処理中のユーザー操作を可能にする
+					if( !::BlockingHook( NULL ) ){
+						throw CAppExitException(); //中断検出
+					}
 				}
 			}
 		}
 		
+		for( int i = 0; i < OmpMaxThreadNum; ++i ) pcDocLineMgr->Cat( &cDocMgr[ i ]);
+		
 		// 巨大ファイル判定
 		pFileInfo->SetLargeFile(
 			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize &&
-			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize * ( 1024 * 1024UL ) <= cfl.GetFileSize()
+			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize * ( 1024 * 1024UL ) <= cfl[ 0 ].GetFileSize()
 		);
 		
 		// ファイルをクローズする
-		cfl.FileClose();
+		cfl[ 0 ].FileClose();
 	}
 	catch(CAppExitException){
 		//WM_QUITが発生した
@@ -180,7 +219,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		/* 既存データのクリア */
 		pcDocLineMgr->DeleteAllLine();
 	} // 例外処理終わり
-
+	
 	NotifyProgress(0);
 	/* 処理中のユーザー操作を可能にする */
 	if( !::BlockingHook( NULL ) ){

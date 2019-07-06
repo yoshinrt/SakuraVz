@@ -103,6 +103,12 @@ public:
 	// 次の行頭を検索
 	size_t GetNextLineTop( size_t uPos );
 	
+	// buf 処理範囲を制限
+	void SetBufLimit( size_t uBegin, size_t uEnd ){
+		m_nReadBufOffSet	= uBegin;
+		m_uBufSize			= uEnd;
+	}
+	
 protected:
 	void _Init( void );
 	
@@ -121,6 +127,7 @@ protected:
 	HANDLE	m_hMap;		//!< メモリマップドファイルハンドル
 	
 	size_t	m_nFileSize;	// ファイルサイズ(64bit)
+	size_t	m_uBufSize;		// 処理対象の buf サイズ
 	int		m_nLineIndex;	// 現在ロードしている論理行(0開始)
 	ECodeType	m_CharCode;		// 文字コード
 	CCodeBase*	m_pCodeBase;	////

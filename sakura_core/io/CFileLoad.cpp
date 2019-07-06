@@ -109,6 +109,7 @@ std::wstring CFileLoad::GetSizeStringForHuman(ULONGLONG size)
 void CFileLoad::_Init( void ){
 	m_hFile			= NULL;
 	m_nFileSize		= 0;
+	m_uBufSize		= 0;
 	m_CharCode		= CODE_DEFAULT;
 	m_pCodeBase		= NULL;////
 	m_encodingTrait = ENCODING_TRAIT_ASCII;
@@ -129,6 +130,7 @@ void CFileLoad::Copy( CFileLoad& Src ){
 	
 	m_hFile			= nullptr;
 	m_nFileSize		= Src.m_nFileSize;
+	m_uBufSize		= Src.m_nFileSize;
 	m_CharCode		= Src.m_CharCode;
 	m_pCodeBase		= Src.m_pCodeBase;
 	m_encodingTrait = Src.m_encodingTrait;
@@ -201,7 +203,7 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 		FileClose();
 		throw CError_FileOpen(CError_FileOpen::TOO_BIG);
 	}
-	m_nFileSize = ( size_t )fileSize.QuadPart;
+	m_nFileSize = m_uBufSize = ( size_t )fileSize.QuadPart;
 	
 	if( m_nFileSize ){
 		if(
@@ -305,6 +307,7 @@ void CFileLoad::FileClose( void )
 	m_nReadBufOffSet	= 0;
 	
 	m_nFileSize		=  0;
+	m_uBufSize		=  0;
 	m_CharCode		= CODE_DEFAULT;
 	m_bBomExist		= false; // From Here Jun. 08, 2003
 	m_nFlag 		=  0;
@@ -375,9 +378,9 @@ EConvertResult CFileLoad::ReadLine_core(
 	
 	const char* pLine = GetNextLineCharCode(
 		m_pReadBuf,
-		m_nFileSize,    //[in] バッファの有効データサイズ
-		&nBufLineLen,      //[out]改行を含まない長さ
-		&m_nReadBufOffSet, //[i/o]オフセット
+		m_uBufSize,			//[in] バッファの有効データサイズ
+		&nBufLineLen,		//[out]改行を含まない長さ
+		&m_nReadBufOffSet,	//[i/o]オフセット
 		pcEol,
 		&nEolLen
 	);
@@ -414,10 +417,10 @@ EConvertResult CFileLoad::ReadLine_core(
 */
 int CFileLoad::GetPercent( void ){
 	int nRet;
-	if( 0 == m_nFileSize || m_nReadBufOffSet > m_nFileSize ){
+	if( 0 == m_uBufSize || m_nReadBufOffSet > m_uBufSize ){
 		nRet = 100;
 	}else{
-		nRet = static_cast<int>(m_nReadBufOffSet * 100 / m_nFileSize);
+		nRet = static_cast<int>(m_nReadBufOffSet * 100 / m_uBufSize);
 	}
 	return nRet;
 }
@@ -609,11 +612,11 @@ size_t CFileLoad::GetNextLineTop( size_t uPos ){
 	int		nEolLen;	// 不使用
 	
 	if( !uPos ) return 0;
-	if( uPos == m_nFileSize ) return uPos;
+	if( uPos == m_uBufSize ) return uPos;
 	
 	--uPos;
 	
-	GetNextLineCharCode( m_pReadBuf, m_nFileSize, &nLineLen, &uPos, &cEol, &nEolLen );
+	GetNextLineCharCode( m_pReadBuf, m_uBufSize, &nLineLen, &uPos, &cEol, &nEolLen );
 	return uPos;
 }
 
