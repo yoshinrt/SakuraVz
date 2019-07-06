@@ -52,7 +52,12 @@ int LimitStringLengthW( const WCHAR* pszData, int nDataLength, int nLimitLength,
 
 const char* GetNextLimitedLengthText( const char* pText, int nTextLen, int nLimitLen, int* pnLineLen, int* pnBgn );/* 指定長以下のテキストに切り分ける */
 const char*    GetNextLine  ( const char* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol); /* CR0LF0,CRLF,LF,CRで区切られる「行」を返す。改行コードは行長に加えない */
-const wchar_t* GetNextLineW ( const wchar_t* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, bool bExtEol); // GetNextLineのwchar_t版
+const wchar_t* GetNextLineW ( const wchar_t* pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, bool bExtEol ); // GetNextLineのwchar_t版
+static inline const wchar_t* GetNextLineW ( const wchar_t* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, bool bExtEol ){
+	size_t	sizeLineLen;
+	size_t	sizeBgn	= ( size_t )*pnBgn;
+	return GetNextLineW( pData, ( size_t )nDataLen, &sizeLineLen, &sizeBgn, pcEol, bExtEol );
+}
 //wchar_t* GetNextLineWB( const wchar_t*, int, int*, int*, CEol* ); // GetNextLineのwchar_t版(ビックエンディアン用)  // 未使用
 void GetLineColumn( const wchar_t* pLine, int* pnJumpToLine, int* pnJumpToColumn );
 

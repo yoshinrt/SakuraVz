@@ -737,7 +737,7 @@ public:
 		m_bWordSearch			= true;
 		m_bNoAskWhenFileUpdate	= true;
 		m_nSelectMode			= ESelectMode::T_Always;
-		m_nLargeFileSize		= 10 * 1024 * 1024;
+		m_nLargeFileSize		= 10;
 	}
 	
 	//! VzMode の ini 入出力

@@ -53,7 +53,7 @@
 */
 
 /*! ロード用バッファサイズの初期値 */
-const int CFileLoad::gm_nBufSizeDef = 32768;
+const size_t CFileLoad::gm_nBufSizeDef = 32768;
 //(最適値がマシンによって違うのでとりあえず32KB確保する)
 
 // /*! ロード用バッファサイズの設定可能な最低値 */
@@ -183,7 +183,7 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 		FileClose();
 		throw CError_FileOpen(CError_FileOpen::TOO_BIG);
 	}
-	m_nFileSize = fileSize.QuadPart;
+	m_nFileSize = ( size_t )fileSize.QuadPart;
 	
 	if( m_nFileSize ){
 		if(
@@ -197,13 +197,13 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 	
 	// 文字コード判定
 
-	nBomCode = CCodeMediator::DetectUnicodeBom( m_pReadBuf, ( int )t_min( m_nFileSize, ( LONGLONG )gm_nBufSizeDef ));
+	nBomCode = CCodeMediator::DetectUnicodeBom( m_pReadBuf, ( int )t_min( m_nFileSize, gm_nBufSizeDef ));
 	if( CharCode == CODE_AUTODETECT ){
 		if( nBomCode != CODE_NONE ){
 			CharCode = nBomCode;
 		}else{
 			CCodeMediator mediator(*m_pEencoding);
-			CharCode = mediator.CheckKanjiCode( m_pReadBuf, ( int )t_min( m_nFileSize, ( LONGLONG )gm_nBufSizeDef ));
+			CharCode = mediator.CheckKanjiCode( m_pReadBuf, ( int )t_min( m_nFileSize, gm_nBufSizeDef ));
 		}
 	}
 	// 不正な文字コードのときはデフォルト(SJIS:無変換)を設定
@@ -217,7 +217,7 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 
 	bool bBom = false;
 	if( 0 < m_nFileSize ){
-		CMemory headData(m_pReadBuf, ( int )t_min( m_nFileSize, ( LONGLONG )10 ));
+		CMemory headData(m_pReadBuf, ( int )t_min( m_nFileSize, ( size_t )10 ));
 		CNativeW headUni;
 		CIoBridge::FileToImpl(headData, &headUni, m_pCodeBase, m_nFlag);
 		if( 1 <= headUni.GetStringLength() && headUni.GetStringPtr()[0] == 0xfeff ){
@@ -352,9 +352,9 @@ EConvertResult CFileLoad::ReadLine_core(
 
 	// 1行取り出し ReadBuf -> m_memLine
 	//	Oct. 19, 2002 genta while条件を整理
-	int			nBufLineLen;
+	size_t		nBufLineLen;
 	int			nEolLen;
-	int			nBufferNext;
+	size_t		nBufferNext;
 	
 	const char* pLine = GetNextLineCharCode(
 		m_pReadBuf,
@@ -411,15 +411,15 @@ int CFileLoad::GetPercent( void ){
 */
 const char* CFileLoad::GetNextLineCharCode(
 	const char*	pData,		//!< [in]	検索文字列
-	int			nDataLen,	//!< [in]	検索文字列のバイト数
-	int*		pnLineLen,	//!< [out]	1行のバイト数を返すただしEOLは含まない
-	int*		pnBgn,		//!< [i/o]	検索文字列のバイト単位のオフセット位置
+	size_t			nDataLen,	//!< [in]	検索文字列のバイト数
+	size_t*		pnLineLen,	//!< [out]	1行のバイト数を返すただしEOLは含まない
+	size_t*		pnBgn,		//!< [i/o]	検索文字列のバイト単位のオフセット位置
 	CEol*		pcEol,		//!< [i/o]	EOL
 	int*		pnEolLen,	//!< [out]	EOLのバイト数 (Unicodeで困らないように)
-	int*		pnBufferNext	//!< [out]	次回持越しバッファ長(EOLの断片)
+	size_t*		pnBufferNext	//!< [out]	次回持越しバッファ長(EOLの断片)
 ){
-	int nbgn = *pnBgn;
-	int i;
+	size_t nbgn = *pnBgn;
+	size_t i;
 
 	pcEol->SetType( EOL_NONE );
 	*pnBufferNext = 0;
@@ -431,7 +431,7 @@ const char* CFileLoad::GetNextLineCharCode(
 	}
 	const unsigned char* pUData = (const unsigned char*)pData; // signedだと符号拡張でNELがおかしくなるので
 	bool bExtEol = GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol;
-	int nLen = nDataLen;
+	size_t nLen = nDataLen;
 	int neollen = 0;
 	switch( m_encodingTrait ){
 	case ENCODING_TRAIT_ERROR://
@@ -466,11 +466,11 @@ const char* CFileLoad::GetNextLineCharCode(
 			}
 			// UTF-8のNEL,PS,LS断片の検出
 			if( i == nDataLen && m_bEolEx ){
-				for( i = t_max(0, nDataLen - m_nMaxEolLen - 1); i < nDataLen; i++ ){
+				for( i = t_max(( size_t )0, nDataLen - m_nMaxEolLen - 1 ); i < nDataLen; i++ ){
 					int k;
 					bool bSet = false;
 					for( k = 0; k < (int)_countof(eEolEx); k++ ){
-						int nCompLen = t_min(nDataLen - i, m_memEols[k].GetRawLength());
+						size_t nCompLen = t_min( nDataLen - i, ( size_t )m_memEols[k].GetRawLength());
 						if( 0 != nCompLen && 0 == memcmp(m_memEols[k].GetRawPtr(), pData + i, nCompLen) ){
 							*pnBufferNext = t_max(*pnBufferNext, nCompLen);
 							bSet = true;
@@ -567,7 +567,7 @@ const char* CFileLoad::GetNextLineCharCode(
 							(i + 1 < nDataLen ? pData[i+1] : 0))),
 					0
 				};
-				pcEol->SetTypeByStringForFile( szEof, t_min(nDataLen - i,2) );
+				pcEol->SetTypeByStringForFile( szEof, t_min(( int )( nDataLen - i ), 2 ));
 				neollen = (Int)pcEol->GetLen();
 				break;
 			}

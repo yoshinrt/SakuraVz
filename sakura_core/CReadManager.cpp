@@ -126,7 +126,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		// 巨大ファイル判定
 		pFileInfo->SetLargeFile(
 			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize &&
-			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize <= cfl.GetFileSize()
+			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize * ( 1024 * 1024UL ) <= cfl.GetFileSize()
 		);
 		
 		// ファイルをクローズする

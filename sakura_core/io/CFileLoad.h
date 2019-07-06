@@ -87,9 +87,9 @@ public:
 	int GetPercent( void );
 
 	//! ファイルサイズを取得する
-	inline LONGLONG GetFileSize( void ){ return m_nFileSize; }
+	inline size_t GetFileSize( void ){ return m_nFileSize; }
 
-	static const int gm_nBufSizeDef; // ロード用バッファサイズの初期値
+	static const size_t gm_nBufSizeDef; // ロード用バッファサイズの初期値
 //	static const int gm_nBufSizeMin; // ロード用バッファサイズの設定可能な最低値
 
 protected:
@@ -97,7 +97,7 @@ protected:
 //	void SeekBegin( void );		// ファイルの先頭位置に移動する(BOMを考慮する)
 
 	// GetLextLine の 文字コード考慮版
-	const char* GetNextLineCharCode(const char*	pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, int* pnEolLen, int* pnBufferNext);
+	const char* GetNextLineCharCode(const char*	pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, int* pnEolLen, size_t* pnBufferNext);
 	EConvertResult ReadLine_core(CNativeW* pUnicodeBuffer, CEol* pcEol);
 
 	/* メンバオブジェクト */
@@ -107,7 +107,7 @@ protected:
 	HANDLE	m_hFile;		// ファイルハンドル
 	HANDLE	m_hMap;		//!< メモリマップドファイルハンドル
 	
-	LONGLONG	m_nFileSize;	// ファイルサイズ(64bit)
+	size_t	m_nFileSize;	// ファイルサイズ(64bit)
 	int		m_nLineIndex;	// 現在ロードしている論理行(0開始)
 	ECodeType	m_CharCode;		// 文字コード
 	CCodeBase*	m_pCodeBase;	////
@@ -120,7 +120,7 @@ protected:
 
 	// 読み込みバッファ系
 	const char*	m_pReadBuf;		// 読み込みバッファへのポインタ
-	int		m_nReadBufOffSet;	// 読み込みバッファ中のオフセット(次の行頭位置)
+	size_t		m_nReadBufOffSet;	// 読み込みバッファ中のオフセット(次の行頭位置)
 	CMemory m_cLineBuffer;
 	CNativeW m_cLineTemp;
 	int		m_nReadOffset2;
