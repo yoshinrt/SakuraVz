@@ -80,6 +80,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 	
 	std::vector<CFileLoad>		cfl( OmpMaxThreadNum );
 	std::vector<CDocLineMgr>	cDocMgr( OmpMaxThreadNum );
+	volatile bool	bBreakRead = false;
 	
 	try{
 		cfl[ 0 ].SetEncodingConfig( type->m_encoding );
@@ -151,14 +152,18 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				cDocMgr[ iThread ].AddNewLine( pLine, nLineLen );
 				//経過通知
 				if( nLineNum % 512 == 0 ){
-					if( iThread == 0 ) NotifyProgress( cfl[ 0 ].GetPercent());
-					// 処理中のユーザー操作を可能にする
-					if( !::BlockingHook( NULL ) ){
-						throw CAppExitException(); //中断検出
+					if( iThread == 0 ){
+						NotifyProgress( cfl[ 0 ].GetPercent());
+						// 処理中のユーザー操作を可能にする
+						if( !::BlockingHook( NULL )) bBreakRead = true;
 					}
+					
+					if( bBreakRead ) break;
 				}
 			}
 		}
+		
+		if( bBreakRead ) throw CAppExitException(); //中断検出
 		
 		for( int i = 0; i < OmpMaxThreadNum; ++i ) pcDocLineMgr->Cat( &cDocMgr[ i ]);
 		
