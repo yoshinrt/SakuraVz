@@ -327,17 +327,18 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 #endif
 
 	// レイアウト行の最大幅を取り出す
-	CLayoutInt *nMaxLenL		= new CLayoutInt[ OmpMaxThreadNum ];
-	CLayoutInt *nMaxLineNumL	= new CLayoutInt[ OmpMaxThreadNum ];
+	// reduction
+	int nMaxLen		= int(0);
+	int nMaxLineNum	= int(0);
 	
 	#pragma omp parallel for
-	for( int iProcs = 0; iProcs < OmpMaxThreadNum; ++iProcs ){
+	for( int iThread = 0; iThread < OmpMaxThreadNum; ++iThread ){
 		
-		CLayoutInt nMaxLen		= CLayoutInt(0);
-		CLayoutInt nMaxLineNum	= CLayoutInt(0);
+		CLayoutInt nMaxLenL		= CLayoutInt(0);
+		CLayoutInt nMaxLineNumL	= CLayoutInt(0);
 		
-		CLayoutInt nStartL	= ( nEnd - nStart ) *   OmpThreadId       / OmpMaxThreadNum + nStart;
-		CLayoutInt nEndL	= ( nEnd - nStart ) * ( OmpThreadId + 1 ) / OmpMaxThreadNum + nStart;
+		CLayoutInt nStartL	= ( nEnd - nStart ) *   iThread       / OmpMaxThreadNum + nStart;
+		CLayoutInt nEndL	= ( nEnd - nStart ) * ( iThread + 1 ) / OmpMaxThreadNum + nStart;
 		
 		CLayout* pLayout;
 		
@@ -359,12 +360,12 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 			}
 			
 			// 最大幅を更新
-			if( nMaxLen < pLayout->GetLayoutWidth() ){
-				nMaxLen = pLayout->GetLayoutWidth();
-				nMaxLineNum = i;		// 最大幅のレイアウト行
+			if( nMaxLenL < pLayout->GetLayoutWidth() ){
+				nMaxLenL = pLayout->GetLayoutWidth();
+				nMaxLineNumL = i;		// 最大幅のレイアウト行
 				
 				// アプリケーションの最大幅となったら算出は停止
-				if( nMaxLen >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
+				if( nMaxLenL >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
 					break;
 			}
 			
@@ -372,23 +373,13 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 			pLayout = pLayout->GetNextLayout();
 		}
 		
-		nMaxLenL    [ OmpThreadId ] = nMaxLen;
-		nMaxLineNumL[ OmpThreadId ] = nMaxLineNum;
-	}
-	
-	// reduction
-	CLayoutInt nMaxLen		= nMaxLenL[ 0 ];
-	CLayoutInt nMaxLineNum	= nMaxLineNumL[ 0 ];
-	
-	for( int i = 1; i < OmpMaxThreadNum; ++i ){
-		if( nMaxLen < nMaxLenL[ i ]){
-			nMaxLen = nMaxLenL[ i ];
-			nMaxLineNum = nMaxLineNumL[ i ];		// 最大幅のレイアウト行
+		// reduction
+		#pragma omp critical
+		if( nMaxLen < nMaxLenL){
+			nMaxLen = ( Int )nMaxLenL;
+			nMaxLineNum = ( Int )nMaxLineNumL;		// 最大幅のレイアウト行
 		}
 	}
-	
-	delete [] nMaxLenL;
-	delete [] nMaxLineNumL;
 	
 	// テキストの幅の変化をチェック
 	if( Int(nMaxLen) ){
