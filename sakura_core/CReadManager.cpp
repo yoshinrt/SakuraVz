@@ -78,8 +78,13 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 
 	EConvertResult eRet = RESULT_COMPLETE;
 	
-	std::vector<CFileLoad>		cfl( OmpMaxThreadNum );
-	std::vector<CDocLineMgr>	cDocMgr( OmpMaxThreadNum );
+	UINT uMaxThreadNum = std::thread::hardware_concurrency();
+	
+	std::vector<CFileLoad>		cfl( uMaxThreadNum );
+	std::vector<CDocLineMgr>	cDocMgr( uMaxThreadNum );
+	std::vector<std::thread>	cThread;
+	
+	volatile bool	bBreakRead = false;
 	
 	try{
 		cfl[ 0 ].SetEncodingConfig( type->m_encoding );
@@ -102,65 +107,75 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			pFileInfo->SetFileTime( FileTime );
 		}
 		
-		for( int i = 1; i < OmpMaxThreadNum; ++i ){
+		for( UINT u = 1; u < uMaxThreadNum; ++u ){
 			// cfl インスタンスコピー
-			cfl[ i ].Copy( cfl[ 0 ]);
+			cfl[ u ].Copy( cfl[ 0 ]);
 		}
 		
-		#pragma omp parallel for
-		for( int iThread = 0; iThread < OmpMaxThreadNum; ++iThread ){
-			
-			// 処理開始・終了位置探索
-			size_t	uBeginPos;
-			if( iThread == 0 ){
-				uBeginPos = 0;
-			}else{
-				uBeginPos = cfl[ iThread ].GetNextLineTop(
-					cfl[ iThread ].GetFileSize() * iThread / OmpMaxThreadNum
-				);
-			}
-			
-			size_t	uEndPos;
-			if( iThread == OmpMaxThreadNum - 1 ){
-				uEndPos = cfl[ iThread ].GetFileSize();
-			}else{
-				uEndPos = cfl[ iThread ].GetNextLineTop(
-					cfl[ iThread ].GetFileSize() * ( iThread + 1 ) / OmpMaxThreadNum
-				);
-			}
-			
-			cfl[ iThread ].SetBufLimit( uBeginPos, uEndPos );
-			#ifdef DEBUG
-				MYTRACE( L"pid:%d range:%u - %u\n", iThread, ( UINT )uBeginPos, ( UINT )uEndPos );
-			#endif
-			
-			// ReadLineはファイルから 文字コード変換された1行を読み出します
-			// エラー時はthrow CError_FileRead を投げます
-			int				nLineNum = 0;
-			CEol			cEol;
-			CNativeW		cUnicodeBuffer;
-			EConvertResult	eRead;
-			
-			while( RESULT_FAILURE != (eRead = cfl[ iThread ].ReadLine( &cUnicodeBuffer, &cEol ))){
-				if(eRead==RESULT_LOSESOME){
-					eRet = RESULT_LOSESOME;
+		for( UINT uThread = 0; uThread < uMaxThreadNum; ++uThread ){
+			cThread.emplace_back( std::thread( [ &, this, uThread ]{
+				
+				// 処理開始・終了位置探索
+				size_t	uBeginPos;
+				if( uThread == 0 ){
+					uBeginPos = 0;
+				}else{
+					uBeginPos = cfl[ uThread ].GetNextLineTop(
+						cfl[ uThread ].GetFileSize() * uThread / uMaxThreadNum
+					);
 				}
-				const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
-				int		nLineLen = cUnicodeBuffer.GetStringLength();
-				++nLineNum;
-				cDocMgr[ iThread ].AddNewLine( pLine, nLineLen );
-				//経過通知
-				if( nLineNum % 512 == 0 ){
-					if( iThread == 0 ) NotifyProgress( cfl[ 0 ].GetPercent());
-					// 処理中のユーザー操作を可能にする
-					if( !::BlockingHook( NULL ) ){
-						throw CAppExitException(); //中断検出
+				
+				size_t	uEndPos;
+				if( uThread == uMaxThreadNum - 1 ){
+					uEndPos = cfl[ uThread ].GetFileSize();
+				}else{
+					uEndPos = cfl[ uThread ].GetNextLineTop(
+						cfl[ uThread ].GetFileSize() * ( uThread + 1 ) / uMaxThreadNum
+					);
+				}
+				
+				cfl[ uThread ].SetBufLimit( uBeginPos, uEndPos );
+				#ifdef DEBUG
+					MYTRACE( L"pid:%d range:%u - %u\n", uThread, ( UINT )uBeginPos, ( UINT )uEndPos );
+				#endif
+				
+				// ReadLineはファイルから 文字コード変換された1行を読み出します
+				// エラー時はthrow CError_FileRead を投げます
+				int				nLineNum = 0;
+				CEol			cEol;
+				CNativeW		cUnicodeBuffer;
+				EConvertResult	eRead;
+				
+				while( RESULT_FAILURE != (eRead = cfl[ uThread ].ReadLine( &cUnicodeBuffer, &cEol ))){
+					if(eRead==RESULT_LOSESOME){
+						eRet = RESULT_LOSESOME;
+					}
+					const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
+					int		nLineLen = cUnicodeBuffer.GetStringLength();
+					++nLineNum;
+					cDocMgr[ uThread ].AddNewLine( pLine, nLineLen );
+					//経過通知
+					if( nLineNum % 512 == 0 ){
+						if( uThread == 0 ){
+							//NotifyProgress( cfl[ 0 ].GetPercent());
+							// 処理中のユーザー操作を可能にする
+							if( !::BlockingHook( NULL )) bBreakRead = true;
+						}
+						
+						if( bBreakRead ) break;
 					}
 				}
-			}
+			}));
 		}
 		
-		for( int i = 0; i < OmpMaxThreadNum; ++i ) pcDocLineMgr->Cat( &cDocMgr[ i ]);
+		// 全スレッド終了待ち
+		for( UINT u = 0; u < uMaxThreadNum; ++u ){
+			cThread[ u ].join();
+		}
+		
+		if( bBreakRead ) throw CAppExitException(); //中断検出
+		
+		for( UINT u = 0; u < uMaxThreadNum; ++u ) pcDocLineMgr->Cat( &cDocMgr[ u ]);
 		
 		// 巨大ファイル判定
 		pFileInfo->SetLargeFile(
