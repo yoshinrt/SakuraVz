@@ -56,7 +56,11 @@ const wchar_t* GetNextLineW ( const wchar_t* pData, size_t nDataLen, size_t* pnL
 static inline const wchar_t* GetNextLineW ( const wchar_t* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, bool bExtEol ){
 	size_t	sizeLineLen;
 	size_t	sizeBgn	= ( size_t )*pnBgn;
-	return GetNextLineW( pData, ( size_t )nDataLen, &sizeLineLen, &sizeBgn, pcEol, bExtEol );
+	const wchar_t* ret = GetNextLineW( pData, ( size_t )nDataLen, &sizeLineLen, &sizeBgn, pcEol, bExtEol );
+	*pnLineLen	= ( int )sizeLineLen;
+	*pnBgn		= ( int )sizeBgn;
+	
+	return ret;
 }
 //wchar_t* GetNextLineWB( const wchar_t*, int, int*, int*, CEol* ); // GetNextLineのwchar_t版(ビックエンディアン用)  // 未使用
 void GetLineColumn( const wchar_t* pLine, int* pnJumpToLine, int* pnJumpToColumn );
