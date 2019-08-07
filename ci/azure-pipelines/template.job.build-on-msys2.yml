@@ -7,47 +7,34 @@ parameters:
 jobs:
 - job: ${{ parameters.name }}
   displayName: ${{ parameters.displayName }}
+  dependsOn: script_check
   pool:
     vmImage: ${{ parameters.vmImage }}
 
   strategy:
-    maxParallel: 4
+    maxParallel: 2
     matrix:
-      Win32_Debug:
-        BuildPlatform: 'Win32'
+      MinGW_Debug:
+        BuildPlatform: 'MinGW'
         Configuration: 'Debug'
-      Win32_Release:
-        BuildPlatform: 'Win32'
-        Configuration: 'Release'
-      Win64_Debug:
-        BuildPlatform: 'x64'
-        Configuration: 'Debug'
-      Win64_Release:
-        BuildPlatform: 'x64'
+      MinGW_Release:
+        BuildPlatform: 'MinGW'
         Configuration: 'Release'
 
   steps:
+  - checkout:   self       # self represents the repo where the initial Pipelines YAML file was found
+    clean:      all        # what to clean each time; if not mentioned, does not clean
+    fetchDepth: 5          # the depth of commits to ask Git to fetch; defaults to no limit
+
   # show environmental variables for debug.
   - script: set
     displayName: Show environmental variables for debug
 
-  - template: /ci/azure-pipelines/template.steps.install-python-modules.yml
+  - template: /ci/azure-pipelines/template.steps.install-mingw-w64-gcc.yml
 
-  # Build solution
-  - script: build-sln.bat       $(BuildPlatform) $(Configuration)
-    displayName: Build solution
-
-#  # Build HTML Help
-#  - script: build-chm.bat
-#    displayName: Build HTML Help
-#
-#  # Build instaler with Inno Setup
-#  - script: build-installer.bat $(BuildPlatform) $(Configuration)
-#    displayName: Build instaler with Inno Setup
-
-  # zip files for artifacts
-  - script: zipArtifacts.bat    $(BuildPlatform) $(Configuration)
-    displayName: Zip files for artifacts
+  # Build GNU C++
+  - script: build-gnu.bat       $(BuildPlatform) $(Configuration)
+    displayName: Build with MinGW-w64-gcc
 
   # Unit tests
   - script: tests\build-and-test.bat $(BuildPlatform) $(Configuration)

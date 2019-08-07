@@ -9,6 +9,7 @@ trigger:
       - master
       - develop
       - feature/*
+      - revert-*
   paths:
     exclude:
       - "*.md"
@@ -29,6 +30,7 @@ pr:
       - master
       - develop
       - feature/*
+      - revert-*
   paths:
     exclude:
       - "*.md"
@@ -55,6 +57,15 @@ jobs:
     name: VS2017
     vmImage: 'VS2017-Win2016'
     displayName: VS2017
+
+# サクラエディタのビルドを行う JOB(MinGW)
+# * サクラエディタ本体
+# * 単体テスト
+- template: ci/azure-pipelines/template.job.build-on-msys2.yml
+  parameters:
+    name: MinGW
+    vmImage: 'VS2017-Win2016'
+    displayName: MinGW
 
 # SonarQube で解析を行う JOB
 - template: ci/azure-pipelines/template.job.SonarQube.yml
