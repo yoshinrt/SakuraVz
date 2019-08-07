@@ -476,7 +476,7 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		// 処理中のユーザー操作を可能にする
 		if( GetListenerCount()!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
 			if( uThreadID == 0 ){
-				NotifyProgress(::MulDiv( pWork->nCurLine, 100 , nAllLineNum ) );
+				NotifyProgress(::MulDiv( pWork->nCurLine * ( int )uMaxThreadNum, 50 , nAllLineNum ) + 50 );
 				if( bBlockingHook && !::BlockingHook( NULL )){
 					if( pbBreak ) *pbBreak = true;
 					return;
