@@ -107,69 +107,71 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			pFileInfo->SetFileTime( FileTime );
 		}
 		
-		for( UINT u = 1; u < uMaxThreadNum; ++u ){
-			// cfl インスタンスコピー
-			cfl[ u ].Copy( cfl[ 0 ]);
-		}
+		auto ReadThread = [ &, this ]( int iThreadID ){
+			
+			// 処理開始・終了位置探索
+			size_t	uBeginPos;
+			if( iThreadID == 0 ){
+				uBeginPos = 0;
+			}else{
+				uBeginPos = cfl[ iThreadID ].GetNextLineTop(
+					cfl[ iThreadID ].GetFileSize() * iThreadID / uMaxThreadNum
+				);
+			}
+			
+			size_t	uEndPos;
+			if( iThreadID == uMaxThreadNum - 1 ){
+				uEndPos = cfl[ iThreadID ].GetFileSize();
+			}else{
+				uEndPos = cfl[ iThreadID ].GetNextLineTop(
+					cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / uMaxThreadNum
+				);
+			}
+			
+			cfl[ iThreadID ].SetBufLimit( uBeginPos, uEndPos );
+			#ifdef DEBUG
+				MYTRACE( L"pid:%d range:%u - %u\n", iThreadID, ( UINT )uBeginPos, ( UINT )uEndPos );
+			#endif
+			
+			// ReadLineはファイルから 文字コード変換された1行を読み出します
+			// エラー時はthrow CError_FileRead を投げます
+			int				nLineNum = 0;
+			CEol			cEol;
+			CNativeW		cUnicodeBuffer;
+			EConvertResult	eRead;
+			
+			while( RESULT_FAILURE != (eRead = cfl[ iThreadID ].ReadLine( &cUnicodeBuffer, &cEol ))){
+				if(eRead==RESULT_LOSESOME){
+					eRet = RESULT_LOSESOME;
+				}
+				const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
+				int		nLineLen = cUnicodeBuffer.GetStringLength();
+				++nLineNum;
+				cDocMgr[ iThreadID ].AddNewLine( pLine, nLineLen );
+				//経過通知
+				if( nLineNum % 512 == 0 ){
+					if( iThreadID == 0 ){
+						NotifyProgress( cfl[ 0 ].GetPercent() / 2 );
+						// 処理中のユーザー操作を可能にする
+						if( !::BlockingHook( NULL )) bBreakRead = true;
+					}
+					
+					if( bBreakRead ) break;
+				}
+			}
+		};
 		
-		for( UINT uThread = 0; uThread < uMaxThreadNum; ++uThread ){
-			cThread.emplace_back( std::thread( [ &, this, uThread ]{
-				
-				// 処理開始・終了位置探索
-				size_t	uBeginPos;
-				if( uThread == 0 ){
-					uBeginPos = 0;
-				}else{
-					uBeginPos = cfl[ uThread ].GetNextLineTop(
-						cfl[ uThread ].GetFileSize() * uThread / uMaxThreadNum
-					);
-				}
-				
-				size_t	uEndPos;
-				if( uThread == uMaxThreadNum - 1 ){
-					uEndPos = cfl[ uThread ].GetFileSize();
-				}else{
-					uEndPos = cfl[ uThread ].GetNextLineTop(
-						cfl[ uThread ].GetFileSize() * ( uThread + 1 ) / uMaxThreadNum
-					);
-				}
-				
-				cfl[ uThread ].SetBufLimit( uBeginPos, uEndPos );
-				#ifdef DEBUG
-					MYTRACE( L"pid:%d range:%u - %u\n", uThread, ( UINT )uBeginPos, ( UINT )uEndPos );
-				#endif
-				
-				// ReadLineはファイルから 文字コード変換された1行を読み出します
-				// エラー時はthrow CError_FileRead を投げます
-				int				nLineNum = 0;
-				CEol			cEol;
-				CNativeW		cUnicodeBuffer;
-				EConvertResult	eRead;
-				
-				while( RESULT_FAILURE != (eRead = cfl[ uThread ].ReadLine( &cUnicodeBuffer, &cEol ))){
-					if(eRead==RESULT_LOSESOME){
-						eRet = RESULT_LOSESOME;
-					}
-					const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
-					int		nLineLen = cUnicodeBuffer.GetStringLength();
-					++nLineNum;
-					cDocMgr[ uThread ].AddNewLine( pLine, nLineLen );
-					//経過通知
-					if( nLineNum % 512 == 0 ){
-						if( uThread == 0 ){
-							//NotifyProgress( cfl[ 0 ].GetPercent());
-							// 処理中のユーザー操作を可能にする
-							if( !::BlockingHook( NULL )) bBreakRead = true;
-						}
-						
-						if( bBreakRead ) break;
-					}
-				}
-			}));
+		for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
+			if( iThreadID == 0 ){
+				ReadThread( iThreadID );
+			}else{
+				cfl[ iThreadID ].Copy( cfl[ 0 ]);	// cfl インスタンスコピー
+				cThread.emplace_back( std::thread( ReadThread, iThreadID ));
+			}
 		}
 		
 		// 全スレッド終了待ち
-		for( UINT u = 0; u < uMaxThreadNum; ++u ){
+		for( UINT u = 0; u < uMaxThreadNum - 1; ++u ){
 			cThread[ u ].join();
 		}
 		
@@ -235,7 +237,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		pcDocLineMgr->DeleteAllLine();
 	} // 例外処理終わり
 	
-	NotifyProgress(0);
+	//NotifyProgress(0);
 	/* 処理中のユーザー操作を可能にする */
 	if( !::BlockingHook( NULL ) ){
 		return RESULT_FAILURE; //####INTERRUPT
