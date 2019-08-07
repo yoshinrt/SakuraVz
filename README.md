@@ -2,25 +2,25 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/mf8tx836jtb7epq8/branch/vz_mode?svg=true)](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode)
 [![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
 
-サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/sakura/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+-label%3Arefactoring+sort%3Aupdated-desc) を参照してください．
+サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/SakuraVz/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+-label%3Arefactoring+sort%3Aupdated-desc) を参照してください．
 
 機能の on/off を GUI で設定する機能はありませんので，`sakura.ini` を直接編集してください．本 fork のビルドでは，デフォルトで全て有効になっています．
 
 最新バイナリは [AppVeyor](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode) の Platform:Win32 (または x64)→ARTIFACTS にあります．
 ### 一覧
 
-- [テキストスタック](https://github.com/yoshinrt/sakura#テキストスタック)
-- [改行をまたぐ検索・置換](https://github.com/yoshinrt/sakura#改行をまたぐ検索置換)
-- [ファイルオープンの高速化](https://github.com/yoshinrt/sakura#ファイルオープンの高速化)
-- [方向感応式の行単位・文字単位選択切り替え](https://github.com/yoshinrt/sakura#方向感応式の行単位文字単位選択切り替え)
-- [「ラインモード貼付けを可能にする」の対象コマンドを拡大](https://github.com/yoshinrt/sakura#ラインモード貼付けを可能にするの対象コマンドを拡大)
-- [改行混在を許可しないモード](https://github.com/yoshinrt/sakura#改行混在を許可しないモード)
-- [直前の置換を再実行](https://github.com/yoshinrt/sakura#直前の置換を再実行)
-- [他アプリで編集されたときの問い合わせダイアログボックス抑制](https://github.com/yoshinrt/sakura#他アプリで編集されたときの問い合わせダイアログボックス抑制)
-- [JavaScript ファイルを共通にするためのマクロ関数](https://github.com/yoshinrt/sakura#javascriptファイルを共通にするためのマクロ関数)
-- [カーソル位置周辺の情報を取得するマクロ関数](https://github.com/yoshinrt/sakura#カーソル位置周辺の情報を取得するマクロ関数)
-- [検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加](https://github.com/yoshinrt/sakura#検索置換ダイアログのオプションデフォルトボタンを固定できるパラメータ追加)
-- [コマンドラインオプションでGREP置換ダイアログ呼び出し](https://github.com/yoshinrt/sakura#コマンドラインオプションでGREP置換ダイアログ呼び出し)
+- [テキストスタック](#テキストスタック)
+- [改行をまたぐ検索・置換](#改行をまたぐ検索置換)
+- [ファイルオープンの高速化](#ファイルオープンの高速化)
+- [方向感応式の行単位・文字単位選択切り替え](#方向感応式の行単位文字単位選択切り替え)
+- [「ラインモード貼付けを可能にする」の対象コマンドを拡大](#ラインモード貼付けを可能にするの対象コマンドを拡大)
+- [改行混在を許可しないモード](#改行混在を許可しないモード)
+- [直前の置換を再実行](#直前の置換を再実行)
+- [他アプリで編集されたときの問い合わせダイアログボックス抑制](#他アプリで編集されたときの問い合わせダイアログボックス抑制)
+- [JavaScript ファイルを共通にするためのマクロ関数](#javascriptファイルを共通にするためのマクロ関数)
+- [カーソル位置周辺の情報を取得するマクロ関数](#カーソル位置周辺の情報を取得するマクロ関数)
+- [検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加](#検索置換ダイアログのオプションデフォルトボタンを固定できるパラメータ追加)
+- [コマンドラインオプションでGREP置換ダイアログ呼び出し](#コマンドラインオプションでGREP置換ダイアログ呼び出し)
 
 
 ### テキストスタック
