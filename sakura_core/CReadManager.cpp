@@ -139,6 +139,8 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			CEol			cEol;
 			CNativeW		cUnicodeBuffer;
 			EConvertResult	eRead;
+			constexpr DWORD timeInterval = 33;
+			ULONGLONG nextTime = GetTickCount64() + timeInterval;
 			
 			while( RESULT_FAILURE != (eRead = cfl[ iThreadID ].ReadLine( &cUnicodeBuffer, &cEol ))){
 				if(eRead==RESULT_LOSESOME){
@@ -149,15 +151,16 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				++nLineNum;
 				cDocMgr[ iThreadID ].AddNewLine( pLine, nLineLen );
 				//経過通知
-				if( nLineNum % 512 == 0 ){
-					if( iThreadID == 0 ){
+				if( iThreadID == 0 ){
+					ULONGLONG currTime = GetTickCount64();
+					if(currTime >= nextTime){
+						nextTime += timeInterval;
 						NotifyProgress( cfl[ 0 ].GetPercent() / 2 );
 						// 処理中のユーザー操作を可能にする
 						if( !::BlockingHook( NULL )) bBreakRead = true;
 					}
-					
-					if( bBreakRead ) break;
 				}
+				if( bBreakRead ) break;
 			}
 		};
 		
