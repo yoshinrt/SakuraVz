@@ -47,7 +47,9 @@ public:
 	CMemory();
 	CMemory(const CMemory& rhs);
 	CMemory(const void* pData, int nDataLenBytes);
-	virtual ~CMemory();
+	// デストラクタを仮想にすると仮想関数テーブルへのポインタを持つ為にインスタンスの容量が増えてしまうので仮想にしない
+	// 仮想デストラクタでは無いので派生クラスでメンバー変数を追加しない事
+	~CMemory();
 protected:
 	void _init_members();
 
@@ -95,12 +97,6 @@ public:
 		std::swap( m_nRawLen, left.m_nRawLen );
 	}
 	int capacity() const { return m_nDataBufSize ? m_nDataBufSize - 2: 0; }
-
-#ifdef _DEBUG
-protected:
-	typedef char* PCHAR;
-	PCHAR& _DebugGetPointerRef(){ return m_pRawData; } //デバッグ用。バッファポインタの参照を返す。
-#endif
 
 private: // 2002/2/10 aroka アクセス権変更
 	/*

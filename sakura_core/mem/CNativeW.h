@@ -189,12 +189,6 @@ public:
 	const TCHAR* GetStringT() const						{ return GetStringPtrOld(); }
 #endif
 
-#if _DEBUG
-private:
-	typedef wchar_t* PWCHAR;
-	PWCHAR& m_pDebugData; //デバッグ用。CMemoryの内容をwchar_t*型でウォッチするためのモノ
-#endif
-
 public:
 	// -- -- staticインターフェース -- -- //
 	static CLogicInt GetSizeOfChar( const wchar_t* pData, int nDataLen, int nIdx ); //!< 指定した位置の文字がwchar_t何個分かを返す
@@ -212,6 +206,9 @@ public:
 	static CLayoutXInt GetColmOfChar( const CStringRef& cStr, int nIdx )
 		{ return GetHabaOfChar(cStr.GetPtr(), cStr.GetLength(), nIdx);}
 };
+
+// 派生クラスでメンバー追加禁止
+static_assert(sizeof(CNativeW) == sizeof(CNative), "size check");
 
 namespace std {
 template <>
