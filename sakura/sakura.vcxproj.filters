@@ -1091,9 +1091,6 @@
     <ClInclude Include="..\libs\pcre2\include\pcre2.h">
       <Filter>Other Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\sakura_core\mem\CPoolResource.h">
-      <Filter>Cpp Source Files\mem</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\sakura_core\Funccode_x.hsrc">
