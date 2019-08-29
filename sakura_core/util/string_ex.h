@@ -55,7 +55,7 @@
 inline int amemcmp(const ACHAR* p1, const ACHAR* p2, size_t count){ return ::memcmp(p1,p2,count); }
 
 //大文字小文字を区別せずにメモリ比較
-inline int amemicmp(const ACHAR* p1, const ACHAR* p2, size_t count){ return ::memicmp(p1,p2,count); }
+inline int amemicmp(const ACHAR* p1, const ACHAR* p2, size_t count){ return ::_memicmp(p1,p2,count); }
        int wmemicmp(const WCHAR* p1, const WCHAR* p2, size_t count);
        int wmemicmp(const WCHAR* p1, const WCHAR* p2 );
        int wmemicmp_ascii(const WCHAR* p1, const WCHAR* p2, size_t count);
@@ -78,13 +78,8 @@ inline wchar_t my_towupper2( wchar_t c ){ return my_towupper(c); }
 inline wchar_t my_towlower2( wchar_t c ){ return my_towlower(c); }
 int skr_towupper( int c );
 int skr_towlower( int c );
-#ifdef _UNICODE
 #define _tcs_toupper skr_towupper
 #define _tcs_tolower skr_towlower
-#else
-#define _tcs_toupper my_toupper
-#define _tcs_tolower my_tolower
-#endif
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                           拡張・独自実装                    //
@@ -101,11 +96,7 @@ const WCHAR* wcsistr( const WCHAR* s1, const WCHAR* s2 );
 const ACHAR* stristr( const ACHAR* s1, const ACHAR* s2 );
 inline WCHAR* wcsistr( WCHAR* s1, const WCHAR* s2 ){ return const_cast<WCHAR*>(wcsistr(static_cast<const WCHAR*>(s1),s2)); }
 inline ACHAR* stristr( ACHAR* s1, const ACHAR* s2 ){ return const_cast<ACHAR*>(stristr(static_cast<const ACHAR*>(s1),s2)); }
-#ifdef _UNICODE
 #define _tcsistr wcsistr
-#else
-#define _tcsistr stristr
-#endif
 
 //大文字小文字を区別せずに文字列を検索（日本語対応版）
 const char* strchr_j(const char* s1, char c);				//!< strchr の日本語対応版。
@@ -116,11 +107,7 @@ inline char* strchr_j ( char* s1, char c         ){ return const_cast<char*>(str
 inline char* strichr_j( char* s1, char c         ){ return const_cast<char*>(strichr_j((const char*)s1, c )); }
 inline char* strstr_j ( char* s1, const char* s2 ){ return const_cast<char*>(strstr_j ((const char*)s1, s2)); }
 inline char* stristr_j( char* s1, const char* s2 ){ return const_cast<char*>(stristr_j((const char*)s1, s2)); }
-#ifdef _UNICODE
 #define _tcsistr_j wcsistr
-#else
-#define _tcsistr_j stristr_j
-#endif
 
 template <class CHAR_TYPE>
 CHAR_TYPE* my_strtok(
@@ -135,48 +122,6 @@ CHAR_TYPE* my_strtok(
 // 独自に実装し直したもの。
 int my_stricmp( const char *s1, const char *s2 );
 int my_strnicmp( const char *s1, const char *s2, size_t n );
-
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-//                           互換                              //
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-
-// VS2005以降の安全版文字列関数
-#if (defined(_MSC_VER) && _MSC_VER<1400) \
-	|| (defined(__MINGW32__) && (!defined(MINGW_HAS_SECURE_API) || MINGW_HAS_SECURE_API != 1)) //VS2005より前なら
-	typedef int errno_t;
-#define _TRUNCATE ((size_t)-1)
-	errno_t strcpy_s(char *dest, size_t num, const char *src);
-	errno_t wcscpy_s(wchar_t *dest, size_t num, const wchar_t *src);
-	errno_t strncpy_s(char *dest, size_t num, const char *src, size_t count);
-	errno_t wcsncpy_s(wchar_t *dest, size_t num, const wchar_t *src, size_t count);
-	errno_t strcat_s(char *dest, size_t num, const char *src);
-	errno_t wcscat_s(wchar_t *dest, size_t num, const wchar_t *src);
-
-	int vsprintf_s(char *buf, size_t num, const char *fmt, va_list vaarg);
-	int vswprintf_s(wchar_t *buf, size_t num, const wchar_t *fmt, va_list vaarg);
-	int vsnprintf_s(char *buf, size_t num, size_t count, const char *fmt, va_list vaarg);
-	int _vsnwprintf_s(wchar_t *buf, size_t num, size_t count, const wchar_t *fmt, va_list vaarg);
-
-	size_t strnlen(const char *str, size_t num);
-	size_t wcsnlen(const wchar_t *str, size_t num);
-#ifdef _UNICODE
-#define _tcscpy_s wcscpy_s
-#define _tcsncpy_s wcsncpy_s
-#define _tcscat_s wcscat_s
-#define _tcsnlen wcsnlen
-#define _tcsncicmp _wcsnicmp
-#define _ttempnam _wtempnam
-#define _tWinMain wWinMain
-#else
-#define _tcscpy_s strcpy_s
-#define _tcsncpy_s strncpy_s
-#define _tcscat_s strcat_s
-#define _tcsnlen strnlen
-#define _tcsncicmp _strnicmp
-#define _ttempnam tempnam
-#define _tWinMain WinMain
-#endif
-#endif
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //        auto系（_UNICODE 定義に依存しない関数）              //
@@ -249,18 +194,9 @@ TCHAR* strtotcs( TCHAR* dest, const ACHAR* src, size_t count );
 TCHAR* strtotcs( TCHAR* dest, const WCHAR* src, size_t count );
 
 //印字系
-#if defined(_MSC_VER) && _MSC_VER>=1400
 #define auto_snprintf_s(buf, count, format, ...) tchar_sprintf_s((buf), count, (format), __VA_ARGS__)
 #define auto_sprintf(buf, format, ...)           tchar_sprintf((buf), (format), __VA_ARGS__)
 #define auto_sprintf_s(buf, nBufCount, format, ...) tchar_snprintf_s((buf), nBufCount, (format), __VA_ARGS__)
-#else
-inline int auto_snprintf_s(ACHAR* buf, size_t count, const ACHAR* format, ...)   { va_list v; va_start(v,format); int ret=tchar_vsnprintf_s(buf,count,format,v); va_end(v); return ret; }
-inline int auto_snprintf_s(WCHAR* buf, size_t count, const WCHAR* format, ...)   { va_list v; va_start(v,format); int ret=tchar_vsnprintf_s(buf,count,format,v); va_end(v); return ret; }
-inline int auto_sprintf(ACHAR* buf, const ACHAR* format, ...)                    { va_list v; va_start(v,format); int ret=tchar_vsprintf(buf,format,v); va_end(v); return ret; }
-inline int auto_sprintf(WCHAR* buf, const WCHAR* format, ...)                    { va_list v; va_start(v,format); int ret=tchar_vsprintf(buf,format,v); va_end(v); return ret; }
-inline int auto_sprintf_s(ACHAR* buf, size_t nBufCount, const ACHAR* format, ...){ va_list v; va_start(v,format); int ret=tchar_vsprintf_s(buf,nBufCount,format,v); va_end(v); return ret; }
-inline int auto_sprintf_s(WCHAR* buf, size_t nBufCount, const WCHAR* format, ...){ va_list v; va_start(v,format); int ret=tchar_vsprintf_s(buf,nBufCount,format,v); va_end(v); return ret; }
-#endif
 
 inline int auto_vsprintf(ACHAR* buf, const ACHAR* format, va_list& v){ return tchar_vsprintf(buf,format,v); }
 inline int auto_vsprintf(WCHAR* buf, const WCHAR* format, va_list& v){ return tchar_vsprintf(buf,format,v); }
@@ -322,11 +258,7 @@ inline int wcsncmp_auto(const wchar_t* strData1, const wchar_t* szData2)
 	::strncmp(strData1, literalData2, _countof(literalData2) - 1 ) //※終端ヌルを含めないので、_countofからマイナス1する
 
 //TCHAR
-#ifdef _UNICODE
-	#define _tcsncmp_literal wcsncmp_literal
-#else
-	#define _tcsncmp_literal strncmp_literal
-#endif
+#define _tcsncmp_literal wcsncmp_literal
 
 #endif /* SAKURA_STRING_EX_29EB1DD7_7259_4D6C_A651_B9174E5C3D3C9_H_ */
 /*[EOF]*/

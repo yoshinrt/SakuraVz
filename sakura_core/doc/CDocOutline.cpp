@@ -97,6 +97,7 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 			/* 最初のトークンを取得します。 */
 			const wchar_t* pszTextReplace = L"";
 			wchar_t* pszToken;
+			wchar_t* context{ nullptr };
 			bool bTopDummy = false;
 			bool bRegexRep2 = false;
 			if( bRegex ){
@@ -128,7 +129,7 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 					}
 				}
 			}else{
-				pszToken = wcstok( szLine, pszKeySeps );
+				pszToken = wcstok_s( szLine, pszKeySeps, &context );
 				if( nCount == 0 && pszToken == NULL ){
 					pszToken = szLine;
 					bTopDummy = true;
@@ -153,7 +154,7 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 				if( bTopDummy || bRegex ){
 					pszToken = NULL;
 				}else{
-					pszToken = wcstok( NULL, pszKeySeps );
+					pszToken = wcstok_s( NULL, pszKeySeps, &context );
 				}
 			}
 		}else{
@@ -164,10 +165,10 @@ int CDocOutline::ReadRuleFile( const TCHAR* pszFilename, SOneRule* pcOneRule, in
 					}else{
 						cComment = strLine[13];
 					}
-				}else if( 11 == strLine.length() && 0 == wcsicmp( strLine.c_str() + 1, L"Mode=Regex" ) ){
+				}else if( 11 == strLine.length() && 0 == _wcsicmp( strLine.c_str() + 1, L"Mode=Regex" ) ){
 					bRegex = true;
 					bRegexReplace = false;
-				}else if( 18 == strLine.length() && 0 == wcsicmp( strLine.c_str() + 1, L"Mode=RegexReplace" ) ){
+				}else if( 18 == strLine.length() && 0 == _wcsicmp( strLine.c_str() + 1, L"Mode=RegexReplace" ) ){
 					bRegex = true;
 					bRegexReplace = true;
 				}else if( 7 <= strLine.length() && 0 == _wcsnicmp( strLine.c_str() + 1, L"Title=", 6 ) ){

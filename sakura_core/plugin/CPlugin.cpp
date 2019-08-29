@@ -73,13 +73,11 @@ bool CPlugin::ReadPluginDefCommon( CDataProfile *cProfile, CDataProfile *cProfil
 		cProfileMlang->IOProfileData( PII_PLUGIN, PII_PLUGIN_URL, m_sUrl );
 	}
 
-#ifdef _UNICODE
 	DEBUG_TRACE(_T("    Name:%ls\n"), m_sName.c_str());
 	DEBUG_TRACE(_T("    Description:%ls\n"), m_sDescription.c_str());
 	DEBUG_TRACE(_T("    Author:%ls\n"), m_sAuthor.c_str());
 	DEBUG_TRACE(_T("    Version:%ls\n"), m_sVersion.c_str());
 	DEBUG_TRACE(_T("    Url:%ls\n"), m_sUrl.c_str());
-#endif
 
 	return true;
 }
@@ -98,7 +96,7 @@ bool CPlugin::ReadPluginDefPlug( CDataProfile *cProfile, CDataProfile *cProfileM
 			if( nCount == 0 ){
 				szIndex[0] = L'\0';
 			}else{
-				swprintf(szIndex, L"[%d]", nCount);
+				_swprintf(szIndex, L"[%d]", nCount);
 			}
 			wstring sHandler;
 			if( cProfile->IOProfileData( PII_PLUG, (sKey + szIndex).c_str(), sHandler ) ){
@@ -131,13 +129,13 @@ bool CPlugin::ReadPluginDefCommand( CDataProfile *cProfile, CDataProfile *cProfi
 	WCHAR bufKey[64];
 
 	for( int nCount = 1; nCount < MAX_PLUG_CMD; nCount++ ){	//添え字は１から始める
-		swprintf( bufKey, L"C[%d]", nCount );
+		_swprintf( bufKey, L"C[%d]", nCount );
 		if( cProfile->IOProfileData( PII_COMMAND, bufKey, sHandler ) ){
 			wstring sLabel;
 			wstring sIcon;
 
 			//ラベルの取得
-			swprintf( bufKey, L"C[%d].Label", nCount );
+			_swprintf( bufKey, L"C[%d].Label", nCount );
 			cProfile->IOProfileData( PII_COMMAND, bufKey, sLabel );
 			if( cProfileMlang ){
 				cProfileMlang->IOProfileData( PII_COMMAND, bufKey, sLabel );
@@ -146,7 +144,7 @@ bool CPlugin::ReadPluginDefCommand( CDataProfile *cProfile, CDataProfile *cProfi
 				sLabel = sHandler;		// Labelが無ければハンドラ名で代用
 			}
 			//アイコンの取得
-			swprintf( bufKey, L"C[%d].Icon", nCount );
+			_swprintf( bufKey, L"C[%d].Icon", nCount );
 			cProfile->IOProfileData( PII_COMMAND, bufKey, sIcon );
 			if( cProfileMlang ){
 				cProfileMlang->IOProfileData( PII_COMMAND, bufKey, sIcon );
@@ -177,31 +175,31 @@ bool CPlugin::ReadPluginDefOption( CDataProfile *cProfile, CDataProfile *cProfil
 	for( int nCount = 1; nCount < MAX_PLUG_OPTION; nCount++ ){	//添え字は１から始める
 		sKey = sLabel = sType = sDefaultVal= L"";
 		//Keyの取得
-		swprintf( bufKey, L"O[%d].Key", nCount );
+		_swprintf( bufKey, L"O[%d].Key", nCount );
 		if( cProfile->IOProfileData( PII_OPTION, bufKey, sKey ) ){
 			//Sectionの取得
-			swprintf( bufKey, L"O[%d].Section", nCount );
+			_swprintf( bufKey, L"O[%d].Section", nCount );
 			cProfile->IOProfileData( PII_OPTION, bufKey, sSection_wk );
 			if (!sSection_wk.empty()) {		// 指定が無ければ前を引き継ぐ
 				sSection = sSection_wk;
 			}
 			//ラベルの取得
-			swprintf( bufKey, L"O[%d].Label", nCount );
+			_swprintf( bufKey, L"O[%d].Label", nCount );
 			cProfile->IOProfileData( PII_OPTION, bufKey, sLabel );
 			if( cProfileMlang ){
 				cProfileMlang->IOProfileData( PII_OPTION, bufKey, sLabel );
 			}
 			//Typeの取得
-			swprintf( bufKey, L"O[%d].Type", nCount );
+			_swprintf( bufKey, L"O[%d].Type", nCount );
 			cProfile->IOProfileData( PII_OPTION, bufKey, sType );
 			// 項目選択候補
-			swprintf( bufKey, L"O[%d].Select", nCount );
+			_swprintf( bufKey, L"O[%d].Select", nCount );
 			cProfile->IOProfileData( PII_OPTION, bufKey, sSelect );
 			if( cProfileMlang ){
 				cProfileMlang->IOProfileData( PII_OPTION, bufKey, sSelect );
 			}
 			// デフォルト値
-			swprintf( bufKey, L"O[%d].Default", nCount );
+			_swprintf( bufKey, L"O[%d].Default", nCount );
 			cProfile->IOProfileData( PII_OPTION, bufKey, sDefaultVal );
 
 			if (sSection.empty() || sKey.empty()) {
@@ -279,7 +277,7 @@ bool CPlugin::ReadPluginDefString( CDataProfile *cProfile, CDataProfile *cProfil
 	m_aStrings.push_back( wstring(L"") ); // 0番目ダミー
 	for( int nCount = 1; nCount < MAX_PLUG_STRING; nCount++ ){	//添え字は１から始める
 		wstring sVal = L"";
-		swprintf( bufKey, L"S[%d]", nCount );
+		_swprintf( bufKey, L"S[%d]", nCount );
 		if( cProfile->IOProfileData( PII_STRING, bufKey, sVal ) ){
 			if( cProfileMlang ){
 				cProfileMlang->IOProfileData( PII_STRING, bufKey, sVal );

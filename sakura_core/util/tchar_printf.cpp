@@ -109,7 +109,7 @@ static inline int local_vsprintf(char* buf, const char* format, va_list& v)
 
 static inline int local_vsprintf(wchar_t* buf, const wchar_t* format, va_list& v)
 {
-	return vswprintf(buf,format,v);
+	return _vswprintf(buf,format,v);
 }
 
 //vsnprintf_s API
@@ -219,22 +219,14 @@ static void my_va_forward(va_list& v, const wchar_t* field, const wchar_t* prefi
 static void field_convert(char* src)
 {
 	if(strncmp(src,"%ts",3)==0 || strncmp(src,"%tc",3)==0){
-#ifdef _UNICODE
 		src[1]='l';
-#else
-		src[1]='h';
-#endif
 	}
 }
 
 static void field_convert(wchar_t* src)
 {
 	if(wcsncmp(src,L"%ts",3)==0 || wcsncmp(src,L"%tc",3)==0){
-#ifdef _UNICODE
 		src[1]=L'l';
-#else
-		src[1]=L'h';
-#endif
 	}
 }
 
