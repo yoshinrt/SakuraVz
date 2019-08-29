@@ -2586,7 +2586,7 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		{
 			int iLen = 0;
 			int x;
-			const wchar_t *pStr;
+			const wchar_t *pStr = nullptr;
 			
 			if(
 				// 現在行が総行数を超えていないことを確認
