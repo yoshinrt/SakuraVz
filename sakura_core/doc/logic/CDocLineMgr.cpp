@@ -94,12 +94,42 @@ CDocLine* CDocLineMgr::AddNewLine( const wchar_t* pData, int nDataLen ){
 //! 全ての行を削除する
 void CDocLineMgr::DeleteAllLine()
 {
-	CDocLine* pDocLine = m_pDocLineTop;
-	while( pDocLine ){
-		CDocLine* pDocLineNext = pDocLine->GetNextLine();
-		delete pDocLine;
-		pDocLine = pDocLineNext;
+	int iMaxThreadNum = std::thread::hardware_concurrency();
+	
+	std::vector<std::thread>	cThread;
+	std::vector<CDocLine *>		pDocLineStart( iMaxThreadNum );
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+		pDocLineStart[ iThreadID ] = GetLine( m_nLines * iThreadID / iMaxThreadNum );
 	}
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+		// 各スレッドの開始位置特定
+		CLogicInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
+		CLogicInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
+		
+		#ifdef _DEBUG
+			MYTRACE( L"DeleteAllLine %d: %d - %d / %d\n", iThreadID, iStart, iEnd, m_nLines );
+		#endif
+		
+		// delete 本体
+		cThread.emplace_back( std::thread(
+			[ &, this, iThreadID, iStart, iEnd, pDocLineStart ]{
+				CDocLine* pDocLine = pDocLineStart[ iThreadID ];
+				for( int i = iStart; i < iEnd; ++i ){
+					CDocLine* pDocLineNext = pDocLine->GetNextLine();
+					delete pDocLine;
+					pDocLine = pDocLineNext;
+				}
+			}
+		));
+	}
+	
+	// join
+	for( int i = 0; i < iMaxThreadNum; ++i ){
+		cThread[ i ].join();
+	}
+	
 	_Init();
 }
 
