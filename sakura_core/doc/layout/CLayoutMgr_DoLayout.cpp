@@ -371,34 +371,36 @@ void CLayoutMgr::Cat( CLayoutMgr *pAppendData ){
 void CLayoutMgr::_DoLayout( bool bBlockingHook ){
 	
 	volatile bool	bBreak = false;
-	UINT uMaxThreadNum = m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() ?
+	int iMaxThreadNum = m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() ?
 		std::thread::hardware_concurrency() : 1;
 	
 	// parallel 用インスタンス作成
-	std::vector<std::thread>	cThread;
-	std::vector<CLayoutMgr>		clm( uMaxThreadNum - 1 );
+	std::vector<std::thread>					cThread;
+	std::vector<std::unique_ptr<CLayoutMgr>>	pclm;
 	
-	for( UINT u = 0; u < uMaxThreadNum - 1; ++u ) clm[ u ].Copy( *this );
+	for( int i = 0; i < iMaxThreadNum - 1; ++i ){
+		pclm.emplace_back( std::make_unique<CLayoutMgr>( this ));
+	}
 	
 	// 実行
-	for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
+	for( int iThreadID = iMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
 		
 		CDocLine *pDoc = m_pcDocLineMgr->GetLine( CLogicInt(
-			( int )m_pcDocLineMgr->GetLineCount() * iThreadID / uMaxThreadNum
+			( int )m_pcDocLineMgr->GetLineCount() * iThreadID / iMaxThreadNum
 		));
 		
 		if( iThreadID == 0 ){
-			_DoLayout( bBlockingHook, 0, uMaxThreadNum, pDoc, &bBreak );
+			_DoLayout( bBlockingHook, 0, iMaxThreadNum, pDoc, &bBreak );
 		}else{
 			cThread.emplace_back( std::thread([ &, this, iThreadID, pDoc ]{
-				clm[ iThreadID - 1 ]._DoLayout( bBlockingHook, iThreadID, uMaxThreadNum, pDoc, &bBreak );
+				pclm[ iThreadID - 1 ]->_DoLayout( bBlockingHook, iThreadID, iMaxThreadNum, pDoc, &bBreak );
 			}));
 		}
 	}
 	
-	for( UINT u = 0; u < uMaxThreadNum - 1; ++u ){
-		cThread[ uMaxThreadNum - 2 - u ].join();	// 全スレッド終了待ち
-		Cat( &clm[ u ]);							// m_pLayout の cat
+	for( int i = 0; i < iMaxThreadNum - 1; ++i ){
+		cThread[ iMaxThreadNum - 2 - i ].join();	// 全スレッド終了待ち
+		Cat( pclm[ i ].get());						// m_pLayout の cat
 	}
 }
 

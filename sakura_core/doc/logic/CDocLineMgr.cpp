@@ -52,10 +52,16 @@
 //               コンストラクタ・デストラクタ                  //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-CDocLineMgr::CDocLineMgr()
-	: m_docLineMemRes(new CPoolResource<CDocLine>())
+CDocLineMgr::CDocLineMgr( CDocLineMgr *pcSrc )
+	//: m_docLineMemRes(new CPoolResource<CDocLine>())
 	//: m_docLineMemRes(new std::pmr::unsynchronized_pool_resource()) // メモリ使用量が大きい為に使用しない
 {
+	if( pcSrc ){
+		m_docLineMemRes = pcSrc->m_docLineMemRes;
+	}else{
+		m_docLineMemRes = std::make_shared<CPoolResource<CDocLine, true>>();
+	}
+	
 	_Init();
 }
 

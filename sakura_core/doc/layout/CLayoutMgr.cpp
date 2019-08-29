@@ -36,11 +36,17 @@
 //                        生成と破棄                           //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-CLayoutMgr::CLayoutMgr()
+CLayoutMgr::CLayoutMgr( CLayoutMgr *pcSrc )
 : m_getIndentOffset( &CLayoutMgr::getIndentOffset_Normal )	//	Oct. 1, 2002 genta	//	Nov. 16, 2002 メンバー関数ポインタにはクラス名が必要
-  , m_layoutMemRes(new CPoolResource<CLayout>())
+  //, m_layoutMemRes(new CPoolResource<CLayout>())
   //, m_layoutMemRes(new std::pmr::unsynchronized_pool_resource()) // メモリ使用量が大きい為に使用しない
 {
+	if( pcSrc ){
+		m_layoutMemRes = pcSrc->m_layoutMemRes;
+	}else{
+		m_layoutMemRes = std::make_shared<CPoolResource<CLayoutMgr, true>>();
+	}
+	
 	m_pcDocLineMgr = NULL;
 	m_pTypeConfig = NULL;
 	m_nMaxLineKetas = CKetaXInt(MAXLINEKETAS);
@@ -54,6 +60,8 @@ CLayoutMgr::CLayoutMgr()
 	m_nTextWidthMaxLine = CLayoutInt(0);	// 最大幅のレイアウト行		// 2009.08.28 nasukoji
 
 	Init();
+	
+	if( pcSrc ) Copy( *pcSrc );
 }
 
 CLayoutMgr::~CLayoutMgr()

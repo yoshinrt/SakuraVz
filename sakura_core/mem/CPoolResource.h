@@ -30,7 +30,7 @@
 
 // std::pmr::unsynchronized_pool_resource だとメモリ使用量が大きい為、自前実装を用意
 // T : 要素型
-template <typename T>
+template <typename T, bool bParallel = false>
 class CPoolResource : public std::pmr::memory_resource
 {
 public:
@@ -52,10 +52,34 @@ public:
 	}
 
 protected:
+	
+	void* do_allocate([[maybe_unused]] std::size_t bytes,
+					  [[maybe_unused]] std::size_t alignment) override {
+		
+		if( bParallel ){
+			std::lock_guard<std::mutex> lock( m_Mutex );
+			return do_allocate_( bytes, alignment );
+		}
+		
+		return do_allocate_( bytes, alignment );
+	}
+
+	void do_deallocate(void* p,
+					   [[maybe_unused]] std::size_t bytes,
+					   [[maybe_unused]] std::size_t alignment) override {
+		
+		if( bParallel ){
+			std::lock_guard<std::mutex> lock( m_Mutex );
+			return do_deallocate_( p, bytes, alignment );
+		}
+		
+		return do_deallocate_( p, bytes, alignment );
+	}
+	
 	// 要素のメモリ確保処理、要素の領域のポインタを返す
 	// bytes と alignment 引数は使用しない、template 引数の型で静的に決定する
- 	void* do_allocate([[maybe_unused]] std::size_t bytes,
- 					  [[maybe_unused]] std::size_t alignment) override
+	void* do_allocate_([[maybe_unused]] std::size_t bytes,
+					  [[maybe_unused]] std::size_t alignment)
 	{
 		// メモリ確保時には未割当領域から使用していく
 		if (m_unassignedNode) {
@@ -78,9 +102,9 @@ protected:
 	// メモリ解放処理、要素の領域のポインタを受け取る
 	// 第1引数には、do_allocate メソッドで返したポインタを渡す事
 	// bytes と alignment 引数は使用しない、template 引数の型で静的に決定する
-	void do_deallocate(void* p,
+	void do_deallocate_(void* p,
 					   [[maybe_unused]] std::size_t bytes,
-					   [[maybe_unused]] std::size_t alignment) override
+					   [[maybe_unused]] std::size_t alignment)
 	{
 		if (p) {
 			// メモリ解放した領域を未割当領域として自己参照共用体の片方向連結リストで繋げる
@@ -132,6 +156,8 @@ private:
 	Node* m_unassignedNode = nullptr; // 未割当領域の先頭
 	Node* m_currentBlock = nullptr; // 現在のブロック
 	Node* m_currentNode = nullptr; // 要素確保処理時に現在のブロックの中から切り出すNodeを指すポインタ、メモリ確保時に未割当領域が無い場合はここを使う
+	
+	std::mutex	m_Mutex;
 };
 
 #endif /* SAKURA_CPOOLRESOURCE_H_ */

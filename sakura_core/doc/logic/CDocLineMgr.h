@@ -48,7 +48,7 @@ struct DocLineReplaceArg {
 class CDocLineMgr{
 public:
 	//コンストラクタ・デストラクタ
-	CDocLineMgr();
+	CDocLineMgr( CDocLineMgr *pcSrc = nullptr );
 	~CDocLineMgr();
 
 	//状態
@@ -98,7 +98,7 @@ private:
 	CDocLine*	m_pDocLineTop;		//!< 最初の行
 	CDocLine*	m_pDocLineBot;		//!< 最後の行(※1行しかない場合はm_pDocLineTopと等しくなる)
 	CLogicInt	m_nLines;			//!< 全行数
-	std::unique_ptr<std::pmr::memory_resource> m_docLineMemRes;
+	std::shared_ptr<std::pmr::memory_resource> m_docLineMemRes;
 
 public:
 	//$$ kobake注: 以下、絶対に切り離したい（最低切り離せなくても、変数の意味をコメントで明確に記すべき）変数群

@@ -96,7 +96,7 @@ private:
 
 public:
 	//生成と破棄
-	CLayoutMgr();
+	CLayoutMgr( CLayoutMgr *pcSrc = nullptr );
 	~CLayoutMgr();
 	void Create( CEditDoc*, CDocLineMgr* );
 	void Init();
@@ -412,7 +412,7 @@ protected:
 	//実データ
 	CLayout*				m_pLayoutTop;
 	CLayout*				m_pLayoutBot;
-	std::unique_ptr<std::pmr::memory_resource> m_layoutMemRes;
+	std::shared_ptr<std::pmr::memory_resource> m_layoutMemRes;
 
 	//タイプ別設定
 	const STypeConfig*		m_pTypeConfig;

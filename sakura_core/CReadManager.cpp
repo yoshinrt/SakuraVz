@@ -78,11 +78,11 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 
 	EConvertResult eRet = RESULT_COMPLETE;
 	
-	UINT uMaxThreadNum = std::thread::hardware_concurrency();
+	int iMaxThreadNum = std::thread::hardware_concurrency();
 	
-	std::vector<CFileLoad>		cfl( uMaxThreadNum );
-	std::vector<CDocLineMgr>	cDocMgr( uMaxThreadNum );
-	std::vector<std::thread>	cThread;
+	std::vector<CFileLoad>						cfl( iMaxThreadNum );
+	std::vector<std::unique_ptr<CDocLineMgr>>	pcDocMgr;
+	std::vector<std::thread>					cThread;
 	
 	volatile bool	bBreakRead = false;
 	
@@ -107,6 +107,11 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			pFileInfo->SetFileTime( FileTime );
 		}
 		
+		// 作業用 pcDocLineMgr 生成
+		for( int i = 0; i < iMaxThreadNum; ++i ){
+			pcDocMgr.emplace_back( std::make_unique<CDocLineMgr>( pcDocLineMgr ));
+		}
+		
 		auto ReadThread = [ &, this ]( int iThreadID ){
 			
 			// 処理開始・終了位置探索
@@ -115,16 +120,16 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				uBeginPos = 0;
 			}else{
 				uBeginPos = cfl[ iThreadID ].GetNextLineTop(
-					cfl[ iThreadID ].GetFileSize() * iThreadID / uMaxThreadNum
+					cfl[ iThreadID ].GetFileSize() * iThreadID / iMaxThreadNum
 				);
 			}
 			
 			size_t	uEndPos;
-			if( iThreadID == uMaxThreadNum - 1 ){
+			if( iThreadID == iMaxThreadNum - 1 ){
 				uEndPos = cfl[ iThreadID ].GetFileSize();
 			}else{
 				uEndPos = cfl[ iThreadID ].GetNextLineTop(
-					cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / uMaxThreadNum
+					cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / iMaxThreadNum
 				);
 			}
 			
@@ -149,7 +154,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
 				int		nLineLen = cUnicodeBuffer.GetStringLength();
 				++nLineNum;
-				cDocMgr[ iThreadID ].AddNewLine( pLine, nLineLen );
+				pcDocMgr[ iThreadID ]->AddNewLine( pLine, nLineLen );
 				//経過通知
 				if( iThreadID == 0 ){
 					ULONGLONG currTime = GetTickCount64();
@@ -164,7 +169,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			}
 		};
 		
-		for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
+		for( int iThreadID = iMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
 			if( iThreadID == 0 ){
 				ReadThread( iThreadID );
 			}else{
@@ -174,13 +179,12 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		}
 		
 		// 全スレッド終了待ち
-		for( UINT u = 0; u < uMaxThreadNum - 1; ++u ){
-			cThread[ u ].join();
+		for( int i = 0; i < iMaxThreadNum; ++i ){
+			if( i ) cThread[ iMaxThreadNum - i - 1 ].join();
+			pcDocLineMgr->Cat( pcDocMgr[ i ].get());
 		}
 		
 		if( bBreakRead ) throw CAppExitException(); //中断検出
-		
-		for( UINT u = 0; u < uMaxThreadNum; ++u ) pcDocLineMgr->Cat( &cDocMgr[ u ]);
 		
 		// 巨大ファイル判定
 		pFileInfo->SetLargeFile(
