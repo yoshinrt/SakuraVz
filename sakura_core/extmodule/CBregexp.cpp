@@ -272,7 +272,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		// partial 1回目，szSubject を m_szSearchBuf にコピー
 		if( m_szSubject != m_szSearchBuf ){
-			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize, true ))
 				return false;
 			
 			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
@@ -351,7 +351,7 @@ void CBregexp::GetMatchLine( const wchar_t **ppLine, int *piLen ){
 	@param[in] iSize 確保サイズ (wchar_t 単位)
 	@retval true: 成功
 */
-bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
+bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize, bool bDisposable ){
 	
 	if( iBufSize >= iSize )		return true;	// 元々必要サイズ
 	if( iSize >= ( 1 << 30 ))	return false;	// 必要サイズ大きすぎ
@@ -359,6 +359,11 @@ bool CBregexp::ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize ){
 	// buf サイズ更新必要
 	int iBufSizeTmp = iBufSize ? iBufSize : 1024;	// 最小初期サイズ
 	while( iBufSizeTmp < iSize ) iBufSizeTmp <<= 1;
+	
+	if( pBuf && bDisposable ){
+		free( pBuf );
+		pBuf = nullptr;
+	}
 	
 	void *p;
 	if( pBuf ){
@@ -404,7 +409,7 @@ int CBregexp::Replace( const wchar_t *szReplacement, const wchar_t *szSubject, i
 	m_uOption |= uOption;
 	
 	while( 1 ){
-		if( !ResizeBuf( iNeededSize, m_szReplaceBuf, m_iReplaceBufSize )) return 0;
+		if( !ResizeBuf( iNeededSize, m_szReplaceBuf, m_iReplaceBufSize, true )) return 0;
 		
 		OutputLen	= m_iReplaceBufSize;
 		

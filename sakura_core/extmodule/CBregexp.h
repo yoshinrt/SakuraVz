@@ -40,14 +40,14 @@ public:
 	~CBregexp();
 	
 	// 2006.01.22 かろと オプション追加・名称変更
-	enum Option {							//						いつ指定?
+	enum Option {							//								いつ指定?
 		optNothing			= 0,			//!< オプションなし
-		optIgnoreCase		= 1 << 0,		//!< ignore case		compile
-		optGlobal			= 1 << 1,		//!< 全域オプション(/g)	replace
-		optNoPartialMatch	= 1 << 2,		//!< partial match なし	match
-		optLiteral			= 1 << 3,		//!< 基本検索			compile
-		optWordSearch		= 1 << 4,		//!< 単語検索			compile
-		optNotBol			= 1 << 5,		//!< sbj 先頭は非行頭	match
+		optIgnoreCase		= 1 << 0,		//!< ignore case				compile
+		optGlobal			= 1 << 1,		//!< 全域オプション(/g)			replace
+		optNoPartialMatch	= 1 << 2,		//!< re 時 partial matchなし	match
+		optLiteral			= 1 << 3,		//!< 基本検索					compile
+		optWordSearch		= 1 << 4,		//!< 単語検索					compile
+		optNotBol			= 1 << 5,		//!< sbj 先頭は非行頭			match
 	};
 
 	//! DLLのバージョン情報を取得
@@ -186,7 +186,7 @@ private:
 	pcre2_code				*m_Re;
 	
 	//! Buf 確保・リサイズ
-	static bool ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize );
+	static bool ResizeBuf( int iSize, wchar_t *&pBuf, int &iBufSize, bool bDisposable = false );
 	
 	// 行末が EOL かどうか
 	bool IsEolTail( const wchar_t* szStr, int iLen ){
