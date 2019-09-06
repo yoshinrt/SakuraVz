@@ -217,13 +217,13 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 	UINT uPcre2Opt = 0;
 	if(
 		!( m_uOption & ( optWordSearch | optLiteral )) &&
-		( uOption & optPartialMatch ) &&
+		!( uOption & optNoPartialMatch ) &&
 		m_GetNextLineCallback
 	){
-		m_uOption |= optPartialMatch;
+		m_uOption &= ~optNoPartialMatch;
 		uPcre2Opt |= PCRE2_PARTIAL_HARD;
 	}else{
-		m_uOption &= ~optPartialMatch;
+		m_uOption |= optNoPartialMatch;
 	}
 	
 	if( uOption & optNotBol ){

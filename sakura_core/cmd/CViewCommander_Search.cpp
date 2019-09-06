@@ -202,16 +202,14 @@ re_do:;
 			nIdx,							// 検索開始データ位置
 			SEARCH_FORWARD,					// 前方検索
 			&sRangeA,						// マッチレイアウト範囲
-			m_pCommanderView->m_sSearchPattern,
-			CBregexp::optPartialMatch
+			m_pCommanderView->m_sSearchPattern
 		);
 	}else{
 		nSearchResult = CSearchAgent(&GetDocument()->m_cDocLineMgr).SearchWord(
 			CLogicPoint(nIdx, nLineNumLogic),
 			SEARCH_FORWARD,					// 前方検索
 			pcSelectLogic,
-			m_pCommanderView->m_sSearchPattern,
-			CBregexp::optPartialMatch
+			m_pCommanderView->m_sSearchPattern
 		);
 	}
 	
@@ -409,8 +407,7 @@ re_do:;							//	hor
 		nIdx,									// 検索開始データ位置
 		SEARCH_BACKWARD,						// 後方検索
 		&sRangeA,								// マッチレイアウト範囲
-		m_pCommanderView->m_sSearchPattern,
-		CBregexp::optPartialMatch
+		m_pCommanderView->m_sSearchPattern
 	) ){
 		if( bSelecting ){
 			/* 現在のカーソル位置によって選択範囲を変更 */
@@ -858,7 +855,7 @@ void CViewCommander::Command_REPLACE_ALL()
 	CLogicRange cSelectLogic;	// 置換文字列GetSelect()のLogic単位版
 	
 	// partial 設定，block モード時は無効
-	UINT uSearchWordOpt = bBeginBoxSelect ? 0 : CBregexp::optPartialMatch;
+	UINT uSearchWordOpt = bBeginBoxSelect ? CBregexp::optNoPartialMatch : 0;
 	
 	// 置換ループ
 	while( !bCANCEL ){	/* キャンセルされたか */

@@ -253,7 +253,7 @@ void CBookmarkManager::MarkSearchWord(
 			DocInfo.m_pDoc		= pDoc;
 			DocInfo.m_iLineNo	= iLineNo;
 			
-			if( !pRegexp->Match( pLine, nLineLen, 0, CBregexp::optPartialMatch )){
+			if( !pRegexp->Match( pLine, nLineLen, 0 )){
 				// partial match 中に EOF に達した
 				if( !DocInfo.m_pDoc ) break;
 				
