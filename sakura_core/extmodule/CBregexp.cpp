@@ -257,7 +257,19 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		UINT uPrevLineNum = m_iLineTop.size();
 		
 		while( 1 ){
-			// partial match したので，次行読み出し
+			// partial match 1回目，szSubject を m_szSearchBuf にコピー
+			if( m_iLineTop.size() == 0 ){
+				if( !ResizeBuf( m_iSubjectLen * 2, m_szSearchBuf, m_iSearchBufSize, true ))
+					return false;
+				
+				memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+				
+				#ifdef _DEBUG
+					if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
+				#endif
+			}
+			
+			// 次行読み出し
 			const wchar_t	*pNextLine;
 			int iNextSize = m_GetNextLineCallback( &pNextLine, m_pCallbackParam );
 			
@@ -270,20 +282,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 			bool bLastLine = ( iNextSize & SIZE_LAST ) != 0;
 			iNextSize &= ~SIZE_LAST;
 			
-			// partial 1回目，szSubject を m_szSearchBuf にコピー
-			if( m_iLineTop.size() == 0 ){
-				if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize, true ))
-					return false;
-				
-				memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
-				m_szSubject	= m_szSearchBuf;
-				
-				#ifdef _DEBUG
-					if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
-				#endif
-			}
-			
-			else if( m_iSubjectLen + iNextSize > m_iSearchBufSize ){
+			if( m_iSubjectLen + iNextSize > m_iSearchBufSize ){
 				// SearchBuf サイズを超えそうだが，最低 1行は cat するため buf 拡張
 				if( m_iLineTop.size() == uPrevLineNum ){
 					if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
@@ -323,6 +322,8 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 				break;
 			}
 		}
+		
+		m_szSubject	= m_szSearchBuf;
 	}
 }
 

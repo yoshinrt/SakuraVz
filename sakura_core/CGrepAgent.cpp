@@ -1344,7 +1344,7 @@ int CGrepAgent::DoGrepReplaceFile(
 			while( nIndex <= nLineLen ){
 				
 				// マッチ
-				bool bMatch = pRegexp->Match( pLine, nLineLen, nIndex, CBregexp::optNoFastCat );
+				bool bMatch = pRegexp->Match( pLine, nLineLen, nIndex );
 				if( sGrepOption.nGrepOutputLineType == 2/*非該当行*/ ) bMatch = !bMatch;
 				if( !bMatch ) break;
 				
