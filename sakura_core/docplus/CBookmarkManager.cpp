@@ -206,17 +206,24 @@ public:
 	CGetNextLineInfoBM( CDocLine *pDoc, int iLineNo ) : m_pDoc( pDoc ), m_iLineNo( iLineNo ){};
 };
 
-int CBookmarkManager::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
+int CBookmarkManager::GetNextLine( const wchar_t **ppNextLine, void *pParam ){
 	CGetNextLineInfoBM& DocInfo = *reinterpret_cast<CGetNextLineInfoBM *>( pParam );
+	
+	// unget
+	if( !ppNextLine ){
+		DocInfo.m_pDoc = DocInfo.m_pDoc->GetPrevLine();	// 前行
+		--DocInfo.m_iLineNo;
+		return 0;
+	}
 	
 	DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();		// 次行取得
 	if( !DocInfo.m_pDoc ) return 0;						// 次行なし
 	
 	int iLen;
-	pNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
+	*ppNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
 	
 	// この行が最終行?
-	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_LAST;
 	++DocInfo.m_iLineNo;
 	
 	return iLen;
@@ -243,7 +250,7 @@ void CBookmarkManager::MarkSearchWord(
 	CLogicRange MatchRange;
 	
 	// 次行取得コールバック設定
-	pRegexp->SetNextLineCallback( GetNextLine, &DocInfo );
+	pRegexp->SetNextLineCallback( &GetNextLine, &DocInfo );
 	
 	while( pDoc ){
 		if( !CBookmarkGetter( pDoc ).IsBookmarked()){

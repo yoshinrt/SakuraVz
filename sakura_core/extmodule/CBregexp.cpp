@@ -254,46 +254,75 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		if( m_iLastCode != PCRE2_ERROR_PARTIAL ) return m_iLastCode > 0;
 		
-		// partial match したので，次行読み出し
-		const wchar_t	*pNextLine;
-		int iNextSize = m_GetNextLineCallback( pNextLine, m_pCallbackParam );
+		int iPrevLineNum = m_iLineTop.size();
 		
-		// partial match したけど次行がないので，partial match を外して再検索
-		if( iNextSize == 0 ){
-			uPcre2Opt	&= ~PCRE2_PARTIAL_HARD;
-			continue;
-		}
-		
-		// SIZE_NOPARTIAL bit が立っていたら，partial option を外す
-		if( iNextSize & SIZE_NOPARTIAL ){
-			iNextSize &= ~SIZE_NOPARTIAL;
-			uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
-		}
-		
-		// partial 1回目，szSubject を m_szSearchBuf にコピー
-		if( m_szSubject != m_szSearchBuf ){
-			if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize, true ))
-				return false;
+		while( 1 ){
+			// partial match したので，次行読み出し
+			const wchar_t	*pNextLine;
+			int iNextSize = m_GetNextLineCallback( &pNextLine, m_pCallbackParam );
 			
-			memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+			// partial match したけど次行がないので，partial match を外して再検索
+			if( iNextSize == 0 ){
+				uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+				break;	// cat 終了
+			}
 			
+			bool bLastLine = ( iNextSize & SIZE_LAST ) != 0;
+			iNextSize &= ~SIZE_LAST;
+			
+			// partial 1回目，szSubject を m_szSearchBuf にコピー
+			if( m_iLineTop.size() == 0 ){
+				if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize, true ))
+					return false;
+				
+				memcpy( m_szSearchBuf, m_szSubject, m_iSubjectLen * sizeof( wchar_t ));
+				m_szSubject	= m_szSearchBuf;
+				
+				#ifdef _DEBUG
+					if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
+				#endif
+			}
+			
+			else if( m_iSubjectLen + iNextSize > m_iSearchBufSize ){
+				// SearchBuf サイズを超えそうだが，最低 1行は cat するため buf 拡張
+				if( m_iLineTop.size() == iPrevLineNum ){
+					if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
+						return false;
+				}
+				
+				// cat はせず，unget 処理
+				else{
+					assert( !( uOption & optNoFastCat ));
+					
+					m_GetNextLineCallback( nullptr, m_pCallbackParam );
+					break;
+				}
+			}
+			
+			// cat 処理
+			m_iLineTop.emplace_back( m_iSubjectLen );	// 行頭位置記憶
+			memcpy( m_szSearchBuf + m_iSubjectLen, pNextLine, iNextSize * sizeof( wchar_t ));
+			m_iSubjectLen += iNextSize;
 			#ifdef _DEBUG
 				if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
 			#endif
+			
+			// 最終行の場合は partial を外す
+			if( bLastLine ){
+				uPcre2Opt &= ~PCRE2_PARTIAL_HARD;
+				break;
+			}
+			
+			if(
+				// NoFastCat 時は，cat 終了
+				( uOption & optNoFastCat ) ||
+				
+				// 元の 2倍の行を cat したら，cat 終了
+				( m_iLineTop.size() + 1 >= ( iPrevLineNum + 1 ) * 2 )
+			){
+				break;
+			}
 		}
-		
-		// cat
-		if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
-			return false;
-		
-		m_iLineTop.emplace_back( m_iSubjectLen );	// 行頭位置記憶
-		memcpy( m_szSearchBuf + m_iSubjectLen, pNextLine, iNextSize * sizeof( wchar_t ));
-		m_iSubjectLen += iNextSize;
-		#ifdef _DEBUG
-			if( m_iSubjectLen < m_iSearchBufSize ) m_szSearchBuf[ m_iSubjectLen ] = L'\0';
-		#endif
-		
-		m_szSubject	= m_szSearchBuf;
 	}
 }
 

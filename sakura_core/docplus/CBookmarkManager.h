@@ -74,7 +74,7 @@ public:
 
 private:
 	/*! 次行取得 */
-	static int GetNextLine( const wchar_t *&pNextLine, void *pParam );
+	static int GetNextLine( const wchar_t **ppNextLine, void *pParam );
 	
 	CDocLineMgr* m_pcDocLineMgr;
 };

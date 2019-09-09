@@ -203,17 +203,24 @@ public:
 	CGetNextLineInfo( CDocLine *pDoc, int iLineNo ) : m_pDoc( pDoc ), m_iLineNo( iLineNo ){};
 };
 
-int CSearchAgent::GetNextLine( const wchar_t *&pNextLine, void *pParam ){
+int CSearchAgent::GetNextLine( const wchar_t **ppNextLine, void *pParam ){
 	CGetNextLineInfo& DocInfo = *reinterpret_cast<CGetNextLineInfo *>( pParam );
+	
+	// unget
+	if( !ppNextLine ){
+		DocInfo.m_pDoc = DocInfo.m_pDoc->GetPrevLine();	// 前行
+		--DocInfo.m_iLineNo;
+		return 0;
+	}
 	
 	DocInfo.m_pDoc = DocInfo.m_pDoc->GetNextLine();		// 次行取得
 	if( !DocInfo.m_pDoc ) return 0;						// 次行なし
 	
 	int iLen;
-	pNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
+	*ppNextLine = ( wchar_t *)DocInfo.m_pDoc->GetDocLineStrWithEOL( &iLen );
 	
 	// この行が最終行?
-	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_NOPARTIAL;
+	if( !DocInfo.m_pDoc->GetNextLine()) iLen |= CBregexp::SIZE_LAST;
 	++DocInfo.m_iLineNo;
 	
 	return iLen;
@@ -239,7 +246,7 @@ int CSearchAgent::SearchWord(
 	
 	// 正規表現の場合，次行取得コールバック設定
 	if( bRe ){
-		pattern.GetRegexp()->SetNextLineCallback( GetNextLine, &DocInfo );
+		pattern.GetRegexp()->SetNextLineCallback( &GetNextLine, &DocInfo );
 	}
 	
 	// 前方検索

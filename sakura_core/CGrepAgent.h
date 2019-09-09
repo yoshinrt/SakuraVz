@@ -171,7 +171,7 @@ private:
 	);
 	
 	// 次行取得
-	static int GetNextLine( const wchar_t *&pNextLine, void *pParam );
+	static int GetNextLine( const wchar_t **ppNextLine, void *pParam );
 	
 	DWORD m_dwTickAddTail;	// AddTail() を呼び出した時間
 	DWORD m_dwTickUICheck;	// 処理中にユーザーによるUI操作が行われていないか確認した時間

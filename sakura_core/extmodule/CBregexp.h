@@ -31,23 +31,29 @@
 
 class CBregexp {
 public:
-	// 0: 次行なし 0 >: 取得成功
-	// SIZE_NOPARTIAL が立っていたら，partial なし (その行が最終行)
-	typedef int ( *GetNextLineCallback_t )( const wchar_t *&pNextLine, void *pParam );
-	static const int SIZE_NOPARTIAL = ( 1 << 31 );
+	/*!
+		@brief partial match 時の次行取得コールバック
+		@param[in] pNextLine	次行の文字列ポインタを受け取るポインタ，nullptr 時は unget 動作
+		@param[in] pParam		コールバックに渡す任意のポインタ
+		@retval 0: 次行なし 0 >: 取得成功 \
+					SIZE_LAST が立っていたら，その行が最終行
+	*/
+	typedef int ( *GetNextLineCallback_t )( const wchar_t **ppNextLine, void *pParam );
+	static const int SIZE_LAST = ( 1 << 31 );
 	
 	CBregexp();
 	~CBregexp();
 	
 	// 2006.01.22 かろと オプション追加・名称変更
-	enum Option {							//								いつ指定?
-		optNothing			= 0,			//!< オプションなし
-		optIgnoreCase		= 1 << 0,		//!< ignore case				compile
-		optGlobal			= 1 << 1,		//!< 全域オプション(/g)			replace
-		optNoPartialMatch	= 1 << 2,		//!< re 時 partial matchなし	match
-		optLiteral			= 1 << 3,		//!< 基本検索					compile
-		optWordSearch		= 1 << 4,		//!< 単語検索					compile
-		optNotBol			= 1 << 5,		//!< sbj 先頭は非行頭			match
+	enum Option {						//	いつ指定?
+		optNothing			= 0,		//!<			オプションなし
+		optIgnoreCase		= 1 <<  0,	//!< compile	ignore case
+		optGlobal			= 1 <<  1,	//!< replace	全域オプション(/g)
+		optNoPartialMatch	= 1 <<  2,	//!< match		re 時 partial matchなし
+		optNoFastCat		= 1 <<  3,	//!< match		partial match の cat 最適化なし
+		optLiteral			= 1 <<  4,	//!< compile	基本検索
+		optWordSearch		= 1 <<  5,	//!< compile	単語検索
+		optNotBol			= 1 <<  6,	//!< match		sbj 先頭は非行頭
 	};
 
 	//! DLLのバージョン情報を取得
