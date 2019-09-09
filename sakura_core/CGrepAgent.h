@@ -26,6 +26,7 @@
 #define SAKURA_CGREPAGENT_89E8C8B7_433B_47F3_A389_75C91E00A4BA9_H_
 
 #include "doc/CDocListener.h"
+#include "io/CFileLoad.h"
 class CDlgCancel;
 class CEditView;
 class CSearchStringPattern;
@@ -61,6 +62,27 @@ struct SGrepOption{
 		,bGrepPaste(false)
 		,bGrepBackup(false)
 	{}
+};
+
+class CGrepDocInfo {
+public:
+	CGrepDocInfo(
+		CFileLoad		*pFileLoad,
+		CNativeW		*pLineBuf,
+		CEol			*pEol,
+		LONGLONG		*piLine
+	) : m_pFileLoad( pFileLoad ),
+		m_pLineBuf( pLineBuf ),
+		m_pEol( pEol ),
+		m_piLine( piLine ),
+		m_bUnget( false ){}
+	
+	CFileLoad		*m_pFileLoad;
+	CNativeW		*m_pLineBuf;
+	CEol			*m_pEol;
+	LONGLONG		*m_piLine;
+	EConvertResult	m_cPrevResult;
+	bool			m_bUnget;
 };
 
 //	Jun. 26, 2001 genta	正規表現ライブラリの差し替え
@@ -171,7 +193,8 @@ private:
 	);
 	
 	// 次行取得
-	static int GetNextLine( const wchar_t **ppNextLine, void *pParam );
+	static EConvertResult ReadLine( CGrepDocInfo *pInfo );
+	static int GetNextLine( const wchar_t **ppNextLine, void *pParam );	// callback 用
 	
 	DWORD m_dwTickAddTail;	// AddTail() を呼び出した時間
 	DWORD m_dwTickUICheck;	// 処理中にユーザーによるUI操作が行われていないか確認した時間

@@ -254,7 +254,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 		
 		if( m_iLastCode != PCRE2_ERROR_PARTIAL ) return m_iLastCode > 0;
 		
-		int iPrevLineNum = m_iLineTop.size();
+		UINT uPrevLineNum = m_iLineTop.size();
 		
 		while( 1 ){
 			// partial match したので，次行読み出し
@@ -285,7 +285,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 			
 			else if( m_iSubjectLen + iNextSize > m_iSearchBufSize ){
 				// SearchBuf サイズを超えそうだが，最低 1行は cat するため buf 拡張
-				if( m_iLineTop.size() == iPrevLineNum ){
+				if( m_iLineTop.size() == uPrevLineNum ){
 					if( !ResizeBuf( m_iSubjectLen + iNextSize, m_szSearchBuf, m_iSearchBufSize ))
 						return false;
 				}
@@ -318,7 +318,7 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 				( uOption & optNoFastCat ) ||
 				
 				// 元の 2倍の行を cat したら，cat 終了
-				( m_iLineTop.size() + 1 >= ( iPrevLineNum + 1 ) * 2 )
+				( m_iLineTop.size() + 1 >= ( uPrevLineNum + 1 ) * 2 )
 			){
 				break;
 			}

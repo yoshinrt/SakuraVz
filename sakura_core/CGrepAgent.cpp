@@ -14,7 +14,6 @@
 #include "charset/CCodeFactory.h"
 #include "charset/CCodeBase.h"
 #include "charset/CCodePage.h"
-#include "io/CFileLoad.h"
 #include "io/CBinaryStream.h"
 #include "util/window.h"
 #include "util/module.h"
@@ -27,21 +26,6 @@
 #define UICHECK_INTERVAL_MILLISEC 200	// UI確認の時間間隔
 #define ADDTAIL_INTERVAL_MILLISEC 200	// 結果出力の時間間隔
 #define UIFILENAME_INTERVAL_MILLISEC 200	// Cancelダイアログのファイル名表示更新間隔
-
-class CGrepDocInfo {
-public:
-	CGrepDocInfo(
-		CFileLoad	*pFileLoad,
-		CNativeW	*pLineBuf,
-		CEol		*pEol,
-		LONGLONG	*piLine
-	) : m_pFileLoad( pFileLoad ), m_pLineBuf( pLineBuf ), m_pEol( pEol ), m_piLine( piLine ){}
-	
-	CFileLoad	*m_pFileLoad;
-	CNativeW	*m_pLineBuf;
-	CEol		*m_pEol;
-	LONGLONG	*m_piLine;
-};
 
 CGrepAgent::CGrepAgent()
 : m_bGrepMode( false )			/* Grepモードか */
@@ -1300,13 +1284,12 @@ int CGrepAgent::DoGrepReplaceFile(
 		CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
 		pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
 		
-		while( RESULT_FAILURE != cfl.ReadLine( &cUnicodeBuffer, &cEol ) )
+		while( RESULT_FAILURE != ReadLine( &GrepLineInfo ))
 		{
 			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
 			int		nLineLen = cUnicodeBuffer.GetStringLength();
 			
 			nEolCodeLen = cEol.GetLen();
-			++nLine;
 			
 			DWORD dwNow = ::GetTickCount();
 			if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
@@ -1483,19 +1466,36 @@ int CGrepAgent::DoGrepReplaceFile(
 }
 
 // 次行取得
-int CGrepAgent::GetNextLine( const wchar_t **ppNextLine, void *m_pParam ){
+EConvertResult CGrepAgent::ReadLine( CGrepDocInfo *pInfo ){
+	++*pInfo->m_piLine;
 	
-	assert( ppNextLine );
+	// unget 後の get
+	if( pInfo->m_bUnget ){
+		pInfo->m_bUnget = false;
+		return pInfo->m_cPrevResult;
+	}
+	
+	return pInfo->m_cPrevResult = pInfo->m_pFileLoad->ReadLine( pInfo->m_pLineBuf, pInfo->m_pEol );
+}
+
+int CGrepAgent::GetNextLine( const wchar_t **ppNextLine, void *m_pParam ){
 	
 	CGrepDocInfo *pInfo = static_cast<CGrepDocInfo *>( m_pParam );
 	
+	// unget
+	if( !ppNextLine ){
+		assert( !pInfo->m_bUnget );	// 2回以上の unget 不可
+		--*pInfo->m_piLine;
+		pInfo->m_bUnget = true;
+		return 0;
+	}
+	
 	// 次行なし
-	if( pInfo->m_pFileLoad->ReadLine( pInfo->m_pLineBuf, pInfo->m_pEol ) == RESULT_FAILURE ){
+	if( ReadLine( pInfo ) == RESULT_FAILURE ){
 		return 0;
 	}
 	
 	// 次行取得
-	++*pInfo->m_piLine;
 	*ppNextLine = pInfo->m_pLineBuf->GetStringPtr();
 	return pInfo->m_pLineBuf->GetStringLength();
 }
