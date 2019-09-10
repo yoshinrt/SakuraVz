@@ -291,8 +291,6 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 				
 				// cat はせず，unget 処理
 				else{
-					assert( !( uOption & optNoFastCat ));
-					
 					m_GetNextLineCallback( nullptr, m_pCallbackParam );
 					break;
 				}
@@ -312,13 +310,8 @@ bool CBregexp::Match( const wchar_t* szSubject, int iSubjectLen, int iStart, UIN
 				break;
 			}
 			
-			if(
-				// NoFastCat 時は，cat 終了
-				( uOption & optNoFastCat ) ||
-				
-				// 元の 2倍の行を cat したら，cat 終了
-				( m_iLineTop.size() + 1 >= ( uPrevLineNum + 1 ) * 2 )
-			){
+			// 元の 2倍の行を cat したら，cat 終了
+			if( m_iLineTop.size() + 1 >= ( uPrevLineNum + 1 ) * 2 ){
 				break;
 			}
 		}

@@ -50,10 +50,9 @@ public:
 		optIgnoreCase		= 1 <<  0,	//!< compile	ignore case
 		optGlobal			= 1 <<  1,	//!< replace	全域オプション(/g)
 		optNoPartialMatch	= 1 <<  2,	//!< match		re 時 partial matchなし
-		optNoFastCat		= 1 <<  3,	//!< match		partial match の cat 最適化なし
-		optLiteral			= 1 <<  4,	//!< compile	基本検索
-		optWordSearch		= 1 <<  5,	//!< compile	単語検索
-		optNotBol			= 1 <<  6,	//!< match		sbj 先頭は非行頭
+		optLiteral			= 1 <<  3,	//!< compile	基本検索
+		optWordSearch		= 1 <<  4,	//!< compile	単語検索
+		optNotBol			= 1 <<  5,	//!< match		sbj 先頭は非行頭
 	};
 
 	//! DLLのバージョン情報を取得
