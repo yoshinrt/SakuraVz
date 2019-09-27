@@ -78,7 +78,7 @@ void CDocLocker::CheckWritable(bool bMsg)
 	// 書き込めるか検査
 	CDocFile& cDocFile = pcDoc->m_cDocFile;
 	m_bIsDocWritable = cDocFile.IsFileWritable();
-	if(!m_bIsDocWritable && bMsg){
+	if(0 && !m_bIsDocWritable && bMsg){
 		// 排他されている場合だけメッセージを出す
 		// その他の原因（ファイルシステムのセキュリティ設定など）では読み取り専用と同様にメッセージを出さない
 		if( ::GetLastError() == ERROR_SHARING_VIOLATION ){
