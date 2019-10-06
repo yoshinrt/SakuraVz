@@ -173,5 +173,5 @@ void CDocEditor::SetImeMode( int mode )
 
 // 改行混在禁止時は LF 固定
 CEol CDocEditor::GetNewLineCode( void ) const {
-	return GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ? EOL_LF : m_cNewLineCode;
+	return GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ? static_cast<CEol>( EOL_LF ) : m_cNewLineCode;
 }

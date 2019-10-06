@@ -756,7 +756,6 @@ void CViewCommander::Command_REPLACE_ALL()
 	//<< 2002/03/26 Azumaiya
 	// 速く動かすことを最優先に組んでみました。
 	// ループの外で文字列の長さを特定できるので、一時変数化。
-	const wchar_t *szREPLACEKEY;		// 置換後文字列。
 	bool		bColumnSelect = false;	// 矩形貼り付けを行うかどうか。
 	bool		bLineSelect = false;	// ラインモード貼り付けを行うかどうか
 	CNativeW	cmemReplacement;				// 置換後文字列のデータ（データを格納するだけで、ループ内ではこの形ではデータを扱いません）。
@@ -812,15 +811,16 @@ void CViewCommander::Command_REPLACE_ALL()
 		cmemReplacement.SetString( GetEditWindow()->m_cDlgReplace.m_strText2.c_str() );
 	}
 
-	CLogicInt nREPLACEKEY;			// 置換後文字列の長さ。
-	szREPLACEKEY = cmemReplacement.GetStringPtr(&nREPLACEKEY);
+	CLogicInt nREPLACEKEY = cmemReplacement.GetStringLength();
+	const wchar_t* szREPLACEKEY = cmemReplacement.GetStringPtr();
 
 	// 行コピー（MSDEVLineSelect形式）のテキストで末尾が改行になっていなければ改行を追加する
 	// ※レイアウト折り返しの行コピーだった場合は末尾が改行になっていない
 	if( bLineSelect ){
 		if( !WCODE::IsLineDelimiter(szREPLACEKEY[nREPLACEKEY - 1], GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol) ){
 			cmemReplacement.AppendString(GetDocument()->m_cDocEditor.GetNewLineCode().GetValue2());
-			szREPLACEKEY = cmemReplacement.GetStringPtr( &nREPLACEKEY );
+			nREPLACEKEY = cmemReplacement.GetStringLength();
+			szREPLACEKEY = cmemReplacement.GetStringPtr();
 		}
 	}
 
@@ -829,7 +829,8 @@ void CViewCommander::Command_REPLACE_ALL()
 		wchar_t	*pszConvertedText = new wchar_t[nConvertedTextLen];
 		ConvertEol(szREPLACEKEY, nREPLACEKEY, pszConvertedText);
 		cmemReplacement.SetString(pszConvertedText, nConvertedTextLen);
-		szREPLACEKEY = cmemReplacement.GetStringPtr(&nREPLACEKEY);
+		nREPLACEKEY = cmemReplacement.GetStringLength();
+		szREPLACEKEY = cmemReplacement.GetStringPtr();
 		delete [] pszConvertedText;
 	}
 

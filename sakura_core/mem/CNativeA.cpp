@@ -2,21 +2,31 @@
 #include "StdAfx.h"
 #include "CNativeA.h"
 
-CNativeA::CNativeA(const char* szData)
-: CNative()
-{
-	SetString(szData);
-}
-
-CNativeA::CNativeA()
-: CNative()
+CNativeA::CNativeA() noexcept
+	: CNative()
 {
 }
 
 CNativeA::CNativeA(const CNativeA& rhs)
-: CNative()
+	: CNative(rhs)
 {
-	SetString(rhs.GetStringPtr(),rhs.GetStringLength());
+}
+
+CNativeA::CNativeA(CNativeA&& other) noexcept
+	: CNative(std::forward<CNativeA>(other))
+{
+}
+
+CNativeA::CNativeA( const char* szData, size_t cchData )
+	: CNative()
+{
+	SetString(szData, cchData);
+}
+
+CNativeA::CNativeA(const char* szData)
+	: CNative()
+{
+	SetString(szData);
 }
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -110,12 +120,6 @@ const CNativeA& CNativeA::operator += ( char ch )
 int CNativeA::GetStringLength() const
 {
 	return CNative::GetRawLength() / sizeof(char);
-}
-
-const char* CNativeA::GetStringPtr(int* pnLength) const
-{
-	if(pnLength)*pnLength=GetStringLength();
-	return GetStringPtr();
 }
 
 // 任意位置の文字取得。nIndexは文字単位。

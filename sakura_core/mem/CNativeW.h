@@ -56,8 +56,9 @@ private:
 class CNativeW : public CNative{
 public:
 	//コンストラクタ・デストラクタ
-	CNativeW();
-	CNativeW( const CNativeW& );
+	CNativeW() noexcept;
+	CNativeW( const CNativeW& rhs );
+	CNativeW( CNativeW&& other ) noexcept;
 	CNativeW( const wchar_t* pData, int nDataLen ); //!< nDataLenは文字単位。
 	CNativeW( const wchar_t* pData);
 
@@ -77,10 +78,11 @@ public:
 	void AppendNativeData( const CNativeW& );                  //!< バッファの最後にデータを追加する
 
 	//演算子
+	CNativeW& operator = (const CNativeW& rhs)			{ CNative::operator=(rhs); return *this; }
+	CNativeW& operator = (CNativeW&& rhs) noexcept		{ CNative::operator=(std::forward<CNativeW>(rhs)); return *this; }
 	const CNativeW& operator+=(wchar_t wch)				{ AppendString(&wch,1);   return *this; }
 	const CNativeW& operator=(wchar_t wch)				{ SetString(&wch,1);      return *this; }
 	const CNativeW& operator+=(const CNativeW& rhs)		{ AppendNativeData(rhs); return *this; }
-	const CNativeW& operator=(const CNativeW& rhs)		{ SetNativeData(rhs);    return *this; }
 	CNativeW operator+(const CNativeW& rhs) const		{ CNativeW tmp=*this; return tmp+=rhs; }
 
 	//ネイティブ取得インターフェース
@@ -97,20 +99,6 @@ public:
 	{
 		return reinterpret_cast<wchar_t*>(GetRawPtr());
 	}
-	const wchar_t* GetStringPtr(int* pnLength) const //[out]pnLengthは文字単位。
-	{
-		*pnLength=GetStringLength();
-		return reinterpret_cast<const wchar_t*>(GetRawPtr());
-	}
-#ifdef USE_STRICT_INT
-	const wchar_t* GetStringPtr(CLogicInt* pnLength) const //[out]pnLengthは文字単位。
-	{
-		int n;
-		const wchar_t* p=GetStringPtr(&n);
-		*pnLength=CLogicInt(n);
-		return p;
-	}
-#endif
 
 	//特殊
 	void _SetStringLength(int nLength)

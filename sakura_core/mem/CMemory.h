@@ -44,14 +44,13 @@ class CMemory
 {
 	//コンストラクタ・デストラクタ
 public:
-	CMemory();
-	CMemory(const CMemory& rhs);
+	CMemory() noexcept;
 	CMemory(const void* pData, int nDataLenBytes);
+	CMemory(const CMemory& rhs);
+	CMemory(CMemory&& other) noexcept;
 	// デストラクタを仮想にすると仮想関数テーブルへのポインタを持つ為にインスタンスの容量が増えてしまうので仮想にしない
 	// 仮想デストラクタでは無いので派生クラスでメンバー変数を追加しない事
 	~CMemory();
-protected:
-	void _init_members();
 
 	//インターフェース
 public:
@@ -65,14 +64,26 @@ public:
 	void Clean(){ _Empty(); }
 	void Clear(){ _Empty(); }
 
-	inline const void* GetRawPtr(int* pnLength) const;      //!< データへのポインタと長さ返す
-	inline void* GetRawPtr(int* pnLength);                  //!< データへのポインタと長さ返す
 	inline const void* GetRawPtr() const{ return m_pRawData; } //!< データへのポインタを返す
 	inline void* GetRawPtr(){ return m_pRawData; }             //!< データへのポインタを返す
 	int GetRawLength() const { return m_nRawLen; }                //!<データ長を返す。バイト単位。
 
 	// 演算子
-	const CMemory& operator=(const CMemory& rhs);
+	//! コピー代入演算子
+	CMemory& operator = (const CMemory& rhs) {
+		if (this != &rhs) {
+			SetRawData(rhs);
+		}
+		return *this;
+	}
+	//! ムーブ代入演算子
+	CMemory& operator = (CMemory&& rhs) noexcept {
+		if (this != &rhs) {
+			_Empty();
+			swap(rhs);
+		}
+		return *this;
+	}
 
 	// 比較
 	static int IsEqual(const CMemory& cmem1, const CMemory& cmem2);	/* 等しい内容か */
@@ -91,7 +102,7 @@ protected:
 public:
 	void _AppendSz(const char* str);
 	void _SetRawLength(int nLength);
-	void swap( CMemory& left ){
+	void swap( CMemory& left ) noexcept {
 		std::swap( m_nDataBufSize, left.m_nDataBufSize );
 		std::swap( m_pRawData, left.m_pRawData );
 		std::swap( m_nRawLen, left.m_nRawLen );
@@ -110,16 +121,6 @@ private: // 2002/2/10 aroka アクセス権変更
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                     inline関数の実装                        //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-inline const void* CMemory::GetRawPtr(int* pnLength) const //!< データへのポインタと長さ返す
-{
-	if(pnLength) *pnLength = GetRawLength();
-	return m_pRawData;
-}
-inline void* CMemory::GetRawPtr(int* pnLength) //!< データへのポインタと長さ返す
-{
-	if(pnLength) *pnLength = GetRawLength();
-	return m_pRawData;
-}
 
 ///////////////////////////////////////////////////////////////////////
 #endif /* _CMEMORY_H_ */

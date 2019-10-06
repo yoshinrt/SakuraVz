@@ -554,7 +554,8 @@ DWORD CGrepAgent::DoGrep(
 	}
 
 	cmemMessage.AppendString( L"\r\n\r\n" );
-	pszWork = cmemMessage.GetStringPtr( &nWork );
+	nWork = cmemMessage.GetStringLength();
+	pszWork = cmemMessage.GetStringPtr();
 //@@@ 2002.01.03 YAZAKI Grep直後はカーソルをGrep直前の位置に動かす
 	CLayoutInt tmp_PosY_Layout = pcViewDst->m_pcEditDoc->m_cLayoutMgr.GetLineCount();
 	if( 0 < nWork && sGrepOption.bGrepHeader ){
@@ -1154,7 +1155,7 @@ public:
 					return;
 				}
 			}
-			std::wstring name = std::wstring(fileName);
+			std::wstring name(fileName);
 			name += L".skrnew";
 			if( FALSE == ::MoveFile( name.c_str(), fileName ) ){
 				memMessage.AppendString( LS(STR_GREP_REP_ERR_REPLACE) );
@@ -1170,7 +1171,7 @@ public:
 			out->Close();
 			delete out;
 			out = NULL;
-			std::wstring name = std::wstring(fileName);
+			std::wstring name(fileName);
 			name += L".skrnew";
 			::DeleteFile( name.c_str() );
 		}

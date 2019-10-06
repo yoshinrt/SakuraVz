@@ -410,9 +410,10 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 	/*	表示上のX位置
 		2004.03.28 Moca nPosXはインデント幅を含むように変更(TAB位置調整のため)
 	*/
-	int			nAllLineNum;
+	const int nAllLineNum = m_pcDocLineMgr->GetLineCount();
+	const int nListenerCount = GetListenerCount();
 
-	if( GetListenerCount() != 0 ){
+	if( nListenerCount != 0 ){
 		if( uThreadID == 0 ){
 			NotifyProgress(0);
 			/* 処理中のユーザー操作を可能にする */
@@ -431,8 +432,6 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		m_nTabSpace = CKetaXInt(4);
 	}
 
-	nAllLineNum = m_pcDocLineMgr->GetLineCount();
-	
 	int iStart	= nAllLineNum *   uThreadID       / uMaxThreadNum;
 	int iEnd	= nAllLineNum * ( uThreadID + 1 ) / uMaxThreadNum;
 	
@@ -443,7 +442,10 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 	pWork->pcColorStrategy			= NULL;
 	pWork->colorPrev				= COLORIDX_DEFAULT;
 	pWork->nCurLine					= CLogicInt( iStart );
-	
+
+	constexpr DWORD userInterfaceInterval = 33;
+	DWORD prevTime = uThreadID == 0 ? GetTickCount() + userInterfaceInterval : 0;
+
 	#ifdef _DEBUG
 		MYTRACE( L">>>CLayoutMgr::_DoLayout %d/%d %d-%d\n",
 			uThreadID, uMaxThreadNum, iStart, iEnd
@@ -473,12 +475,16 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		pWork->pcDocLine = pWork->pcDocLine->GetNextLine();
 		
 		// 処理中のユーザー操作を可能にする
-		if( GetListenerCount()!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
+		if( nListenerCount!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
 			if( uThreadID == 0 ){
-				NotifyProgress(::MulDiv( pWork->nCurLine * ( int )uMaxThreadNum, 50 , nAllLineNum ) + 50 );
-				if( bBlockingHook && !::BlockingHook( NULL )){
-					if( pbBreak ) *pbBreak = true;
-					return;
+				DWORD currTime = GetTickCount();
+				DWORD diffTime = currTime - prevTime;
+				if( diffTime >= userInterfaceInterval ){
+					NotifyProgress(::MulDiv( pWork->nCurLine * ( int )uMaxThreadNum, 50 , nAllLineNum ) + 50 );
+					if( bBlockingHook && !::BlockingHook( NULL )){
+						if( pbBreak ) *pbBreak = true;
+						return;
+					}
 				}
 			}else if( pbBreak && *pbBreak ) return;
 		}
@@ -496,7 +502,7 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 	m_nPrevReferLine = CLayoutInt(0);
 	m_pLayoutPrevRefer = NULL;
 
-	if( GetListenerCount()!=0 ){
+	if( nListenerCount!=0 ){
 		if( uThreadID == 0 ){
 			NotifyProgress(0);
 			/* 処理中のユーザー操作を可能にする */
