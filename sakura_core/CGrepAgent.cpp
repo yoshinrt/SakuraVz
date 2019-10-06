@@ -63,14 +63,14 @@ void CGrepAgent::OnAfterSave(const SSaveInfo& sSaveInfo)
 */
 void CGrepAgent::CreateFolders( const WCHAR* pszPath, std::vector<std::wstring>& vPaths )
 {
-	const int nPathLen = auto_strlen( pszPath );
+	const int nPathLen = wcslen( pszPath );
 	auto szPath = std::make_unique<WCHAR[]>(nPathLen + 1);
 	auto szTmp = std::make_unique<WCHAR[]>(nPathLen + 1);
-	auto_strcpy( &szPath[0], pszPath );
+	wcscpy( &szPath[0], pszPath );
 	WCHAR* token;
 	int nPathPos = 0;
 	while( NULL != (token = my_strtok<WCHAR>( &szPath[0], nPathLen, &nPathPos, L";")) ){
-		auto_strcpy( &szTmp[0], token );
+		wcscpy( &szTmp[0], token );
 		WCHAR* p;
 		WCHAR* q;
 		p = q = &szTmp[0];
@@ -708,7 +708,7 @@ int CGrepAgent::DoGrepTree(
 	int			nWork = 0;
 	int			nHitCountOld = -100;
 	bool		bOutputFolderName = false;
-	int			nBasePathLen = auto_strlen(pszBasePath);
+	int			nBasePathLen = wcslen(pszBasePath);
 	CGrepEnumOptions cGrepEnumOptions;
 	CGrepEnumFilterFiles cGrepEnumFilterFiles;
 	cGrepEnumFilterFiles.Enumerates( pszPath, cGrepEnumKeys, cGrepEnumOptions, cGrepExceptAbsFiles );
@@ -748,7 +748,7 @@ int CGrepAgent::DoGrepTree(
 		currentFile += L"\\";
 		currentFile += lpFileName;
 		int nBasePathLen2 = nBasePathLen + 1;
-		if( (int)auto_strlen(pszPath) < nBasePathLen2 ){
+		if( (int)wcslen(pszPath) < nBasePathLen2 ){
 			nBasePathLen2 = nBasePathLen;
 		}
 
@@ -1244,7 +1244,7 @@ int CGrepAgent::DoGrepReplaceFile(
 		WCHAR szCpName[100];
 		if( CODE_AUTODETECT == sGrepOption.nGrepCharSet ){
 			if( IsValidCodeType(nCharCode) ){
-				auto_strcpy( szCpName, CCodeTypeName(nCharCode).Bracket() );
+				wcscpy( szCpName, CCodeTypeName(nCharCode).Bracket() );
 				pszCodeName = szCpName;
 			}else{
 				CCodePage::GetNameBracket(szCpName, nCharCode);
