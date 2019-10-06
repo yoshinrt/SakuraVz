@@ -63,7 +63,7 @@ public:
 	~CFileLoad( void );
 
 	//	Jul. 26, 2003 ryoji BOM引数追加
-	ECodeType FileOpen( LPCTSTR, bool bBigFile, ECodeType, int, bool* pbBomExist = NULL );		// 指定文字コードでファイルをオープンする
+	ECodeType FileOpen( LPCWSTR, bool bBigFile, ECodeType, int, bool* pbBomExist = NULL );		// 指定文字コードでファイルをオープンする
 	void FileClose( void );					// 明示的にファイルをクローズする
 
 	//! 1行データをロードする 順アクセス用
@@ -122,7 +122,7 @@ protected:
 	/* メンバオブジェクト */
 	const SEncodingConfig* m_pEencoding;
 
-//	LPTSTR	m_pszFileName;	// ファイル名
+//	LPWSTR	m_pszFileName;	// ファイル名
 	HANDLE	m_hFile;		// ファイルハンドル
 	HANDLE	m_hMap;		//!< メモリマップドファイルハンドル
 	

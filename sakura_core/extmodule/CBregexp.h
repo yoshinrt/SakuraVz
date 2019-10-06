@@ -56,7 +56,7 @@ public:
 	};
 
 	//! DLLのバージョン情報を取得
-	const TCHAR* GetVersionT(){ return _T(""); }
+	const WCHAR* GetVersionW(){ return L""; }
 
 	//	CJreエミュレーション関数
 	//!	検索パターンのコンパイル

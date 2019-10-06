@@ -160,7 +160,7 @@ CFileLoad::~CFileLoad( void ){
 	@date 2003.06.08 Moca CODE_AUTODETECTを指定できるように変更
 	@date 2003.07.26 ryoji BOM引数追加
 */
-ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharCode, int nFlag, bool* pbBomExist )
+ECodeType CFileLoad::FileOpen( LPCWSTR pFileName, bool bBigFile, ECodeType CharCode, int nFlag, bool* pbBomExist )
 {
 	HANDLE	hFile;
 	ULARGE_INTEGER	fileSize;
@@ -169,7 +169,7 @@ ECodeType CFileLoad::FileOpen( LPCTSTR pFileName, bool bBigFile, ECodeType CharC
 	// FileCloseを呼んでからにしてください
 	if( NULL != m_hFile ){
 #ifdef _DEBUG
-		::MessageBox( NULL, _T("CFileLoad::FileOpen\nFileCloseを呼んでからにしてください") , NULL, MB_OK );
+		::MessageBox( NULL, L"CFileLoad::FileOpen\nFileCloseを呼んでからにしてください" , NULL, MB_OK );
 #endif
 		throw CError_FileOpen();
 	}
