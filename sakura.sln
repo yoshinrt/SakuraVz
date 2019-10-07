@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sakura", "sakura\sakura.vcxproj", "{AF03508C-515E-4A0E-87BE-67ED1E254BD0}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -13,7 +13,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MakefileMake", "MakefileMak
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sakura_lang_en_US", "sakura_lang_en_US\sakura_lang_en_US.vcxproj", "{7A6D0F29-E560-4985-835B-5F92A08EB242}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpcre2-16-static", "libs\pcre2\build-VS2017\libpcre2-16-static\libpcre2-16-static.vcxproj", "{1F05FE88-8A8C-453F-A6D0-00C75DDFD15A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpcre2-16-static", "libs\pcre2\build-VS2019\libpcre2-16-static\libpcre2-16-static.vcxproj", "{1F05FE88-8A8C-453F-A6D0-00C75DDFD15A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
