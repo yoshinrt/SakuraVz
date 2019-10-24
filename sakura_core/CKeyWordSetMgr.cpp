@@ -354,7 +354,7 @@ void CKeyWordSetMgr::SortKeyWord( int nIdx )
 			m_szKeyWordArr[m_nStartIdx[nIdx]],
 			m_nKeyWordNumArr[nIdx],
 			sizeof(m_szKeyWordArr[0]),
-			(qsort_callback)_wcsicmp
+			(qsort_callback)wcsicmp2
 		);
 	}
 	KeywordMaxLen(nIdx);

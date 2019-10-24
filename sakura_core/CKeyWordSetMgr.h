@@ -144,6 +144,12 @@ private:
 	/*! キーワード格納領域 */
 	wchar_t	m_szKeyWordArr[MAX_KEYWORDNUM][MAX_KEYWORDLEN + 1];	
 	char	m_IsSorted[MAX_SETNUM];	/*!< ソートしたかどうかのフラグ(INI未保存) */  //MIK
+	
+	// ignore case で == 0 になったとき case sensitive で比較
+	static int wcsicmp2( const wchar_t *a, const wchar_t *b ){
+		if( int i = _wcsicmp( a, b )) return i;
+		return wcscmp( a, b );
+	}
 
 protected:
 	// 2004.07.29 Moca 可変長記憶
