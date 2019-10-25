@@ -239,7 +239,7 @@ ELoadResult CLoadAgent::OnLoad(const SLoadInfo& sLoadInfo)
 			CEol cEol;
 			
 			// EOL を LF に変換
-			pcDoc->m_cDocLineMgr.SetEol( EOL_LF, &cEol );
+			pcDoc->m_cDocLineMgr.SetEol( EOL_LF, &cEol, true );
 			
 			// 文書 EOL を設定
 			pcDoc->m_cDocEditor.SetNewLineCode( cEol );
