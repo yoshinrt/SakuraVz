@@ -39,8 +39,7 @@
 		   distribution.
 */
 
-#ifndef SAKURA_CEDITWND_E9E9A41A_05E0_48D5_8F66_9C734A98FB30_H_
-#define SAKURA_CEDITWND_E9E9A41A_05E0_48D5_8F66_9C734A98FB30_H_
+#pragma once
 
 #include <ShellAPI.h>// HDROP
 #include "_main/global.h"
@@ -131,7 +130,7 @@ public:
 	//                         イベント                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//ドキュメントイベント
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 
 	//管理
 	void MessageLoop( void );								/* メッセージループ */
@@ -421,4 +420,3 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* SAKURA_CEDITWND_E9E9A41A_05E0_48D5_8F66_9C734A98FB30_H_ */

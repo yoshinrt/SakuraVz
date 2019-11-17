@@ -12,8 +12,7 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-#ifndef _CHOKANMGR_H_
-#define _CHOKANMGR_H_
+#pragma once
 
 #include <Windows.h>
 #include "dlg/CDialog.h"
@@ -23,7 +22,7 @@
 
 	@date 2003.06.25 Moca ファイル内からの補完機能を追加
 */
-class CHokanMgr : public CDialog
+class CHokanMgr final : public CDialog
 {
 public:
 	/*
@@ -56,11 +55,11 @@ public:
 	BOOL DoHokan(int nVKey);
 	void ChangeView(LPARAM pcEditView);/* モードレス時：対象となるビューの変更 */
 
-	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam );
-	BOOL OnInitDialog( HWND, WPARAM wParam, LPARAM lParam );
-	BOOL OnDestroy( void );
-	BOOL OnSize( WPARAM wParam, LPARAM lParam );
-	BOOL OnLbnSelChange( HWND hwndCtl, int wID );
+	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;
+	BOOL OnInitDialog( HWND, WPARAM wParam, LPARAM lParam ) override;
+	BOOL OnDestroy( void ) override;
+	BOOL OnSize( WPARAM wParam, LPARAM lParam ) override;
+	BOOL OnLbnSelChange( HWND hwndCtl, int wID ) override;
 
 	int KeyProc(WPARAM wParam, LPARAM lParam);
 
@@ -84,9 +83,7 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CHOKANMGR_H_ */
-

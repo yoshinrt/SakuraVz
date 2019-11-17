@@ -28,8 +28,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CFILELOAD_H_
-#define SAKURA_CFILELOAD_H_
+#pragma once
 
 #include <Windows.h>
 #include "CStream.h" //CError_FileOpen
@@ -156,5 +155,4 @@ protected:
 inline BOOL CFileLoad::GetFileTime( FILETIME* pftCreate, FILETIME* pftLastAccess, FILETIME* pftLastWrite ){
 	return ::GetFileTime( m_hFile, pftCreate, pftLastAccess, pftLastWrite );
 }
-#endif /* SAKURA_CFILELOAD_H_ */
 

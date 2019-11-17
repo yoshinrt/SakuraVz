@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDOCLOCKER_5E410382_D36E_46CE_B212_07F2F346FD3C_H_
-#define SAKURA_CDOCLOCKER_5E410382_D36E_46CE_B212_07F2F346FD3C_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 
@@ -35,11 +34,11 @@ public:
 	void Clear(void) { m_bIsDocWritable = true; }
 
 	//ロード前後
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
 	
 	//セーブ前後
-	void OnBeforeSave(const SSaveInfo& sSaveInfo);
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnBeforeSave(const SSaveInfo& sSaveInfo) override;
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 
 	//状態
 	bool IsDocWritable() const{ return m_bIsDocWritable; }
@@ -51,5 +50,4 @@ private:
 	bool m_bIsDocWritable;
 };
 
-#endif /* SAKURA_CDOCLOCKER_5E410382_D36E_46CE_B212_07F2F346FD3C_H_ */
 /*[EOF]*/

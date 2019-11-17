@@ -26,13 +26,12 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CSMARTINDENTIFOBJ_5708577D_5A1D_4374_91FD_5E180C9F4E20_H_
-#define SAKURA_CSMARTINDENTIFOBJ_5708577D_5A1D_4374_91FD_5E180C9F4E20_H_
+#pragma once
 
 #include "macro/CWSHIfObj.h"
 
 // スマートインデント用WSHオブジェクト
-class CSmartIndentIfObj : public CWSHIfObj
+class CSmartIndentIfObj final : public CWSHIfObj
 {
 	// 型定義
 	enum FuncId {
@@ -102,4 +101,3 @@ public:
 	wchar_t m_wcChar;
 };
 
-#endif /* SAKURA_CSMARTINDENTIFOBJ_5708577D_5A1D_4374_91FD_5E180C9F4E20_H_ */

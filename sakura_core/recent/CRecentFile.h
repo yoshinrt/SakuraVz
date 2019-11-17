@@ -22,29 +22,27 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTFILE_EE3F27C6_A91E_426D_8EB9_2E35D191F4199_H_
-#define SAKURA_CRECENTFILE_EE3F27C6_A91E_426D_8EB9_2E35D191F4199_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "EditInfo.h" //EditInfo
 
 //! EditInfoの履歴を管理 (RECENT_FOR_FILE)
-class CRecentFile : public CRecentImp<EditInfo>{
+class CRecentFile final : public CRecentImp<EditInfo>{
 public:
 	//生成
 	CRecentFile();
 
 	//オーバーライド
-	int				CompareItem( const EditInfo* p1, const EditInfo* p2 ) const;
-	void			CopyItem( EditInfo* dst, const EditInfo* src ) const;
+	int				CompareItem( const EditInfo* p1, const EditInfo* p2 ) const override;
+	void			CopyItem( EditInfo* dst, const EditInfo* src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( const EditInfo** dst, const EditInfo* src ) const;
-	bool			TextToDataType( EditInfo* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( const EditInfo* ) const;
+	bool			DataToReceiveType( const EditInfo** dst, const EditInfo* src ) const override;
+	bool			TextToDataType( EditInfo* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( const EditInfo* ) const override;
 	size_t			GetTextMaxLength() const;
 	//固有インターフェース
 	int FindItemByPath(const WCHAR* pszPath) const;
 };
 
-#endif /* SAKURA_CRECENTFILE_EE3F27C6_A91E_426D_8EB9_2E35D191F4199_H_ */
 /*[EOF]*/

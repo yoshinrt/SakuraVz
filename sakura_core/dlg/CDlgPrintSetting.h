@@ -27,8 +27,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDLGPRINTSETTING_9DF803C0_8BBB_41EC_B6A7_AFEBBDBC517D_H_
-#define SAKURA_CDLGPRINTSETTING_9DF803C0_8BBB_41EC_B6A7_AFEBBDBC517D_H_
+#pragma once
 
 #include "dlg/CDialog.h"
 #include "config/maxdata.h" // MAX_PRINTSETTINGARR
@@ -38,7 +37,7 @@
 
 	@date 2002.2.17 YAZAKI CShareDataのインスタンスは、CProcessにひとつあるのみ。
 */
-class CDlgPrintSetting : public CDialog
+class CDlgPrintSetting final : public CDialog
 {
 public:
 	/*
@@ -63,17 +62,17 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	void SetData( void );	/* ダイアログデータの設定 */
-	int GetData( void );	/* ダイアログデータの取得 */
-	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam);
-	BOOL OnDestroy( void );
-	BOOL OnNotify(WPARAM wParam, LPARAM lParam);
-	BOOL OnCbnSelChange(HWND hwndCtl, int wID);
-	BOOL OnBnClicked(int wID);
-	BOOL OnStnClicked(int wID);
-	BOOL OnEnChange( HWND hwndCtl, int wID );
-	BOOL OnEnKillFocus( HWND hwndCtl, int wID );
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	void SetData( void ) override;	/* ダイアログデータの設定 */
+	int GetData( void ) override;	/* ダイアログデータの取得 */
+	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnDestroy( void ) override;
+	BOOL OnNotify(WPARAM wParam, LPARAM lParam) override;
+	BOOL OnCbnSelChange(HWND hwndCtl, int wID) override;
+	BOOL OnBnClicked(int wID) override;
+	BOOL OnStnClicked(int wID) override;
+	BOOL OnEnChange( HWND hwndCtl, int wID ) override;
+	BOOL OnEnKillFocus( HWND hwndCtl, int wID ) override;
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 
 	void OnChangeSettingType(BOOL bGetData);	/* 設定のタイプが変わった */
 	void OnSpin(int nCtrlId, BOOL bDown);	/* スピンコントロールの処理 */
@@ -84,4 +83,3 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* SAKURA_CDLGPRINTSETTING_9DF803C0_8BBB_41EC_B6A7_AFEBBDBC517D_H_ */

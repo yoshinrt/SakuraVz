@@ -21,8 +21,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTExcludeFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_
-#define SAKURA_CRECENTExcludeFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "util/StaticType.h"
@@ -30,20 +29,19 @@
 typedef StaticString<WCHAR, MAX_EXCLUDE_PATH> CExcludeFileString;
 
 //! Excludeファイルの履歴を管理 (RECENT_FOR_Exclude_FILE)
-class CRecentExcludeFile : public CRecentImp<CExcludeFileString, LPCWSTR>{
+class CRecentExcludeFile final : public CRecentImp<CExcludeFileString, LPCWSTR>{
 public:
 	//生成
 	CRecentExcludeFile();
 
 	//オーバーライド
-	int				CompareItem( const CExcludeFileString* p1, LPCWSTR p2 ) const;
-	void			CopyItem( CExcludeFileString* dst, LPCWSTR src ) const;
+	int				CompareItem( const CExcludeFileString* p1, LPCWSTR p2 ) const override;
+	void			CopyItem( CExcludeFileString* dst, LPCWSTR src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( LPCWSTR* dst, const CExcludeFileString* src ) const;
-	bool			TextToDataType( CExcludeFileString* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( LPCWSTR p ) const;
+	bool			DataToReceiveType( LPCWSTR* dst, const CExcludeFileString* src ) const override;
+	bool			TextToDataType( CExcludeFileString* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( LPCWSTR p ) const override;
 	size_t			GetTextMaxLength() const;
 };
 
-#endif /* SAKURA_CRECENTExcludeFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_ */
 /*[EOF]*/

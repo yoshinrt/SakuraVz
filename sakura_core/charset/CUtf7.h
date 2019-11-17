@@ -22,18 +22,17 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CUTF7_D489ED48_E52A_43DD_8124_CB439CA30FC8_H_
-#define SAKURA_CUTF7_D489ED48_E52A_43DD_8124_CB439CA30FC8_H_
+#pragma once
 
 #include "CCodeBase.h"
 
 class CUtf7 : public CCodeBase{
 public:
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){ return UTF7ToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){ return UnicodeToUTF7(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
-	void GetBom(CMemory* pcmemBom);	//!< BOMデータ取得
-	void GetEol(CMemory* pcmemEol, EEolType eEolType);
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return UTF7ToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToUTF7(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
+	void GetBom(CMemory* pcmemBom) override;	//!< BOMデータ取得
+	void GetEol(CMemory* pcmemEol, EEolType eEolType) override;
 
 public:
 	//実装
@@ -53,5 +52,4 @@ protected:
 	static int UniToUtf7( const wchar_t* pSrc, const int nSrcLen, char* pDst );
 };
 
-#endif /* SAKURA_CUTF7_D489ED48_E52A_43DD_8124_CB439CA30FC8_H_ */
 /*[EOF]*/

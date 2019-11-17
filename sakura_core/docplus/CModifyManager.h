@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CMODIFYMANAGER_5129DDF8_A336_4B65_914B_22E626B7B520_H_
-#define SAKURA_CMODIFYMANAGER_5129DDF8_A336_4B65_914B_22E626B7B520_H_
+#pragma once
 
 #include "util/design_template.h" //TSingleton
 #include "doc/CDocListener.h" // CDocListenerEx
@@ -37,7 +36,7 @@ class CModifyManager : public TSingleton<CModifyManager>, public CDocListenerEx{
 	CModifyManager(){}
 
 public:
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 };
 
 //! 行に付加するModified情報
@@ -66,5 +65,4 @@ public:
 	void ResetAllModifyFlag(CDocLineMgr* pcDocLineMgr, int nSeq);	// 行変更状態をすべてリセット
 };
 
-#endif /* SAKURA_CMODIFYMANAGER_5129DDF8_A336_4B65_914B_22E626B7B520_H_ */
 /*[EOF]*/

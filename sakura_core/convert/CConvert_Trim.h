@@ -22,22 +22,20 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_TRIM_09061551_FDED_4982_A974_FAC9AE9AF040_H_
-#define SAKURA_CCONVERT_TRIM_09061551_FDED_4982_A974_FAC9AE9AF040_H_
+#pragma once
 
 #include "CConvert.h"
 
-class CConvert_Trim : public CConvert{
+class CConvert_Trim final : public CConvert{
 public:
 	CConvert_Trim(bool bLeft, bool bExtEol) : m_bLeft(bLeft), m_bExtEol(bExtEol) { }
 
 public:
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 
 private:
 	bool m_bLeft;
 	bool m_bExtEol;
 };
 
-#endif /* SAKURA_CCONVERT_TRIM_09061551_FDED_4982_A974_FAC9AE9AF040_H_ */
 /*[EOF]*/

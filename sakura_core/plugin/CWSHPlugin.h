@@ -25,8 +25,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CWSHPLUGIN_EBA87CBD_779A_4AD3_AB4D_4BFE8E7E339AD_H_
-#define SAKURA_CWSHPLUGIN_EBA87CBD_779A_4AD3_AB4D_4BFE8E7E339AD_H_
+#pragma once
 
 #include "plugin/CPlugin.h"
 #include "macro/CWSHManager.h"
@@ -34,7 +33,7 @@
 #define PII_WSH						L"Wsh"			//WSHセクション
 #define PII_WSH_USECACHE			L"UseCache"		//読み込んだスクリプトを再利用する
 
-class CWSHPlug :
+class CWSHPlug final :
 	public CPlug
 {
 public:
@@ -52,7 +51,7 @@ public:
 	CWSHMacroManager* m_Wsh;
 };
 
-class CWSHPlugin :
+class CWSHPlugin final :
 	public CPlugin
 {
 	//コンストラクタ
@@ -67,24 +66,23 @@ public:
 
 	//操作
 	//CPlugインスタンスの作成。ReadPluginDefPlug/Command から呼ばれる。
-	virtual CPlug* CreatePlug( CPlugin& plugin, PlugId id, wstring sJack, wstring sHandler, wstring sLabel )
+	CPlug* CreatePlug( CPlugin& plugin, PlugId id, wstring sJack, wstring sHandler, wstring sLabel ) override
 	{
 		return new CWSHPlug( plugin, id, sJack, sHandler, sLabel );
 	}
 
 	//実装
 public:
-	bool ReadPluginDef( CDataProfile *cProfile, CDataProfile *cProfileMlang );
-	bool ReadPluginOption( CDataProfile *cProfile );
-	CPlug::Array GetPlugs() const{
+	bool ReadPluginDef( CDataProfile *cProfile, CDataProfile *cProfileMlang ) override;
+	bool ReadPluginOption( CDataProfile *cProfile ) override;
+	CPlug::Array GetPlugs() const override{
 		return m_plugs;
 	}
-	bool InvokePlug( CEditView* view, CPlug& plug, CWSHIfObj::List& params );
+	bool InvokePlug( CEditView* view, CPlug& plug, CWSHIfObj::List& params ) override;
 
 	//メンバ変数
 private:
 	bool m_bUseCache;
 };
 
-#endif /* SAKURA_CWSHPLUGIN_EBA87CBD_779A_4AD3_AB4D_4BFE8E7E339AD_H_ */
 /*[EOF]*/

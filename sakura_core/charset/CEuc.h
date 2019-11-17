@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CEUC_13190B0A_A5F1_4CF2_AA8E_E58906DA05AD9_H_
-#define SAKURA_CEUC_13190B0A_A5F1_4CF2_AA8E_E58906DA05AD9_H_
+#pragma once
 
 #include <mbstring.h>
 #include "charset/CCodeBase.h"
@@ -32,8 +31,8 @@
 class CEuc : public CCodeBase{
 public:
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){ return EUCToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){ return UnicodeToEUC(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return EUCToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToEUC(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
 // GetEolはCCodeBaseに移動	2010/6/13 Uchi
 	EConvertResult UnicodeToHex(const wchar_t* cSrc, const int iSLen, WCHAR* pDst, const CommonSetting_Statusbar* psStatusbar);			//!< UNICODE → Hex 変換
 
@@ -188,5 +187,4 @@ inline int CEuc::_UniToEucjp_char( const unsigned short* pSrc, unsigned char* pD
 	return nret;
 }
 
-#endif /* SAKURA_CEUC_13190B0A_A5F1_4CF2_AA8E_E58906DA05AD9_H_ */
 /*[EOF]*/

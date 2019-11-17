@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CSHIFTJIS_092DD5ED_C21B_4122_8A97_CF4EE64B7EFD_H_
-#define SAKURA_CSHIFTJIS_092DD5ED_C21B_4122_8A97_CF4EE64B7EFD_H_
+#pragma once
 
 #include "CCodeBase.h"
 #include "charset/codeutil.h"
@@ -34,10 +33,10 @@ class CShiftJis : public CCodeBase{
 
 public:
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){ return SJISToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){ return UnicodeToSJIS(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return SJISToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToSJIS(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
 // GetEolはCCodeBaseに移動	2010/6/13 Uchi
-	EConvertResult UnicodeToHex(const wchar_t* cSrc, const int iSLen, WCHAR* pDst, const CommonSetting_Statusbar* psStatusbar);			//!< UNICODE → Hex 変換
+	EConvertResult UnicodeToHex(const wchar_t* cSrc, const int iSLen, WCHAR* pDst, const CommonSetting_Statusbar* psStatusbar) override;			//!< UNICODE → Hex 変換
 
 public:
 	//実装
@@ -139,5 +138,4 @@ inline int CShiftJis::_UniToSjis_char( const unsigned short* pSrc, unsigned char
 	return nret;
 }
 
-#endif /* SAKURA_CSHIFTJIS_092DD5ED_C21B_4122_8A97_CF4EE64B7EFD_H_ */
 /*[EOF]*/

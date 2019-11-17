@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CJIS_3DD8E095_FA6C_46BA_BDD8_00F658818D72_H_
-#define SAKURA_CJIS_3DD8E095_FA6C_46BA_BDD8_00F658818D72_H_
+#pragma once
 
 #include "CCodeBase.h"
 
@@ -32,8 +31,8 @@ public:
 	CJis(bool base64decode = true) : m_base64decode(base64decode) { }
 public:
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){ return JISToUnicode(cSrc, pDst, m_base64decode); }	//!< 特定コード → UNICODE    変換
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){ return UnicodeToJIS(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return JISToUnicode(cSrc, pDst, m_base64decode); }	//!< 特定コード → UNICODE    変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToJIS(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
 // GetEolはCCodeBaseに移動	2010/6/13 Uchi
 	EConvertResult UnicodeToHex(const wchar_t* cSrc, const int iSLen, WCHAR* pDst, const CommonSetting_Statusbar* psStatusbar);			//!< UNICODE → Hex 変換
 
@@ -106,5 +105,4 @@ enum EJisESCSeqType {
 
 #endif
 
-#endif /* SAKURA_CJIS_3DD8E095_FA6C_46BA_BDD8_00F658818D72_H_ */
 /*[EOF]*/

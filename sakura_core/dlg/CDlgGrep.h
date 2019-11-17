@@ -12,11 +12,9 @@
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
 */
+#pragma once
 
 class CDlgGrep;
-
-#ifndef _CDLGGREP_H_
-#define _CDLGGREP_H_
 
 #include "dlg/CDialog.h"
 #include "recent/CRecent.h"
@@ -36,7 +34,7 @@ public:
 	/*
 	||  Attributes & Operations
 	*/
-	BOOL OnCbnDropDown( HWND hwndCtl, int wID );
+	BOOL OnCbnDropDown( HWND hwndCtl, int wID ) override;
 	int DoModal( HINSTANCE, HWND, const WCHAR* );	/* モーダルダイアログの表示 */
 //	HWND DoModeless( HINSTANCE, HWND, const char* );	/* モードレスダイアログの表示 */
 
@@ -80,16 +78,14 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam);
-	BOOL OnDestroy();
-	BOOL OnBnClicked(int wID);
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnDestroy() override;
+	BOOL OnBnClicked(int wID) override;
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 
-	void SetData( void );	/* ダイアログデータの設定 */
-	int GetData( void );	/* ダイアログデータの取得 */
+	void SetData( void ) override;	/* ダイアログデータの設定 */
+	int GetData( void ) override;	/* ダイアログデータの取得 */
 	void SetDataFromThisText(bool bChecked);	/* 現在編集中ファイルから検索チェックでの設定 */
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGGREP_H_ */
-

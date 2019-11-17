@@ -28,17 +28,15 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#pragma once
 
 class CDlgProperty;
-
-#ifndef _CDLGPROPERTY_H_
-#define _CDLGPROPERTY_H_
 
 #include "dlg/CDialog.h"
 /*-----------------------------------------------------------------------
 クラスの宣言
 -----------------------------------------------------------------------*/
-class CDlgProperty : public CDialog
+class CDlgProperty final : public CDialog
 {
 public:
 	int DoModal(HINSTANCE hInstance, HWND hwndParent, LPARAM lParam);	/* モーダルダイアログの表示 */
@@ -46,10 +44,8 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	BOOL OnBnClicked(int wID);
-	void SetData( void );	/* ダイアログデータの設定 */
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	BOOL OnBnClicked(int wID) override;
+	void SetData( void ) override;	/* ダイアログデータの設定 */
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 };
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGPROPERTY_H_ */
-

@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTGREPFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_
-#define SAKURA_CRECENTGREPFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "util/StaticType.h"
@@ -31,20 +30,19 @@
 typedef StaticString<WCHAR, MAX_GREP_PATH> CGrepFileString;
 
 //! GREPファイルの履歴を管理 (RECENT_FOR_GREP_FILE)
-class CRecentGrepFile : public CRecentImp<CGrepFileString, LPCWSTR>{
+class CRecentGrepFile final : public CRecentImp<CGrepFileString, LPCWSTR>{
 public:
 	//生成
 	CRecentGrepFile();
 
 	//オーバーライド
-	int				CompareItem( const CGrepFileString* p1, LPCWSTR p2 ) const;
-	void			CopyItem( CGrepFileString* dst, LPCWSTR src ) const;
+	int				CompareItem( const CGrepFileString* p1, LPCWSTR p2 ) const override;
+	void			CopyItem( CGrepFileString* dst, LPCWSTR src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( LPCWSTR* dst, const CGrepFileString* src ) const;
-	bool			TextToDataType( CGrepFileString* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( LPCWSTR p ) const;
+	bool			DataToReceiveType( LPCWSTR* dst, const CGrepFileString* src ) const override;
+	bool			TextToDataType( CGrepFileString* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( LPCWSTR p ) const override;
 	size_t			GetTextMaxLength() const;
 };
 
-#endif /* SAKURA_CRECENTGREPFILE_6DFF8FB2_B7D0_4828_8191_744A9580C467_H_ */
 /*[EOF]*/

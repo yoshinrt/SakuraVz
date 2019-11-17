@@ -36,8 +36,7 @@
 		   distribution.
 */
 
-#ifndef SAKURA_CPROPCOMMON_8B67EE84_54E5_4541_A820_EE4FC61CCF0D_H_
-#define SAKURA_CPROPCOMMON_8B67EE84_54E5_4541_A820_EE4FC61CCF0D_H_
+#pragma once
 
 #include "func/CFuncLookup.h"
 #include "env/CommonSetting.h"
@@ -191,7 +190,7 @@ protected:
 */
 //==============================================================
 //!	全般ページ
-class CPropGeneral : CPropCommon
+class CPropGeneral final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -206,7 +205,7 @@ protected:
 
 //==============================================================
 //!	ファイルページ
-class CPropFile : CPropCommon
+class CPropFile final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -225,7 +224,7 @@ private:
 
 //==============================================================
 //!	キー割り当てページ
-class CPropKeybind : CPropCommon
+class CPropKeybind final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -246,7 +245,7 @@ private:
 
 //==============================================================
 //!	ツールバーページ
-class CPropToolbar : CPropCommon
+class CPropToolbar final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -264,7 +263,7 @@ private:
 
 //==============================================================
 //!	キーワードページ
-class CPropKeyword : CPropCommon
+class CPropKeyword final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -292,7 +291,7 @@ private:
 
 //==============================================================
 //!	カスタムメニューページ
-class CPropCustmenu : CPropCommon
+class CPropCustmenu final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -310,7 +309,7 @@ protected:
 
 //==============================================================
 //!	書式ページ
-class CPropFormat : CPropCommon
+class CPropFormat final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -332,7 +331,7 @@ private:
 
 //==============================================================
 //!	支援ページ
-class CPropHelper : CPropCommon
+class CPropHelper final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -347,7 +346,7 @@ protected:
 
 //==============================================================
 //!	バックアップページ
-class CPropBackup : CPropCommon
+class CPropBackup final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -368,7 +367,7 @@ private:
 
 //==============================================================
 //!	ウィンドウページ
-class CPropWin : CPropCommon
+class CPropWin final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -387,7 +386,7 @@ private:
 
 //==============================================================
 //!	タブ動作ページ
-class CPropTab : CPropCommon
+class CPropTab final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -405,7 +404,7 @@ private:
 
 //==============================================================
 //!	編集ページ
-class CPropEdit : CPropCommon
+class CPropEdit final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -423,7 +422,7 @@ private:
 
 //==============================================================
 //!	検索ページ
-class CPropGrep : CPropCommon
+class CPropGrep final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -441,7 +440,7 @@ private:
 
 //==============================================================
 //!	マクロページ
-class CPropMacro : CPropCommon
+class CPropMacro final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -465,7 +464,7 @@ private:
 
 //==============================================================
 //!	ファイル名表示ページ
-class CPropFileName : CPropCommon
+class CPropFileName final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -485,7 +484,7 @@ private:
 
 //==============================================================
 //!	ステータスバーページ
-class CPropStatusbar : CPropCommon
+class CPropStatusbar final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -500,7 +499,7 @@ protected:
 
 //==============================================================
 //!	プラグインページ
-class CPropPlugin : CPropCommon
+class CPropPlugin final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -522,7 +521,7 @@ private:
 
 //==============================================================
 //!	メインメニューページ
-class CPropMainMenu : CPropCommon
+class CPropMainMenu final : CPropCommon
 {
 public:
 	//!	Dialog Procedure
@@ -544,4 +543,3 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* SAKURA_CPROPCOMMON_8B67EE84_54E5_4541_A820_EE4FC61CCF0D_H_ */

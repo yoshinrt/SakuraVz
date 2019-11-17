@@ -13,10 +13,9 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-class CDlgCancel;
+#pragma once
 
-#ifndef _CDLGCANCEL_H_
-#define _CDLGCANCEL_H_
+class CDlgCancel;
 
 #include "dlg/CDialog.h"
 
@@ -41,7 +40,7 @@ public:
 //	HWND Open( LPCWSTR );
 //	void Close( void );	/* モードレスダイアログの削除 */
 	BOOL IsCanceled( void ){ return m_bCANCEL; } /* IDCANCELボタンが押されたか？ */
-	INT_PTR DispatchEvent(HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam);	/* ダイアログのメッセージ処理 *//* BOOL->INT_PTR 2008/7/18 Uchi*/
+	INT_PTR DispatchEvent(HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam) override;	/* ダイアログのメッセージ処理 *//* BOOL->INT_PTR 2008/7/18 Uchi*/
 	void DeleteAsync( void );	/* 自動破棄を遅延実行する */	// 2008.05.28 ryoji
 
 //	HINSTANCE	m_hInstance;	/* アプリケーションインスタンスのハンドル */
@@ -54,11 +53,9 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam);
-	BOOL OnBnClicked(int wID);
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnBnClicked(int wID) override;
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGCANCEL_H_ */
-

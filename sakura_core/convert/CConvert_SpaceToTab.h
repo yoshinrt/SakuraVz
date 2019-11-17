@@ -22,19 +22,18 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_SPACETOTAB_E17CC2BE_1BD0_4838_ABFD_570B344B99AD_H_
-#define SAKURA_CCONVERT_SPACETOTAB_E17CC2BE_1BD0_4838_ABFD_570B344B99AD_H_
+#pragma once
 
 #include "CConvert.h"
 
-class CConvert_SpaceToTab : public CConvert{
+class CConvert_SpaceToTab final : public CConvert{
 public:
 	CConvert_SpaceToTab(int nTabWidth, int nStartColumn, bool bExtEol)
 	: m_nTabWidth(nTabWidth), m_nStartColumn(nStartColumn), m_bExtEol(bExtEol)
 	{
 	}
 
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 
 private:
 	int m_nTabWidth;
@@ -42,5 +41,4 @@ private:
 	bool m_bExtEol;
 };
 
-#endif /* SAKURA_CCONVERT_SPACETOTAB_E17CC2BE_1BD0_4838_ABFD_570B344B99AD_H_ */
 /*[EOF]*/

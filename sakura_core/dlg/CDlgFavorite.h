@@ -29,15 +29,14 @@
 		   distribution.
 */
 
-#ifndef SAKURA_CDLGFAVORITE_H_
-#define SAKURA_CDLGFAVORITE_H_
+#pragma once
 
 #include "dlg/CDialog.h"
 #include "recent/CRecent.h"
 
 //!「履歴とお気に入りの管理」ダイアログ
 //アクセス方法：[設定] - [履歴の管理]
-class CDlgFavorite : public CDialog
+class CDlgFavorite final : public CDialog
 {
 public:
 	/*
@@ -55,18 +54,18 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam);
-	BOOL	OnBnClicked(int wID);
-	BOOL	OnNotify( WPARAM wParam, LPARAM lParam );
-	BOOL	OnActivate( WPARAM wParam, LPARAM lParam );
-	LPVOID	GetHelpIdTable( void );
-	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam );	// 標準以外のメッセージを捕捉する
-	BOOL	OnSize( WPARAM wParam, LPARAM lParam );
-	BOOL	OnMove( WPARAM wParam, LPARAM lParam );
+	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL	OnBnClicked(int wID) override;
+	BOOL	OnNotify( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnActivate( WPARAM wParam, LPARAM lParam ) override;
+	LPVOID	GetHelpIdTable( void ) override;
+	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;	// 標準以外のメッセージを捕捉する
+	BOOL	OnSize( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnMove( WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnMinMaxInfo( LPARAM lParam );
 
-	void	SetData( void );	/* ダイアログデータの設定 */
-	int		GetData( void );	/* ダイアログデータの取得 */
+	void	SetData( void ) override;	/* ダイアログデータの設定 */
+	int		GetData( void ) override;	/* ダイアログデータの取得 */
 
 	void	TabSelectChange(bool bSetFocus);
 	bool	RefreshList( void );
@@ -138,6 +137,4 @@ private:
 
 	static void  ListViewSort(ListViewSortInfo& info, const CRecent* pRecent, int column, bool bReverse);
 };
-
-#endif	//SAKURA_CDLGFAVORITE_H_
 

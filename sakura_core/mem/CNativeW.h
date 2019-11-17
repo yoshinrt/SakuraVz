@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CNATIVEW_59D44E96_F966_471D_A399_73D86F939DDA9_H_
-#define SAKURA_CNATIVEW_59D44E96_F966_471D_A399_73D86F939DDA9_H_
+#pragma once
 
 #include "CNative.h"
 #include "basis/SakuraBasis.h"
@@ -37,12 +36,12 @@ public:
 };
 
 //! 文字列への参照を保持するクラス
-class CStringRef : public IStringRef{
+class CStringRef final : public IStringRef{
 public:
 	CStringRef() : m_pData(NULL), m_nDataLen(0) { }
 	CStringRef(const wchar_t* pData, int nDataLen) : m_pData(pData), m_nDataLen(nDataLen) { }
-	const wchar_t*	GetPtr()		const{ return m_pData;    }
-	int				GetLength()		const{ return m_nDataLen; }
+	const wchar_t*	GetPtr()		const override{ return m_pData;    }
+	int				GetLength()		const override{ return m_nDataLen; }
 
 	//########補助
 	bool			IsValid()		const{ return m_pData!=NULL; }
@@ -53,7 +52,7 @@ private:
 };
 
 //! UNICODE文字列管理クラス
-class CNativeW : public CNative{
+class CNativeW final : public CNative{
 public:
 	//コンストラクタ・デストラクタ
 	CNativeW() noexcept;
@@ -67,7 +66,7 @@ public:
 
 	//WCHAR
 	void SetString( const wchar_t* pData, int nDataLen );      //!< バッファの内容を置き換える。nDataLenは文字単位。
-	void SetString( const wchar_t* pszData );                  //!< バッファの内容を置き換える
+	void SetString( const wchar_t* pszData );                  //!< バッファの内容を置き換える。NULL 指定時はメモリ解放を行い、文字列長はゼロになる
 	void SetStringHoldBuffer( const wchar_t* pData, int nDataLen );
 	void AppendString( const wchar_t* pszData );               //!< バッファの最後にデータを追加する
 	void AppendString( const wchar_t* pszData, int nLength );  //!< バッファの最後にデータを追加する。nLengthは文字単位。成功すればtrue。メモリ確保に失敗したらfalseを返す。
@@ -164,5 +163,4 @@ template <>
 	}
 }
 
-#endif /* SAKURA_CNATIVEW_59D44E96_F966_471D_A399_73D86F939DDA9_H_ */
 /*[EOF]*/

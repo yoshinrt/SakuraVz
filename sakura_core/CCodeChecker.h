@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCODECHECKER_4EBAEA37_FC62_4206_A9DD_82DDB8CDE44E9_H_
-#define SAKURA_CCODECHECKER_4EBAEA37_FC62_4206_A9DD_82DDB8CDE44E9_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 #include "util/design_template.h"
@@ -34,12 +33,11 @@ class CCodeChecker : public CDocListenerEx, public TSingleton<CCodeChecker>{
 
 public:
 	//セーブ時チェック
-	ECallbackResult OnCheckSave(SSaveInfo* pSaveInfo);
-	void OnFinalSave(ESaveResult eSaveResult);
+	ECallbackResult OnCheckSave(SSaveInfo* pSaveInfo) override;
+	void OnFinalSave(ESaveResult eSaveResult) override;
 
 	//ロード時チェック
-	void OnFinalLoad(ELoadResult eLoadResult);
+	void OnFinalLoad(ELoadResult eLoadResult) override;
 };
 
-#endif /* SAKURA_CCODECHECKER_4EBAEA37_FC62_4206_A9DD_82DDB8CDE44E9_H_ */
 /*[EOF]*/

@@ -22,16 +22,14 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_ZENEISUTOHANEISU_AB71D3F0_338A_4B00_80A1_B11589BE1C759_H_
-#define SAKURA_CCONVERT_ZENEISUTOHANEISU_AB71D3F0_338A_4B00_80A1_B11589BE1C759_H_
+#pragma once
 
 #include "CConvert.h"
 
 //!全角英数→半角英数
-class CConvert_ZeneisuToHaneisu : public CConvert{
+class CConvert_ZeneisuToHaneisu final : public CConvert{
 public:
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 };
 
-#endif /* SAKURA_CCONVERT_ZENEISUTOHANEISU_AB71D3F0_338A_4B00_80A1_B11589BE1C759_H_ */
 /*[EOF]*/

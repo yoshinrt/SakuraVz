@@ -22,19 +22,17 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CBACKUPAGENT_54267C70_F49D_418B_B1EA_0F98DD5DE4B19_H_
-#define SAKURA_CBACKUPAGENT_54267C70_F49D_418B_B1EA_0F98DD5DE4B19_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 
 class CBackupAgent : public CDocListenerEx{
 public:
-	ECallbackResult OnPreBeforeSave(SSaveInfo* pSaveInfo);
+	ECallbackResult OnPreBeforeSave(SSaveInfo* pSaveInfo) override;
 
 protected:
 	int MakeBackUp( const WCHAR* target_file );								//!< バックアップの作成
 	bool FormatBackUpPath( WCHAR*, size_t, const WCHAR* );	//!< バックアップパスの作成 2005.11.21 aroka
 };
 
-#endif /* SAKURA_CBACKUPAGENT_54267C70_F49D_418B_B1EA_0F98DD5DE4B19_H_ */
 /*[EOF]*/

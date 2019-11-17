@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CUTF8_EDEFA3B8_A37B_4416_9EC5_0A16659C92059_H_
-#define SAKURA_CUTF8_EDEFA3B8_A37B_4416_9EC5_0A16659C92059_H_
+#pragma once
 
 #include "CCodeBase.h"
 #include "charset/codeutil.h"
@@ -34,16 +33,16 @@ class CUtf8 : public CCodeBase{
 public:
 
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){	//!< 特定コード → UNICODE    変換
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{	//!< 特定コード → UNICODE    変換
 		return UTF8ToUnicode(cSrc, pDst);
 	}
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){	//!< UNICODE    → 特定コード 変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{	//!< UNICODE    → 特定コード 変換
 		return UnicodeToUTF8(cSrc, pDst);
 	}
-	void GetBom(CMemory* pcmemBom);																			//!< BOMデータ取得
-	void GetEol(CMemory* pcmemEol, EEolType eEolType);
+	void GetBom(CMemory* pcmemBom) override;																			//!< BOMデータ取得
+	void GetEol(CMemory* pcmemEol, EEolType eEolType) override;
 	EConvertResult _UnicodeToHex(const wchar_t* cSrc, const int iSLen, WCHAR* pDst, const CommonSetting_Statusbar* psStatusbar, const bool CESU8Mode);			//!< UNICODE → Hex 変換
-	EConvertResult UnicodeToHex(const wchar_t* ps, const int nsl, WCHAR* pd, const CommonSetting_Statusbar* psStatusbar){ return _UnicodeToHex(ps, nsl, pd, psStatusbar, false); }
+	EConvertResult UnicodeToHex(const wchar_t* ps, const int nsl, WCHAR* pd, const CommonSetting_Statusbar* psStatusbar) override{ return _UnicodeToHex(ps, nsl, pd, psStatusbar, false); }
 
 public:
 	// UTF-8 / CESU-8 <-> Unicodeコード変換
@@ -158,5 +157,4 @@ inline int CUtf8::_UniToUtf8_char( const unsigned short* pSrc, const int nSrcLen
 	return nret;
 }
 
-#endif /* SAKURA_CUTF8_EDEFA3B8_A37B_4416_9EC5_0A16659C92059_H_ */
 /*[EOF]*/

@@ -27,8 +27,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDLGPROFILEMGR_H_
-#define SAKURA_CDLGPROFILEMGR_H_
+#pragma once
 
 #include "dlg/CDialog.h"
 #include <string>
@@ -42,7 +41,7 @@ struct SProfileSettings
 	bool m_bDefaultSelect;
 };
 
-class CDlgProfileMgr : public CDialog
+class CDlgProfileMgr final : public CDialog
 {
 public:
 	/*
@@ -56,14 +55,14 @@ public:
 
 protected:
 
-	BOOL	OnBnClicked(int wID);
-	INT_PTR	DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam );
+	BOOL	OnBnClicked(int wID) override;
+	INT_PTR	DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;
 
-	void	SetData();	/* ダイアログデータの設定 */
+	void	SetData() override;	/* ダイアログデータの設定 */
 	void	SetData(int nSelIndex);	/* ダイアログデータの設定 */
-	int		GetData();	/* ダイアログデータの取得 */
+	int		GetData() override;	/* ダイアログデータの取得 */
 	int		GetData(bool bStart);	/* ダイアログデータの取得 */
-	LPVOID	GetHelpIdTable(void);
+	LPVOID	GetHelpIdTable(void) override;
 
 	void	UpdateIni();
 	void	CreateProf();
@@ -79,5 +78,3 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* SAKURA_CDLGPROFILEMGR_H_ */
-

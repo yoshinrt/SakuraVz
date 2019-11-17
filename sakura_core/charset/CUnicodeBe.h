@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CUNICODEBE_484B0FE6_3896_4E2E_83BA_CC8718999735_H_
-#define SAKURA_CUNICODEBE_484B0FE6_3896_4E2E_83BA_CC8718999735_H_
+#pragma once
 
 #include "CCodeBase.h"
 #include "CUnicode.h"
@@ -32,10 +31,10 @@
 class CUnicodeBe : public CCodeBase{
 public:
 	//CCodeBaseインターフェース
-	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst){ return UnicodeBEToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
-	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst){ return UnicodeToUnicodeBE(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
-	void GetBom(CMemory* pcmemBom);	//!< BOMデータ取得
-	void GetEol(CMemory* pcmemEol, EEolType eEolType);	//!< 改行データ取得
+	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return UnicodeBEToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
+	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToUnicodeBE(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
+	void GetBom(CMemory* pcmemBom) override;	//!< BOMデータ取得
+	void GetEol(CMemory* pcmemEol, EEolType eEolType) override;	//!< 改行データ取得
 
 public:
 
@@ -45,5 +44,4 @@ public:
 		{ return CUnicode::_UnicodeToUnicode_out(cSrc, pDst, true); }	// Unicode   → UnicodeBEコード変換
 };
 
-#endif /* SAKURA_CUNICODEBE_484B0FE6_3896_4E2E_83BA_CC8718999735_H_ */
 /*[EOF]*/

@@ -27,18 +27,16 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDECODE_UUDECODE_2082FDBF_E5F4_4173_87E3_A862FA4F694B_H_
-#define SAKURA_CDECODE_UUDECODE_2082FDBF_E5F4_4173_87E3_A862FA4F694B_H_
+#pragma once
 
 #include "convert/CDecode.h"
 
-class CDecode_UuDecode : public CDecode{
+class CDecode_UuDecode final : public CDecode{
 
 	WCHAR m_aFilename[_MAX_PATH];
 public:
-	bool DoDecode(const CNativeW& cData, CMemory* pDst);
+	bool DoDecode(const CNativeW& cData, CMemory* pDst) override;
 	void CopyFilename( WCHAR *pcDst ) const { wcscpy( pcDst, m_aFilename ); }
 };
 
-#endif /* SAKURA_CDECODE_UUDECODE_2082FDBF_E5F4_4173_87E3_A862FA4F694B_H_ */
 /*[EOF]*/

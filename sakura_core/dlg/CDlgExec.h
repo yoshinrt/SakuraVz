@@ -11,16 +11,15 @@
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
 */
+#pragma once
+
 #include "dlg/CDialog.h"
 #include "recent/CRecentCmd.h"
-
-#ifndef _CDLGEXEC_H_
-#define _CDLGEXEC_H_
 
 /*-----------------------------------------------------------------------
 クラスの宣言
 -----------------------------------------------------------------------*/
-class CDlgExec : public CDialog
+class CDlgExec final : public CDialog
 {
 public:
 	/*
@@ -42,14 +41,11 @@ protected:
 	SComboBoxItemDeleter m_comboDelCur;
 	CRecentCurDir m_cRecentCur;
 
-	/* オーバーライド? */
-	int GetData( void );	/* ダイアログデータの取得 */
-	void SetData( void );	/* ダイアログデータの設定 */
-	BOOL OnInitDialog(HWND hwnd, WPARAM wParam, LPARAM lParam);
-	BOOL OnBnClicked(int wID);
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	int GetData( void ) override;	/* ダイアログデータの取得 */
+	void SetData( void ) override;	/* ダイアログデータの設定 */
+	BOOL OnInitDialog(HWND hwnd, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnBnClicked(int wID) override;
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGEXEC_H_ */
-

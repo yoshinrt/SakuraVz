@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTEXCEPTMRU_C30EB710_D560_49A0_99EB_603E335B102A_H_
-#define SAKURA_CRECENTEXCEPTMRU_C30EB710_D560_49A0_99EB_603E335B102A_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "util/StaticType.h"
@@ -31,20 +30,19 @@
 typedef StaticString<WCHAR, _MAX_PATH> CMetaPath;
 
 //! フォルダの履歴を管理 (RECENT_FOR_FOLDER)
-class CRecentExceptMRU : public CRecentImp<CMetaPath, LPCWSTR>{
+class CRecentExceptMRU final : public CRecentImp<CMetaPath, LPCWSTR>{
 public:
 	//生成
 	CRecentExceptMRU();
 
 	//オーバーライド
-	int				CompareItem( const CMetaPath* p1, LPCWSTR p2 ) const;
-	void			CopyItem( CMetaPath* dst, LPCWSTR src ) const;
+	int				CompareItem( const CMetaPath* p1, LPCWSTR p2 ) const override;
+	void			CopyItem( CMetaPath* dst, LPCWSTR src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( LPCWSTR* dst, const CMetaPath* src ) const;
-	bool			TextToDataType( CMetaPath* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( LPCWSTR p ) const;
+	bool			DataToReceiveType( LPCWSTR* dst, const CMetaPath* src ) const override;
+	bool			TextToDataType( CMetaPath* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( LPCWSTR p ) const override;
 	size_t			GetTextMaxLength() const;
 };
 
-#endif /* SAKURA_CRECENTEXCEPTMRU_C30EB710_D560_49A0_99EB_603E335B102A_H_ */
 /*[EOF]*/

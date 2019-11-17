@@ -28,8 +28,7 @@
 		   distribution.
 */
 
-#ifndef SAKURA_CDLGFILETREE_H_
-#define SAKURA_CDLGFILETREE_H_
+#pragma once
 
 #include "dlg/CDialog.h"
 #include "outline/CDlgFuncList.h"
@@ -37,7 +36,7 @@
 /*!
 	@brief ファイルツリー設定ダイアログ
 */
-class CDlgFileTree : public CDialog
+class CDlgFileTree final : public CDialog
 {
 public:
 	CDlgFileTree();
@@ -45,12 +44,12 @@ public:
 	int DoModal(HINSTANCE hInstance, HWND hwndParent, LPARAM lParam);
 
 private:
-	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam);
-	BOOL	OnBnClicked(int wID);
-	BOOL	OnNotify(WPARAM wParam, LPARAM lParam);
-	LPVOID	GetHelpIdTable();
-	void	SetData();
-	int		GetData();
+	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL	OnBnClicked(int wID) override;
+	BOOL	OnNotify(WPARAM wParam, LPARAM lParam) override;
+	LPVOID	GetHelpIdTable() override;
+	void	SetData() override;
+	int		GetData() override;
 
 	void	SetDataInit();
 	void	SetDataItem(int nItemIndex);
@@ -69,6 +68,4 @@ private:
 
 	int					m_bInMove;
 };
-
-#endif /* SAKURA_CDLGFILETREE_H_ */
 

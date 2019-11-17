@@ -22,23 +22,21 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCOLOR_KEYWORDSET_FA3FF02C_3855_4447_BE0A_5311E0E65822_H_
-#define SAKURA_CCOLOR_KEYWORDSET_FA3FF02C_3855_4447_BE0A_5311E0E65822_H_
+#pragma once
 
 #include "view/colors/CColorStrategy.h"
 
-class CColor_KeywordSet : public CColorStrategy{
+class CColor_KeywordSet final : public CColorStrategy{
 public:
 	CColor_KeywordSet();
-	virtual EColorIndexType GetStrategyColor() const{ return (EColorIndexType)(COLORIDX_KEYWORD1 + m_nKeywordIndex); }
-	virtual void InitStrategyStatus(){ m_nCOMMENTEND = 0; }
-	virtual bool BeginColor(const CStringRef& cStr, int nPos);
-	virtual bool EndColor(const CStringRef& cStr, int nPos);
-	virtual bool Disp() const { return true; }
+	EColorIndexType GetStrategyColor() const override{ return (EColorIndexType)(COLORIDX_KEYWORD1 + m_nKeywordIndex); }
+	void InitStrategyStatus() override{ m_nCOMMENTEND = 0; }
+	bool BeginColor(const CStringRef& cStr, int nPos) override;
+	bool EndColor(const CStringRef& cStr, int nPos) override;
+	bool Disp() const override{ return true; }
 private:
 	int m_nKeywordIndex;
 	int m_nCOMMENTEND;
 };
 
-#endif /* SAKURA_CCOLOR_KEYWORDSET_FA3FF02C_3855_4447_BE0A_5311E0E65822_H_ */
 /*[EOF]*/

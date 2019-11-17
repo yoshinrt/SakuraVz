@@ -22,19 +22,17 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CLOADAGENT_780AC971_71A8_4495_BE95_C8786311D1489_H_
-#define SAKURA_CLOADAGENT_780AC971_71A8_4495_BE95_C8786311D1489_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 
 class CLoadAgent : public CDocListenerEx{
 public:
-	ECallbackResult OnCheckLoad(SLoadInfo* pLoadInfo);
-	void OnBeforeLoad(SLoadInfo* sLoadInfo);
-	ELoadResult OnLoad(const SLoadInfo& sLoadInfo);
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
-	void OnFinalLoad(ELoadResult eLoadResult);
+	ECallbackResult OnCheckLoad(SLoadInfo* pLoadInfo) override;
+	void OnBeforeLoad(SLoadInfo* sLoadInfo) override;
+	ELoadResult OnLoad(const SLoadInfo& sLoadInfo) override;
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
+	void OnFinalLoad(ELoadResult eLoadResult) override;
 };
 
-#endif /* SAKURA_CLOADAGENT_780AC971_71A8_4495_BE95_C8786311D1489_H_ */
 /*[EOF]*/

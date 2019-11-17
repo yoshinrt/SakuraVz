@@ -29,8 +29,7 @@
 		   distribution.
 */
 
-#ifndef __CMARKMGR_H_
-#define __CMARKMGR_H_
+#pragma once
 
 #include <vector>
 
@@ -130,11 +129,9 @@ private:
 
 	CMarkMgr を継承し、動作が規定されていない部分を実装する。
 */
-class CAutoMarkMgr : public CMarkMgr{
+class CAutoMarkMgr final : public CMarkMgr{
 public:
-	virtual void Add(const CMark& m);	//!<	要素の追加
-	virtual void Expire(void);	//!<	要素数の調整
+	void Add(const CMark& m) override;	//!<	要素の追加
+	void Expire(void) override;	//!<	要素数の調整
 };
-
-#endif
 

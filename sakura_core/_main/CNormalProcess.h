@@ -11,8 +11,7 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-#ifndef _CNORMALPROCESS_H_
-#define _CNORMALPROCESS_H_
+#pragma once
 
 #include "global.h"
 #include "CProcess.h"
@@ -29,17 +28,17 @@ class CEditWnd;
 	
 	エディタプロセスはCEditWndクラスのインスタンスを作る。
 */
-class CNormalProcess : public CProcess {
+class CNormalProcess final : public CProcess {
 public:
 	//コンストラクタ・デストラクタ
 	CNormalProcess( HINSTANCE hInstance, LPCWSTR lpCmdLine );
-	virtual ~CNormalProcess();
+	~CNormalProcess();
 
 protected:
 	//プロセスハンドラ
-	virtual bool InitializeProcess();
-	virtual bool MainLoop();
-	virtual void OnExitProcess();
+	bool InitializeProcess() override;
+	bool MainLoop() override;
+	void OnExitProcess() override;
 
 protected:
 	//実装補助
@@ -51,5 +50,3 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CNORMALPROCESS_H_ */
-

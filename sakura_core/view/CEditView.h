@@ -38,8 +38,7 @@
 		   distribution.
 */
 
-#ifndef _CEDITVIEW_H_
-#define _CEDITVIEW_H_
+#pragma once
 
 #include <Windows.h>
 #include <ObjIdl.h>  // LPDATAOBJECT
@@ -200,7 +199,7 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
 	//ドキュメントイベント
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
 	/* メッセージディスパッチャ */
 	LRESULT DispatchEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	//
@@ -752,5 +751,3 @@ public:
 	virtual bool IsActiveDebugWindow(){ return true; }
 };
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CEDITVIEW_H_ */
-

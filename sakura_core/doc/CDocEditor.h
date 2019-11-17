@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_
-#define SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 #include "_os/CClipboard.h"
@@ -51,11 +50,11 @@ public:
 	//                         イベント                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//ロード前後
-	void OnBeforeLoad(SLoadInfo* sLoadInfo);
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
+	void OnBeforeLoad(SLoadInfo* sLoadInfo) override;
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
 
 	//セーブ前後
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                           状態                              //
@@ -105,5 +104,4 @@ public:
 	}
 };
 
-#endif /* SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_ */
 /*[EOF]*/

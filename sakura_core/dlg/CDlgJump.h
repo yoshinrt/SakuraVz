@@ -13,15 +13,13 @@
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
 */
+#pragma once
 
 class CDlgJump;
 
-#ifndef _CDLGJUMP_H_
-#define _CDLGJUMP_H_
-
 #include "dlg/CDialog.h"
 //! 指定行へのジャンプダイアログボックス
-class CDlgJump : public CDialog
+class CDlgJump final : public CDialog
 {
 public:
 	/*
@@ -41,14 +39,12 @@ protected:
 	/*
 	||  実装ヘルパ関数
 	*/
-	BOOL OnNotify(WPARAM wParam, LPARAM lParam);	//	Oct. 6, 2000 JEPRO added for Spin control
-	BOOL OnCbnSelChange(HWND hwndCtl, int wID);
-	BOOL OnBnClicked(int wID);
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
-	void SetData( void );	/* ダイアログデータの設定 */
-	int GetData( void );	/* ダイアログデータの取得 */
+	BOOL OnNotify(WPARAM wParam, LPARAM lParam) override;	//	Oct. 6, 2000 JEPRO added for Spin control
+	BOOL OnCbnSelChange(HWND hwndCtl, int wID) override;
+	BOOL OnBnClicked(int wID) override;
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
+	void SetData( void ) override;	/* ダイアログデータの設定 */
+	int GetData( void ) override;	/* ダイアログデータの取得 */
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGJUMP_H_ */
-

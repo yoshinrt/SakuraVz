@@ -12,10 +12,9 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-class CDlgTypeList;
+#pragma once
 
-#ifndef _CDLGTYPELIST_H_
-#define _CDLGTYPELIST_H_
+class CDlgTypeList;
 
 #include "dlg/CDialog.h"
 using std::wstring;
@@ -26,7 +25,7 @@ using std::wstring;
 /*!
 	@brief ファイルタイプ一覧ダイアログ
 */
-class CDlgTypeList : public CDialog
+class CDlgTypeList final : public CDialog
 {
 public:
 	// 型
@@ -41,13 +40,13 @@ public:
 
 protected:
 	// 実装ヘルパ関数
-	BOOL OnLbnDblclk(int wID);
-	BOOL OnBnClicked(int wID);
-	BOOL OnActivate( WPARAM wParam, LPARAM lParam );
-	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam );
-	void SetData();	/* ダイアログデータの設定 */
+	BOOL OnLbnDblclk(int wID) override;
+	BOOL OnBnClicked(int wID) override;
+	BOOL OnActivate( WPARAM wParam, LPARAM lParam ) override;
+	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;
+	void SetData() override;	/* ダイアログデータの設定 */
 	void SetData(int selIdx);	/* ダイアログデータの設定 */
-	LPVOID GetHelpIdTable(void);	//@@@ 2002.01.18 add
+	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
 	bool Import( void );			// 2010/4/12 Uchi
 	bool Export( void );			// 2010/4/12 Uchi
 	bool InitializeType( void );	// 2010/4/12 Uchi
@@ -69,5 +68,3 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CDLGTYPELIST_H_ */
-

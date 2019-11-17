@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTGREPFOLDER_6162D952_F009_44DB_9C13_80E73507D8E7_H_
-#define SAKURA_CRECENTGREPFOLDER_6162D952_F009_44DB_9C13_80E73507D8E7_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "util/StaticType.h"
@@ -31,20 +30,19 @@
 typedef StaticString<WCHAR, MAX_GREP_PATH> CGrepFolderString;
 
 //! GREPフォルダの履歴を管理 (RECENT_FOR_GREP_FOLDER)
-class CRecentGrepFolder : public CRecentImp<CGrepFolderString, LPCWSTR>{
+class CRecentGrepFolder final : public CRecentImp<CGrepFolderString, LPCWSTR>{
 public:
 	//生成
 	CRecentGrepFolder();
 
 	//オーバーライド
-	int				CompareItem( const CGrepFolderString* p1, LPCWSTR p2 ) const;
-	void			CopyItem( CGrepFolderString* dst, LPCWSTR src ) const;
+	int				CompareItem( const CGrepFolderString* p1, LPCWSTR p2 ) const override;
+	void			CopyItem( CGrepFolderString* dst, LPCWSTR src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( LPCWSTR* dst, const CGrepFolderString* src ) const;
-	bool			TextToDataType( CGrepFolderString* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( LPCWSTR p ) const;
+	bool			DataToReceiveType( LPCWSTR* dst, const CGrepFolderString* src ) const override;
+	bool			TextToDataType( CGrepFolderString* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( LPCWSTR p ) const override;
 	size_t			GetTextMaxLength() const;
 };
 
-#endif /* SAKURA_CRECENTGREPFOLDER_6162D952_F009_44DB_9C13_80E73507D8E7_H_ */
 /*[EOF]*/

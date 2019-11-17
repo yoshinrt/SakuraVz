@@ -24,8 +24,7 @@
 		   distribution.
 */
 
-#ifndef _DLL_BREGEXP_H_
-#define _DLL_BREGEXP_H_
+#pragma once
 
 #include "CDllHandler.h"
 
@@ -219,4 +218,3 @@ static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage )
 	return true;
 }
 
-#endif

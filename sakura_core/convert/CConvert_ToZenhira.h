@@ -22,16 +22,14 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_TOZENHIRA_A2D60F31_CBF3_427D_A622_A585F1F3E667_H_
-#define SAKURA_CCONVERT_TOZENHIRA_A2D60F31_CBF3_427D_A622_A585F1F3E667_H_
+#pragma once
 
 #include "CConvert.h"
 
 //!できる限り全角ひらがなにする
-class CConvert_ToZenhira : public CConvert{
+class CConvert_ToZenhira final : public CConvert{
 public:
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 };
 
-#endif /* SAKURA_CCONVERT_TOZENHIRA_A2D60F31_CBF3_427D_A622_A585F1F3E667_H_ */
 /*[EOF]*/

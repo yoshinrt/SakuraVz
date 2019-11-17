@@ -29,8 +29,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CTEXTSTREAM_0D3CC877_CA34_4CC8_9596_B120F4F902939_H_
-#define SAKURA_CTEXTSTREAM_0D3CC877_CA34_4CC8_9596_B120F4F902939_H_
+#pragma once
 
 #include <string>
 
@@ -54,7 +53,7 @@ private:
 
 //テキスト出力ストリーム
 // 2008.01.26 kobake 出力文字コードを任意で指定できるように変更
-class CTextOutputStream : public COutputStream{
+class CTextOutputStream final : public COutputStream{
 public:
 	//コンストラクタ・デストラクタ
 	CTextOutputStream(const WCHAR* pszPath, ECodeType eCodeType = CODE_UTF8, bool bExceptionMode = false, bool bBom = true);
@@ -72,10 +71,9 @@ private:
 };
 
 //テキスト入力ストリーム。相対パスの場合はINIファイルのパスからの相対パスとして開く。
-class CTextInputStream_AbsIni : public CTextInputStream{
+class CTextInputStream_AbsIni final : public CTextInputStream{
 public:
 	CTextInputStream_AbsIni(const WCHAR* pszPath, bool bOrExedir = true);
 };
 
-#endif /* SAKURA_CTEXTSTREAM_0D3CC877_CA34_4CC8_9596_B120F4F902939_H_ */
 /*[EOF]*/

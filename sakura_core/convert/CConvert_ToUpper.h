@@ -22,15 +22,13 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_TOUPPER_98DEA386_E8FA_466B_AE7A_6A708EC39F0D9_H_
-#define SAKURA_CCONVERT_TOUPPER_98DEA386_E8FA_466B_AE7A_6A708EC39F0D9_H_
+#pragma once
 
 #include "CConvert.h"
 
-class CConvert_ToUpper : public CConvert{
+class CConvert_ToUpper final : public CConvert{
 public:
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 };
 
-#endif /* SAKURA_CCONVERT_TOUPPER_98DEA386_E8FA_466B_AE7A_6A708EC39F0D9_H_ */
 /*[EOF]*/

@@ -22,15 +22,14 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CCONVERT_TOHANKAKU_AA990D46_6904_44DF_8162_B2D96E20AE3A_H_
-#define SAKURA_CCONVERT_TOHANKAKU_AA990D46_6904_44DF_8162_B2D96E20AE3A_H_
+#pragma once
 
 #include "CConvert.h"
 
 //!半角にできるものは全部半角に変換
-class CConvert_ToHankaku : public CConvert{
+class CConvert_ToHankaku final : public CConvert{
 public:
-	bool DoConvert(CNativeW* pcData);
+	bool DoConvert(CNativeW* pcData) override;
 };
 
 enum EToHankakuMode{
@@ -39,5 +38,4 @@ enum EToHankakuMode{
 	TO_EISU		= 0x04, //!< 英数字に影響アリ
 };
 
-#endif /* SAKURA_CCONVERT_TOHANKAKU_AA990D46_6904_44DF_8162_B2D96E20AE3A_H_ */
 /*[EOF]*/

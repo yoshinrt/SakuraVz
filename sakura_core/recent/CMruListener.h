@@ -22,28 +22,26 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CMRULISTENER_7C175242_808A_48BB_A4C2_93FA71274B999_H_
-#define SAKURA_CMRULISTENER_7C175242_808A_48BB_A4C2_93FA71274B999_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 
 class CMruListener : public CDocListenerEx{
 public:
 	//ロード前後
-//	ECallbackResult OnCheckLoad(SLoadInfo* pLoadInfo);
-	void OnBeforeLoad(SLoadInfo* sLoadInfo);
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
+//	ECallbackResult OnCheckLoad(SLoadInfo* pLoadInfo) override;
+	void OnBeforeLoad(SLoadInfo* sLoadInfo) override;
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
 
 	//セーブ前後
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 
 	//クローズ前後
-	ECallbackResult OnBeforeClose();
+	ECallbackResult OnBeforeClose() override;
 
 protected:
 	//ヘルパ
 	void _HoldBookmarks_And_AddToMRU(); // Mar. 30, 2003 genta
 };
 
-#endif /* SAKURA_CMRULISTENER_7C175242_808A_48BB_A4C2_93FA71274B999_H_ */
 /*[EOF]*/

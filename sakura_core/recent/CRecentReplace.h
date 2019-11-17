@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CRECENTREPLACE_0597B923_7C40_4B6A_BCCE_C35E043E7577_H_
-#define SAKURA_CRECENTREPLACE_0597B923_7C40_4B6A_BCCE_C35E043E7577_H_
+#pragma once
 
 #include "CRecentImp.h"
 #include "util/StaticType.h"
@@ -31,20 +30,19 @@
 typedef StaticString<WCHAR, _MAX_PATH> CReplaceString;
 
 //! 置換の履歴を管理 (RECENT_FOR_REPLACE)
-class CRecentReplace : public CRecentImp<CReplaceString, LPCWSTR>{
+class CRecentReplace final : public CRecentImp<CReplaceString, LPCWSTR>{
 public:
 	//生成
 	CRecentReplace();
 
 	//オーバーライド
-	int				CompareItem( const CReplaceString* p1, LPCWSTR p2 ) const;
-	void			CopyItem( CReplaceString* dst, LPCWSTR src ) const;
+	int				CompareItem( const CReplaceString* p1, LPCWSTR p2 ) const override;
+	void			CopyItem( CReplaceString* dst, LPCWSTR src ) const override;
 	const WCHAR*	GetItemText( int nIndex ) const;
-	bool			DataToReceiveType( LPCWSTR* dst, const CReplaceString* src ) const;
-	bool			TextToDataType( CReplaceString* dst, LPCWSTR pszText ) const;
-	bool			ValidateReceiveType( LPCWSTR p ) const;
+	bool			DataToReceiveType( LPCWSTR* dst, const CReplaceString* src ) const override;
+	bool			TextToDataType( CReplaceString* dst, LPCWSTR pszText ) const override;
+	bool			ValidateReceiveType( LPCWSTR p ) const override;
 	size_t			GetTextMaxLength() const;
 };
 
-#endif /* SAKURA_CRECENTREPLACE_0597B923_7C40_4B6A_BCCE_C35E043E7577_H_ */
 /*[EOF]*/

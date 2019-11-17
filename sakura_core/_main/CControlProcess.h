@@ -12,8 +12,7 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
-#ifndef _CCONTROLPROCESS_H_
-#define _CCONTROLPROCESS_H_
+#pragma once
 
 #include "global.h"
 #include "CProcess.h"
@@ -30,7 +29,7 @@ class CControlTray;
 	
 	@date 2002.2.17 YAZAKI CShareDataのインスタンスは、CProcessにひとつあるのみ。
 */
-class CControlProcess : public CProcess {
+class CControlProcess final : public CProcess {
 public:
 	CControlProcess( HINSTANCE hInstance, LPCWSTR lpCmdLine ) : 
 		CProcess( hInstance, lpCmdLine ),
@@ -41,12 +40,12 @@ public:
 		m_pcTray( 0 )
 	{}
 
-	virtual ~CControlProcess();
+	~CControlProcess();
 protected:
 	CControlProcess();
-	virtual bool InitializeProcess();
-	virtual bool MainLoop();
-	virtual void OnExitProcess();
+	bool InitializeProcess() override;
+	bool MainLoop() override;
+	void OnExitProcess() override;
 
 private:
 	HANDLE			m_hMutex;				//!< アプリケーション実行検出用ミューテックス
@@ -56,5 +55,3 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////
-#endif /* _CCONTROLPROCESS_H_ */
-
