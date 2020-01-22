@@ -300,6 +300,7 @@
     <ClInclude Include="..\sakura_core\charset\CUnicodeBe.h" />
     <ClInclude Include="..\sakura_core\charset\CUtf7.h" />
     <ClInclude Include="..\sakura_core\charset\CUtf8.h" />
+    <ClInclude Include="..\sakura_core\charset\icu4c\CharsetDetector.h" />
     <ClInclude Include="..\sakura_core\CHokanMgr.h" />
     <ClInclude Include="..\sakura_core\CKeyWordSetMgr.h" />
     <ClInclude Include="..\sakura_core\CLoadAgent.h" />
@@ -410,6 +411,7 @@
     <ClInclude Include="..\sakura_core\extmodule\CBregexp.h" />
     <ClInclude Include="..\sakura_core\extmodule\CDllHandler.h" />
     <ClInclude Include="..\sakura_core\extmodule\CHtmlHelp.h" />
+    <ClInclude Include="..\sakura_core\extmodule\CIcu4cI18n.h" />
     <ClInclude Include="..\sakura_core\extmodule\CMigemo.h" />
     <ClInclude Include="..\sakura_core\extmodule\CUxTheme.h" />
     <ClInclude Include="..\sakura_core\Funccode_define.h" />
@@ -418,6 +420,7 @@
     <ClInclude Include="..\sakura_core\func\CFuncLookup.h" />
     <ClInclude Include="..\sakura_core\func\CKeyBind.h" />
     <ClInclude Include="..\sakura_core\func\Funccode.h" />
+    <ClInclude Include="..\sakura_core\GrepInfo.h" />
     <ClInclude Include="..\sakura_core\io\CBinaryStream.h" />
     <ClInclude Include="..\sakura_core\io\CFile.h" />
     <ClInclude Include="..\sakura_core\io\CFileLoad.h" />
@@ -643,6 +646,7 @@
     <ClCompile Include="..\sakura_core\charset\CUnicodeBe.cpp" />
     <ClCompile Include="..\sakura_core\charset\CUtf7.cpp" />
     <ClCompile Include="..\sakura_core\charset\CUtf8.cpp" />
+    <ClCompile Include="..\sakura_core\charset\icu4c\CharsetDetector.cpp" />
     <ClCompile Include="..\sakura_core\CHokanMgr.cpp" />
     <ClCompile Include="..\sakura_core\CKeyWordSetMgr.cpp" />
     <ClCompile Include="..\sakura_core\CLoadAgent.cpp" />
@@ -756,6 +760,7 @@
     <ClCompile Include="..\sakura_core\doc\layout\CTsvModeInfo.cpp" />
     <ClCompile Include="..\sakura_core\doc\logic\CDocLine.cpp" />
     <ClCompile Include="..\sakura_core\doc\logic\CDocLineMgr.cpp" />
+    <ClCompile Include="..\sakura_core\EditInfo.cpp" />
     <ClCompile Include="..\sakura_core\env\CAppNodeManager.cpp" />
     <ClCompile Include="..\sakura_core\env\CDocTypeManager.cpp" />
     <ClCompile Include="..\sakura_core\env\CFileNameManager.cpp" />
@@ -772,12 +777,14 @@
     <ClCompile Include="..\sakura_core\extmodule\CBregexp.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CDllHandler.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CHtmlHelp.cpp" />
+    <ClCompile Include="..\sakura_core\extmodule\CIcu4cI18n.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CMigemo.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CUxTheme.cpp" />
     <ClCompile Include="..\sakura_core\func\CFuncKeyWnd.cpp" />
     <ClCompile Include="..\sakura_core\func\CFuncLookup.cpp" />
     <ClCompile Include="..\sakura_core\func\CKeyBind.cpp" />
     <ClCompile Include="..\sakura_core\func\Funccode.cpp" />
+    <ClCompile Include="..\sakura_core\GrepInfo.cpp" />
     <ClCompile Include="..\sakura_core\io\CBinaryStream.cpp" />
     <ClCompile Include="..\sakura_core\io\CFile.cpp" />
     <ClCompile Include="..\sakura_core\io\CFileLoad.cpp" />

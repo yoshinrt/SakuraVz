@@ -164,7 +164,6 @@ ECodeType CFileLoad::FileOpen( LPCWSTR pFileName, bool bBigFile, ECodeType CharC
 {
 	HANDLE	hFile;
 	ULARGE_INTEGER	fileSize;
-	ECodeType	nBomCode;
 
 	// FileCloseを呼んでからにしてください
 	if( NULL != m_hFile ){
@@ -217,14 +216,9 @@ ECodeType CFileLoad::FileOpen( LPCWSTR pFileName, bool bBigFile, ECodeType CharC
 	
 	// 文字コード判定
 
-	nBomCode = CCodeMediator::DetectUnicodeBom( m_pReadBuf, ( int )t_min( m_nFileSize, gm_nBufSizeDef ));
 	if( CharCode == CODE_AUTODETECT ){
-		if( nBomCode != CODE_NONE ){
-			CharCode = nBomCode;
-		}else{
-			CCodeMediator mediator(*m_pEencoding);
-			CharCode = mediator.CheckKanjiCode( m_pReadBuf, ( int )t_min( m_nFileSize, gm_nBufSizeDef ));
-		}
+		CCodeMediator mediator(*m_pEencoding);
+		CharCode = mediator.CheckKanjiCode(m_pReadBuf, ( int )t_min( m_nFileSize, gm_nBufSizeDef ));
 	}
 	// 不正な文字コードのときはデフォルト(SJIS:無変換)を設定
 	if( !IsValidCodeOrCPType(CharCode) ){

@@ -199,4 +199,3 @@ m_sSelectOldについて
 	DrawSelectArea()を呼びだすことで新しい範囲が描かれる．
 */
 
-/*[EOF]*/

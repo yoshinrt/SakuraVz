@@ -162,4 +162,3 @@ ptrdiff_t int2dec(
 	return len;
 }
 
-/*[EOF]*/

@@ -182,6 +182,8 @@ const EFunctionCode pnFuncList_Move[] = {	//Oct. 16, 2000 JEPRO 変数名変更(
 	F_GOFILETOP			,	//ファイルの先頭に移動
 	F_GOFILEEND			,	//ファイルの最後に移動
 	F_CURLINECENTER		,	//カーソル行をウィンドウ中央へ
+	F_CURLINETOP		,	//カーソル行をウィンドウ上部へ
+	F_CURLINEBOTTOM		,	//カーソル行をウィンドウ下部へ
 	F_JUMP_DIALOG		,	//指定行ヘジャンプ	//Sept. 17, 2000 JEPRO コマンド本家は「検索系」
 	F_JUMP_SRCHSTARTPOS	,	//検索開始位置へ戻る	// 02/06/26 ai コマンド本家は｢検索系｣
 	F_JUMPHIST_PREV		,	//移動履歴: 前へ
@@ -1273,9 +1275,7 @@ bool IsFuncEnable( const CEditDoc* pcEditDoc, const DLLSHAREDATA* pShareData, EF
 /* 機能がチェック状態か調べる */
 bool IsFuncChecked( const CEditDoc* pcEditDoc, const DLLSHAREDATA* pShareData, EFunctionCode nId )
 {
-	CEditWnd* pCEditWnd;
-	// Modified by KEITA for WIN64 2003.9.6
-	pCEditWnd = ( CEditWnd* )::GetWindowLongPtr( CEditWnd::getInstance()->GetHwnd(), GWLP_USERDATA );
+	auto* pCEditWnd = CEditWnd::getInstance();
 //@@@ 2002.01.14 YAZAKI 印刷プレビューをCPrintPreviewに独立させたことにより、プレビュー判定削除
 	ECodeType eDocCode = pcEditDoc->GetDocumentEncoding();
 	switch( nId ){

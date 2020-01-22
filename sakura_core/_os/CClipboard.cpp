@@ -33,11 +33,6 @@
 #include "charset/CUtf8.h"
 #include "CEol.h"
 
-// MinGW<=4.5.0のコンパイルエラー対策
-#ifndef CF_DIBV5
-#define CF_DIBV5 17
-#endif
-
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //               コンストラクタ・デストラクタ                  //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -612,11 +607,7 @@ bool CClipboard::GetClipboradByFormat(CNativeW& mem, const wchar_t* pFormatName,
 		}else{
 			ECodeType eMode = (ECodeType)nMode;
 			if( !IsValidCodeType(eMode) ){
-				// コード不明と99は自動判別
-				ECodeType nBomCode = CCodeMediator::DetectUnicodeBom((const char*)pData, nLength);
-				if( nBomCode != CODE_NONE ){
-					eMode = nBomCode;
-				}else{
+				{
 					const STypeConfig& type = CEditDoc::GetInstance(0)->m_cDocType.GetDocumentAttribute();
 					CCodeMediator mediator(type.m_encoding);
 					eMode = mediator.CheckKanjiCode((const char*)pData, nLength);

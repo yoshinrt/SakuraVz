@@ -302,4 +302,3 @@ public:
 	virtual bool ReadPluginOption( CDataProfile *cProfile ) =0;		//オプションファイルを読み込む
 };
 
-/*[EOF]*/

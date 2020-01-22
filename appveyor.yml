@@ -30,7 +30,8 @@ install:
 
 # to run our custom scripts instead of automatic MSBuild
 build_script:
-- cmd: |
+  - cmd: cup vswhere
+  - cmd: |
     git submodule init
     git submodule update
     build-all.bat %PLATFORM% %CONFIGURATION%
@@ -58,6 +59,7 @@ for:
     - ps: Start-Sleep -s 10
 
   build_script:
+    - cmd: cup vswhere
     - cmd: build-chm.bat
     - cmd: help\make-artifacts.bat
 

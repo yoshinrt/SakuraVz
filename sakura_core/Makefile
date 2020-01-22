@@ -84,6 +84,8 @@ CSearchAgent.o \
 CSelectLang.o \
 CSortedTagJumpList.o \
 CWriteManager.o \
+EditInfo.o \
+GrepInfo.o \
 StdAfx.o \
 apiwrap/StdApi.o \
 apiwrap/StdControl.o \
@@ -115,6 +117,7 @@ charset/CUnicode.o \
 charset/CUnicodeBe.o \
 charset/CUtf7.o \
 charset/CUtf8.o \
+charset/icu4c/CharsetDetector.o \
 cmd/CViewCommander.o \
 cmd/CViewCommander_Bookmark.o \
 cmd/CViewCommander_Clipboard.o \
@@ -228,6 +231,7 @@ env/DLLSHAREDATA.o \
 extmodule/CBregexp.o \
 extmodule/CDllHandler.o \
 extmodule/CHtmlHelp.o \
+extmodule/CIcu4cI18n.o \
 extmodule/CMigemo.o \
 extmodule/CUxTheme.o \
 func/CFuncKeyWnd.o \

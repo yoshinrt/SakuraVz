@@ -42,7 +42,7 @@ public:
 
 	bool GetTypeConfig(CTypeConfig cDocumentType, STypeConfig& type);
 	bool SetTypeConfig(CTypeConfig cDocumentType, const STypeConfig& type);
-	bool GetTypeConfigMini(CTypeConfig cDocumentType, const STypeConfigMini** type);
+	[[nodiscard]] bool GetTypeConfigMini(CTypeConfig cDocumentType, const STypeConfigMini** type);
 	bool AddTypeConfig(CTypeConfig cDocumentType);
 	bool DelTypeConfig(CTypeConfig cDocumentType);
 
@@ -57,4 +57,3 @@ private:
 	DLLSHAREDATA* m_pShareData;
 };
 
-/*[EOF]*/

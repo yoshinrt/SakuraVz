@@ -32,7 +32,6 @@ struct StringBufferW_{
 	WCHAR*    pData;
 	const int nDataCount;
 
-//	StringBufferW_() : pData(L""), nDataCount(0) { }
 	StringBufferW_(WCHAR* _pData, int _nDataCount) : pData(_pData), nDataCount(_nDataCount) { }
 
 	StringBufferW_& operator = (const StringBufferW_& rhs)
@@ -41,25 +40,10 @@ struct StringBufferW_{
 		return *this;
 	}
 };
-struct StringBufferA_{
-	ACHAR* pData;
-	int    nDataCount;
-
-//	StringBufferA_() : pData(""), nDataCount(0) { }
-	StringBufferA_(ACHAR* _pData, int _nDataCount) : pData(_pData), nDataCount(_nDataCount) { }
-
-	StringBufferA_& operator = (const StringBufferA_& rhs)
-	{
-		strcpy_s(pData,nDataCount,rhs.pData);
-		return *this;
-	}
-};
-typedef const StringBufferA_ StringBufferA;
 typedef const StringBufferW_ StringBufferW;
 
 //文字列バッファ型インスタンスの生成マクロ
 #define MakeStringBufferW(S) StringBufferW(S,_countof(S))
-#define MakeStringBufferA(S) StringBufferA(S,_countof(S))
 #define MakeStringBufferW0(S) StringBufferW(S,0)
 
 //2007.09.24 kobake データ変換部を子クラスに分離
@@ -156,15 +140,6 @@ protected:
 	{
 		*profile = value.pData;
 	}
-	//StringBufferA
-	void profile_to_value(const wstring& profile, StringBufferA* value)
-	{
-		strcpy_s(value->pData,value->nDataCount,to_achar(profile.c_str()));
-	}
-	void value_to_profile(const StringBufferA& value, wstring* profile)
-	{
-		*profile = to_wchar(value.pData);
-	}
 	//StaticString<WCHAR,N>
 	template <int N>
 	void profile_to_value(const wstring& profile, StaticString<WCHAR, N>* value)
@@ -176,54 +151,43 @@ protected:
 	{
 		*profile = value.GetBufferPointer();
 	}
-	//StaticString<ACHAR,N>
-	template <int N>
-	void profile_to_value(const wstring& profile, StaticString<ACHAR, N>* value)
-	{
-		strcpy_s(value->GetBufferPointer(),value->GetBufferCount(),to_achar(profile.c_str()));
-	}
-	template <int N>
-	void value_to_profile(const StaticString<ACHAR, N>& value, wstring* profile)
-	{
-		*profile = to_wchar(value.GetBufferPointer());
-	}
-	//wstring
-	void profile_to_value(const wstring& profile, wstring* value)
-	{
-		*value = profile;
-	}
-	void value_to_profile(const wstring& value, wstring* profile)
-	{
-		*profile = value;
-	}
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                         入出力部                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
-	// 注意：StringBuffer系はバッファが足りないとabortします
-	template <class T> //T=={bool, int, WORD, wchar_t, char, wstring, StringBufferA, StringBufferW, StaticString}
-	bool IOProfileData( const WCHAR* pszSectionName, const WCHAR* pszEntryKey, T& tEntryValue )
+	/*!
+	 * 設定値の入出力テンプレート
+	 *
+	 * 標準stringを介して設定値の入出力を行う。
+	 * @remark StringBufferWはバッファが足りないとabortします。
+	 * @remark StaticStringはバッファが足りないとabortします。
+	 */
+	template <class T> //T=={bool, int, WORD, wchar_t, char, StringBufferW, StaticString}
+	bool IOProfileData(
+		const WCHAR*			pszSectionName,	//!< [in] セクション名
+		const WCHAR*			pszEntryKey,	//!< [in] エントリ名
+		T&						tEntryValue		//!< [in,out] エントリ値
+	) noexcept
 	{
-		//読み込み
-		if(m_bRead){
+		// 標準stringに変換して入出力する
+		std::wstring buf;
+
+		bool ret = false;
+		if( IsReadingMode() ){
 			//文字列読み込み
-			wstring buf;
-			bool ret=GetProfileDataImp( pszSectionName, pszEntryKey, buf);
-			if(ret){
+			if( GetProfileDataImp( pszSectionName, pszEntryKey, buf ) ){
 				//Tに変換
 				profile_to_value(buf, &tEntryValue);
+				ret = true;
 			}
-			return ret;
-		}
-		//書き込み
-		else{
+		}else{
 			//文字列に変換
-			wstring buf;
 			value_to_profile(tEntryValue, &buf);
 			//文字列書き込み
-			return SetProfileDataImp( pszSectionName, pszEntryKey, buf);
+			ret = SetProfileDataImp( pszSectionName, pszEntryKey, buf );
 		}
+		return ret;
 	}
 
 	//2007.08.14 kobake 追加
@@ -238,4 +202,24 @@ public:
 	}
 };
 
-/*[EOF]*/
+/*!
+ * 文字列型(標準string)の入出力(無変換)
+ */
+template <> inline
+bool CDataProfile::IOProfileData<std::wstring>(
+	const WCHAR*			pszSectionName,	//!< [in] セクション名
+	const WCHAR*			pszEntryKey,	//!< [in] エントリ名
+	std::wstring&			strEntryValue	//!< [in,out] エントリ値
+) noexcept
+{
+	bool ret = false;
+	if( IsReadingMode() ){
+		//文字列読み込み
+		ret = GetProfileDataImp( pszSectionName, pszEntryKey, strEntryValue );
+	}else{
+		//文字列書き込み
+		ret = SetProfileDataImp( pszSectionName, pszEntryKey, strEntryValue );
+	}
+	return ret;
+}
+

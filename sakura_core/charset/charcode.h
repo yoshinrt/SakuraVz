@@ -26,6 +26,7 @@
 
 //2007.09.13 kobake 作成
 #include "parse/CWordParse.h"
+#include "util/std_macro.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                         判定関数                            //
@@ -343,4 +344,3 @@ void SelectCharWidthCache( ECharWidthFontMode fMode, ECharWidthCacheMode cMode )
 void InitCharWidthCache( const LOGFONT &lf, ECharWidthFontMode fMode=CWM_FONT_EDIT ); //!< フォントを変更したとき
 void InitCharWidthCacheFromDC(const LOGFONT* lfs, ECharWidthFontMode fMode, HDC hdcOrg );
 
-/*[EOF]*/
