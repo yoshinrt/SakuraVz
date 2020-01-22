@@ -32,9 +32,9 @@ install:
 build_script:
   - cmd: cup vswhere
   - cmd: |
-    git submodule init
-    git submodule update
-    build-all.bat %PLATFORM% %CONFIGURATION%
+      git submodule init
+      git submodule update
+      build-all.bat %PLATFORM% %CONFIGURATION%
 
 # to run our custom scripts instead of automatic tests
 test_script:
