@@ -588,6 +588,7 @@ F_GetCursorPosYLogic,			// カーソル位置 Y (Logic 単位)
 F_IsCursorEOF,				// カーソル位置 EOF?
 F_IsCursorEOL,				// カーソル位置 EOL?
 F_GetCursorChar,			// カーソル位置の 1文字取得
+F_ExecFuncCode,			// function code 実行
 
 //	= 2005,.01.10 genta ISearch用補助コード
 //	2007.07.07 genta 16bit以内に収めないと状況コードと衝突するのでコードを変更

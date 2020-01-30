@@ -217,4 +217,3 @@ bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, 
 static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage ){
 	return true;
 }
-

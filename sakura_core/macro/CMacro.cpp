@@ -1495,6 +1495,15 @@ inline bool VariantToI4(Variant& varCopy, const VARIANT& arg)
 	@date 2005.08.05 maru,zenryaku 関数追加
 	@date 2005.11.29 FILE VariantChangeType対応
 */
+
+#define GetArgI4( Pos, DefVal )	[&]{ \
+	Variant varCopy; \
+	return ( \
+		ArgSize > ( Pos ) && \
+		VariantChangeType( &varCopy.Data, const_cast<VARIANTARG*>( &( Arguments[ Pos ])), 0, VT_I4 ) == S_OK \
+	) ? varCopy.Data.lVal : ( DefVal ); \
+}()
+
 bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Arguments, int ArgSize, VARIANT &Result)
 {
 	Variant varCopy;	// VT_BYREFだと困るのでコピー用
@@ -2478,18 +2487,10 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		}
 	case F_GETMACROINFO:
 		{
-			int nFunc = 0;
-			if(
-				ArgSize >= 1 &&
-				VariantChangeType( &varCopy.Data, const_cast<VARIANTARG*>( &( Arguments[ 0 ])), 0, VT_I4 ) == S_OK
-			){
-				nFunc = varCopy.Data.lVal;
-			}
-			
 			int nMacroNo = View->GetCommander().m_pcSMacroMgr->GetCurrentIdx();
 			const TCHAR *strTmp = nullptr;
 			
-			switch( nFunc ){
+			switch( GetArgI4( 0, 0 )){
 				case 1: // マクロ No.
 					break;
 				
@@ -2610,6 +2611,18 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 				Wrap( &Result )->Receive( sysstr );
 			}
 		}
+		return true;
+	
+	case F_ExecFuncCode:
+		Wrap( &Result )->Receive(
+			View->GetCommander().HandleCommand(
+				static_cast<EFunctionCode>( GetArgI4( 0, 0 )), true,
+				GetArgI4( 1, 0 ),
+				GetArgI4( 2, 0 ),
+				GetArgI4( 3, 0 ),
+				GetArgI4( 4, 0 )
+			)
+		);
 		return true;
 	
 	default:
