@@ -789,4 +789,3 @@ struct CommonSetting
 	//
 	CommonSetting_VzMode			m_sVzMode;			//!< Vz 互換設定
 };
-

@@ -77,4 +77,3 @@ private:
 	
 	CDocLineMgr* m_pcDocLineMgr;
 };
-

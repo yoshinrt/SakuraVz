@@ -436,4 +436,3 @@ DWORD CRegexKeyword::GetNewMagicNumber()
 {
 	return ::GetTickCount();
 }
-

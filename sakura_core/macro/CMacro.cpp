@@ -2616,4 +2616,3 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		return false;
 	}
 }
-

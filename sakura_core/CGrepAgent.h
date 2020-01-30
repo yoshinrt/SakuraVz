@@ -203,4 +203,3 @@ public: //$$ 仮
 	bool	m_bGrepMode;		//!< Grepモードか
 	bool	m_bGrepRunning;		//!< Grep処理中
 };
-

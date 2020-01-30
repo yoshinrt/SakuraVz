@@ -167,4 +167,3 @@ protected:
 	bool KeyWordReAlloc(int nIdx, int nSize);
 	void KeywordMaxLen(int nIdx);
 };
-

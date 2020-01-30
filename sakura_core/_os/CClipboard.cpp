@@ -681,4 +681,3 @@ int CClipboard::GetDataType()
 	if(::IsClipboardFormatAvailable(CF_HDROP))return CF_HDROP;
 	return -1;
 }
-

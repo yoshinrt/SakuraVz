@@ -840,4 +840,3 @@ static void SetGrepFolder( HWND hwndCtrl, LPCWSTR folder )
 		::SetWindowText( hwndCtrl, folder );
 	}
 }
-

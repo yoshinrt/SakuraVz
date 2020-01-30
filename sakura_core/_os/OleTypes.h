@@ -124,4 +124,3 @@ inline SysString* Wrap(BSTR *Value)
 {
 	return reinterpret_cast<SysString*>(Value);
 }
-
