@@ -41,6 +41,7 @@ enum enumShowDlg {
 	SHOW_NORMAL			= 0,
 	SHOW_RELOAD			= 1,
 	SHOW_TOGGLE			= 2,
+	SHOW_CLOSE			= 3,
 };
 
 /* 選択領域描画用パラメータ */

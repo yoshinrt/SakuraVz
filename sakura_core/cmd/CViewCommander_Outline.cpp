@@ -63,6 +63,12 @@ BOOL CViewCommander::Command_FUNCLIST(
 		nOutlineType = m_pCommanderView->m_pTypeData->m_eDefaultOutline;
 	}
 
+	if( NULL == GetEditWindow()->m_cDlgFuncList.GetHwnd() && nAction == SHOW_CLOSE ){
+		// すでに閉じているので，何もせず return
+		bIsProcessing = false;
+		return TRUE;
+	}
+	
 	if( NULL != GetEditWindow()->m_cDlgFuncList.GetHwnd() && nAction != SHOW_RELOAD ){
 		switch(nAction ){
 		case SHOW_NORMAL: // アクティブにする
@@ -76,6 +82,7 @@ BOOL CViewCommander::Command_FUNCLIST(
 				return TRUE;
 			}
 			break;
+		case SHOW_CLOSE: // 常に閉じる
 		case SHOW_TOGGLE: // 閉じる
 			//	開いているものと種別が同じなら閉じる．異なれば再解析
 			if( GetEditWindow()->m_cDlgFuncList.CheckListType( nOutlineType )){
