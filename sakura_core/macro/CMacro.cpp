@@ -2625,6 +2625,18 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		);
 		return true;
 	
+	case F_SetFileType:
+		{
+			int iResult = 0;
+			
+			if( 1 <= ArgSize && VariantToBStr( varCopy, Arguments[ 0 ])){
+				CTypeConfig cType = CDocTypeManager().GetDocumentTypeOfExt( varCopy.Data.bstrVal );
+				View->GetCommander().Command_CHANGETYPE( iResult = ( cType.GetIndex() + 1 ));
+			}
+			Wrap( &Result )->Receive( iResult );
+			return true;
+		}
+	
 	default:
 		return false;
 	}

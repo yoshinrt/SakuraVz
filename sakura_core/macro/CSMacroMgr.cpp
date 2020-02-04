@@ -486,6 +486,7 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_IsCursorEOL,				L"IsCursorEOL",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOL?
 	{F_GetCursorChar,			L"GetCursorChar",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //カーソル位置の 1文字取得
 	{F_ExecFuncCode,			L"ExecFuncCode",			{VT_I4,    VT_I4,    VT_I4,    VT_I4},		VT_I4,		&s_MacroInfoEx_i }, //function code 実行
+	{F_SetFileType,				L"SetFileType",				{VT_BSTR,  VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //ChangeType のマクロ版，type 名 or 拡張子指定
 
 	//	終端
 	//	Jun. 27, 2002 genta
