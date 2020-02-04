@@ -2630,7 +2630,14 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			int iResult = 0;
 			
 			if( 1 <= ArgSize && VariantToBStr( varCopy, Arguments[ 0 ])){
+				
+				// 拡張子でタイプ取得
 				CTypeConfig cType = CDocTypeManager().GetDocumentTypeOfExt( varCopy.Data.bstrVal );
+				
+				// 失敗したのでタイプ名でタイプ取得
+				if( cType.GetIndex() == 0 ){
+					cType = CDocTypeManager().GetDocumentTypeOfName( varCopy.Data.bstrVal );
+				}
 				View->GetCommander().Command_CHANGETYPE( iResult = ( cType.GetIndex() + 1 ));
 			}
 			Wrap( &Result )->Receive( iResult );
