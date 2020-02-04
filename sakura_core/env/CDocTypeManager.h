@@ -38,6 +38,7 @@ public:
 	}
 	CTypeConfig GetDocumentTypeOfPath( const WCHAR* pszFilePath );	/* ファイルパスを渡して、ドキュメントタイプ（数値）を取得する */
 	CTypeConfig GetDocumentTypeOfExt( const WCHAR* pszExt );		/* 拡張子を渡して、ドキュメントタイプ（数値）を取得する */
+	CTypeConfig GetDocumentTypeOfName( const WCHAR* pszTypeName );	// タイプ名からドキュメントタイプ（数値）を取得する
 	CTypeConfig GetDocumentTypeOfId( int id );
 
 	bool GetTypeConfig(CTypeConfig cDocumentType, STypeConfig& type);

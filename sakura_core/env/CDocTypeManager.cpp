@@ -82,6 +82,21 @@ CTypeConfig CDocTypeManager::GetDocumentTypeOfExt( const WCHAR* pszExt )
 	return GetDocumentTypeOfPath(pszExt);
 }
 
+// タイプ名からドキュメントタイプ（数値）を取得する
+CTypeConfig CDocTypeManager::GetDocumentTypeOfName( const WCHAR* pszTypeName ){
+	int		i;
+
+	for( i = 0; i < m_pShareData->m_nTypesCount; ++i ){
+		const STypeConfigMini* mini = NULL;
+		if( GetTypeConfigMini( CTypeConfig(i), &mini ) &&
+			_wcsicmp( pszTypeName, mini->m_szTypeName ) == 0
+		){
+			return CTypeConfig(i);
+		}
+	}
+	return CTypeConfig(0);	//	ハズレ
+}
+
 CTypeConfig CDocTypeManager::GetDocumentTypeOfId( int id )
 {
 	int		i;
