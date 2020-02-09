@@ -90,13 +90,7 @@ protected:
 public:
 	/*! 現在の種別と同じなら
 	*/
-	bool CheckListType( int nOutLineType ) const {
-		return nOutLineType == m_nOutlineType ||
-			nOutLineType == OUTLINE_C_CPP && (
-				m_nOutlineType == OUTLINE_C ||
-				m_nOutlineType == OUTLINE_CPP
-			);
-	}
+	bool CheckListType( int nOutLineType ) const { return nOutLineType == m_nOutlineType; }
 	void Redraw( int nOutLineType, int nListType, CFuncInfoArr*, CLayoutInt nCurLine, CLayoutInt nCurCol );
 	void Refresh( void );
 	bool ChangeLayout( int nId );
