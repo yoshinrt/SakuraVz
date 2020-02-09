@@ -117,7 +117,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				uBeginPos = 0;
 			}else{
 				uBeginPos = cfl[ iThreadID ].GetNextLineTop(
-					cfl[ iThreadID ].GetFileSize() * iThreadID / uMaxThreadNum
+					( cfl[ iThreadID ].GetFileSize() * iThreadID / uMaxThreadNum ) & ~1
 				);
 			}
 			
@@ -126,7 +126,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 				uEndPos = cfl[ iThreadID ].GetFileSize();
 			}else{
 				uEndPos = cfl[ iThreadID ].GetNextLineTop(
-					cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / uMaxThreadNum
+					( cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / uMaxThreadNum ) & ~1
 				);
 			}
 			
