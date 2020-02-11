@@ -229,27 +229,21 @@ ECodeType CFileLoad::FileOpen( LPCWSTR pFileName, bool bBigFile, ECodeType CharC
 	m_encodingTrait = CCodePage::GetEncodingTrait(m_CharCode);
 	m_nFlag = nFlag;
 
-	bool bBom = false;
 	if( 0 < m_nFileSize ){
 		CMemory headData(m_pReadBuf, ( int )t_min( m_nFileSize, ( size_t )10 ));
 		CNativeW headUni;
 		CIoBridge::FileToImpl(headData, &headUni, m_pCodeBase, m_nFlag);
 		if( 1 <= headUni.GetStringLength() && headUni.GetStringPtr()[0] == 0xfeff ){
-			bBom = true;
-		}
-	}
-	if( bBom ){
-		//	Jul. 26, 2003 ryoji BOMの有無をパラメータで返す
-		m_bBomExist = true;
-		if( pbBomExist != NULL ){
-			*pbBomExist = true;
+			m_bBomExist = true;
+		}else{
+			m_bBomExist = false;
 		}
 	}else{
-		//	Jul. 26, 2003 ryoji BOMの有無をパラメータで返す
-		if( pbBomExist != NULL ){
-			*pbBomExist = false;
-		}
+		m_bBomExist = pbBomExist ? *pbBomExist : false;
 	}
+	
+	// BOMの有無をパラメータで返す
+	if( pbBomExist ) *pbBomExist = m_bBomExist;
 	
 	// To Here Jun. 13, 2003 Moca BOMの除去
 //	m_cmemLine.AllocBuffer( 256 );
