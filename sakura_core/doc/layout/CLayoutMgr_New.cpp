@@ -326,72 +326,69 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 	}
 #endif
 
-	UINT uMaxThreadNum = std::thread::hardware_concurrency();
-	std::vector<std::thread>	cThread;
-	
 	// レイアウト行の最大幅を取り出す
-	std::vector<CLayoutInt>	nMaxLenL( uMaxThreadNum );
-	std::vector<CLayoutInt> nMaxLineNumL( uMaxThreadNum );
+	CLayoutInt *nMaxLenL		= new CLayoutInt[ OmpMaxThreadNum ];
+	CLayoutInt *nMaxLineNumL	= new CLayoutInt[ OmpMaxThreadNum ];
 	
-	for( UINT uThread = 0; uThread < uMaxThreadNum; ++uThread ){
-		cThread.emplace_back( std::thread( [ &, this, uThread ]{
+	#pragma omp parallel for
+	for( int iProcs = 0; iProcs < OmpMaxThreadNum; ++iProcs ){
+		
+		CLayoutInt nMaxLen		= CLayoutInt(0);
+		CLayoutInt nMaxLineNum	= CLayoutInt(0);
+		
+		CLayoutInt nStartL	= ( nEnd - nStart ) *   OmpThreadId       / OmpMaxThreadNum + nStart;
+		CLayoutInt nEndL	= ( nEnd - nStart ) * ( OmpThreadId + 1 ) / OmpMaxThreadNum + nStart;
+		
+		CLayout* pLayout;
+		
+		// 算出開始レイアウト行を探す
+		if( nStartL == 0 ){
+			pLayout = m_pLayoutTop;
+		}else{
+			pLayout = SearchLineByLayoutY( nStartL );
+		}
+		
+		for( CLayoutInt i = nStartL; i < nEndL; i++ ){
+			if( !pLayout )
+				break;
 			
-			CLayoutInt nMaxLen		= CLayoutInt(0);
-			CLayoutInt nMaxLineNum	= CLayoutInt(0);
-			
-			CLayoutInt nStartL	= ( nEnd - nStart ) * ( int )  uThread       / ( int )uMaxThreadNum + nStart;
-			CLayoutInt nEndL	= ( nEnd - nStart ) * ( int )( uThread + 1 ) / ( int )uMaxThreadNum + nStart;
-			
-			CLayout* pLayout;
-			
-			// 算出開始レイアウト行を探す
-			if( nStartL == 0 ){
-				pLayout = m_pLayoutTop;
-			}else{
-				pLayout = SearchLineByLayoutY( nStartL );
+			// レイアウト行の長さを算出する
+			if( bCalLineLen ){
+				CLayoutInt nWidth = pLayout->CalcLayoutWidth(*this) + CLayoutInt(pLayout->GetLayoutEol().GetLen()>0?1+m_nSpacing:0);
+				pLayout->SetLayoutWidth( nWidth );
 			}
 			
-			for( CLayoutInt i = nStartL; i < nEndL; i++ ){
-				if( !pLayout )
+			// 最大幅を更新
+			if( nMaxLen < pLayout->GetLayoutWidth() ){
+				nMaxLen = pLayout->GetLayoutWidth();
+				nMaxLineNum = i;		// 最大幅のレイアウト行
+				
+				// アプリケーションの最大幅となったら算出は停止
+				if( nMaxLen >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
 					break;
-				
-				// レイアウト行の長さを算出する
-				if( bCalLineLen ){
-					CLayoutInt nWidth = pLayout->CalcLayoutWidth(*this) + CLayoutInt(pLayout->GetLayoutEol().GetLen()>0?1+m_nSpacing:0);
-					pLayout->SetLayoutWidth( nWidth );
-				}
-				
-				// 最大幅を更新
-				if( nMaxLen < pLayout->GetLayoutWidth() ){
-					nMaxLen = pLayout->GetLayoutWidth();
-					nMaxLineNum = i;		// 最大幅のレイアウト行
-					
-					// アプリケーションの最大幅となったら算出は停止
-					if( nMaxLen >= MAXLINEKETAS * GetWidthPerKeta() && !bCalLineLen )
-						break;
-				}
-				
-				// 次のレイアウト行のデータ
-				pLayout = pLayout->GetNextLayout();
 			}
 			
-			nMaxLenL    [ uThread ] = nMaxLen;
-			nMaxLineNumL[ uThread ] = nMaxLineNum;
-		}));
+			// 次のレイアウト行のデータ
+			pLayout = pLayout->GetNextLayout();
+		}
+		
+		nMaxLenL    [ OmpThreadId ] = nMaxLen;
+		nMaxLineNumL[ OmpThreadId ] = nMaxLineNum;
 	}
 	
 	// reduction
-	CLayoutInt nMaxLen		= CLayoutInt( 0 );
-	CLayoutInt nMaxLineNum	= CLayoutInt( 0 );
+	CLayoutInt nMaxLen		= nMaxLenL[ 0 ];
+	CLayoutInt nMaxLineNum	= nMaxLineNumL[ 0 ];
 	
-	for( UINT u = 0; u < uMaxThreadNum; ++u ){
-		cThread[ u ].join();
-		
-		if( nMaxLen < nMaxLenL[ u ]){
-			nMaxLen = nMaxLenL[ u ];
-			nMaxLineNum = nMaxLineNumL[ u ];		// 最大幅のレイアウト行
+	for( int i = 1; i < OmpMaxThreadNum; ++i ){
+		if( nMaxLen < nMaxLenL[ i ]){
+			nMaxLen = nMaxLenL[ i ];
+			nMaxLineNum = nMaxLineNumL[ i ];		// 最大幅のレイアウト行
 		}
 	}
+	
+	delete [] nMaxLenL;
+	delete [] nMaxLineNumL;
 	
 	// テキストの幅の変化をチェック
 	if( Int(nMaxLen) ){

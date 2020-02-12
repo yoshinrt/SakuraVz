@@ -80,7 +80,6 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
-#include <thread>
 #endif // ifndef SAKURA_PCH_MODE_MIN
 
 #define PCRE2_STATIC
@@ -156,6 +155,8 @@
 //###########超仮
 #include "uiparts/CGraphics.h"
 #endif // SAKURA_PCH_MODE_MAX
+
+#include "openmp.h"
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。
