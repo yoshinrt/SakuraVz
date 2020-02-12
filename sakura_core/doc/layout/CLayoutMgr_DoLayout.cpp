@@ -293,74 +293,6 @@ void CLayoutMgr::_OnLine1(SLayoutWork* pWork)
 	pWork->nPosX = pWork->nIndent = (this->*m_getIndentOffset)( pWork->pLayout );
 }
 
-// 並列実行用インスタンスコピー
-void CLayoutMgr::Copy( const CLayoutMgr& Src ){
-	m_pcDocLineMgr			= Src.m_pcDocLineMgr;
-	m_tsvInfo				= Src.m_tsvInfo;
-	
-	//参照
-	m_pcEditDoc				= Src.m_pcEditDoc;
-	
-	//実データ
-	m_pLayoutTop			= nullptr;
-	m_pLayoutBot			= nullptr;
-	
-	//タイプ別設定
-	m_pTypeConfig			= Src.m_pTypeConfig;
-	m_nMaxLineKetas			= Src.m_nMaxLineKetas;
-	m_nTabSpace				= Src.m_nTabSpace;
-	m_nCharLayoutXPerKeta	= Src.m_nCharLayoutXPerKeta;
-	m_nSpacing				= Src.m_nSpacing;
-	m_pszKinsokuHead_1		= Src.m_pszKinsokuHead_1;
-	m_pszKinsokuTail_1		= Src.m_pszKinsokuTail_1;
-	m_pszKinsokuKuto_1		= Src.m_pszKinsokuKuto_1;
-	m_getIndentOffset		= Src.m_getIndentOffset;
-	
-	//フラグ等
-	m_nLineTypeBot			= Src.m_nLineTypeBot;
-	//m_cLayoutExInfoBot		= Src.m_cLayoutExInfoBot;
-	m_nLines				= Src.m_nLines;
-	
-	m_nPrevReferLine		= Src.m_nPrevReferLine;
-	m_pLayoutPrevRefer		= Src.m_pLayoutPrevRefer;
-	
-	// EOFカーソル位置を記憶する(_DoLayout/DoLayout_Rangeで無効にする)
-	m_nEOFLine				= Src.m_nEOFLine;
-	m_nEOFColumn			= Src.m_nEOFColumn;
-	
-	// テキスト最大幅を記憶（折り返し位置算出に使用）
-	m_nTextWidth			= Src.m_nTextWidth;
-	m_nTextWidthMaxLine		= Src.m_nTextWidthMaxLine;
-}
-
-// CLayoutMgr 同士の連結
-// pAppendData 側のデータを this の後ろに連結後，pAppendData はクリアされる
-void CLayoutMgr::Cat( CLayoutMgr *pAppendData ){
-	
-	CLayout*	pAppendTop;
-	
-	// pAppendData が空なら何もせず return
-	if(
-		pAppendData == nullptr ||
-		( pAppendTop = pAppendData->GetTopLayout()) == nullptr
-	){
-		return;
-	}
-	
-	// this が空なら，top は append の top
-	if( !m_pLayoutTop ) m_pLayoutTop = pAppendTop;
-	
-	pAppendTop->m_pPrev = m_pLayoutBot;
-	if( m_pLayoutBot ) m_pLayoutBot->m_pNext = pAppendTop;
-	
-	m_pLayoutBot = pAppendData->GetBottomLayout();
-	
-	m_nLines += pAppendData->GetLineCount();
-	
-	// append data のクリア (delete 時に行データが削除されないように)
-	pAppendData->Init();
-}
-
 /*!
 	現在の折り返し文字数に合わせて全データのレイアウト情報を再生成します
 
@@ -368,58 +300,21 @@ void CLayoutMgr::Cat( CLayoutMgr *pAppendData ){
 		nPosXがインデントを含む幅を保持するように変更．m_nMaxLineKetasは
 		固定値となったが，既存コードの置き換えは避けて最初に値を代入するようにした．
 */
-void CLayoutMgr::_DoLayout( bool bBlockingHook ){
-	
-	volatile bool	bBreak = false;
-	UINT uMaxThreadNum = m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() ?
-		std::thread::hardware_concurrency() : 1;
-	
-	// parallel 用インスタンス作成
-	std::vector<std::thread>	cThread;
-	std::vector<CLayoutMgr>		clm( uMaxThreadNum - 1 );
-	
-	for( UINT u = 0; u < uMaxThreadNum - 1; ++u ) clm[ u ].Copy( *this );
-	
-	// 実行
-	for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
-		
-		CDocLine *pDoc = m_pcDocLineMgr->GetLine( CLogicInt(
-			( int )m_pcDocLineMgr->GetLineCount() * iThreadID / uMaxThreadNum
-		));
-		
-		if( iThreadID == 0 ){
-			_DoLayout( bBlockingHook, 0, uMaxThreadNum, pDoc, &bBreak );
-		}else{
-			cThread.emplace_back( std::thread([ &, this, iThreadID, pDoc ]{
-				clm[ iThreadID - 1 ]._DoLayout( bBlockingHook, iThreadID, uMaxThreadNum, pDoc, &bBreak );
-			}));
-		}
-	}
-	
-	for( UINT u = 0; u < uMaxThreadNum - 1; ++u ){
-		cThread[ uMaxThreadNum - 2 - u ].join();	// 全スレッド終了待ち
-		Cat( &clm[ u ]);							// m_pLayout の cat
-	}
-}
-
-void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadNum, CDocLine *pDoc, volatile bool *pbBreak ){
+void CLayoutMgr::_DoLayout(bool bBlockingHook)
+{
 	MY_RUNNINGTIMER( cRunningTimer, "CLayoutMgr::_DoLayout" );
 
 	/*	表示上のX位置
 		2004.03.28 Moca nPosXはインデント幅を含むように変更(TAB位置調整のため)
 	*/
-	const int nAllLineNum = m_pcDocLineMgr->GetLineCount();
-	const int nListenerCount = GetListenerCount();
+	int			nAllLineNum;
 
-	if( nListenerCount != 0 ){
-		if( uThreadID == 0 ){
-			NotifyProgress(0);
-			/* 処理中のユーザー操作を可能にする */
-			if( bBlockingHook && !::BlockingHook( NULL )){
-				if( pbBreak ) *pbBreak = true;
-				return;
-			}
-		}else if( pbBreak && *pbBreak ) return;
+	if( GetListenerCount() != 0 ){
+		NotifyProgress(0);
+		/* 処理中のユーザー操作を可能にする */
+		if( bBlockingHook ){
+			if( !::BlockingHook( NULL ) )return;
+		}
 	}
 
 	_Empty();
@@ -433,27 +328,17 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		m_nTabSpace = CKetaXInt(4);
 	}
 
-	int iStart	= nAllLineNum *   uThreadID       / uMaxThreadNum;
-	int iEnd	= nAllLineNum * ( uThreadID + 1 ) / uMaxThreadNum;
-	
+	nAllLineNum = m_pcDocLineMgr->GetLineCount();
+
 	SLayoutWork	_sWork;
 	SLayoutWork* pWork = &_sWork;
-	pWork->pcDocLine				= pDoc;
+	pWork->pcDocLine				= m_pcDocLineMgr->GetDocLineTop(); // 2002/2/10 aroka CDocLineMgr変更
 	pWork->pLayout					= NULL;
 	pWork->pcColorStrategy			= NULL;
 	pWork->colorPrev				= COLORIDX_DEFAULT;
-	pWork->nCurLine					= CLogicInt( iStart );
+	pWork->nCurLine					= CLogicInt(0);
 
-	constexpr DWORD userInterfaceInterval = 33;
-	DWORD prevTime = uThreadID == 0 ? GetTickCount() + userInterfaceInterval : 0;
-
-	#ifdef _DEBUG
-		MYTRACE( L">>>CLayoutMgr::_DoLayout %d/%d %d-%d\n",
-			uThreadID, uMaxThreadNum, iStart, iEnd
-		);
-	#endif
-	
-	for( int i = iStart; i < iEnd && pWork->pcDocLine; ++i ){
+	while( NULL != pWork->pcDocLine ){
 		pWork->cLineStr		= pWork->pcDocLine->GetStringRefWithEOL();
 		pWork->eKinsokuType	= KINSOKU_TYPE_NONE;	//@@@ 2002.04.20 MIK
 		pWork->nBgn			= CLogicInt(0);
@@ -466,6 +351,7 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		_MakeOneLine(pWork, &CLayoutMgr::_OnLine1);
 
 		if( pWork->nPos - pWork->nBgn > 0 ){
+// 2002/03/13 novice
 			AddLineBottom( pWork->_CreateLayout(this) );
 			pWork->colorPrev = pWork->pcColorStrategy->GetStrategyColorSafe();
 			pWork->exInfoPrev.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
@@ -476,22 +362,16 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		pWork->pcDocLine = pWork->pcDocLine->GetNextLine();
 		
 		// 処理中のユーザー操作を可能にする
-		if( nListenerCount!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
-			if( uThreadID == 0 ){
-				NotifyProgress(::MulDiv( pWork->nCurLine, 100 , nAllLineNum ) );
-				if( bBlockingHook && !::BlockingHook( NULL )){
-					if( pbBreak ) *pbBreak = true;
-					return;
-				}
-			}else if( pbBreak && *pbBreak ) return;
+		if( GetListenerCount()!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
+			NotifyProgress(::MulDiv( pWork->nCurLine, 100 , nAllLineNum ) );
+			if( bBlockingHook ){
+				if( !::BlockingHook( NULL ) )return;
+			}
 		}
-		CDocLine *pPrevDoc = pWork->pcDocLine;
+
+// 2002/03/13 novice
 	}
 
-	#ifdef _DEBUG
-		MYTRACE( L"<<<CLayoutMgr::_DoLayout %d/%d\n", uThreadID, uMaxThreadNum );
-	#endif
-	
 	// 2011.12.31 Botの色分け情報は最後に設定
 	m_nLineTypeBot = pWork->pcColorStrategy->GetStrategyColorSafe();
 	m_cLayoutExInfoBot.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
@@ -499,15 +379,12 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 	m_nPrevReferLine = CLayoutInt(0);
 	m_pLayoutPrevRefer = NULL;
 
-	if( nListenerCount!=0 ){
-		if( uThreadID == 0 ){
-			NotifyProgress(0);
-			/* 処理中のユーザー操作を可能にする */
-			if( bBlockingHook && !::BlockingHook( NULL )){
-				if( pbBreak ) *pbBreak = true;
-				return;
-			}
-		}else if( pbBreak && *pbBreak ) return;
+	if( GetListenerCount()!=0 ){
+		NotifyProgress(0);
+		/* 処理中のユーザー操作を可能にする */
+		if( bBlockingHook ){
+			if( !::BlockingHook( NULL ) )return;
+		}
 	}
 }
 
@@ -709,7 +586,7 @@ void CLayoutMgr::CalculateTextWidth_Range( const CalTextWidthArg* pctwArg )
 			bCalTextWidth = FALSE;		// テキスト最大幅の算出要求をOFF
 		}
 
-#if defined( _DEBUG )
+#if defined( _DEBUG ) && defined( _UNICODE )
 		static int testcount = 0;
 		testcount++;
 

@@ -283,10 +283,7 @@ public:
 	}
 	CPixelXInt GetWidthPerKeta() const { return Int(m_nCharLayoutXPerKeta); }
 	CPixelXInt GetCharSpacing() const { return m_nSpacing; }
-	
-	void Copy( const CLayoutMgr& Src );		// 並列実行用コピー
-	void Cat( CLayoutMgr *pAppendData );	// m_pLayoutTop/Bot の cat-move
-	
+
 protected:
 	/*
 	||  参照系
@@ -299,9 +296,7 @@ protected:
 	*/
 	// 2005.11.21 Moca 引用符の色分け情報を引数から除去
 public:
-	/* 現在の折り返し文字数に合わせて全データのレイアウト情報を再生成します */
-	void _DoLayout( bool bBlockingHook );
-	void _DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadNum, CDocLine *pDoc, volatile bool *pbBreak );
+	void _DoLayout(bool bBlockingHook);	/* 現在の折り返し文字数に合わせて全データのレイアウト情報を再生成します */
 protected:
 	// 2005.11.21 Moca 引用符の色分け情報を引数から除去
 	// 2009.08.28 nasukoji	テキスト最大幅算出用引数追加
