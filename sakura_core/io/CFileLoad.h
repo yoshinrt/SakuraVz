@@ -129,4 +129,3 @@ protected:
 inline BOOL CFileLoad::GetFileTime( FILETIME* pftCreate, FILETIME* pftLastAccess, FILETIME* pftLastWrite ){
 	return ::GetFileTime( m_hFile, pftCreate, pftLastAccess, pftLastWrite );
 }
-

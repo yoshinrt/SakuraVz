@@ -286,13 +286,8 @@ void CLoadAgent::OnAfterLoad(const SLoadInfo& sLoadInfo)
 	pcDoc->m_nCommandExecNum=0;
 
 	// テキストの折り返し方法を初期化
-	if( pcDoc->m_cDocFile.m_sFileInfo.IsLargeFile()){
-		pcDoc->m_nTextWrapMethodCur = WRAP_NO_TEXT_WRAP;											// 折り返し方法
-		pcDoc->m_bTextWrapMethodCurTemp = true;														// 一時設定適用中を解除
-	}else{
-		pcDoc->m_nTextWrapMethodCur = pcDoc->m_cDocType.GetDocumentAttribute().m_nTextWrapMethod;	// 折り返し方法
-		pcDoc->m_bTextWrapMethodCurTemp = false;													// 一時設定適用中を解除
-	}
+	pcDoc->m_nTextWrapMethodCur = pcDoc->m_cDocType.GetDocumentAttribute().m_nTextWrapMethod;	// 折り返し方法
+	pcDoc->m_bTextWrapMethodCurTemp = false;													// 一時設定適用中を解除
 	pcDoc->m_blfCurTemp = false;
 	pcDoc->m_bTabSpaceCurTemp = false;
 

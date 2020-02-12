@@ -22,8 +22,7 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
-#ifndef SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_
-#define SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_
+#pragma once
 
 #include "doc/CDocListener.h"
 #include "_os/CClipboard.h"
@@ -34,28 +33,17 @@ class CDocLineMgr;
 
 class CDocEditor : public CDocListenerEx{
 public:
-	CEditDoc*		m_pcDocRef;
-	COpeBuf			m_cOpeBuf;					//!< アンドゥバッファ
-	COpeBlk*		m_pcOpeBlk;					//!< 操作ブロック
-	int				m_nOpeBlkRedawCount;		//!< OpeBlkの再描画非対象数
-	bool			m_bInsMode;					//!< 挿入・上書きモード Oct. 2, 2005 genta
-	bool			m_bIsDocModified;
-
-private:
-	CEol 			m_cNewLineCode;				//!< Enter押下時に挿入する改行コード種別
-
-public:
 	CDocEditor(CEditDoc* pcDoc);
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                         イベント                            //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//ロード前後
-	void OnBeforeLoad(SLoadInfo* sLoadInfo);
-	void OnAfterLoad(const SLoadInfo& sLoadInfo);
+	void OnBeforeLoad(SLoadInfo* sLoadInfo) override;
+	void OnAfterLoad(const SLoadInfo& sLoadInfo) override;
 
 	//セーブ前後
-	void OnAfterSave(const SSaveInfo& sSaveInfo);
+	void OnAfterSave(const SSaveInfo& sSaveInfo) override;
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                           状態                              //
@@ -103,6 +91,17 @@ public:
 			// クリップボードにデータが有る
 			CClipboard::HasValidData();
 	}
+	CEditDoc*		m_pcDocRef;
+	COpeBuf			m_cOpeBuf;					//!< アンドゥバッファ
+	COpeBlk*		m_pcOpeBlk;					//!< 操作ブロック
+	int				m_nOpeBlkRedawCount;		//!< OpeBlkの再描画非対象数
+	bool			m_bInsMode;					//!< 挿入・上書きモード Oct. 2, 2005 genta
+	bool			m_bIsDocModified;
+
+private:
+	CEol 			m_cNewLineCode;				//!< Enter押下時に挿入する改行コード種別
+
+public:
 };
 
 class CDocEditAgent{
@@ -118,6 +117,3 @@ public:
 private:
 	CDocLineMgr* m_pcDocLineMgr;
 };
-
-#endif /* SAKURA_CDOCEDITOR_1F90937C_B53A_490C_BCCF_74EFAEE628AC_H_ */
-/*[EOF]*/
