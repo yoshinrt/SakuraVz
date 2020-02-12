@@ -101,7 +101,7 @@ protected:
 //	void SeekBegin( void );		// ファイルの先頭位置に移動する(BOMを考慮する)
 
 	// GetLextLine の 文字コード考慮版
-	const char* GetNextLineCharCode(const char*	pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, int* pnEolLen);
+	const char* GetNextLineCharCode(const char*	pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, int* pnEolLen, size_t* pnBufferNext);
 	EConvertResult ReadLine_core(CNativeW* pUnicodeBuffer, CEol* pcEol);
 
 	/* メンバオブジェクト */
