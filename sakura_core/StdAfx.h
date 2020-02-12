@@ -156,7 +156,5 @@
 #include "uiparts/CGraphics.h"
 #endif // SAKURA_PCH_MODE_MAX
 
-#include "openmp.h"
-
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。
