@@ -203,16 +203,7 @@ void CLayoutMgr::_MakeOneLine(SLayoutWork* pWork, PF_OnLine pfOnLine)
 		nEol_1 = 0;
 	}
 	CLogicInt nLength = pWork->cLineStr.GetLength() - CLogicInt(nEol_1);
-	
-	// 巨大ファイルモード，5120文字で折り返す
-	if( m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile()){
-		for( pWork->nPos = MAXLINEKETAS / 2; pWork->nPos < nLength; pWork->nPos += MAXLINEKETAS / 2 ){
-			( this->*pfOnLine )( pWork );
-		}
-		pWork->nPos = nLength;
-		return;
-	}
-	
+
 	if(pWork->pcColorStrategy)pWork->pcColorStrategy->InitStrategyStatus();
 	CColorStrategyPool& color = *CColorStrategyPool::getInstance();
 
