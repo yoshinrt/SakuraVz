@@ -370,9 +370,6 @@ void CLayoutMgr::Cat( CLayoutMgr *pAppendData ){
 */
 void CLayoutMgr::_DoLayout( bool bBlockingHook ){
 	
-	_Empty();
-	Init();
-	
 	volatile bool	bBreak = false;
 	UINT uMaxThreadNum = m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() ?
 		std::thread::hardware_concurrency() : 1;
@@ -380,6 +377,8 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook ){
 	// parallel 用インスタンス作成
 	std::vector<std::thread>	cThread;
 	std::vector<CLayoutMgr>		clm( uMaxThreadNum - 1 );
+	
+	for( UINT u = 0; u < uMaxThreadNum - 1; ++u ) clm[ u ].Copy( *this );
 	
 	// 実行
 	for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
@@ -391,7 +390,6 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook ){
 		if( iThreadID == 0 ){
 			_DoLayout( bBlockingHook, 0, uMaxThreadNum, pDoc, &bBreak );
 		}else{
-			clm[ iThreadID - 1 ].Copy( *this );
 			cThread.emplace_back( std::thread([ &, this, iThreadID, pDoc ]{
 				clm[ iThreadID - 1 ]._DoLayout( bBlockingHook, iThreadID, uMaxThreadNum, pDoc, &bBreak );
 			}));
@@ -424,6 +422,9 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 		}else if( pbBreak && *pbBreak ) return;
 	}
 
+	_Empty();
+	Init();
+	
 	//	Nov. 16, 2002 genta
 	//	折り返し幅 <= TAB幅のとき無限ループするのを避けるため，
 	//	TABが折り返し幅以上の時はTAB=4としてしまう

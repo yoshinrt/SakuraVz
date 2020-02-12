@@ -92,36 +92,11 @@ void CLayoutMgr::Init()
 
 void CLayoutMgr::_Empty()
 {
-	int iMaxThreadNum = std::thread::hardware_concurrency();
-	
-	std::vector<std::thread>	cThread;
-	std::vector<CLayout *>		pLayoutStart( iMaxThreadNum );
-	
-	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
-		pLayoutStart[ iThreadID ] = SearchLineByLayoutY( m_nLines * iThreadID / iMaxThreadNum );
-	}
-	
-	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
-		// 各スレッドの開始位置特定
-		CLayoutInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
-		CLayoutInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
-		
-		// delete 本体
-		cThread.emplace_back( std::thread(
-			[ &, this, iThreadID, iStart, iEnd, pLayoutStart ]{
-				CLayout* pLayout = pLayoutStart[ iThreadID ];
-				for( CLayoutInt i = iStart; i < iEnd; ++i ){
-					CLayout* pLayoutNext = pLayout->GetNextLayout();
-					delete pLayout;
-					pLayout = pLayoutNext;
-				}
-			}
-		));
-	}
-	
-	// join
-	for( int i = 0; i < iMaxThreadNum; ++i ){
-		cThread[ i ].join();
+	CLayout* pLayout = m_pLayoutTop;
+	while( pLayout ){
+		CLayout* pLayoutNext = pLayout->GetNextLayout();
+		delete pLayout;
+		pLayout = pLayoutNext;
 	}
 }
 
