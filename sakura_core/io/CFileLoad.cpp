@@ -106,7 +106,10 @@ std::wstring CFileLoad::GetSizeStringForHuman(ULONGLONG size)
 }
 
 /*! コンストラクタ */
-void CFileLoad::_Init( void ){
+CFileLoad::CFileLoad( const SEncodingConfig& encode )
+{
+	m_pEencoding = &encode;
+
 	m_hFile			= NULL;
 	m_nFileSize		= 0;
 	m_CharCode		= CODE_DEFAULT;
@@ -115,31 +118,10 @@ void CFileLoad::_Init( void ){
 	m_bBomExist		= false;	// Jun. 08, 2003 Moca
 	m_nFlag 		= 0;
 	m_hMap			= nullptr;
-	m_bCopyInstance	= false;
 
 	m_nLineIndex	= -1;
 
 	m_pReadBuf = NULL;
-	m_nReadBufOffSet  = 0;
-}
-
-// ReadLine の並列処理用に FileOpen 後のインスタンスをコピーする
-void CFileLoad::Copy( CFileLoad& Src ){
-	m_pEencoding	= Src.m_pEencoding;
-	
-	m_hFile			= nullptr;
-	m_nFileSize		= Src.m_nFileSize;
-	m_CharCode		= Src.m_CharCode;
-	m_pCodeBase		= Src.m_pCodeBase;
-	m_encodingTrait = Src.m_encodingTrait;
-	m_bBomExist		= Src.m_bBomExist;
-	m_nFlag 		= Src.m_nFlag;
-	m_hMap			= nullptr;
-	m_bCopyInstance	= true;
-	
-	m_nLineIndex	= -1;
-	
-	m_pReadBuf		= Src.m_pReadBuf;
 	m_nReadBufOffSet  = 0;
 }
 
@@ -275,19 +257,19 @@ ECodeType CFileLoad::FileOpen( LPCWSTR pFileName, bool bBigFile, ECodeType CharC
 void CFileLoad::FileClose( void )
 {
 	if( m_pReadBuf ){
-		if( !m_bCopyInstance ) UnmapViewOfFile( m_pReadBuf );
+		UnmapViewOfFile( m_pReadBuf );
 		m_pReadBuf = nullptr;
 	}
 	if( nullptr != m_hMap ){
-		if( !m_bCopyInstance ) CloseHandle( m_hMap );
+		CloseHandle( m_hMap );
 		m_hMap = nullptr;
 	}
 	if( NULL != m_hFile ){
-		if( !m_bCopyInstance ) ::CloseHandle( m_hFile );
+		::CloseHandle( m_hFile );
 		m_hFile = NULL;
 	}
 	if( NULL != m_pCodeBase ){
-		if( !m_bCopyInstance ) delete m_pCodeBase;
+		delete m_pCodeBase;
 		m_pCodeBase = NULL;
 	}
 	m_nReadBufOffSet	= 0;
@@ -417,12 +399,12 @@ int CFileLoad::GetPercent( void ){
 */
 const char* CFileLoad::GetNextLineCharCode(
 	const char*	pData,		//!< [in]	検索文字列
-	size_t		nDataLen,	//!< [in]	検索文字列のバイト数
+	size_t			nDataLen,	//!< [in]	検索文字列のバイト数
 	size_t*		pnLineLen,	//!< [out]	1行のバイト数を返すただしEOLは含まない
 	size_t*		pnBgn,		//!< [i/o]	検索文字列のバイト単位のオフセット位置
 	CEol*		pcEol,		//!< [i/o]	EOL
 	int*		pnEolLen,	//!< [out]	EOLのバイト数 (Unicodeで困らないように)
-	size_t*		pnBufferNext//!< [out]	次回持越しバッファ長(EOLの断片)
+	size_t*		pnBufferNext	//!< [out]	次回持越しバッファ長(EOLの断片)
 ){
 	size_t nbgn = *pnBgn;
 	size_t i;

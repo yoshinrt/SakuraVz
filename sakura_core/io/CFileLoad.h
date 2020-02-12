@@ -52,8 +52,7 @@ public:
 	static std::wstring GetSizeStringForHuman(ULONGLONG size); //!< 人にとって見やすいサイズ文字列を作る (例: "2 GB", "10 GB", "400 MB", "32 KB")
 
 public:
-	CFileLoad(){ _Init(); };
-	CFileLoad( const SEncodingConfig& encode ) : m_pEencoding( &encode ){ _Init(); }
+	CFileLoad( const SEncodingConfig& encode );
 	~CFileLoad( void );
 
 	//	Jul. 26, 2003 ryoji BOM引数追加
@@ -86,17 +85,8 @@ public:
 
 	static const size_t gm_nBufSizeDef; // ロード用バッファサイズの初期値
 //	static const int gm_nBufSizeMin; // ロード用バッファサイズの設定可能な最低値
-	
-	void SetEncodingConfig( const SEncodingConfig& Cfg ){
-		m_pEencoding = &Cfg;
-	}
-	
-	// 並列実行用コピー
-	void Copy( CFileLoad& Src );
-	
+
 protected:
-	void _Init( void );
-	
 	// Oct. 19, 2002 genta スペルミス修正
 //	void SeekBegin( void );		// ファイルの先頭位置に移動する(BOMを考慮する)
 
@@ -121,8 +111,7 @@ protected:
 	int		m_nMaxEolLen;	//!< EOLの長さ
 	bool	m_bBomExist;	// ファイルのBOMが付いているか Jun. 08, 2003 Moca 
 	int		m_nFlag;		// 文字コードの変換オプション
-	bool	m_bCopyInstance;// 並列実行用のコピーインスタンス
-	
+
 	// 読み込みバッファ系
 	const char*	m_pReadBuf;		// 読み込みバッファへのポインタ
 	size_t		m_nReadBufOffSet;	// 読み込みバッファ中のオフセット(次の行頭位置)
