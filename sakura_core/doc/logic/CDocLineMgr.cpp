@@ -437,32 +437,3 @@ void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
 		Line->SetEol( cEol, nullptr );
 	}
 }
-
-// CDocLineMgr 同士の連結
-// pAppendData 側のデータを this の後ろに連結後，pAppendData はクリアされる
-void CDocLineMgr::Cat( CDocLineMgr *pAppendData ){
-	
-	CDocLine*	pAppendTop;
-	
-	// pAppendData が空なら何もせず return
-	if(
-		pAppendData == nullptr ||
-		( pAppendTop = pAppendData->GetDocLineTop()) == nullptr
-	){
-		return;
-	}
-	
-	// this が空なら，top は append の top
-	if( !m_pDocLineTop ) m_pDocLineTop = pAppendTop;
-	
-	pAppendTop->m_pPrev = m_pDocLineBot;
-	if( m_pDocLineBot ) m_pDocLineBot->m_pNext = pAppendTop;
-	
-	m_pDocLineBot = pAppendData->GetDocLineBottom();
-	
-	m_nLines += pAppendData->GetLineCount();
-	
-	// append data のクリア (delete 時に行データが削除されないように)
-	pAppendData->_Init();
-}
-
