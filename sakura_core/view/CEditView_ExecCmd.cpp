@@ -89,6 +89,8 @@ protected:
 		@li	0x100	標準入力をUTF-8で行う
 		@li	0x200	カレントディレクトリを指定
 		@li	0x400	console ウィンドウを前面にする
+		@li	0x08000000	[31:28] を SW_* として使用する
+		@li 0x0xxxxxxx - 0xFxxxxxxx	SW_* << 28 の値
 
 	@note	子プロセスの標準出力取得はパイプを使用する
 	@note	子プロセスの標準入力への送信は一時ファイルを使用
@@ -225,7 +227,8 @@ bool CEditView::ExecCmd( const WCHAR* pszCmd, int nFlgOpt, const WCHAR* pszCurDi
 	sui.cb = sizeof(sui);
 	if( bGetStdout || bSendStdin ) {
 		sui.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-		sui.wShowWindow = bGetStdout ? SW_HIDE : SW_SHOW;
+		sui.wShowWindow =	nFlgOpt & 0x8000000 ? nFlgOpt >> 28 :
+							bGetStdout ? SW_HIDE : SW_SHOW;
 		sui.hStdInput = hStdIn;
 		sui.hStdOutput = bGetStdout ? hStdOutWrite : GetStdHandle( STD_OUTPUT_HANDLE );
 		sui.hStdError = bGetStdout ? hStdOutWrite : GetStdHandle( STD_ERROR_HANDLE );
