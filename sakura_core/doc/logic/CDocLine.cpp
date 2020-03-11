@@ -16,8 +16,9 @@
 #include "CDocLine.h"
 #include "mem/CMemory.h"
 
-CDocLine::CDocLine()
-: m_pPrev( NULL ), m_pNext( NULL )
+CDocLine::CDocLine() :
+	m_pPrev( nullptr ), m_pNext( nullptr ),
+	m_pLayoutTop( nullptr ), m_pLayoutBot( nullptr )
 {
 }
 

@@ -28,6 +28,7 @@
 
 class CDocLine;
 class COpeBlk;
+class CLayout;
 
 #pragma pack(push,1)
 
@@ -97,6 +98,8 @@ public:
 private: //####
 	CDocLine*	m_pPrev;	//!< 一つ前の要素
 	CDocLine*	m_pNext;	//!< 一つ後の要素
+	CLayout*	m_pLayoutTop;	//!< この論理行のレイアウト Top
+	CLayout*	m_pLayoutBot;	//!< この論理行のレイアウト Bot
 private:
 	CNativeW	m_cLine;	//!< データ  2007.10.11 kobake ポインタではなく、実体を持つように変更
 public:
