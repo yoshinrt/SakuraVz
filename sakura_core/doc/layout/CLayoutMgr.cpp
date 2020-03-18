@@ -78,8 +78,6 @@ void CLayoutMgr::Create( CEditDoc* pcEditDoc, CDocLineMgr* pcDocLineMgr )
 
 void CLayoutMgr::Init()
 {
-	m_pLayoutTop = NULL;
-	m_pLayoutBot = NULL;
 	m_nPrevReferLine = CLayoutInt(0);
 	m_pLayoutPrevRefer = NULL;
 	m_nLines = CLayoutInt(0);			/* 全物理行数 */
@@ -92,11 +90,20 @@ void CLayoutMgr::Init()
 
 void CLayoutMgr::_Empty()
 {
-	CLayout* pLayout = m_pLayoutTop;
-	while( pLayout ){
-		CLayout* pLayoutNext = pLayout->GetNextLayout();
-		delete pLayout;
-		pLayout = pLayoutNext;
+	if( !m_pcDocLineMgr ) return;
+
+	CDocLine *pDocLine = GetDocLineTop();
+	for(; pDocLine; pDocLine = pDocLine->GetNextLine()){
+		CLayout* pLayout = pDocLine->GetLayoutTop();
+		
+		while( pLayout ){
+			CLayout* pLayoutNext = pLayout->GetNextLayoutRaw();
+			delete pLayout;
+			pLayout = pLayoutNext;
+		}
+		
+		pDocLine->SetLayoutTop( nullptr );
+		pDocLine->SetLayoutBot( nullptr );
 	}
 }
 
@@ -222,34 +229,6 @@ const CLayout* CLayoutMgr::SearchLineByLayoutY(
 		}
 		return NULL;
 	}
-//	/*+++++++ 低速版 +++++++++*/
-//	if( nLineNum < (m_nLines / 2) ){
-//		nCount = 0;
-//		pLayout = m_pLayoutTop;
-//		while( NULL != pLayout ){
-//			if( nLineNum == nCount ){
-//				m_pLayoutPrevRefer = pLayout;
-//				m_nPrevReferLine = nLineNum;
-//				return pLayout;
-//			}
-//			pLayout = pLayout->GetNextLayout();
-//			nCount++;
-//		}
-//	}else{
-//		nCount = m_nLines - 1;
-//		pLayout = m_pLayoutBot;
-//		while( NULL != pLayout ){
-//			if( nLineNum == nCount ){
-//				m_pLayoutPrevRefer = pLayout;
-//				m_nPrevReferLine = nLineNum;
-//				return pLayout;
-//			}
-//			pLayout = pLayout->GetPrevLayout();
-//			nCount--;
-//		}
-//	}
-
-	/*+++++++わずかに高速版+++++++*/
 	// 2004.03.28 Moca m_pLayoutPrevReferより、Top,Botのほうが近い場合は、そちらを利用する
 	CLayoutInt nPrevToLineNumDiff = t_abs( m_nPrevReferLine - nLineNum );
 	if( m_pLayoutPrevRefer == NULL
@@ -258,7 +237,7 @@ const CLayout* CLayoutMgr::SearchLineByLayoutY(
 	){
 		if( nLineNum < (m_nLines / 2) ){
 			nCount = CLayoutInt(0);
-			pLayout = m_pLayoutTop;
+			pLayout = GetTopLayout();
 			while( NULL != pLayout ){
 				if( nLineNum == nCount ){
 					m_pLayoutPrevRefer = pLayout;
@@ -270,7 +249,7 @@ const CLayout* CLayoutMgr::SearchLineByLayoutY(
 			}
 		}else{
 			nCount = m_nLines - CLayoutInt(1);
-			pLayout = m_pLayoutBot;
+			pLayout = GetBottomLayout();
 			while( NULL != pLayout ){
 				if( nLineNum == nCount ){
 					m_pLayoutPrevRefer = pLayout;
@@ -318,15 +297,18 @@ const CLayout* CLayoutMgr::SearchLineByLayoutY(
 //@@@ 2002.09.23 YAZAKI CLayout*を作成するところは分離して、InsertLineNext()と共通化
 void CLayoutMgr::AddLineBottom( CLayout* pLayout )
 {
-	if(	CLayoutInt(0) == m_nLines ){
-		m_pLayoutBot = m_pLayoutTop = pLayout;
-		m_pLayoutTop->m_pPrev = NULL;
+	CLayout *pLayoutBot = pLayout->GetDocLine()->GetLayoutBot();
+	
+	if( !pLayoutBot ){
+		pLayout->GetDocLine()->SetLayoutTop( pLayout );
+		pLayout->m_pPrev	= nullptr;
 	}else{
-		m_pLayoutBot->m_pNext = pLayout;
-		pLayout->m_pPrev = m_pLayoutBot;
-		m_pLayoutBot = pLayout;
+		pLayoutBot->m_pNext	= pLayout;
+		pLayout->m_pPrev	= pLayoutBot;
 	}
+	pLayout->GetDocLine()->SetLayoutBot( pLayout );
 	pLayout->m_pNext = NULL;
+	
 	m_nLines++;
 	return;
 }
@@ -334,30 +316,34 @@ void CLayoutMgr::AddLineBottom( CLayout* pLayout )
 //@@@ 2002.09.23 YAZAKI CLayout*を作成するところは分離して、AddLineBottom()と共通化
 CLayout* CLayoutMgr::InsertLineNext( CLayout* pLayoutPrev, CLayout* pLayout )
 {
-	CLayout* pLayoutNext;
-
-	if(	CLayoutInt(0) == m_nLines ){
+	CLayout *pLayoutBot = pLayout->GetDocLine()->GetLayoutBot();
+	
+	if( !pLayoutBot ){
 		/* 初 */
-		m_pLayoutBot = m_pLayoutTop = pLayout;
-		m_pLayoutTop->m_pPrev = NULL;
-		m_pLayoutTop->m_pNext = NULL;
+		pLayout->GetDocLine()->SetLayoutTop( pLayout );
+		pLayout->GetDocLine()->SetLayoutBot( pLayout );
+		pLayout->m_pPrev	= nullptr;
+		pLayout->m_pNext	= nullptr;
 	}
 	else if( NULL == pLayoutPrev ){
 		/* 先頭に挿入 */
-		m_pLayoutTop->m_pPrev = pLayout;
-		pLayout->m_pPrev = NULL;
-		pLayout->m_pNext = m_pLayoutTop;
-		m_pLayoutTop = pLayout;
-	}else
-	if( NULL == pLayoutPrev->GetNextLayout() ){
+		CLayout *pLayoutTop = pLayout->GetDocLine()->GetLayoutTop();
+		
+		pLayout->GetDocLine()->SetLayoutTop( pLayout );
+		pLayoutTop->m_pPrev	= pLayout;
+		pLayout->m_pPrev	= nullptr;
+		pLayout->m_pNext	= pLayoutTop;
+	}
+	else if( NULL == pLayoutPrev->GetNextLayoutRaw()){
 		/* 最後に挿入 */
-		m_pLayoutBot->m_pNext = pLayout;
-		pLayout->m_pPrev = m_pLayoutBot;
-		pLayout->m_pNext = NULL;
-		m_pLayoutBot = pLayout;
-	}else{
+		pLayoutBot->m_pNext	= pLayout;
+		pLayout->GetDocLine()->SetLayoutBot( pLayout );
+		pLayout->m_pPrev	= pLayoutBot;
+		pLayout->m_pNext	= nullptr;
+	}
+	else{
 		/* 途中に挿入 */
-		pLayoutNext = pLayoutPrev->GetNextLayout();
+		CLayout* pLayoutNext = pLayoutPrev->GetNextLayoutRaw();
 		pLayoutPrev->m_pNext = pLayout;
 		pLayoutNext->m_pPrev = pLayout;
 		pLayout->m_pPrev = pLayoutPrev;
@@ -484,7 +470,7 @@ void CLayoutMgr::GetEndLayoutPos(
 		return;
 	}
 
-	if( CLayoutInt(0) == m_nLines || m_pLayoutBot == NULL ){
+	if( CLayoutInt(0) == m_nLines || GetBottomLayout() == NULL ){
 		// データが空
 		ptLayoutEnd->x = CLayoutInt(0);
 		ptLayoutEnd->y = CLayoutInt(0);
@@ -493,7 +479,7 @@ void CLayoutMgr::GetEndLayoutPos(
 		return;
 	}
 
-	CLayout *btm = m_pLayoutBot;
+	CLayout *btm = GetBottomLayout();
 	if( btm->m_cEol != EOL_NONE ){
 		//	末尾に改行がある
 		ptLayoutEnd->Set(CLayoutInt(0), GetLineCount());
@@ -528,9 +514,7 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 	CLayoutInt*	pnDeleteLines
 )
 {
-	CLayout* pLayout;
-	CLayout* pLayoutWork;
-	CLayout* pLayoutNext;
+	CLayout* pLayoutRet	= nullptr;
 
 	*pnDeleteLines = CLayoutInt(0);
 	if( CLayoutInt(0) == m_nLines){	/* 全物理行数 */
@@ -543,63 +527,62 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 	// 1999.11.22
 	m_pLayoutPrevRefer = pLayoutInThisArea->GetPrevLayout();
 	m_nPrevReferLine = nLineOf_pLayoutInThisArea - CLayoutInt(1);
-
-	/* 範囲内先頭に該当するレイアウト情報をサーチ */
-	pLayoutWork = pLayoutInThisArea->GetPrevLayout();
-	while( NULL != pLayoutWork && nLineFrom <= pLayoutWork->GetLogicLineNo()){
-		pLayoutWork = pLayoutWork->GetPrevLayout();
-	}
-
-	if( NULL == pLayoutWork ){
-		pLayout	= m_pLayoutTop;
+	
+	// pLayoutInThisArea を起点とし 論理行番号 == nLineFrom となる DocLine をサーチ
+	CDocLine *pDocLine = pLayoutInThisArea->GetDocLine();
+	for( ;
+		pDocLine && pDocLine->GetLayoutTop() && pDocLine->GetLayoutTop()->GetLogicLineNo() > nLineFrom;
+		pDocLine = pDocLine->GetPrevLine()
+	);
+	if( !pDocLine ){
+		// 見つからなかったら，とりあえず先頭
+		pDocLine = GetDocLineTop();
 	}else{
-		pLayout = pLayoutWork->GetNextLayout();
-	}
-	while( NULL != pLayout ){
-		if( pLayout->GetLogicLineNo() > nLineTo ){
-			break;
-		}
-		pLayoutNext = pLayout->GetNextLayout();
-		if( NULL == pLayoutWork ){
-			/* 先頭行の処理 */
-			m_pLayoutTop = pLayout->GetNextLayout();
-			if( NULL != pLayout->GetNextLayout() ){
-				pLayout->m_pNext->m_pPrev = NULL;
-			}
-		}else{
-			pLayoutWork->m_pNext = pLayout->GetNextLayout();
-			if( NULL != pLayout->GetNextLayout() ){
-				pLayout->m_pNext->m_pPrev = pLayoutWork;
-			}
-		}
-//		if( m_pLayoutPrevRefer == pLayout ){
-//			// 1999.12.22 前にずらすだけでよいのでは
-//			m_pLayoutPrevRefer = pLayout->GetPrevLayout();
-//			--m_nPrevReferLine;
-//		}
-
-		if( ( ptDelLogicalFrom.GetY2() == pLayout->GetLogicLineNo() &&
-			  ptDelLogicalFrom.GetX2() < pLayout->GetLogicOffset() + pLayout->GetLengthWithEOL() ) ||
-			( ptDelLogicalFrom.GetY2() < pLayout->GetLogicLineNo() )
+		// pDocLine は削除対象 Layout の論理行，
+		//   pDocLineRet はそれより前かつ layout が存在する論理行
+		for(
+			CDocLine *pDocLineRet = pDocLine->GetPrevLine();
+			pDocLineRet;
+			pDocLineRet = pDocLineRet->GetPrevLine()
 		){
-			(*pnDeleteLines)++;
+			if( pLayoutRet = pDocLineRet->GetLayoutBot()) break;
 		}
-
-		if( m_pLayoutPrevRefer == pLayout ){
-			DEBUG_TRACE( L"バグバグ\n" );
+	}
+	
+	bool bBreak = false;
+	for(; pDocLine; pDocLine = pDocLine->GetNextLine()){
+		CLayout *pLayout = pDocLine->GetLayoutTop();
+		
+		for(; pLayout; pLayout = pLayout->GetNextLayoutRaw()){
+			if( pLayout->GetLogicLineNo() > nLineTo ){
+				bBreak = true;
+				break;
+			}
+			
+			if( ( ptDelLogicalFrom.GetY2() == pLayout->GetLogicLineNo() &&
+				  ptDelLogicalFrom.GetX2() < pLayout->GetLogicOffset() + pLayout->GetLengthWithEOL() ) ||
+				( ptDelLogicalFrom.GetY2() < pLayout->GetLogicLineNo() )
+			){
+				(*pnDeleteLines)++;
+			}
+			
+			if( m_pLayoutPrevRefer == pLayout ){
+				DEBUG_TRACE( L"バグバグ\n" );
+			}
+			
+			delete pLayout;
+			
+			m_nLines--;	/* 全物理行数 */
 		}
-
-		delete pLayout;
-
-		m_nLines--;	/* 全物理行数 */
-		if( NULL == pLayoutNext ){
-			m_pLayoutBot = pLayoutWork;
-		}
-		pLayout = pLayoutNext;
+		
+		if( bBreak ) break;
+		
+		pDocLine->SetLayoutTop( nullptr );
+		pDocLine->SetLayoutBot( nullptr );
 	}
 //	MYTRACE( L"(*pnDeleteLines)=%d\n", (*pnDeleteLines) );
 
-	return pLayoutWork;
+	return pLayoutRet;
 }
 
 /* 指定行より後の行のレイアウト情報について、論理行番号を指定行数だけシフトする */
@@ -608,20 +591,26 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 void CLayoutMgr::ShiftLogicalLineNum( CLayout* pLayoutPrev, CLogicInt nShiftLines )
 {
 	MY_RUNNINGTIMER( cRunningTimer, "CLayoutMgr::ShiftLogicalLineNum" );
-
+	
+	// pLayoutPrev は論理行の最終 layout 行であるはず
+	if( pLayoutPrev ) assert( pLayoutPrev->GetDocLine()->GetLayoutBot() == pLayoutPrev );
+	
 	CLayout* pLayout;
+	CDocLine *pDocLine;
+	
 	if( 0 == nShiftLines ){
 		return;
 	}
 	if( NULL == pLayoutPrev ){
-		pLayout = m_pLayoutTop;
-	}else{
-		pLayout = pLayoutPrev->GetNextLayout();
+		pDocLine = GetDocLineTop();
+	}else if( !( pDocLine = pLayoutPrev->GetDocLine()->GetNextLine())){
+		return;
 	}
-	/* レイアウト情報全体を更新する(なな、なんと!!!) */
-	while( NULL != pLayout ){
-		pLayout->OffsetLogicLineNo(nShiftLines);	/* 対応する論理行番号 */
-		pLayout = pLayout->GetNextLayout();
+	/* レイアウト情報全体を更新する */
+	for(; pDocLine; pDocLine = pDocLine->GetNextLine()){
+		for( pLayout = pDocLine->GetLayoutTop(); pLayout; pLayout = pLayout->GetNextLayoutRaw()){
+			pLayout->OffsetLogicLineNo(nShiftLines);	/* 対応する論理行番号 */
+		}
 	}
 	return;
 }
@@ -1028,6 +1017,17 @@ void CLayoutMgr::LayoutToLogic( const CLayoutPoint& ptLayout, CLogicPoint* pptLo
 	*pptLogic = ptEx;
 }
 
+
+// CDocLine Top/Bottom 取得
+
+CDocLine* CLayoutMgr::GetDocLineTop( void ) const {
+	return m_pcDocLineMgr->GetDocLineTop();
+}
+
+CDocLine* CLayoutMgr::GetDocLineBot( void ) const {
+	return m_pcDocLineMgr->GetDocLineBottom();
+}
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                         デバッグ                            //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -1040,14 +1040,14 @@ void CLayoutMgr::DUMP()
 	CLogicInt nDataLen;
 	MYTRACE( L"------------------------\n" );
 	MYTRACE( L"m_nLines=%d\n", m_nLines );
-	MYTRACE( L"m_pLayoutTop=%08lxh\n", m_pLayoutTop );
-	MYTRACE( L"m_pLayoutBot=%08lxh\n", m_pLayoutBot );
+	MYTRACE( L"m_pLayoutTop=%08lxh\n", GetDocLineTop()->GetLayoutTop());
+	MYTRACE( L"m_pLayoutBot=%08lxh\n", GetDocLineBot()->GetLayoutBot());
 	MYTRACE( L"m_nMaxLineKetas=%d\n", m_nMaxLineKetas );
 
 	MYTRACE( L"m_nTabSpace=%d\n", m_nTabSpace );
 	CLayout* pLayout;
 	CLayout* pLayoutNext;
-	pLayout = m_pLayoutTop;
+	pLayout = GetTopLayout();
 	while( NULL != pLayout ){
 		pLayoutNext = pLayout->GetNextLayout();
 		MYTRACE( L"\t-------\n" );

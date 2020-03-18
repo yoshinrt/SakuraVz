@@ -276,7 +276,7 @@ void CLayoutMgr::_MakeOneLine(SLayoutWork* pWork, PF_OnLine pfOnLine)
 void CLayoutMgr::_OnLine1(SLayoutWork* pWork)
 {
 	AddLineBottom( pWork->_CreateLayout(this) );
-	pWork->pLayout = m_pLayoutBot;
+	pWork->pLayout = GetBottomLayout();
 	pWork->colorPrev = pWork->pcColorStrategy->GetStrategyColorSafe();
 	pWork->exInfoPrev.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
 	pWork->nBgn = pWork->nPos;

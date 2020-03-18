@@ -123,11 +123,18 @@ public:
 	const wchar_t*	GetLineStr( CLayoutInt nLine, CLogicInt* pnLineLen, const CLayout** ppcLayoutDes ) const;	/* 指定された物理行のデータへのポインタとその長さを返す */
 
 	//先頭と末尾
-	CLayout*		GetTopLayout()		{ return m_pLayoutTop; }
-	CLayout*		GetBottomLayout()	{ return m_pLayoutBot; }
-	const CLayout*	GetTopLayout() const { return m_pLayoutTop; }
-	const CLayout*	GetBottomLayout() const { return m_pLayoutBot; }
-
+	CLayout*	GetTopLayout() const {
+		CDocLine *pDocLine =  GetDocLineTop();
+		return pDocLine ? pDocLine->GetLayoutTop() : nullptr;
+	}
+	CLayout*	GetBottomLayout() const {
+		CDocLine *pDocLine =  GetDocLineTop();
+		return pDocLine ? pDocLine->GetLayoutBot() : nullptr;
+	}
+	
+	CDocLine	*GetDocLineTop( void ) const;
+	CDocLine	*GetDocLineBot( void ) const;
+	
 	//レイアウトを探す
 	const CLayout*	SearchLineByLayoutY( CLayoutInt nLineLayout ) const;	/* 指定された物理行のレイアウトデータ(CLayout)へのポインタを返す */
 	CLayout*		SearchLineByLayoutY( CLayoutInt nLineLayout ){ return const_cast<CLayout*>(static_cast<const CLayoutMgr*>(this)->SearchLineByLayoutY(nLineLayout)); }

@@ -95,6 +95,11 @@ public:
 	void _SetPrevLine(CDocLine* pcDocLine){ m_pPrev = pcDocLine; }
 	void _SetNextLine(CDocLine* pcDocLine){ m_pNext = pcDocLine; }
 	
+	// レイアウト行
+	CLayout *GetLayoutTop( void ){ return m_pLayoutTop; }
+	CLayout *GetLayoutBot( void ){ return m_pLayoutBot; }
+	void SetLayoutTop( CLayout *p ){ m_pLayoutTop = p; }
+	void SetLayoutBot( CLayout *p ){ m_pLayoutBot = p; }
 private: //####
 	CDocLine*	m_pPrev;	//!< 一つ前の要素
 	CDocLine*	m_pNext;	//!< 一つ後の要素

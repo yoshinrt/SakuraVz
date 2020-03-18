@@ -38,7 +38,7 @@ public:
 	*/
 	//2007.08.23 kobake コンストラクタでメンバ変数を初期化するようにした
 	CLayout(
-		const CDocLine*	pcDocLine,		//!< 実データへの参照
+		CDocLine*		pcDocLine,		//!< 実データへの参照
 		CLogicPoint		ptLogicPos,		//!< 実データ参照位置
 		CLogicInt		nLength,		//!< 実データ内データ長
 		EColorIndexType	nTypePrev,
@@ -90,15 +90,38 @@ public:
 	CStringRef GetStringRef() const{ return CStringRef(GetPtr(), GetLengthWithEOL()); }
 
 	//チェーン属性
-	CLayout* GetPrevLayout(){ return m_pPrev; }
-	const CLayout* GetPrevLayout() const{ return m_pPrev; }
-	CLayout* GetNextLayout(){ return m_pNext; }
-	const CLayout* GetNextLayout() const{ return m_pNext; }
+	CLayout* GetPrevLayoutRaw(){ return m_pPrev; }
+	const CLayout* GetPrevLayoutRaw() const{ return m_pPrev; }
+	CLayout* GetNextLayoutRaw(){ return m_pNext; }
+	const CLayout* GetNextLayoutRaw() const{ return m_pNext; }
 	void _SetPrevLayout(CLayout* pcLayout){ m_pPrev = pcLayout; }
 	void _SetNextLayout(CLayout* pcLayout){ m_pNext = pcLayout; }
-
+	
+	// logic 行をまたいだ Prev / Next
+	//   レイアウト未生成の論理行は飛ばしてレイアウトが見つかるまでたどる
+	CLayout *GetPrevLayout( void ) const {
+		if( m_pPrev ) return m_pPrev;
+		
+		for( CDocLine *pDocLine = GetDocLine()->GetPrevLine(); pDocLine; pDocLine = pDocLine->GetPrevLine()){
+			CLayout *pLayout = pDocLine->GetLayoutBot();
+			if( pLayout ) return pLayout;
+		}
+		return nullptr;
+	}
+	
+	CLayout *GetNextLayout( void ) const {
+		if( m_pNext ) return m_pNext;
+		
+		for( CDocLine *pDocLine = GetDocLine()->GetNextLine(); pDocLine; pDocLine = pDocLine->GetNextLine()){
+			CLayout *pLayout = pDocLine->GetLayoutTop();
+			if( pLayout ) return pLayout;
+		}
+		return nullptr;
+	}
+	
 	//実データ参照
-	const CDocLine* GetDocLineRef() const{ if(this)return m_pCDocLine; else return NULL; } //$$note:高速化
+	CDocLine* GetDocLineRef() const{ if(this)return m_pCDocLine; else return NULL; } //$$note:高速化
+	CDocLine* GetDocLine() const{ return m_pCDocLine; }
 
 	//その他属性参照
 	const CEol& GetLayoutEol() const{ return m_cEol; }
@@ -112,7 +135,7 @@ private:
 	CLayout*			m_pNext;
 
 	//データ参照範囲
-	const CDocLine*		m_pCDocLine;		//!< 実データへの参照
+	CDocLine*			m_pCDocLine;		//!< 実データへの参照
 	CLogicPoint			m_ptLogicPos;		//!< 対応するロジック参照位置
 	CLogicInt			m_nLength;			//!< このレイアウト行の長さ。文字単位。
 	

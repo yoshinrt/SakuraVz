@@ -307,7 +307,7 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 	// 算出開始レイアウト行を探す
 	// 2013.05.13 SearchLineByLayoutYを使う
 	if( nStart == 0 ){
-		pLayout = m_pLayoutTop;
+		pLayout = GetTopLayout();
 	}else{
 		pLayout = SearchLineByLayoutY(nStart);
 	}
@@ -315,7 +315,7 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 	if( nStart * 2 < nLines ){
 		// 前方からサーチ
 		CLayoutInt nCount = CLayoutInt(0);
-		pLayout = m_pLayoutTop;
+		pLayout = GetTopLayout();
 		while( NULL != pLayout ){
 			if( nStart == nCount ){
 				break;
@@ -326,7 +326,7 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 	}else{
 		// 後方からサーチ
 		CLayoutInt nCount = CLayoutInt( m_nLines - 1 );
-		pLayout = m_pLayoutBot;
+		pLayout = GetBottomLayout();
 		while( NULL != pLayout ){
 			if( nStart == nCount ){
 				break;
@@ -396,7 +396,7 @@ BOOL CLayoutMgr::CalculateTextWidth( BOOL bCalLineLen, CLayoutInt nStart, CLayou
 */
 void CLayoutMgr::ClearLayoutLineWidth( void )
 {
-	CLayout* pLayout = m_pLayoutTop;
+	CLayout* pLayout = GetTopLayout();
 
 	while( pLayout ){
 		pLayout->m_nLayoutWidth = 0;			// レイアウト行長をクリア

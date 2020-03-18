@@ -99,27 +99,25 @@ void CLayoutMgr::ReplaceData_CLayoutMgr(
 			);
 		}
 	}else{
-		pLayoutPrev = m_pLayoutBot;
+		pLayoutPrev = GetBottomLayout();
 	}
 
 	/* 指定レイアウト行に対応する論理行の次の論理行から指定論理行数だけ再レイアウトする */
-	CLogicInt	nRowNum;
+	CLogicInt	nRowNum( 0 );
 	if( NULL == pLayoutPrev ){
-		if( NULL == m_pLayoutTop ){
+		if( NULL == GetTopLayout() ){
 			nRowNum = m_pcDocLineMgr->GetLineCount();
 		}else{
-			nRowNum = m_pLayoutTop->GetLogicLineNo();
+			nRowNum = GetTopLayout()->GetLogicLineNo();
 		}
 	}
 	else{
-		if( NULL == pLayoutPrev->GetNextLayout() ){
-			nRowNum =
-				m_pcDocLineMgr->GetLineCount() -
-				pLayoutPrev->GetLogicLineNo() - CLogicInt(1);
-		}else{
-			nRowNum =
-				pLayoutPrev->m_pNext->GetLogicLineNo() -
-				pLayoutPrev->GetLogicLineNo() - CLogicInt(1);
+		// レイアウトが生成されていない論理行数を数える
+		
+		CDocLine *pDocLine = pLayoutPrev->GetDocLine()->GetNextLine();
+		
+		for (; pDocLine && pDocLine->GetLayoutTop() == nullptr; pDocLine = pDocLine->GetNextLine()) {
+			++nRowNum;
 		}
 	}
 
