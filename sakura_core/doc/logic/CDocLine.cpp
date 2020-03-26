@@ -14,6 +14,7 @@
 
 #include "StdAfx.h"
 #include "CDocLine.h"
+#include "doc/layout/CLayout.h"
 #include "mem/CMemory.h"
 
 CDocLine::CDocLine() :
@@ -24,6 +25,13 @@ CDocLine::CDocLine() :
 
 CDocLine::~CDocLine()
 {
+	CLayout *pLayout = GetLayoutTop();
+	
+	while( pLayout ){
+		CLayout* pLayoutNext = pLayout->GetNextLayoutRaw();
+		delete pLayout;
+		pLayout = pLayoutNext;
+	}
 }
 
 /* 空行（スペース、タブ、改行記号のみの行）かどうかを取得する

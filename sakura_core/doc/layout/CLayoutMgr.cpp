@@ -553,7 +553,7 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 	for(; pDocLine; pDocLine = pDocLine->GetNextLine()){
 		CLayout *pLayout = pDocLine->GetLayoutTop();
 		
-		for(; pLayout; pLayout = pLayout->GetNextLayoutRaw()){
+		while( pLayout ){
 			if( pLayout->GetLogicLineNo() > nLineTo ){
 				bBreak = true;
 				break;
@@ -570,7 +570,9 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 				DEBUG_TRACE( L"バグバグ\n" );
 			}
 			
+			CLayout* pLayoutNext = pLayout->GetNextLayoutRaw();
 			delete pLayout;
+			pLayout = pLayoutNext;
 			
 			m_nLines--;	/* 全物理行数 */
 		}
@@ -1033,11 +1035,8 @@ CDocLine* CLayoutMgr::GetDocLineBot( void ) const {
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 /* テスト用にレイアウト情報をダンプ */
-void CLayoutMgr::DUMP()
-{
 #ifdef _DEBUG
-	const wchar_t* pData;
-	CLogicInt nDataLen;
+void CLayoutMgr::DUMP(){
 	MYTRACE( L"------------------------\n" );
 	MYTRACE( L"m_nLines=%d\n", m_nLines );
 	MYTRACE( L"m_pLayoutTop=%08lxh\n", GetDocLineTop()->GetLayoutTop());
@@ -1045,26 +1044,46 @@ void CLayoutMgr::DUMP()
 	MYTRACE( L"m_nMaxLineKetas=%d\n", m_nMaxLineKetas );
 
 	MYTRACE( L"m_nTabSpace=%d\n", m_nTabSpace );
-	CLayout* pLayout;
-	CLayout* pLayoutNext;
-	pLayout = GetTopLayout();
-	while( NULL != pLayout ){
-		pLayoutNext = pLayout->GetNextLayout();
-		MYTRACE( L"\t-------\n" );
-		MYTRACE( L"\tthis=%08lxh\n", pLayout );
-		MYTRACE( L"\tm_pPrev =%08lxh\n",		pLayout->GetPrevLayout() );
-		MYTRACE( L"\tm_pNext =%08lxh\n",		pLayout->GetNextLayout() );
-		MYTRACE( L"\tm_nLinePhysical=%d\n",	pLayout->GetLogicLineNo() );
-		MYTRACE( L"\tm_nOffset=%d\n",		pLayout->GetLogicOffset() );
-		MYTRACE( L"\tm_nLength=%d\n",		pLayout->GetLengthWithEOL() );
-		MYTRACE( L"\tm_enumEOLType =%ls\n",	pLayout->GetLayoutEol().GetName() );
-		MYTRACE( L"\tm_nEOLLen =%d\n",		pLayout->GetLayoutEol().GetLen() );
-		MYTRACE( L"\tm_nTypePrev=%d\n",		pLayout->GetColorTypePrev() );
-		pData = CDocReader(*m_pcDocLineMgr).GetLineStr( pLayout->GetLogicLineNo(), &nDataLen );
-		MYTRACE( L"\t[%ls]\n", pData );
-		pLayout = pLayoutNext;
+	
+	for(
+		CDocLine *pDocLine = m_pcDocLineMgr->GetDocLineTop();
+		pDocLine;
+		pDocLine = pDocLine->GetNextLine()
+	){
+		MYTRACE( L"--- DocLine ---\n" );
+		
+		if( !pDocLine->GetLayoutTop()){
+			// layout top == null なら bot も null
+			assert( pDocLine->GetLayoutBot() == nullptr );
+		}else{
+			// top, bot リンクが正しいか chk
+			assert( pDocLine->GetLayoutTop()->GetPrevLayoutRaw() == nullptr );
+			assert( pDocLine->GetLayoutBot()->GetNextLayoutRaw() == nullptr );
+		}
+		
+		for(
+			CLayout *pLayout = pDocLine->GetLayoutTop();
+			pLayout;
+			pLayout = pLayout->GetNextLayoutRaw()
+		){
+			CLogicInt nDataLen;
+			const wchar_t* pData = CDocReader(*m_pcDocLineMgr).GetLineStr( pLayout->GetLogicLineNo(), &nDataLen );
+			MYTRACE(
+				L"L%d:%d+%d:%ls\n",
+				pLayout->GetLogicLineNo(),
+				pLayout->GetLogicOffset(),
+				pLayout->GetLengthWithEOL(),
+				pData
+			);
+			
+			// CLayout <--> CDocLine リンクチェック
+			assert( pLayout->GetDocLine() == pDocLine );
+			
+			// Next / Prev リンクチェック
+			if( pLayout->GetNextLayoutRaw()){
+				assert( pLayout->GetNextLayoutRaw()->GetPrevLayoutRaw() == pLayout );
+			}
+		}
 	}
-	MYTRACE( L"------------------------\n" );
 #endif
-	return;
 }
