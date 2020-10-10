@@ -1310,11 +1310,17 @@ int CGrepAgent::DoGrepReplaceFile(
 			
 			LONGLONG iLineDisp = nLine;
 			
+			bool bRestartGrep = true; // search_buf に残っているデータが対象の場合 false
+			
 			// 行単位の処理
 			while( nIndex <= nLineLen ){
 				
 				// マッチ
-				bool bMatch = pRegexp->Match( pLine, nLineLen, nIndex );
+				bool bMatch = bRestartGrep ?
+					pRegexp->Match( pLine, nLineLen, nIndex ) :
+					pRegexp->Match( nullptr, 0, nIndex );
+				bRestartGrep = false;
+				
 				if( sGrepOption.nGrepOutputLineType == 2/*非該当行*/ ) bMatch = !bMatch;
 				if( !bMatch ) break;
 				
@@ -1323,12 +1329,22 @@ int CGrepAgent::DoGrepReplaceFile(
 					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 				}
 				
-				//	パターン発見
-				int iMatchIdx = pRegexp->GetIndex();
-				int iMatchLen = pRegexp->GetMatchLen();
+				// cat した serch buf に切り替わっているかもしれないので，pLine nLineLen をそちらに更新
+				pLine		= pRegexp->GetSubject();
+				nLineLen	= pRegexp->GetSubjectLen();
+				
+				// log 表示用行，match 位置
+				const wchar_t* pLogLine	= pLine;
+				int iLogLineLen			= nLineLen;
+				int iLogMatchIdx		= pRegexp->GetIndex();
+				int iLogMatchLen		= pRegexp->GetMatchLen();
 				
 				if( sGrepOption.nGrepOutputLineType != 0/*該当部分*/ ){
-					pRegexp->GetMatchLine( &pLine, &nLineLen );
+					// pLine は cat した行なので，その中から match した
+					// 行のみを表示用に取り出す
+					
+					pRegexp->GetMatchLine( &pLogLine, &iLogLineLen );
+					iLogMatchIdx -= pLogLine - pLine;
 				}
 				
 				++nHitCount;
@@ -1343,9 +1359,9 @@ int CGrepAgent::DoGrepReplaceFile(
 					/* Grep結果を、cmemMessageに格納する */
 					SetGrepResult(
 						cmemMessage, pszDispFilePath, pszCodeName,
-						iLineDisp, iMatchIdx + 1,
-						pLine, nLineLen, nEolCodeLen,
-						pLine + iMatchIdx, iMatchLen,
+						iLineDisp, iLogMatchIdx + 1,
+						pLogLine, iLogLineLen, nEolCodeLen,
+						pLogLine + iLogMatchIdx, iLogMatchLen,
 						sGrepOption
 					);
 					
@@ -1364,7 +1380,7 @@ int CGrepAgent::DoGrepReplaceFile(
 					pOutput->OutputHead();
 					
 					// hit 位置直前までをコピー
-					cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, iMatchIdx - nIndex );
+					cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, pRegexp->GetIndex() - nIndex );
 					
 					// 置換後文字列をコピー
 					if( sGrepOption.bGrepPaste ){
@@ -1377,7 +1393,7 @@ int CGrepAgent::DoGrepReplaceFile(
 				}
 				
 				// 次検索開始位置
-				nIndex = iMatchIdx + pRegexp->GetMatchLen();
+				nIndex = pRegexp->GetIndex() + pRegexp->GetMatchLen();
 				
 				// 0 幅マッチの場合 1文字進める
 				if( pRegexp->GetMatchLen() == 0 ) ++nIndex;
