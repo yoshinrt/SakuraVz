@@ -1,0 +1,126 @@
+name: build sakura
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - master
+      - feature/*
+    paths-ignore:
+      - '**/*.md'
+      - .gitignore
+      - .editorconfig
+      - appveyor.yml
+      - 'azure-pipelines*.yml'
+      - 'ci/azure-pipelines/template*.yml'
+
+  pull_request:
+    branches:
+      - master
+      - feature/*
+      - release/*
+    paths-ignore:
+      - '**/*.md'
+      - .gitignore
+      - .editorconfig
+      - appveyor.yml
+      - 'azure-pipelines*.yml'
+      - 'ci/azure-pipelines/template*.yml'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    name: MSBuild
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        config:
+          - Debug
+          - Release
+        platform:
+          - Win32
+          - x64
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    ## see https://github.com/actions/checkout
+    - uses: actions/checkout@v2
+
+    ## see https://github.com/microsoft/setup-msbuild
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.0
+
+    - name: MSBuild
+      run: build-sln.bat ${{ matrix.platform }} ${{ matrix.config }}
+      shell: cmd
+
+    - name: Install Locale Emulator
+      run: choco install locale-emulator -y
+      shell: cmd
+
+    - name: Build HTML Help
+      run: build-chm.bat
+      shell: cmd
+
+    - name: Build installer with Inno Setup
+      run: build-installer.bat ${{ matrix.platform }} ${{ matrix.config }}
+      shell: cmd
+
+    - name: zipArtifacts
+      run: zipArtifacts.bat ${{ matrix.platform }} ${{ matrix.config }}
+      if: ${{ matrix.config }} == 'Release'
+      shell: cmd
+
+    ## see https://github.com/actions/upload-artifact
+    - name: Upload Installer
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Installer ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Installer.zip'
+
+    - name: Upload Installer MD5
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Installer MD5 ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Installer.zip.md5'
+
+    - name: Upload Exe
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Exe ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Exe.zip'
+
+    - name: Upload Exe MD5
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Exe MD5 ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Exe.zip.md5'
+
+    - name: Upload Log
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Log ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Log.zip'
+
+    - name: Upload Asm
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Asm ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Asm.zip'
+
+    - name: Upload Dev
+      uses: actions/upload-artifact@v2
+      if: ${{ matrix.config }} == 'Release'
+      with:
+        name: Dev ${{ matrix.platform }} ${{ matrix.config }}
+        path: 'sakura-*-Dev.zip'

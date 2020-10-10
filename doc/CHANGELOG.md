@@ -1,5 +1,131 @@
 # Change Log
 
+## [Unreleased](https://github.com/sakura-editor/sakura/tree/HEAD)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.1...HEAD)
+
+### その他変更
+
+- ver 2.4.1 をリリースしたので ver 2.4.2 に上げる [\#1317](https://github.com/sakura-editor/sakura/pull/1317) ([m-tmatma](https://github.com/m-tmatma))
+- Release/v2.4.1  [\#1316](https://github.com/sakura-editor/sakura/pull/1316) ([KENCHjp](https://github.com/KENCHjp))
+
+## [v2.4.1](https://github.com/sakura-editor/sakura/tree/v2.4.1) (2020-05-30)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.1-beta3...v2.4.1)
+
+### その他変更
+
+- GitHub Actions の成果物を別々の ZIP として upload する [\#1285](https://github.com/sakura-editor/sakura/pull/1285) ([m-tmatma](https://github.com/m-tmatma))
+
+## [v2.4.1-beta3](https://github.com/sakura-editor/sakura/tree/v2.4.1-beta3) (2020-05-20)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.1-beta2...v2.4.1-beta3)
+
+
+
+### その他変更
+
+- README.md の「変更履歴」に CHANGELOG.md へのリンクを追加 [\#1309](https://github.com/sakura-editor/sakura/pull/1309) ([takke](https://github.com/takke))
+- \#1302 OSDNより転載： 「タイプ別設定」等ダイアログ内の「ヘルプ」ボタンが機能しない [\#1306](https://github.com/sakura-editor/sakura/pull/1306) ([m-tmatma](https://github.com/m-tmatma))
+- MinGW のコンパイルエラーを修正する [\#1299](https://github.com/sakura-editor/sakura/pull/1299) ([k-takata](https://github.com/k-takata))
+- コンパイルテストを導入する [\#1297](https://github.com/sakura-editor/sakura/pull/1297) ([berryzplus](https://github.com/berryzplus))
+
+## [v2.4.1-beta2](https://github.com/sakura-editor/sakura/tree/v2.4.1-beta2) (2020-05-10)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.0...v2.4.1-beta2)
+
+### 仕様変更
+
+
+### バグ修正
+
+- CImpExpRegex::Import の実装を見直し [\#1273](https://github.com/sakura-editor/sakura/pull/1273) ([beru](https://github.com/beru))
+- ツールイメージのリサイズ機構にフォールバック機能を付ける [\#1261](https://github.com/sakura-editor/sakura/pull/1261) ([berryzplus](https://github.com/berryzplus))
+- 正規表現キーワードのインポートで許容サイズを超える文字列を無駄にコピーしているのを修正する [\#1244](https://github.com/sakura-editor/sakura/pull/1244) ([berryzplus](https://github.com/berryzplus))
+
+
+
+### その他変更
+
+- installer のタイトルのアプリ名で 32bit/64bit の区別ができるようにする [\#1293](https://github.com/sakura-editor/sakura/pull/1293) ([m-tmatma](https://github.com/m-tmatma))
+- Combo\_AddString の戻り値の型を int にする [\#1291](https://github.com/sakura-editor/sakura/pull/1291) ([m-tmatma](https://github.com/m-tmatma))
+- CLayoutIntのテストを追加 [\#1290](https://github.com/sakura-editor/sakura/pull/1290) ([berryzplus](https://github.com/berryzplus))
+- 単体テストで文字列リソースを利用できるようにする [\#1275](https://github.com/sakura-editor/sakura/pull/1275) ([berryzplus](https://github.com/berryzplus))
+- CodeFactor の警告を修正 [\#1272](https://github.com/sakura-editor/sakura/pull/1272) ([m-tmatma](https://github.com/m-tmatma))
+- GitHub Actions の yml のCodeFactor の警告 [\#1270](https://github.com/sakura-editor/sakura/pull/1270) ([m-tmatma](https://github.com/m-tmatma))
+- azure pipeline の表示名のタイポ修正 [\#1258](https://github.com/sakura-editor/sakura/pull/1258) ([m-tmatma](https://github.com/m-tmatma))
+- googletest を無視リストに追加 [\#1256](https://github.com/sakura-editor/sakura/pull/1256) ([m-tmatma](https://github.com/m-tmatma))
+- 履歴コンボの履歴削除機能の発動条件を変更したい [\#1255](https://github.com/sakura-editor/sakura/pull/1255) ([berryzplus](https://github.com/berryzplus))
+- ヘルプの動作環境OSの記述を更新 [\#1254](https://github.com/sakura-editor/sakura/pull/1254) ([beru](https://github.com/beru))
+- GrepとGrep置換ダイアログの微調整 [\#1242](https://github.com/sakura-editor/sakura/pull/1242) ([7-rate](https://github.com/7-rate))
+- 折り返しされた際、文字数カウントが合わない不具合を修正 [\#1241](https://github.com/sakura-editor/sakura/pull/1241) ([beru](https://github.com/beru))
+- TCHAR系マクロ \_stprintf の呼び出しがまだ残っている箇所を swprintf 関数の呼び出しに変更 [\#1240](https://github.com/sakura-editor/sakura/pull/1240) ([beru](https://github.com/beru))
+- \_wcsdup\(\)ではfree\(\)を使うべきなはずなのでそうする [\#1239](https://github.com/sakura-editor/sakura/pull/1239) ([beru](https://github.com/beru))
+- SJISエンコードのキーワードヘルプ辞書を設定するとき表示化けする問題への対処 [\#1238](https://github.com/sakura-editor/sakura/pull/1238) ([beru](https://github.com/beru))
+- wstringをWCHAR\[N\]にコピーする処理でNUL終端が付かない不具合を修正 [\#1235](https://github.com/sakura-editor/sakura/pull/1235) ([berryzplus](https://github.com/berryzplus))
+- 開発バージョンを ver 2.4.1 に変更 [\#1231](https://github.com/sakura-editor/sakura/pull/1231) ([m-tmatma](https://github.com/m-tmatma))
+- CNativeテストケースの期待値を修正する [\#1230](https://github.com/sakura-editor/sakura/pull/1230) ([berryzplus](https://github.com/berryzplus))
+- UNICODE一本化対応で見落としていたA版専用処理を削りたい [\#1229](https://github.com/sakura-editor/sakura/pull/1229) ([berryzplus](https://github.com/berryzplus))
+- コピー代入のメソッド名を書き間違っているのを訂正 [\#1228](https://github.com/sakura-editor/sakura/pull/1228) ([berryzplus](https://github.com/berryzplus))
+- googletestのビルドをバッチスクリプトで行うように変更したい [\#1227](https://github.com/sakura-editor/sakura/pull/1227) ([berryzplus](https://github.com/berryzplus))
+- Grep置換ダイアログの「置換後」の実装を置換ダイアログと合わせる [\#1224](https://github.com/sakura-editor/sakura/pull/1224) ([berryzplus](https://github.com/berryzplus))
+
+## [v2.4.0](https://github.com/sakura-editor/sakura/tree/v2.4.0) (2020-04-18)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.0-beta5...v2.4.0)
+
+### その他変更
+
+- 一括フォーマット実施に向けての微修正 [\#1222](https://github.com/sakura-editor/sakura/pull/1222) ([berryzplus](https://github.com/berryzplus))
+- beta5 リリース用のヘルプをマージ [\#1218](https://github.com/sakura-editor/sakura/pull/1218) ([m-tmatma](https://github.com/m-tmatma))
+
+## [v2.4.0-beta5](https://github.com/sakura-editor/sakura/tree/v2.4.0-beta5) (2020-03-21)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.0-beta4...v2.4.0-beta5)
+
+### 仕様変更
+
+- 設定画面の数値入力用のエディット コントロールにフォーカス時にIMEを使わないように設定 [\#1212](https://github.com/sakura-editor/sakura/pull/1212) ([beru](https://github.com/beru))
+
+
+
+### その他変更
+
+- バージョン情報に表示するプロジェクトURLに付けるラベルキャプションを短くする [\#1215](https://github.com/sakura-editor/sakura/pull/1215) ([berryzplus](https://github.com/berryzplus))
+- 除外ファイル・除外フォルダの指定をGrep置換でも使えるようにする [\#1210](https://github.com/sakura-editor/sakura/pull/1210) ([berryzplus](https://github.com/berryzplus))
+- キーワードを指定してタグジャンプができないバグを修正 [\#1208](https://github.com/sakura-editor/sakura/pull/1208) ([7-rate](https://github.com/7-rate))
+- マクロMakeStringBufferW0を廃止する [\#1203](https://github.com/sakura-editor/sakura/pull/1203) ([berryzplus](https://github.com/berryzplus))
+- ヘルプのコピーライトの年とソフト名変更。 [\#1202](https://github.com/sakura-editor/sakura/pull/1202) ([KENCHjp](https://github.com/KENCHjp))
+- C\#ツールの.vsconfigを追加する [\#1199](https://github.com/sakura-editor/sakura/pull/1199) ([berryzplus](https://github.com/berryzplus))
+
+## [v2.4.0-beta4](https://github.com/sakura-editor/sakura/tree/v2.4.0-beta4) (2020-02-15)
+
+[Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.0-beta3...v2.4.0-beta4)
+
+### 機能追加
+
+- batch ファイルのキーワードに setlocal/endlocal を追加 [\#1171](https://github.com/sakura-editor/sakura/pull/1171) ([m-tmatma](https://github.com/m-tmatma))
+
+### バグ修正
+
+- C++ファイルのアウトライン解析がトグルで閉じない不具合の修正 [\#1176](https://github.com/sakura-editor/sakura/pull/1176) ([berryzplus](https://github.com/berryzplus))
+- 検索条件の文字列をエスケープする処理を関数化する変更のうち、CNativeW::AppendStringF を使うように変更したのをやっぱ止める [\#1135](https://github.com/sakura-editor/sakura/pull/1135) ([beru](https://github.com/beru))
+
+
+
+### その他変更
+
+- ChmSourceConverterのターゲットバージョンを下げる [\#1195](https://github.com/sakura-editor/sakura/pull/1195) ([berryzplus](https://github.com/berryzplus))
+- ログの整形、変数の定義位置の移動 \(\#1183 を分割してレビューしやすくする\) [\#1186](https://github.com/sakura-editor/sakura/pull/1186) ([m-tmatma](https://github.com/m-tmatma))
+- Appveyor 専用の環境変数を汎用的なものに定義しなおす \(\#1183 を分割した PR\) [\#1185](https://github.com/sakura-editor/sakura/pull/1185) ([m-tmatma](https://github.com/m-tmatma))
+- Visual Studio 2017/2019 の環境構築方法に関する説明を更新 [\#1165](https://github.com/sakura-editor/sakura/pull/1165) ([m-tmatma](https://github.com/m-tmatma))
+- Visual Studio のインストールオプションの設定ファイルを追加する [\#1162](https://github.com/sakura-editor/sakura/pull/1162) ([m-tmatma](https://github.com/m-tmatma))
+- インストーラに同梱する bregonig.dll を Ver.4.20 にする [\#1158](https://github.com/sakura-editor/sakura/pull/1158) ([m-tmatma](https://github.com/m-tmatma))
+- Universal Ctags の Windows のバイナリ \(2020-01-12/feffe43a\) に差し替え [\#1156](https://github.com/sakura-editor/sakura/pull/1156) ([m-tmatma](https://github.com/m-tmatma))
+- CDataProfileの「abortします」コメントを復活する [\#1155](https://github.com/sakura-editor/sakura/pull/1155) ([berryzplus](https://github.com/berryzplus))
+- Copyright を 2020 にする [\#1154](https://github.com/sakura-editor/sakura/pull/1154) ([m-tmatma](https://github.com/m-tmatma))
+- 検索条件の文字列をエスケープする処理を関数化する [\#1132](https://github.com/sakura-editor/sakura/pull/1132) ([berryzplus](https://github.com/berryzplus))
+
 ## [v2.4.0-beta3](https://github.com/sakura-editor/sakura/tree/v2.4.0-beta3) (2019-12-22)
 
 [Full Changelog](https://github.com/sakura-editor/sakura/compare/v2.4.0-beta2...v2.4.0-beta3)
@@ -80,8 +206,6 @@
 - メモリプールを使う事でメモリ確保と解放を高速化 [\#985](https://github.com/sakura-editor/sakura/pull/985) ([beru](https://github.com/beru))
 - DISABLED テストのサンプルを追加する [\#943](https://github.com/sakura-editor/sakura/pull/943) ([m-tmatma](https://github.com/m-tmatma))
 - HTML の Help 中の JavaScript の文字コードを UTF-8 に修正 [\#939](https://github.com/sakura-editor/sakura/pull/939) ([m-tmatma](https://github.com/m-tmatma))
-- .gitignore をソートする [\#927](https://github.com/sakura-editor/sakura/pull/927) ([m-tmatma](https://github.com/m-tmatma))
-- Inno Setup のログファイルを .gitignore に追加する [\#925](https://github.com/sakura-editor/sakura/pull/925) ([m-tmatma](https://github.com/m-tmatma))
 - md5 ファイルを git の無視リストに追加する [\#923](https://github.com/sakura-editor/sakura/pull/923) ([m-tmatma](https://github.com/m-tmatma))
 - PR でビルドに関係ないドキュメント等の更新の場合に CI ビルドが走らないようにする [\#919](https://github.com/sakura-editor/sakura/pull/919) ([m-tmatma](https://github.com/m-tmatma))
 - README に star history を追加 [\#917](https://github.com/sakura-editor/sakura/pull/917) ([m-tmatma](https://github.com/m-tmatma))
@@ -196,10 +320,8 @@
 - ヘルプのバージョンを 2.4.0 に update \(\#713 に追従\) [\#739](https://github.com/sakura-editor/sakura/pull/739) ([m-tmatma](https://github.com/m-tmatma))
 - patchunicode 1006 と 1047 の取り込み [\#738](https://github.com/sakura-editor/sakura/pull/738) ([beru](https://github.com/beru))
 - add CONTRIBUTING.md [\#734](https://github.com/sakura-editor/sakura/pull/734) ([KageShiron](https://github.com/KageShiron))
-- `};` の前の行の空行を削除する [\#728](https://github.com/sakura-editor/sakura/pull/728) ([m-tmatma](https://github.com/m-tmatma))
 - \(ビルドログの解析スクリプト\) 予約語の type と重複する変数名を使わないようにする [\#727](https://github.com/sakura-editor/sakura/pull/727) ([m-tmatma](https://github.com/m-tmatma))
 - 冗長な空行を削除するスクリプトのバグを修正 [\#725](https://github.com/sakura-editor/sakura/pull/725) ([m-tmatma](https://github.com/m-tmatma))
-- CodeFactor の警告で localtime を使っているという警告を修正する [\#723](https://github.com/sakura-editor/sakura/pull/723) ([m-tmatma](https://github.com/m-tmatma))
 - HTML Help のプロジェクトで alias の指定間違いを修正 [\#717](https://github.com/sakura-editor/sakura/pull/717) ([m-tmatma](https://github.com/m-tmatma))
 - ダイアログのコントロールの見出し文字の見切れを修正 [\#711](https://github.com/sakura-editor/sakura/pull/711) ([beru](https://github.com/beru))
 - Grep に関するメニューにショートカットを指定する [\#705](https://github.com/sakura-editor/sakura/pull/705) ([m-tmatma](https://github.com/m-tmatma))

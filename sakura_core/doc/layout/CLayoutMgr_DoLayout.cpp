@@ -171,7 +171,7 @@ void CLayoutMgr::_DoGyomatsuKinsoku(SLayoutWork* pWork, PF_OnLine pfOnLine)
 			pWork->nWordBgn = pWork->nPos;
 			pWork->nWordLen = 1;
 			pWork->eKinsokuType = KINSOKU_TYPE_KINSOKU_TAIL;
-			
+
 			(this->*pfOnLine)(pWork);
 		}
 	}
@@ -286,8 +286,8 @@ void CLayoutMgr::_OnLine1(SLayoutWork* pWork)
 {
 	AddLineBottom( pWork->_CreateLayout(this) );
 	pWork->pLayout = m_pLayoutBot;
-	pWork->colorPrev = pWork->pcColorStrategy->GetStrategyColorSafe();
-	pWork->exInfoPrev.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
+	pWork->colorPrev = CColorStrategy::GetStrategyColorSafe(pWork->pcColorStrategy);
+	pWork->exInfoPrev.SetColorInfo(CColorStrategy::GetStrategyColorInfoSafe(pWork->pcColorStrategy));
 	pWork->nBgn = pWork->nPos;
 	// 2004.03.28 Moca pWork->nPosXはインデント幅を含むように変更(TAB位置調整のため)
 	pWork->nPosX = pWork->nIndent = (this->*m_getIndentOffset)( pWork->pLayout );
@@ -466,14 +466,14 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 
 		if( pWork->nPos - pWork->nBgn > 0 ){
 			AddLineBottom( pWork->_CreateLayout(this) );
-			pWork->colorPrev = pWork->pcColorStrategy->GetStrategyColorSafe();
-			pWork->exInfoPrev.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
+			pWork->colorPrev = CColorStrategy::GetStrategyColorSafe(pWork->pcColorStrategy);
+			pWork->exInfoPrev.SetColorInfo(CColorStrategy::GetStrategyColorInfoSafe(pWork->pcColorStrategy));
 		}
 
 		// 次の行へ
 		pWork->nCurLine++;
 		pWork->pcDocLine = pWork->pcDocLine->GetNextLine();
-		
+
 		// 処理中のユーザー操作を可能にする
 		if( nListenerCount!=0 && 0 < nAllLineNum && 0 == ( pWork->nCurLine % 1024 ) ){
 			if( uThreadID == 0 ){
@@ -496,8 +496,8 @@ void CLayoutMgr::_DoLayout( bool bBlockingHook, UINT uThreadID, UINT uMaxThreadN
 	#endif
 	
 	// 2011.12.31 Botの色分け情報は最後に設定
-	m_nLineTypeBot = pWork->pcColorStrategy->GetStrategyColorSafe();
-	m_cLayoutExInfoBot.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
+	m_nLineTypeBot = CColorStrategy::GetStrategyColorSafe(pWork->pcColorStrategy);
+	m_cLayoutExInfoBot.SetColorInfo(CColorStrategy::GetStrategyColorInfoSafe(pWork->pcColorStrategy));
 
 	m_nPrevReferLine = CLayoutInt(0);
 	m_pLayoutPrevRefer = NULL;
@@ -530,8 +530,8 @@ void CLayoutMgr::_OnLine2(SLayoutWork* pWork)
 	else {
 		pWork->pLayout = InsertLineNext( pWork->pLayout, pWork->_CreateLayout(this) );
 	}
-	pWork->colorPrev = pWork->pcColorStrategy->GetStrategyColorSafe();
-	pWork->exInfoPrev.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
+	pWork->colorPrev = CColorStrategy::GetStrategyColorSafe(pWork->pcColorStrategy);
+	pWork->exInfoPrev.SetColorInfo(CColorStrategy::GetStrategyColorInfoSafe(pWork->pcColorStrategy));
 
 	pWork->nBgn = pWork->nPos;
 	// 2004.03.28 Moca pWork->nPosXはインデント幅を含むように変更(TAB位置調整のため)
@@ -545,7 +545,7 @@ void CLayoutMgr::_OnLine2(SLayoutWork* pWork)
 
 /*!
 	指定レイアウト行に対応する論理行の次の論理行から指定論理行数だけ再レイアウトする
-	
+
 	@date 2002.10.07 YAZAKI rename from "DoLayout3_New"
 	@date 2004.04.03 Moca TABが使われると折り返し位置がずれるのを防ぐため，
 		pWork->nPosXがインデントを含む幅を保持するように変更．m_nMaxLineKetasは
@@ -647,8 +647,8 @@ CLayoutInt CLayoutMgr::DoLayout_Range(
 
 	// 2004.03.28 Moca EOFだけの論理行の直前の行の色分けが確認・更新された
 	if( pWork->nCurLine == m_pcDocLineMgr->GetLineCount() ){
-		m_nLineTypeBot = pWork->pcColorStrategy->GetStrategyColorSafe();
-		m_cLayoutExInfoBot.SetColorInfo(pWork->pcColorStrategy->GetStrategyColorInfoSafe());
+		m_nLineTypeBot = CColorStrategy::GetStrategyColorSafe(pWork->pcColorStrategy);
+		m_cLayoutExInfoBot.SetColorInfo(CColorStrategy::GetStrategyColorInfoSafe(pWork->pcColorStrategy));
 	}
 
 	// 2009.08.28 nasukoji	テキストが編集されたら最大幅を算出する

@@ -29,6 +29,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CDLGFAVORITE_D3C5AE69_3DBD_4C29_9918_BCC0D3BE61FE_H_
+#define SAKURA_CDLGFAVORITE_D3C5AE69_3DBD_4C29_9918_BCC0D3BE61FE_H_
 #pragma once
 
 #include "dlg/CDialog.h"
@@ -56,7 +58,7 @@ protected:
 	*/
 	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
 	BOOL	OnBnClicked(int wID) override;
-	BOOL	OnNotify( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnNotify(NMHDR* pNMHDR) override;
 	BOOL	OnActivate( WPARAM wParam, LPARAM lParam ) override;
 	LPVOID	GetHelpIdTable( void ) override;
 	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;	// 標準以外のメッセージを捕捉する
@@ -137,3 +139,4 @@ private:
 
 	static void  ListViewSort(ListViewSortInfo& info, const CRecent* pRecent, int column, bool bReverse);
 };
+#endif /* SAKURA_CDLGFAVORITE_D3C5AE69_3DBD_4C29_9918_BCC0D3BE61FE_H_ */

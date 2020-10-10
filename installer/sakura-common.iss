@@ -14,7 +14,7 @@ ArchitecturesAllowed={#MyArchitecture}
 AppName={cm:AppName}
 AppId=sakura editor
 AppVersion={#MyAppVer}
-AppVerName={cm:AppVerName} {#MyAppVer}
+AppVerName={cm:AppVerName} {#MyAppVer} ({#MyArchitecture})
 AppMutex=MutexSakuraEditor
 AppPublisher={cm:AppPublisher}
 AppPublisherURL=https://sakura-editor.github.io/
@@ -369,8 +369,10 @@ begin
        IsVistaOrLater and
       ( MultiUserPage.Values[0] = False ) then
       begin
+{
+         Program Files等のシステムフォルダへインストールする場合はUACを無効にしないと設定が保存できません。
+}
          selected := MsgBox(
-{          'Program Files等のシステムフォルダへインストールする場合はUACを無効にしないと設定が保存できませんがよろしいですか？',}
           CustomMessage('MultiUser'),
           mbConfirmation,
           ( MB_OKCANCEL ));

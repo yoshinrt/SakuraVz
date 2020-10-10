@@ -2485,6 +2485,11 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			}
 			return false;
 		}
+	case F_GETVIEWTOP:
+		{
+			int nLine = (Int)View->GetTextArea().GetViewTopLine();
+			Wrap( &Result )->Receive( nLine + 1 );
+		}
 	case F_GETMACROINFO:
 		{
 			int nMacroNo = View->GetCommander().m_pcSMacroMgr->GetCurrentIdx();
@@ -2643,7 +2648,6 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			Wrap( &Result )->Receive( iResult );
 			return true;
 		}
-	
 	default:
 		return false;
 	}

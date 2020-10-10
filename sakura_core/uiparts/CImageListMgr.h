@@ -29,6 +29,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CIMAGELISTMGR_4FA1F1E8_0029_42BD_A346_C51BB0A70B0C_H_
+#define SAKURA_CIMAGELISTMGR_4FA1F1E8_0029_42BD_A346_C51BB0A70B0C_H_
 #pragma once
 
 #include "_main/global.h"
@@ -120,9 +122,10 @@ protected:
 	void MyDitherBlt( HDC drawdc, int nXDest, int nYDest,
 		int nWidth, int nHeight, int nXSrc, int nYSrc ) const;
 
-	//! ビットマップを一行拡張する
-	HBITMAP ResizeToolIcons(HDC hDC, HBITMAP &hRscbmp, int cols, int rows) const noexcept;
+	//! ツールイメージをリサイズする
+	HBITMAP ResizeToolIcons( HBITMAP hRscbmp, COLORREF& clrTransparent ) const noexcept;
 
 	//! ビットマップを一行拡張する
 	void Extend(bool = true);
 };
+#endif /* SAKURA_CIMAGELISTMGR_4FA1F1E8_0029_42BD_A346_C51BB0A70B0C_H_ */

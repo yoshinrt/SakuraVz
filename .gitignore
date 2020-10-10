@@ -1,3 +1,4 @@
+*.aps
 *.bak
 *.iobj
 *.ipdb
@@ -31,4 +32,5 @@ sha256.txt
 tags
 testData_*.txt
 UpgradeLog.htm
+/tools/googletest
 *.vcxproj.user

@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CTYPE_B057F55F_C082_47DB_9CB4_E8B1BBA5BF77_H_
+#define SAKURA_CTYPE_B057F55F_C082_47DB_9CB4_E8B1BBA5BF77_H_
 #pragma once
 
 #include "CEol.h"
@@ -290,7 +292,11 @@ public:
 		m_nType = n;
 	}
 	bool IsValidType() const{ return m_nType>=0 && m_nType<MAX_TYPES; }
-	int GetIndex() const{ /*assert(IsValid());*/ return m_nType; }
+	int GetIndex() const
+	{
+		/*assert(IsValid());*/
+		return m_nType;
+	}
 
 	//共有データへの簡易アクセサ
 //	STypeConfig* operator->(){ return GetTypeConfig(); }
@@ -355,3 +361,4 @@ inline bool C_IsSpace( wchar_t c, bool bExtEol )
 //! C/C++のファイル名による判定
 EOutlineType GetCLangOutlineType( const wchar_t* pszFileName );
 
+#endif /* SAKURA_CTYPE_B057F55F_C082_47DB_9CB4_E8B1BBA5BF77_H_ */

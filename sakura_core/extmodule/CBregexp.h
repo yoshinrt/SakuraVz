@@ -24,6 +24,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CBREGEXP_7B193CCD_1EE7_48A7_8004_6E59B0F4F161_H_
+#define SAKURA_CBREGEXP_7B193CCD_1EE7_48A7_8004_6E59B0F4F161_H_
 #pragma once
 
 #include "CDllHandler.h"
@@ -217,3 +219,4 @@ bool CheckRegexpSyntax( const wchar_t* szPattern, HWND hWnd, bool bShowMessage, 
 static inline bool InitRegexp( HWND hWnd, CBregexp& rRegexp, bool bShowMessage ){
 	return true;
 }
+#endif /* SAKURA_CBREGEXP_7B193CCD_1EE7_48A7_8004_6E59B0F4F161_H_ */

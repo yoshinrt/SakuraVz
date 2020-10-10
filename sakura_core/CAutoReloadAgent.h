@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CAUTORELOADAGENT_6340340B_4677_4748_8240_689427F4AE3D_H_
+#define SAKURA_CAUTORELOADAGENT_6340340B_4677_4748_8240_689427F4AE3D_H_
 #pragma once
 
 #include "doc/CDocListener.h"
@@ -43,7 +45,11 @@ public:
 
 	//監視の一時停止
 	void PauseWatching(){ m_nPauseCount++; }
-	void ResumeWatching(){ m_nPauseCount--; assert(m_nPauseCount>=0); }
+	void ResumeWatching()
+	{
+		m_nPauseCount--;
+		assert(m_nPauseCount>=0);
+	}
 	bool IsPausing() const{ return m_nPauseCount>=1; }
 
 public://#####仮
@@ -58,3 +64,4 @@ private:
 	int m_nPauseCount;	//これが1以上の場合は監視をしない
 	int m_nDelayCount;	//未編集で再ロード時の遅延カウンタ
 };
+#endif /* SAKURA_CAUTORELOADAGENT_6340340B_4677_4748_8240_689427F4AE3D_H_ */

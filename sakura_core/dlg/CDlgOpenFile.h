@@ -17,6 +17,8 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
+#ifndef SAKURA_CDLGOPENFILE_8084B9DB_6463_4168_BA59_132EB2596AE7_H_
+#define SAKURA_CDLGOPENFILE_8084B9DB_6463_4168_BA59_132EB2596AE7_H_
 #pragma once
 
 #include <memory>
@@ -99,12 +101,12 @@ public:
 	) override;
 
 	//操作
-	inline bool DoModal_GetOpenFileName(WCHAR* pszPath, EFilter eAddFileter = EFITER_TEXT) override;
-	inline bool DoModal_GetSaveFileName(WCHAR* pszPath) override;
-	inline bool DoModalOpenDlg(SLoadInfo* pLoadInfo,
+	bool DoModal_GetOpenFileName(WCHAR* pszPath, EFilter eAddFileter = EFITER_TEXT) override;
+	bool DoModal_GetSaveFileName(WCHAR* pszPath) override;
+	bool DoModalOpenDlg(SLoadInfo* pLoadInfo,
 		std::vector<std::wstring>* pFilenames,
 		bool bOptions = true) override;
-	inline bool DoModalSaveDlg(SSaveInfo*	pSaveInfo, bool bSimpleMode) override;
+	bool DoModalSaveDlg(SSaveInfo*	pSaveInfo, bool bSimpleMode) override;
 
 	// 設定フォルダ相対ファイル選択(共有データ,ini位置依存)
 	static BOOL SelectFile(HWND parent, HWND hwndCtl, const WCHAR* filter,
@@ -114,3 +116,4 @@ public:
 private:
 	std::shared_ptr<IDlgOpenFile> m_pImpl;
 };
+#endif /* SAKURA_CDLGOPENFILE_8084B9DB_6463_4168_BA59_132EB2596AE7_H_ */

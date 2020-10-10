@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_STDCONTROL_57A7282D_B9F0_4642_ABFF_48B6D715CCA7_H_
+#define SAKURA_STDCONTROL_57A7282D_B9F0_4642_ABFF_48B6D715CCA7_H_
 #pragma once
 
 /*
@@ -126,9 +128,12 @@ namespace ApiWrap{
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                      コンボボックス                         //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	inline LRESULT Combo_AddString(HWND hwndCombo, const WCHAR* str)
+	inline int Combo_AddString(HWND hwndCombo, const WCHAR* str)
 	{
-		return ::SendMessage( hwndCombo, CB_ADDSTRING, 0, LPARAM(str) );
+		// CB_ADDSTRING は失敗の時、負の値を返す。
+		// 成功した場合 0 ベースのインデックスを返す。
+		// 64bit 対応時に int で十分
+		return (int)::SendMessage( hwndCombo, CB_ADDSTRING, 0, LPARAM(str) );
 	}
 
 	inline LRESULT Combo_GetLBText(HWND hwndCombo, int nIndex, WCHAR* str)
@@ -159,6 +164,57 @@ namespace ApiWrap{
 	inline BOOL Combo_ShowDropdown(HWND hwndCtl, BOOL fShow)			{ return (BOOL)(DWORD)::SendMessage(hwndCtl, CB_SHOWDROPDOWN, (WPARAM)fShow, 0L); }
 	inline int Combo_SetDroppedWidth(HWND hwndCtl, int width)			{ return (int)(DWORD)::SendMessage(hwndCtl, CB_SETDROPPEDWIDTH, (WPARAM)width, 0L); }
 	inline BOOL Combo_GetDroppedState(HWND hwndCtl)						{ return (BOOL)(DWORD)::SendMessage(hwndCtl, CB_GETDROPPEDSTATE, 0L, 0L ); }
+
+	inline bool Combo_GetLBText(HWND hwndCombo, int nIndex, CNativeW& str)
+	{
+		// バッファをクリアしておく
+		str.Clear();
+
+		// 範囲外は失敗にする
+		if (nIndex < 0)
+		{
+			return false;
+		}
+
+		// 文字列長を取得する、取得できなければエラー
+		const int length = Combo_GetLBTextLen( hwndCombo, nIndex );
+		if ( length == CB_ERR || length < 0)
+		{
+			return false;
+		}
+
+		// 必要なメモリを確保する
+		const int bufsize = length + 1;
+		str.AllocStringBuffer( bufsize );
+
+		// アイテムテキストを取得する
+		const int actualCount = (int)Combo_GetLBText( hwndCombo, nIndex, str.GetStringPtr() );
+		if (actualCount == CB_ERR || actualCount < 0)
+		{
+			return false;
+		}
+		else if(str.capacity() <= actualCount)
+		{
+			return false;
+		}
+
+		// CNativeW 内部のデータサイズを更新する
+		str._SetStringLength(actualCount);
+
+		// 正しく設定されているはず
+		assert(str.GetStringLength() == actualCount);
+		return true;
+	}
+	inline void Combo_GetEditSel( HWND hwndCombo, int &nSelStart, int &nSelEnd )
+	{
+		DWORD dwSelStart = 0;
+		DWORD dwSelEnd = 0;
+		::SendMessage( hwndCombo, CB_GETEDITSEL, WPARAM( &dwSelStart ), LPARAM( &dwSelEnd ) );
+		assert_warning( 0x7FFFFFFF < dwSelStart );
+		assert_warning( 0x7FFFFFFF < dwSelEnd );
+		nSelStart = static_cast<int>(dwSelStart);
+		nSelEnd = static_cast<int>(dwSelEnd);
+	}
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                      リストボックス                         //
@@ -244,3 +300,4 @@ namespace ApiWrap{
 	void TreeView_ExpandAll( HWND, bool, int nMaxDepth = 100 );
 }
 using namespace ApiWrap;
+#endif /* SAKURA_STDCONTROL_57A7282D_B9F0_4642_ABFF_48B6D715CCA7_H_ */

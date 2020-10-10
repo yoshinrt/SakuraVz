@@ -18,6 +18,8 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
+#ifndef SAKURA_CDLGFUNCLIST_B22A3877_572A_49B7_B683_50ECA451A6F8_H_
+#define SAKURA_CDLGFUNCLIST_B22A3877_572A_49B7_B683_50ECA451A6F8_H_
 #pragma once
 
 #include <Windows.h>
@@ -99,6 +101,8 @@ public:
 	void SetWindowText( const WCHAR* szTitle );		//ダイアログタイトルの設定
 	EFunctionCode GetFuncCodeRedraw(int outlineType);
 	void LoadFileTreeSetting( CFileTreeSetting& data, SFilePath& IniDirPath );
+	void NotifyCaretMovement( CLayoutInt nCurLine, CLayoutInt nCurCol );
+	void NotifyDocModification();
 
 protected:
 	bool m_bInChangeLayout;
@@ -119,7 +123,7 @@ public:
 protected:
 	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
 	BOOL OnBnClicked(int wID) override;
-	BOOL OnNotify(WPARAM wParam, LPARAM lParam) override;
+	BOOL OnNotify(NMHDR* pNMHDR) override;
 	BOOL OnSize( WPARAM wParam, LPARAM lParam ) override;
 	BOOL OnMinMaxInfo( LPARAM lParam );
 	BOOL OnDestroy(void) override; // 20060201 aroka
@@ -137,12 +141,16 @@ protected:
 	void SetTreeFile();				// ツリーコントロールの初期化：ファイルツリー
 	void SetListVB( void );			/* リストビューコントロールの初期化：VisualBasic */		// Jul 10, 2003  little YOSHI
 	void SetDocLineFuncList();
+	void SetItemSelection( int nSelectItemIndex, bool bAllowExpand );
+	void SetItemSelectionForTreeView( HWND hwndTree, int nSelectItemIndex, bool bAllowExpand );
+	void SetItemSelectionForListView( HWND hwndList, int nSelectItemIndex );
+	bool GetFuncInfoIndex( CLayoutInt nCurLine, CLayoutInt nCurCol, int* pnIndexOut );
 
 	void SetTreeFileSub(HTREEITEM hParent, const WCHAR* pszFile);
-	// 2002/11/1 frozen 
+	// 2002/11/1 frozen
 	void SortTree(HWND hWndTree,HTREEITEM htiParent);//!< ツリービューの項目をソートする（ソート基準はm_nSortTypeを使用）
 #if 0
-2002.04.01 YAZAKI SetTreeTxt()、SetTreeTxtNest()は廃止。GetTreeTextNextはもともと使用されていなかった。
+// 2002.04.01 YAZAKI SetTreeTxt()、SetTreeTxtNest()は廃止。GetTreeTextNextはもともと使用されていなかった。
 	void SetTreeTxt( HWND );	/* ツリーコントロールの初期化：テキストトピックツリー */
 	int SetTreeTxtNest( HWND, HTREEITEM, int, int, HTREEITEM*, int );
 	void GetTreeTextNext( HWND, HTREEITEM, int );
@@ -209,7 +217,7 @@ private:
 	bool		m_bHovering;
 	int			m_nHilightedBtn;
 	int			m_nCapturingBtn;
-	
+
 	STypeConfig m_type;
 	CFileTreeSetting	m_fileTreeSetting;
 
@@ -220,4 +228,7 @@ private:
 	POINT				m_ptDefaultSize;
 	POINT				m_ptDefaultSizeClient;
 	RECT				m_rcItems[12];
+
+	bool		m_bFuncInfoArrIsUpToDate;
 };
+#endif /* SAKURA_CDLGFUNCLIST_B22A3877_572A_49B7_B683_50ECA451A6F8_H_ */

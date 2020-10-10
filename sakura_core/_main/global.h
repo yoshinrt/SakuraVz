@@ -18,6 +18,8 @@
 	Please contact the copyright holder to use this code for other purpose.
 */
 
+#ifndef SAKURA_GLOBAL_BD124BE7_A850_41F3_9F5D_8A4F0E45A4C9_H_
+#define SAKURA_GLOBAL_BD124BE7_A850_41F3_9F5D_8A4F0E45A4C9_H_
 #pragma once
 
 #ifndef STRICT
@@ -27,14 +29,14 @@
 #include <Windows.h>
 #include <tchar.h>
 
+#include "charset/charset.h"
+
 /* ウィンドウのID */
 #define IDW_STATUSBAR 123
 
 #define IDM_SELWINDOW		10000
 #define IDM_SELMRU			11000
 #define IDM_SELOPENFOLDER	12000
-
-#include "charset/charset.h"
 
 /* ダイアログ表示方法 */ // アウトラインウィンドウ用に作成 20060201 aroka
 enum enumShowDlg {
@@ -176,3 +178,4 @@ class CEditWnd;
 extern CEditWnd* g_pcEditWnd;
 
 HINSTANCE G_AppInstance();
+#endif /* SAKURA_GLOBAL_BD124BE7_A850_41F3_9F5D_8A4F0E45A4C9_H_ */

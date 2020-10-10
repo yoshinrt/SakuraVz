@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_GREPINFO_9A59ABAF_04F9_4D29_B216_0B0784DD2290_H_
+#define SAKURA_GREPINFO_9A59ABAF_04F9_4D29_B216_0B0784DD2290_H_
 #pragma once
 
 #include "_main/global.h"	//SSearchOption
@@ -41,8 +43,6 @@ struct GrepInfo {
 	CNativeW		cmGrepRep;				//!< 置換キー
 	CNativeW		cmGrepFile;				//!< 検索対象ファイル
 	CNativeW		cmGrepFolder;			//!< 検索対象フォルダ
-	CNativeW		cmExcludeFile;			//!< 除外対象ファイル
-	CNativeW		cmExcludeFolder;		//!< 除外対象フォルダ
 	SSearchOption	sGrepSearchOption;		//!< 検索オプション
 	bool			bGrepCurFolder;			//!< カレントディレクトリを維持
 	bool			bGrepStdout;			//!< 標準出力モード
@@ -61,3 +61,4 @@ struct GrepInfo {
 	// コンストラクタ
 	GrepInfo() noexcept;
 };
+#endif /* SAKURA_GREPINFO_9A59ABAF_04F9_4D29_B216_0B0784DD2290_H_ */

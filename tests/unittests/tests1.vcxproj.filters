@@ -59,5 +59,25 @@
     <ClCompile Include="coverage.cpp">
       <Filter>Other Files</Filter>
     </ClCompile>
+    <ClCompile Include="test-loadstring.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test-clayoutint.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test-cdlgprofilemgr.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code-main.cpp">
+      <Filter>Other Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test-winmain.cpp">
+      <Filter>Test Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StartEditorProcessForTest.h">
+      <Filter>Other Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

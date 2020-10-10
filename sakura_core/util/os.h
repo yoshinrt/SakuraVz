@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_OS_0C5BD7E8_67ED_467C_916F_CCDC1F9A26BF_H_
+#define SAKURA_OS_0C5BD7E8_67ED_467C_916F_CCDC1F9A26BF_H_
 #pragma once
 
 #include <ObjIdl.h> // LPDATAOBJECT
@@ -99,3 +101,13 @@ private:
 	@brief PowerShell が利用可能か判定する
 */
 BOOL IsPowerShellAvailable(void);
+
+/*!
+	@brief IMEのオープン状態を設定する
+	@param hWnd 設定対象のウィンドウハンドル
+	@param bOpen 設定するオープン状態
+	@param pBackup `nullptr` でなければ設定前のオープン状態を取得
+	@return	手続きが成功したら true 失敗したら false
+*/
+BOOL ImeSetOpen(HWND hWnd, BOOL bOpen, BOOL* pBackup);
+#endif /* SAKURA_OS_0C5BD7E8_67ED_467C_916F_CCDC1F9A26BF_H_ */

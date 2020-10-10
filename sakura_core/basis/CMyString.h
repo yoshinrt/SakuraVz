@@ -22,10 +22,13 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CMYSTRING_009A2525_6B06_4C1B_B089_C1B8A424A565_H_
+#define SAKURA_CMYSTRING_009A2525_6B06_4C1B_B089_C1B8A424A565_H_
 #pragma once
 
 #include <string>
 #include "util/string_ex.h"
+#include "util/StaticType.h"
 
 #define m_delete2(p) { if(p){ delete[] p; p=0; } }
 
@@ -33,7 +36,6 @@
 
 //共通マクロ
 #define _FT _T
-#include "util/StaticType.h"
 
 //共通型
 typedef StaticString<WCHAR,_MAX_PATH> SFilePath;
@@ -106,3 +108,4 @@ private:
 	WCHAR	m_szCmdLine[1024];
 	WCHAR*	m_pHead;
 };
+#endif /* SAKURA_CMYSTRING_009A2525_6B06_4C1B_B089_C1B8A424A565_H_ */

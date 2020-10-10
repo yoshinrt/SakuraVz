@@ -23,6 +23,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_COMMONSETTING_2CBDBC26_EA7F_466E_842F_AFB0D93207D2_H_
+#define SAKURA_COMMONSETTING_2CBDBC26_EA7F_466E_842F_AFB0D93207D2_H_
 #pragma once
 
 #include "CKeyWordSetMgr.h"
@@ -789,3 +791,4 @@ struct CommonSetting
 	//
 	CommonSetting_VzMode			m_sVzMode;			//!< Vz 互換設定
 };
+#endif /* SAKURA_COMMONSETTING_2CBDBC26_EA7F_466E_842F_AFB0D93207D2_H_ */

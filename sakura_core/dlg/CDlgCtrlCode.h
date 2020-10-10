@@ -28,6 +28,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CDLGCTRLCODE_84B2AD70_76BB_4CE3_9B09_4D1AF49BF5EE_H_
+#define SAKURA_CDLGCTRLCODE_84B2AD70_76BB_4CE3_9B09_4D1AF49BF5EE_H_
 #pragma once
 
 class CDlgCtrlCode;
@@ -58,7 +60,7 @@ private:
 	*/
 	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
 	BOOL	OnBnClicked(int wID) override;
-	BOOL	OnNotify( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnNotify(NMHDR* pNMHDR) override;
 	LPVOID	GetHelpIdTable( void ) override;
 
 	void	SetData( void ) override;	/* ダイアログデータの設定 */
@@ -70,3 +72,4 @@ private:
 	*/
 	wchar_t		m_nCode;	// コード
 };
+#endif /* SAKURA_CDLGCTRLCODE_84B2AD70_76BB_4CE3_9B09_4D1AF49BF5EE_H_ */

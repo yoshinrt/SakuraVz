@@ -1347,7 +1347,8 @@ void CPrintPreview::DrawHeaderFooter( HDC hdc, const CMyRect& rect, bool bHeader
 			bHeader ? m_pPrintSetting->m_szHeaderForm[POS_CENTER] : m_pPrintSetting->m_szFooterForm[POS_CENTER],
 			szWork, nWorkLen);
 		nLen = wcslen( szWork );
-		nTextWidth = CTextMetrics::CalcTextWidth2(szWork, nLen, nDx, spaceing); //テキスト幅
+		std::vector<int> vDxArray;
+		nTextWidth = CTextMetrics::CalcTextWidth2(szWork, nLen, nDx, spaceing, vDxArray); //テキスト幅
 		Print_DrawLine(
 			hdc,
 			CMyPoint(
@@ -1366,7 +1367,7 @@ void CPrintPreview::DrawHeaderFooter( HDC hdc, const CMyRect& rect, bool bHeader
 			bHeader ? m_pPrintSetting->m_szHeaderForm[POS_RIGHT] : m_pPrintSetting->m_szFooterForm[POS_RIGHT],
 			szWork, nWorkLen);
 		nLen = wcslen( szWork );
-		nTextWidth = CTextMetrics::CalcTextWidth2(szWork, nLen, nDx, spaceing); //テキスト幅
+		nTextWidth = CTextMetrics::CalcTextWidth2(szWork, nLen, nDx, spaceing, vDxArray); //テキスト幅
 		Print_DrawLine(
 			hdc,
 			CMyPoint(
@@ -1950,7 +1951,7 @@ void CPrintPreview::CreatePrintPreviewControls( void )
 	/* 縦スクロールバーの作成 */
 	m_hwndVScrollBar = ::CreateWindowEx(
 		0L,									/* no extended styles			*/
-		L"SCROLLBAR",						/* scroll bar control class		*/
+		WC_SCROLLBAR,						/* scroll bar control class		*/
 		NULL,								/* text for window title bar	*/
 		WS_VISIBLE | WS_CHILD | SBS_VERT,	/* scroll bar styles			*/
 		0,									/* horizontal position			*/
@@ -1976,7 +1977,7 @@ void CPrintPreview::CreatePrintPreviewControls( void )
 	/* 横スクロールバーの作成 */
 	m_hwndHScrollBar = ::CreateWindowEx(
 		0L,									/* no extended styles			*/
-		L"SCROLLBAR",						/* scroll bar control class		*/
+		WC_SCROLLBAR,						/* scroll bar control class		*/
 		NULL,								/* text for window title bar	*/
 		WS_VISIBLE | WS_CHILD | SBS_HORZ,	/* scroll bar styles			*/
 		0,									/* horizontal position			*/
@@ -2001,7 +2002,7 @@ void CPrintPreview::CreatePrintPreviewControls( void )
 	/* サイズボックスの作成 */
 	m_hwndSizeBox = ::CreateWindowEx(
 		WS_EX_CONTROLPARENT/*0L*/, 							/* no extended styles			*/
-		L"SCROLLBAR",										/* scroll bar control class		*/
+		WC_SCROLLBAR,										/* scroll bar control class		*/
 		NULL,												/* text for window title bar	*/
 		WS_VISIBLE | WS_CHILD | SBS_SIZEBOX | SBS_SIZEGRIP, /* scroll bar styles			*/
 		0,													/* horizontal position			*/

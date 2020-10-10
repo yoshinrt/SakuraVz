@@ -290,7 +290,7 @@ void CMainToolBar::CreateToolBar( void )
 						Toolbar_GetItemRect( m_hwndToolBar, count-1, &rc );
 
 						//コンボボックスを作る
-						m_hwndSearchBox = CreateWindow( L"COMBOBOX", L"Combo",
+						m_hwndSearchBox = CreateWindow( WC_COMBOBOX, L"Combo",
 								WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWN
 								/*| CBS_SORT*/ | CBS_AUTOHSCROLL /*| CBS_DISABLENOSCROLL*/,
 								rc.left, rc.top, rc.right - rc.left, (rc.bottom - rc.top) * 10,
@@ -331,15 +331,15 @@ void CMainToolBar::CreateToolBar( void )
 							m_comboDel.pRecent = &m_cRecentSearch;
 							CDialog::SetComboBoxDeleter(m_hwndSearchBox, &m_comboDel);
 
-							// コンボボックスの垂直位置を調整する
+							// コンボボックスの位置と幅を調整する
 							CMyRect rcCombo;
 							::GetWindowRect( m_hwndSearchBox, &rcCombo );
 							::SetWindowPos( m_hwndSearchBox, NULL,
-								rc.left,	//作ったときと同じ値を指定
-								(rc.bottom - rc.top - rcCombo.Height()) / 2,	//上下中央に配置する
-								0,			//rcCombo.Width()のまま変えない
-								0,			//rcCombo.Height()のまま変えない
-								SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING );
+								rc.left + cxBorder,
+								rc.top + (rc.bottom - rc.top - rcCombo.Height()) / 2,
+								rcCombo.Width() - cxBorder * 2,
+								rcCombo.Height(),
+								SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOSENDCHANGING );
 						}
 						break;
 
@@ -538,7 +538,7 @@ void CMainToolBar::UpdateToolbar( void )
 			int state = Toolbar_GetState( m_hwndToolBar, tbb.idCommand );
 			if( state != -1 )
 			{
-				WORD stateToSet = 0;
+				WORD stateToSet = state & ~(TBSTATE_ENABLED | TBSTATE_CHECKED);
 				// 機能が利用可能か調べる
 				if( IsFuncEnable( m_pOwner->GetDocument(), &GetDllShareData(), (EFunctionCode)tbb.idCommand ) )
 				{

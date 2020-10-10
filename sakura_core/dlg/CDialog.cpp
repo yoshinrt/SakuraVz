@@ -372,7 +372,7 @@ void CDialog::CreateSizeBox( void )
 	/* サイズボックス */
 	m_hwndSizeBox = ::CreateWindowEx(
 		WS_EX_CONTROLPARENT,								/* no extended styles */
-		L"SCROLLBAR",									/* scroll bar control class */
+		WC_SCROLLBAR,										/* scroll bar control class */
 		NULL,												/* text for window title bar */
 		WS_VISIBLE | WS_CHILD | SBS_SIZEBOX | SBS_SIZEGRIP, /* scroll bar styles */
 		0,													/* horizontal position */
@@ -395,7 +395,7 @@ INT_PTR CDialog::DispatchEvent( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 	case WM_INITDIALOG:	return OnInitDialog( hwndDlg, wParam, lParam );
 	case WM_DESTROY:	return OnDestroy();
 	case WM_COMMAND:	return OnCommand( wParam, lParam );
-	case WM_NOTIFY:		return OnNotify( wParam, lParam );
+	case WM_NOTIFY:		return OnNotify( (NMHDR*)lParam );
 	case WM_SIZE:
 		m_hWnd = hwndDlg;
 		return OnSize( wParam, lParam );
@@ -446,6 +446,7 @@ BOOL CDialog::OnCommand( WPARAM wParam, LPARAM lParam )
 		}else if( ::lstrcmpi(szClass, L"Edit") == 0 ){
 			switch( wNotifyCode ){
 			case EN_CHANGE:		return OnEnChange( hwndCtl, wID );
+			case EN_SETFOCUS:	return OnEnSetFocus( hwndCtl, wID );
 			case EN_KILLFOCUS:	return OnEnKillFocus( hwndCtl, wID );
 			}
 		}else if( ::lstrcmpi(szClass, L"ListBox") == 0 ){
@@ -697,15 +698,46 @@ void CDialog::GetItemClientRect( int wID, RECT& rc )
 
 static const WCHAR* TSTR_SUBCOMBOBOXDATA = L"SubComboBoxData";
 
-static void DeleteItem(HWND hwnd, CRecent* pRecent)
+/*! コンボボックスのリストアイテムを関連付けられた履歴と共に削除する
+ */
+static void DeleteRecentItem(
+	HWND		hwndCombo,	//!< コンボボックスのハンドル
+	int			nIndex,		//!< 選択中のリストアイテムのインデックス
+	CRecent*	pRecent		//!< コンボに関連付けられた履歴
+)
 {
-	int nIndex = Combo_GetCurSel(hwnd);
-	if( 0 <= nIndex ){
-		std::vector<WCHAR> szText;
-		szText.resize(Combo_GetLBTextLen(hwnd, nIndex) + 1);
-		Combo_GetLBText(hwnd, nIndex, &szText[0]);
-		Combo_DeleteString(hwnd, nIndex);
-		int nRecentIndex = pRecent->FindItemByText(&szText[0]);
+	// アイテムインデックスは0以上の整数である必要がある
+	if( nIndex < 0 ){
+		return;
+	}
+
+	// ドロップダウンリスト内の選択されたテキストを取得
+	CNativeW cItemText;
+	if( Combo_GetLBText( hwndCombo, nIndex, cItemText ) ){
+		// エディットテキストを取得(失敗しても構わないのでエラー処理なし)
+		CNativeW cEditText;
+		Wnd_GetText( hwndCombo, cEditText );
+
+		// コンボボックスのキャレット位置を取得
+		int nSelStart = 0;
+		int nSelEnd = 0;
+		Combo_GetEditSel( hwndCombo, nSelStart, nSelEnd );
+
+		// アイテムテキストとエディットテキストが異なる、またはエディットが全選択でなかった場合
+		if ( cItemText != cEditText
+			|| 0 < nSelStart
+			|| nSelEnd < cEditText.GetStringLength()
+			)
+		{
+			// 履歴削除をスキップする
+			return;
+		}
+
+		// コンボボックスのリストアイテム削除
+		Combo_DeleteString( hwndCombo, nIndex );
+
+		// 履歴項目を削除
+		int nRecentIndex = pRecent->FindItemByText( cItemText.GetStringPtr() );
 		if( 0 <= nRecentIndex ){
 			pRecent->DeleteItem(nRecentIndex);
 		}
@@ -721,9 +753,9 @@ LRESULT CALLBACK SubEditProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if( wParam == VK_DELETE ){
 			HWND hwndCombo = data->hwndCombo;
 			BOOL bShow = Combo_GetDroppedState(hwndCombo);
-			if( bShow ){
-				DeleteItem(hwndCombo, data->pRecent);
-				return 0;
+			int nIndex = Combo_GetCurSel(hwndCombo);
+			if( bShow && 0 <= nIndex ){
+				DeleteRecentItem(hwndCombo, nIndex, data->pRecent);
 			}
 		}
 		break;
@@ -749,9 +781,9 @@ LRESULT CALLBACK SubListBoxProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	{
 		if( wParam == VK_DELETE ){
 			HWND hwndCombo = data->hwndCombo;
-			BOOL bShow = Combo_GetDroppedState(hwndCombo);
-			if( bShow ){
-				DeleteItem(hwndCombo, data->pRecent);
+			int nIndex = Combo_GetCurSel(hwndCombo);
+			if( 0 <= nIndex ){
+				DeleteRecentItem(hwndCombo, nIndex, data->pRecent);
 				return 0;
 			}
 		}

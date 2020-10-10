@@ -1,4 +1,6 @@
 ﻿/*! @file */
+#ifndef SAKURA_VERSION_F8EBA970_BB7A_43D9_B89A_04FB0B586A8A_H_
+#define SAKURA_VERSION_F8EBA970_BB7A_43D9_B89A_04FB0B586A8A_H_
 #pragma once
 
 #include "config/build_config.h"
@@ -13,7 +15,7 @@
 //       d  => 0
 #define VER_A   2 // a of ver a.b.c.d
 #define VER_B   4 // b of ver a.b.c.d
-#define VER_C   0 // c of ver a.b.c.d
+#define VER_C   2 // c of ver a.b.c.d
 #ifdef CI_BUILD_NUMBER_INT
 #define VER_D   CI_BUILD_NUMBER_INT // d of ver a.b.c.d
 #else
@@ -88,3 +90,4 @@
 	DEV_VERSION_STR_WITH_SPACE         \
 	SPACE_WHEN_DEBUG                            \
 	VER_CONFIG ALPHA_VERSION_STR_WITH_SPACE
+#endif /* SAKURA_VERSION_F8EBA970_BB7A_43D9_B89A_04FB0B586A8A_H_ */

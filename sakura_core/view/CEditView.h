@@ -38,6 +38,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CEDITVIEW_54DE503F_6F97_4A16_8165_27F5F0D232E2_H_
+#define SAKURA_CEDITVIEW_54DE503F_6F97_4A16_8165_27F5F0D232E2_H_
 #pragma once
 
 #include <Windows.h>
@@ -243,8 +245,7 @@ public:
 protected:
 	//! ロジック行を1行描画
 	bool DrawLogicLine(
-		HDC				hdc,			//!< [in]     作画対象
-		DispPos*		pDispPos,		//!< [in,out] 描画する箇所、描画元ソース
+		SColorStrategyInfo* pInfo,		//!< [in,out] 作画情報
 		CLayoutInt		nLineTo			//!< [in]     作画終了するレイアウト行番号
 	);
 
@@ -572,12 +573,36 @@ public:
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 public:
 	//主要構成部品アクセス
-	CTextArea& GetTextArea(){ assert(m_pcTextArea); return *m_pcTextArea; }
-	const CTextArea& GetTextArea() const{ assert(m_pcTextArea); return *m_pcTextArea; }
-	CCaret& GetCaret(){ assert(m_pcCaret); return *m_pcCaret; }
-	const CCaret& GetCaret() const{ assert(m_pcCaret); return *m_pcCaret; }
-	CRuler& GetRuler(){ assert(m_pcRuler); return *m_pcRuler; }
-	const CRuler& GetRuler() const{ assert(m_pcRuler); return *m_pcRuler; }
+	CTextArea& GetTextArea()
+	{
+		assert(m_pcTextArea);
+		return *m_pcTextArea;
+	}
+	const CTextArea& GetTextArea() const
+	{
+		assert(m_pcTextArea);
+		return *m_pcTextArea;
+	}
+	CCaret& GetCaret()
+	{
+		assert(m_pcCaret);
+		return *m_pcCaret;
+	}
+	const CCaret& GetCaret() const
+	{
+		assert(m_pcCaret);
+		return *m_pcCaret;
+	}
+	CRuler& GetRuler()
+	{
+		assert(m_pcRuler);
+		return *m_pcRuler;
+	}
+	const CRuler& GetRuler() const
+	{
+		assert(m_pcRuler);
+		return *m_pcRuler;
+	}
 
 	//主要属性アクセス
 	CTextMetrics& GetTextMetrics(){ return m_cTextMetrics; }
@@ -586,8 +611,16 @@ public:
 	const CViewSelect& GetSelectionInfo() const{ return m_cViewSelect; }
 
 	//主要オブジェクトアクセス
-	CViewFont& GetFontset(){ assert(m_pcViewFont); return *m_pcViewFont; }
-	const CViewFont& GetFontset() const{ assert(m_pcViewFont); return *m_pcViewFont; }
+	CViewFont& GetFontset()
+	{
+		assert(m_pcViewFont);
+		return *m_pcViewFont;
+	}
+	const CViewFont& GetFontset() const
+	{
+		assert(m_pcViewFont);
+		return *m_pcViewFont;
+	}
 
 	//主要ヘルパアクセス
 	const CViewParser& GetParser() const{ return m_cParser; }
@@ -750,3 +783,4 @@ public:
 	virtual bool IsEnableRunningDlg(){ return true; }
 	virtual bool IsActiveDebugWindow(){ return true; }
 };
+#endif /* SAKURA_CEDITVIEW_54DE503F_6F97_4A16_8165_27F5F0D232E2_H_ */

@@ -30,6 +30,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CDLGTAGJUMPLIST_D44C3C98_9BF7_4B99_923B_9005CD54872F_H_
+#define SAKURA_CDLGTAGJUMPLIST_D44C3C98_9BF7_4B99_923B_9005CD54872F_H_
 #pragma once
 
 #include "dlg/CDialog.h"
@@ -79,7 +81,7 @@ protected:
 	BOOL	OnSize( WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnMove( WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnMinMaxInfo( LPARAM lParam );
-	BOOL	OnNotify( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnNotify(NMHDR* pNMHDR) override;
 	//	@@ 2005.03.31 MIK キーワード入力エリアのイベント処理
 	BOOL	OnCbnSelChange( HWND hwndCtl, int wID ) override;
 	BOOL	OnCbnEditChange( HWND hwndCtl, int wID ) override;
@@ -171,3 +173,4 @@ private:
 
 	DISALLOW_COPY_AND_ASSIGN(CDlgTagJumpList);
 };
+#endif /* SAKURA_CDLGTAGJUMPLIST_D44C3C98_9BF7_4B99_923B_9005CD54872F_H_ */

@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CDOCEDITOR_87202DA6_D60E_4235_AD2F_02507F4E101A_H_
+#define SAKURA_CDOCEDITOR_87202DA6_D60E_4235_AD2F_02507F4E101A_H_
 #pragma once
 
 #include "doc/CDocListener.h"
@@ -103,3 +105,4 @@ public:
 			CClipboard::HasValidData();
 	}
 };
+#endif /* SAKURA_CDOCEDITOR_87202DA6_D60E_4235_AD2F_02507F4E101A_H_ */

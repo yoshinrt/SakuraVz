@@ -22,6 +22,7 @@
 #include "outline/CFuncInfo.h"
 #include "outline/CFuncInfoArr.h"// 2002/2/10 aroka ヘッダ整理
 #include "util/shell.h"
+#include "util/os.h"
 #include "window/CEditWnd.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
@@ -65,13 +66,13 @@ int CDlgJump::DoModal(
 
 // From Here Oct. 6, 2000 JEPRO added 行番号入力ボックスにスピンコントロールを付けるため
 // CDlgPrintSetting.cppのOnNotifyとOnSpin及びCpropComFile.cppのDispatchEvent_p2内のcase WM_NOTIFYを参考にした
-BOOL CDlgJump::OnNotify( WPARAM wParam, LPARAM lParam )
+BOOL CDlgJump::OnNotify(NMHDR* pNMHDR)
 {
 	NM_UPDOWN*		pMNUD;
 	int				idCtrl;
 	int				nData;
-	idCtrl = (int)wParam;
-	pMNUD  = (NM_UPDOWN*)lParam;
+	idCtrl = (int)pNMHDR->idFrom;
+	pMNUD  = (NM_UPDOWN*)pNMHDR;
 /* スピンコントロールの処理 */
 	switch( idCtrl ){
 	case IDC_SPIN_LINENUM:
@@ -182,6 +183,35 @@ BOOL CDlgJump::OnBnClicked( int wID )
 	}
 	/* 基底クラスメンバ */
 	return CDialog::OnBnClicked( wID );
+}
+
+// IMEのオープン状態復帰用
+static BOOL s_isImmOpenBkup;
+
+// IMEを使用したくないコントロールのID判定
+static bool isImeUndesirable(int id)
+{
+	switch (id) {
+	case IDC_EDIT_LINENUM:
+	case IDC_EDIT_PLSQL_E1:
+		return true;
+	default:
+		return false;
+	}
+}
+
+BOOL CDlgJump::OnEnSetFocus(HWND hwndCtl, int wID)
+{
+	if (isImeUndesirable(wID))
+		ImeSetOpen(hwndCtl, FALSE, &s_isImmOpenBkup);
+	return 0;
+}
+
+BOOL CDlgJump::OnEnKillFocus(HWND hwndCtl, int wID)
+{
+	if (isImeUndesirable(wID))
+		ImeSetOpen(hwndCtl, s_isImmOpenBkup, nullptr);
+	return 0;
 }
 
 /* ダイアログデータの設定 */

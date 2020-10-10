@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CDATAPROFILE_401640FD_5B27_454A_B0DE_098E1C4FAEAD_H_
+#define SAKURA_CDATAPROFILE_401640FD_5B27_454A_B0DE_098E1C4FAEAD_H_
 #pragma once
 
 #include "util/StaticType.h"
@@ -44,7 +46,6 @@ typedef const StringBufferW_ StringBufferW;
 
 //文字列バッファ型インスタンスの生成マクロ
 #define MakeStringBufferW(S) StringBufferW(S,_countof(S))
-#define MakeStringBufferW0(S) StringBufferW(S,0)
 
 //2007.09.24 kobake データ変換部を子クラスに分離
 //!各種データ変換付きCProfile
@@ -222,3 +223,4 @@ bool CDataProfile::IOProfileData<std::wstring>(
 	}
 	return ret;
 }
+#endif /* SAKURA_CDATAPROFILE_401640FD_5B27_454A_B0DE_098E1C4FAEAD_H_ */

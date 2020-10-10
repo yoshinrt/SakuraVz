@@ -36,9 +36,9 @@ call %~dp0sakura\githash.bat %~dp0sakura_core
 @rem ----------------------------------------------------------------
 @rem prepare environment variable
 @rem ----------------------------------------------------------------
-@echo checking CI_ACCOUNT_NAME %CI_ACCOUNT_NAME%
+@echo checking CI_REPO_NAME %CI_REPO_NAME%
 set BUILD_ACCOUNT=
-if "%CI_ACCOUNT_NAME%" == "sakuraeditor" (
+if "%CI_REPO_NAME%" == "sakura-editor/sakura" (
 	set BUILD_ACCOUNT=
 ) else if "%CI_REPO_NAME%" == "" (
 	set BUILD_ACCOUNT=
@@ -74,7 +74,7 @@ if not "%GITHUB_PR_NUMBER%" == "" (
 )
 
 @echo hash name
-set SHORTHASH=%TEMP_GIT_SHORT_COMMIT_HASH%
+set SHORTHASH=%GIT_SHORT_COMMIT_HASH%
 
 if "%ALPHA%" == "1" (
 	set RELEASE_PHASE=alpha

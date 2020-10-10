@@ -27,9 +27,12 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CDLGPROFILEMGR_E77A329C_4D06_436A_84E3_01B4D8F34A9A_H_
+#define SAKURA_CDLGPROFILEMGR_E77A329C_4D06_436A_84E3_01B4D8F34A9A_H_
 #pragma once
 
 #include "dlg/CDialog.h"
+#include "_main/CCommandLine.h"
 #include <string>
 #include <vector>
 
@@ -44,6 +47,9 @@ struct SProfileSettings
 class CDlgProfileMgr final : public CDialog
 {
 public:
+	//! コマンドラインだけでプロファイルが確定するか調べる
+	static bool TrySelectProfile( CCommandLine* pcCommandLine ) noexcept;
+
 	/*
 	||  Constructors
 	*/
@@ -76,3 +82,4 @@ public:
 	static bool ReadProfSettings(SProfileSettings& settings);
 	static bool WriteProfSettings(SProfileSettings& settings);
 };
+#endif /* SAKURA_CDLGPROFILEMGR_E77A329C_4D06_436A_84E3_01B4D8F34A9A_H_ */

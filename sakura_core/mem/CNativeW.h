@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CNATIVEW_3B48F63E_5B62_4FAB_9718_0D80114E20C1_H_
+#define SAKURA_CNATIVEW_3B48F63E_5B62_4FAB_9718_0D80114E20C1_H_
 #pragma once
 
 #include "CNative.h"
@@ -45,7 +47,11 @@ public:
 
 	//########補助
 	bool			IsValid()		const{ return m_pData!=NULL; }
-	wchar_t			At(int nIndex)	const{ assert(nIndex>=0 && nIndex<m_nDataLen); return m_pData[nIndex]; }
+	wchar_t			At(int nIndex)	const
+	{
+		assert(nIndex>=0 && nIndex<m_nDataLen);
+		return m_pData[nIndex];
+	}
 private:
 	const wchar_t*	m_pData;
 	int				m_nDataLen;
@@ -174,3 +180,4 @@ public:
 
 // 派生クラスでメンバー追加禁止
 static_assert(sizeof(CNativeW) == sizeof(CNative), "size check");
+#endif /* SAKURA_CNATIVEW_3B48F63E_5B62_4FAB_9718_0D80114E20C1_H_ */

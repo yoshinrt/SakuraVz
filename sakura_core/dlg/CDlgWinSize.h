@@ -28,6 +28,8 @@
 		   distribution.
 */
 
+#ifndef SAKURA_CDLGWINSIZE_864AE2FE_C5EB_4CF8_9812_197F16568FFE_H_
+#define SAKURA_CDLGWINSIZE_864AE2FE_C5EB_4CF8_9812_197F16568FFE_H_
 #pragma once
 
 #include "dlg/CDialog.h"
@@ -50,6 +52,8 @@ protected:
 
 	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
 	BOOL OnBnClicked(int wID) override;
+	BOOL OnEnSetFocus(HWND hwndCtl, int wID) override;
+	BOOL OnEnKillFocus(HWND hwndCtl, int wID) override;
 	int  GetData( void ) override;
 	void SetData( void ) override;
 	LPVOID GetHelpIdTable( void ) override;
@@ -62,3 +66,4 @@ private:
 	int				m_nWinSizeType;	//!< ウィンドウ表示方法: 0/標準，1/最大化，2/最小化
 	RECT			m_rc;
 };
+#endif /* SAKURA_CDLGWINSIZE_864AE2FE_C5EB_4CF8_9812_197F16568FFE_H_ */

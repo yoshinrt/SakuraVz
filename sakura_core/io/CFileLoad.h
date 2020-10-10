@@ -28,6 +28,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CFILELOAD_B9B7A22E_8C14_4913_8B92_3B5ABA6FC0DB_H_
+#define SAKURA_CFILELOAD_B9B7A22E_8C14_4913_8B92_3B5ABA6FC0DB_H_
 #pragma once
 
 #include <Windows.h>
@@ -151,3 +153,4 @@ inline BOOL CFileLoad::GetFileTime( FILETIME* pftCreate, FILETIME* pftLastAccess
 	return ::GetFileTime( m_hFile, pftCreate, pftLastAccess, pftLastWrite );
 }
 
+#endif /* SAKURA_CFILELOAD_B9B7A22E_8C14_4913_8B92_3B5ABA6FC0DB_H_ */

@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_STATICTYPE_54CC2BD5_4C7C_4584_B515_EF8C533B90EA_H_
+#define SAKURA_STATICTYPE_54CC2BD5_4C7C_4584_B515_EF8C533B90EA_H_
 #pragma once
 
 #include "util/string_ex.h"
@@ -40,8 +42,18 @@ public:
 	int max_size() const{ return MAX_SIZE; }
 
 	//要素アクセス
-	ElementType&       operator[](int nIndex)      { assert(nIndex<MAX_SIZE); assert_warning(nIndex<m_nCount); return m_aElements[nIndex]; }
-	const ElementType& operator[](int nIndex) const{ assert(nIndex<MAX_SIZE); assert_warning(nIndex<m_nCount); return m_aElements[nIndex]; }
+	ElementType&       operator[](int nIndex)
+	{
+		assert(nIndex<MAX_SIZE);
+		assert_warning(nIndex<m_nCount);
+		return m_aElements[nIndex];
+	}
+	const ElementType& operator[](int nIndex) const
+	{
+		assert(nIndex<MAX_SIZE);
+		assert_warning(nIndex<m_nCount);
+		return m_aElements[nIndex];
+	}
 
 	//操作
 	void clear(){ m_nCount=0; }
@@ -114,3 +126,4 @@ private:
 };
 
 #define _countof2(s) s.BUFFER_COUNT
+#endif /* SAKURA_STATICTYPE_54CC2BD5_4C7C_4584_B515_EF8C533B90EA_H_ */

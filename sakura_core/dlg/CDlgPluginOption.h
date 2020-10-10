@@ -27,6 +27,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CDLGPLUGINOPTION_AF75E03E_99DB_4AEF_93AF_BFF669310DE6_H_
+#define SAKURA_CDLGPLUGINOPTION_AF75E03E_99DB_4AEF_93AF_BFF669310DE6_H_
 #pragma once
 
 #include "dlg/CDialog.h"
@@ -71,7 +73,7 @@ protected:
 	*/
 	BOOL	OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnBnClicked(int wID) override;
-	BOOL	OnNotify( WPARAM wParam, LPARAM lParam ) override;
+	BOOL	OnNotify(NMHDR* pNMHDR) override;
 	BOOL	OnCbnSelChange( HWND hwndCtl, int wID ) override;
 	BOOL	OnEnChange( HWND hwndCtl, int wID ) override;
 	BOOL	OnActivate( WPARAM wParam, LPARAM lParam ) override;
@@ -95,3 +97,4 @@ private:
 	int				m_Line;			// 現在編集中のオプション行番号
 	std::wstring	m_sReadMeName;	// ReadMe ファイル名
 };
+#endif /* SAKURA_CDLGPLUGINOPTION_AF75E03E_99DB_4AEF_93AF_BFF669310DE6_H_ */

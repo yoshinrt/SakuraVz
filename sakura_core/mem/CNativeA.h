@@ -22,6 +22,8 @@
 		3. This notice may not be removed or altered from any source
 		   distribution.
 */
+#ifndef SAKURA_CNATIVEA_03C02187_A42C_4403_9D24_8B4CA20EEA81_H_
+#define SAKURA_CNATIVEA_03C02187_A42C_4403_9D24_8B4CA20EEA81_H_
 #pragma once
 
 #include "CNative.h"
@@ -61,12 +63,5 @@ public:
 	CNativeA& operator = (CNativeA&& rhs) noexcept		{ CNative::operator=(std::forward<CNativeA>(rhs)); return *this; }
 	const CNativeA& operator=( char );
 	const CNativeA& operator+=( char );
-
-	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-	//                           変換                              //
-	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
-
-	//ネイティブ変換
-	void Replace_j( const char* pszFrom, const char* pszTo ); //!< 文字列置換（日本語考慮版）
-
 };
+#endif /* SAKURA_CNATIVEA_03C02187_A42C_4403_9D24_8B4CA20EEA81_H_ */

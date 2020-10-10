@@ -277,10 +277,10 @@ BOOL CDlgAbout::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 #ifdef CI_BUILD_NUMBER_LABEL
 	m_UrlBuildLinkWnd.SetSubclassWindow( GetItemHwnd( IDC_STATIC_URL_CI_BUILD ) );
 #endif
-#ifdef TEMP_GIT_SHORT_COMMIT_HASH
+#if defined( GITHUB_COMMIT_URL )
 	m_UrlGitHubCommitWnd.SetSubclassWindow( GetItemHwnd( IDC_STATIC_URL_GITHUB_COMMIT ) );
 #endif
-#ifdef GITHUB_PR_NUMBER_LABEL
+#if defined( GITHUB_PR_HEAD_URL )
 	m_UrlGitHubPRWnd.SetSubclassWindow( GetItemHwnd( IDC_STATIC_URL_GITHUB_PR ) );
 #endif
 
@@ -344,8 +344,8 @@ BOOL CDlgAbout::OnStnClicked( int wID )
 #endif
 		return TRUE;
 	case IDC_STATIC_URL_GITHUB_PR:
-#if defined(GITHUB_COMMIT_URL_PR_HEAD)
-		::ShellExecute(GetHwnd(), NULL, _T(GITHUB_COMMIT_URL_PR_HEAD), NULL, NULL, SW_SHOWNORMAL);
+#if defined(GITHUB_PR_HEAD_URL)
+		::ShellExecute(GetHwnd(), NULL, _T(GITHUB_PR_HEAD_URL), NULL, NULL, SW_SHOWNORMAL);
 #endif
 		return TRUE;
 	}
