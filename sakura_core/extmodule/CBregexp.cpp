@@ -363,7 +363,7 @@ void CBregexp::GetMatchLine( const wchar_t **ppLine, int *piLen ){
 	GetMatchRange( &Range );
 	
 	int iFrom	= Range.GetFrom().y == 0 ? 0 : m_iLineTop[ Range.GetFrom().y - 1 ];
-	int iTo		= Range.GetTo().y == m_iLineTop.size() ? m_iSubjectLen : m_iLineTop[ Range.GetFrom().y ];
+	int iTo		= Range.GetTo().y == m_iLineTop.size() ? m_iSubjectLen : m_iLineTop[ Range.GetTo().y ];
 	
 	*ppLine	= m_szSubject + iFrom;
 	*piLen	= iTo - iFrom;
