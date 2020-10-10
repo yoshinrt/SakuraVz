@@ -913,19 +913,16 @@ void CGrepAgent::SetGrepResult(
 	/* マッチした行の情報 */
 	LONGLONG	nLine,				/*!< [in] マッチした行番号(1～) */
 	int			nColumn,			/*!< [in] マッチした桁番号(1～) */
-	const wchar_t*	pCompareData,	/*!< [in] 行の文字列 */
-	int			nLineLen,			/*!< [in] 行の文字列の長さ */
-	int			nEolCodeLen,		/*!< [in] EOLの長さ */
-	/* マッチした文字列の情報 */
 	const wchar_t*	pMatchData,		/*!< [in] マッチした文字列 */
 	int			nMatchLen,			/*!< [in] マッチした文字列の長さ */
+	int			nEolCodeLen,		/*!< [in] EOLの長さ */
+	/* マッチした文字列の情報 */
 	/* オプション */
 	const SGrepOption&	sGrepOption
 )
 {
 	CNativeW cmemBuf(L"");
 	wchar_t strWork[64];
-	const wchar_t * pDispData;
 	int k;
 	bool bEOL = true;
 	int nMaxOutStr = 0;
@@ -952,31 +949,19 @@ void CGrepAgent::SetGrepResult(
 		nMaxOutStr = 2500;
 	}
 
-	/* 該当行 */
-	if( sGrepOption.nGrepOutputLineType != 0 ){
-		pDispData = pCompareData;
-		k = nLineLen - nEolCodeLen;
-		if( nMaxOutStr < k ){
-			k = nMaxOutStr; // 2003.06.10 Moca 最大長変更
-		}
+	k = nMatchLen;
+	if( nMaxOutStr < k ){
+		k = nMaxOutStr; // 2003.06.10 Moca 最大長変更
 	}
-	/* 該当部分 */
-	else{
-		pDispData = pMatchData;
-		k = nMatchLen;
-		if( nMaxOutStr < k ){
-			k = nMaxOutStr; // 2003.06.10 Moca 最大長変更
-		}
-		// 該当部分に改行を含む場合はその改行コードをそのまま利用する(次の行に空行を作らない)
-		// 2003.06.10 Moca k==0のときにバッファアンダーランしないように
-		if( 0 < k && WCODE::IsLineDelimiter(pMatchData[ k - 1 ], GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol) ){
-			bEOL = false;
-		}
+	// 該当部分に改行を含む場合はその改行コードをそのまま利用する(次の行に空行を作らない)
+	// 2003.06.10 Moca k==0のときにバッファアンダーランしないように
+	if( 0 < k && WCODE::IsLineDelimiter(pMatchData[ k - 1 ], GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol) ){
+		bEOL = false;
 	}
 
 	cmemMessage.AllocStringBuffer( cmemMessage.GetStringLength() + cmemBuf.GetStringLength() + 2 );
 	cmemMessage.AppendNativeData( cmemBuf );
-	cmemMessage.AppendString( pDispData, k );
+	cmemMessage.AppendString( pMatchData, k );
 	if( bEOL ){
 		cmemMessage.AppendString( L"\r\n", 2 );
 	}
@@ -1254,6 +1239,8 @@ int CGrepAgent::DoGrepReplaceFile(
 		CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
 		pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
 		
+		LONGLONG iMatchLinePrev = -1;
+		
 		while( RESULT_FAILURE != ReadLine( &GrepLineInfo ))
 		{
 			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
@@ -1334,36 +1321,46 @@ int CGrepAgent::DoGrepReplaceFile(
 				nLineLen	= pRegexp->GetSubjectLen();
 				
 				// log 表示用行，match 位置
-				const wchar_t* pLogLine	= pLine;
-				int iLogLineLen			= nLineLen;
-				int iLogMatchIdx		= pRegexp->GetIndex();
-				int iLogMatchLen		= pRegexp->GetMatchLen();
+				int iLogMatchIdx;
+				int iLogMatchLen;
+				int iLogMatchLineOffs;
 				
-				if( sGrepOption.nGrepOutputLineType != 0/*該当部分*/ ){
-					// pLine は cat した行なので，その中から match した
-					// 行のみを表示用に取り出す
-					
-					pRegexp->GetMatchLine( &pLogLine, &iLogLineLen );
-					iLogMatchIdx -= pLogLine - pLine;
+				pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
+				
+				if( sGrepOption.nGrepOutputLineType == 0/*該当部分*/ ){
+					iLogMatchIdx = pRegexp->GetIndex();
+					iLogMatchLen = pRegexp->GetMatchLen();
 				}
 				
 				++nHitCount;
 				++(*pnHitCount);
 				
 				if( bOutput ){
-					OutputPathInfo(
-						cmemMessage, sGrepOption,
-						pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-						bOutputBaseFolder, bOutputFolderName, bOutFileName
-					);
-					/* Grep結果を、cmemMessageに格納する */
-					SetGrepResult(
-						cmemMessage, pszDispFilePath, pszCodeName,
-						iLineDisp, iLogMatchIdx + 1,
-						pLogLine, iLogLineLen, nEolCodeLen,
-						pLogLine + iLogMatchIdx, iLogMatchLen,
-						sGrepOption
-					);
+					
+					if(
+						sGrepOption.nGrepOutputLineType == 0 ||
+						 iMatchLinePrev != iLineDisp + iLogMatchLineOffs
+					){
+						
+						iMatchLinePrev = iLineDisp + iLogMatchLineOffs;
+						
+						OutputPathInfo(
+							cmemMessage, sGrepOption,
+							pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
+							bOutputBaseFolder, bOutputFolderName, bOutFileName
+						);
+						
+						/* Grep結果を、cmemMessageに格納する */
+						SetGrepResult(
+							cmemMessage, pszDispFilePath, pszCodeName,
+							iMatchLinePrev,			// line
+							iLogMatchIdx + 1,		// column
+							pLine + iLogMatchIdx,	// match str
+							iLogMatchLen,			// match str len
+							nEolCodeLen,			// eol len
+							sGrepOption
+						);
+					}
 					
 					// 
 					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){

@@ -350,11 +350,12 @@ void CBregexp::GetMatchRange( CLogicRange *pRangeOut, int iFrom, int iTo, int iL
 }
 
 //! match した行全体を得る，grep 結果表示用
-void CBregexp::GetMatchLine( const wchar_t **ppLine, int *piLen ){
+void CBregexp::GetMatchLine( int *piStart, int *piLen, int *piLineOffset ){
 	// 行跨ぎなし, X の変換なし
 	if( m_iLineTop.size() == 0 ){
-		*ppLine	= m_szSubject;
-		*piLen	= m_iSubjectLen;
+		*piStart		= 0;
+		*piLen	 		= m_iSubjectLen;
+		*piLineOffset	= 0;
 		return;
 	}
 	
@@ -362,11 +363,12 @@ void CBregexp::GetMatchLine( const wchar_t **ppLine, int *piLen ){
 	CLogicRange Range;
 	GetMatchRange( &Range );
 	
-	int iFrom	= Range.GetFrom().y == 0 ? 0 : m_iLineTop[ Range.GetFrom().y - 1 ];
-	int iTo		= Range.GetTo().y == m_iLineTop.size() ? m_iSubjectLen : m_iLineTop[ Range.GetTo().y ];
+	int iFrom		= Range.GetFrom().y == 0 ? 0 : m_iLineTop[ Range.GetFrom().y - 1 ];
+	int iTo			= Range.GetTo().y == m_iLineTop.size() ? m_iSubjectLen : m_iLineTop[ Range.GetTo().y ];
 	
-	*ppLine	= m_szSubject + iFrom;
-	*piLen	= iTo - iFrom;
+	*piStart		= iFrom;
+	*piLen			= iTo - iFrom;
+	*piLineOffset	= Range.GetFrom().y;
 }
 
 /*! ReplaceBuf 確保・リサイズ

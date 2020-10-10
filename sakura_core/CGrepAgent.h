@@ -181,12 +181,9 @@ private:
 		// マッチした行の情報
 		LONGLONG		nLine,			//	マッチした行番号
 		int				nColumn,		//	マッチした桁番号
-		const wchar_t*	pCompareData,	//	行の文字列
-		int				nLineLen,		//	行の文字列の長さ
-		int				nEolCodeLen,	//	EOLの長さ
-		// マッチした文字列の情報
 		const wchar_t*	pMatchData,		//	マッチした文字列
 		int				nMatchLen,		//	マッチした文字列の長さ
+		int				nEolCodeLen,	//	EOLの長さ
 		// オプション
 		const SGrepOption&	sGrepOption
 	);

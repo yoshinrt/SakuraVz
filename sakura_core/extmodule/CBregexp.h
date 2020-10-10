@@ -122,7 +122,7 @@ public:
 	}
 	
 	//! match した行全体を得る，grep 結果表示用
-	void GetMatchLine( const wchar_t **ppLine, int *piLen );
+	void GetMatchLine( int *piStart, int *piLen, int *piLineOffset );
 	
 	//-----------------------------------------
 
