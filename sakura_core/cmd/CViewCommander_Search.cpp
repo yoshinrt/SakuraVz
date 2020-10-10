@@ -598,7 +598,7 @@ void CViewCommander::Command_REPLACE( HWND hwndParent )
 			
 			int iRet = pRegexp->Replace( cMemRepKey.GetStringPtr());
 			if( iRet > 0 ){
-				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), TRUE );
+				Command_INSTEXT( false, pRegexp->GetReplacedString(), pRegexp->GetReplacedLen(), TRUE );
 				
 				// マッチ幅が 0 の場合，1文字選進む
 				if( pRegexp->GetMatchLen() == 0 ){
@@ -1063,7 +1063,7 @@ void CViewCommander::Command_REPLACE_ALL()
 					cSelectLogic.GetTo().x
 				);
 				if(
-					pRegexp->GetStringLen() == 0 &&
+					pRegexp->GetReplacedLen() == 0 &&
 					cSelectLogic.GetTo().x != 0 &&
 					rDocLineMgr.GetLine( cSelectLogic.GetTo().y )->GetLengthWithEOL() != cSelectLogic.GetTo().x
 				){
@@ -1072,7 +1072,7 @@ void CViewCommander::Command_REPLACE_ALL()
 					uSearchWordOpt &= ~CBregexp::optNotBol;
 				}
 				
-				Command_INSTEXT( false, pRegexp->GetString(), pRegexp->GetStringLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
+				Command_INSTEXT( false, pRegexp->GetReplacedString(), pRegexp->GetReplacedLen(), true, false, !bBeginBoxSelect, bBeginBoxSelect ? nullptr : &cSelectLogic );
 				++nReplaceNum;
 				
 				// マッチ幅が 0 の場合，1文字選進める

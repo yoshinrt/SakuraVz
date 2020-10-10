@@ -96,7 +96,7 @@ public:
 		置換された文字列の長さを返す
 		@retval 置換された文字列長
 	*/
-	CLogicInt GetStringLen( void ){
+	CLogicInt GetReplacedLen( void ){
 		return CLogicInt(
 			m_iReplacedLen - m_iSubjectLen + GetMatchLen()
 		);
@@ -105,7 +105,7 @@ public:
 		置換された文字列を返す
 		@retval 置換された文字列へのポインタ
 	*/
-	const wchar_t *GetString( void ){
+	const wchar_t *GetReplacedString( void ){
 		if( m_iReplacedLen == 0 || m_szReplaceBuf == nullptr ) return L"";
 		return m_szReplaceBuf + GetIndex();
 	}

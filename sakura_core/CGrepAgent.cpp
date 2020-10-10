@@ -1372,7 +1372,7 @@ int CGrepAgent::DoGrepReplaceFile(
 						cOutBuffer.AppendNativeData( cmGrepReplace );
 					}else{
 						// regexp 置換結果
-						cOutBuffer.AppendString( pRegexp->GetString(), pRegexp->GetStringLen());
+						cOutBuffer.AppendString( pRegexp->GetReplacedString(), pRegexp->GetReplacedLen());
 					}
 				}
 				

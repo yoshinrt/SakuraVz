@@ -315,7 +315,7 @@ void CDocOutline::MakeFuncList_RuleFile( CFuncInfoArr* pcFuncInfoArr, std::wstri
 						// testのszText = "$&456"
 						// GetString() = "ABC123456DEF"
 						// pszText = "123456"
-						strText.assign( pRegex[j].GetString(), pRegex[j].GetStringLen());
+						strText.assign( pRegex[j].GetReplacedString(), pRegex[j].GetReplacedLen());
 						pszText = strText.c_str();
 						wcscpy( szTitle, test[j].szGroupName );
 						break;
