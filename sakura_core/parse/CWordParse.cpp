@@ -14,6 +14,7 @@ bool CWordParse::WhereCurrentWord_2(
 	const wchar_t*	pLine,			//!< [in]  調べるメモリ全体の先頭アドレス
 	CLogicInt		nLineLen,		//!< [in]  調べるメモリ全体の有効長
 	CLogicInt		nIdx,			//!< [in]  調査開始地点:pLineからの相対的な位置
+	bool			bEnableExtEol,	//!< [in]  Unicode改行文字を改行とみなすかどうか
 	CLogicInt*		pnIdxFrom,		//!< [out] 単語が見つかった場合は、単語の先頭インデックスを返す。
 	CLogicInt*		pnIdxTo,		//!< [out] 単語が見つかった場合は、単語の終端の次のバイトの先頭インデックスを返す。
 	CNativeW*		pcmcmWord,		//!< [out] 単語が見つかった場合は、現在単語を切り出して指定されたCMemoryオブジェクトに格納する。情報が不要な場合はNULLを指定する。
@@ -33,7 +34,7 @@ bool CWordParse::WhereCurrentWord_2(
 	}
 
 	// 現在位置の文字の種類によっては選択不可
-	if( WCODE::IsLineDelimiter(pLine[nIdx], GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol) ){
+	if( WCODE::IsLineDelimiter(pLine[nIdx], bEnableExtEol) ){
 		return false;
 	}
 
@@ -307,6 +308,51 @@ bool CWordParse::SearchNextWordPosition4KW(
 		nCharChars = CNativeW::GetSizeOfChar( pLine, nLineLen, nIdxNext );
 	}
 	return false;
+}
+
+bool CWordParse::SearchPrevWordPosition(const wchar_t* pLine,
+	CLogicInt nLineLen, CLogicInt nIdx, CLogicInt* pnColumnNew, BOOL bStopsBothEnds)
+{
+	/* 現在位置の文字の種類を調べる */
+	ECharKind	nCharKind = CWordParse::WhatKindOfChar( pLine, nLineLen, nIdx );
+	if( nIdx == 0 ){
+		return false;
+	}
+
+	/* 文字種類が変わるまで前方へサーチ */
+	/* 空白とタブは無視する */
+	int		nCount = 0;
+	CLogicInt	nIdxNext = nIdx;
+	CLogicInt	nCharChars = CLogicInt(&pLine[nIdxNext] - CNativeW::GetCharPrev( pLine, nLineLen, &pLine[nIdxNext] ));
+	while( nCharChars > 0 ){
+		CLogicInt		nIdxNextPrev = nIdxNext;
+		nIdxNext -= nCharChars;
+		ECharKind nCharKindNext = CWordParse::WhatKindOfChar( pLine, nLineLen, nIdxNext );
+
+		ECharKind nCharKindMerge = CWordParse::WhatKindOfTwoChars( nCharKindNext, nCharKind );
+		if( nCharKindMerge == CK_NULL ){
+			/* サーチ開始位置の文字が空白またはタブの場合 */
+			if( nCharKind == CK_TAB	|| nCharKind == CK_SPACE ){
+				if ( bStopsBothEnds && nCount ){
+					nIdxNext = nIdxNextPrev;
+					break;
+				}
+				nCharKindMerge = nCharKindNext;
+			}else{
+				if( nCount == 0){
+					nCharKindMerge = nCharKindNext;
+				}else{
+					nIdxNext = nIdxNextPrev;
+					break;
+				}
+			}
+		}
+		nCharKind = nCharKindMerge;
+		nCharChars = CLogicInt(&pLine[nIdxNext] - CNativeW::GetCharPrev( pLine, nLineLen, &pLine[nIdxNext] ));
+		++nCount;
+	}
+	*pnColumnNew = nIdxNext;
+	return true;
 }
 
 //! wcがasciiなら0-127のまま返す。それ以外は0を返す。

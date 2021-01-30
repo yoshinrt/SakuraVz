@@ -520,7 +520,6 @@
     <ClInclude Include="..\sakura_core\util\string_ex.h" />
     <ClInclude Include="..\sakura_core\util\string_ex2.h" />
     <ClInclude Include="..\sakura_core\util\tchar_convert.h" />
-    <ClInclude Include="..\sakura_core\util\tchar_printf.h" />
     <ClInclude Include="..\sakura_core\util\tchar_template.h" />
     <ClInclude Include="..\sakura_core\util\window.h" />
     <ClInclude Include="..\sakura_core\version.h" />
@@ -596,14 +595,10 @@
     <None Include="..\resource\cursor_tab_join.cur" />
     <None Include="..\resource\cursor_tab_separate.cur" />
     <None Include="..\resource\MainMenu.ini" />
+    <None Include="..\sakura_core\sakura_rc.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\sakura_core\sakura_rc.rc">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/c 65001</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/c 65001</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/c 65001</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/c 65001</AdditionalOptions>
-    </ResourceCompile>
+    <ResourceCompile Include="..\sakura_core\sakura_rc.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\sakura_core\apiwrap\StdApi.cpp" />
@@ -918,7 +913,6 @@
     <ClCompile Include="..\sakura_core\util\string_ex.cpp" />
     <ClCompile Include="..\sakura_core\util\string_ex2.cpp" />
     <ClCompile Include="..\sakura_core\util\tchar_convert.cpp" />
-    <ClCompile Include="..\sakura_core\util\tchar_printf.cpp" />
     <ClCompile Include="..\sakura_core\util\tchar_template.cpp" />
     <ClCompile Include="..\sakura_core\util\window.cpp" />
     <ClCompile Include="..\sakura_core\view\CCaret.cpp" />

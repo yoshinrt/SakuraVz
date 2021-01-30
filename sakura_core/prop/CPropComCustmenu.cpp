@@ -474,6 +474,8 @@ INT_PTR CPropCustmenu::DispatchEvent(
 					}
 					List_SetCurSel( hwndLIST_RES, nIdx2 );
 
+					// 機能リストを1つ進める
+					List_SetCurSel( hwndLIST_FUNC, nIdx4 + 1 );
 					break;
 
 				case IDC_BUTTON_ADD:
@@ -492,7 +494,7 @@ INT_PTR CPropCustmenu::DispatchEvent(
 					}
 					nNum2 = List_GetCount( hwndLIST_RES );
 					if( LB_ERR == nNum2 ){
-						nIdx2 = 0;
+						nNum2 = 0;
 					}
 					nIdx3 = Combo_GetCurSel( hwndCOMBO_FUNCKIND );
 					if( CB_ERR == nIdx3 ){
@@ -526,6 +528,8 @@ INT_PTR CPropCustmenu::DispatchEvent(
 					}
 					List_SetCurSel( hwndLIST_RES, nIdx2 );
 
+					// 機能リストを1つ進める
+					List_SetCurSel( hwndLIST_FUNC, nIdx4 + 1 );
 					break;
 
 				case IDC_BUTTON_UP:

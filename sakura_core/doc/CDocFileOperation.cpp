@@ -40,6 +40,7 @@
 #include "env/CSakuraEnvironment.h"
 #include "plugin/CPlugin.h"
 #include "plugin/CJackManager.h"
+#include "util/format.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                          ロック                             //
@@ -263,15 +264,15 @@ bool CDocFileOperation::SaveFileDialog(
 				wcscat(szDefaultWildCard, L";*.*");	// 全ファイル表示
 		}
 	}
-	// 無題に、無題番号を付ける
+
+	// 無題の時は日時を付ける
 	if( pSaveInfo->cFilePath[0] == L'\0' ){
+		SYSTEMTIME localTime = {};
+		::GetLocalTime( &localTime );
+		auto dateTimeString = GetDateTimeFormat( L"_%Y%m%d_%H%M%S", localTime );
 		const EditNode* node = CAppNodeManager::getInstance()->GetEditNode( m_pcDocRef->m_pcEditWnd->GetHwnd() );
-		if( 0 < node->m_nId ){
-			WCHAR szText[16];
-			auto_sprintf(szText, L"%d", node->m_nId);
-			wcscpy(pSaveInfo->cFilePath, LS(STR_NO_TITLE2));	// 無題
-			wcscat(pSaveInfo->cFilePath, szText);
-		}
+		const int nId = (node != NULL && 0 < node->m_nId) ? node->m_nId : 0;
+		auto_sprintf_s( pSaveInfo->cFilePath, pSaveInfo->cFilePath.GetBufferCount(), L"%s%.0d%s", LS(STR_NO_TITLE2), nId, dateTimeString.c_str() );
 	}
 
 	// ダイアログを表示

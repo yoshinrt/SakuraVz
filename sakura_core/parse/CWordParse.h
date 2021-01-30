@@ -72,7 +72,8 @@ public:
 	static bool WhereCurrentWord_2(
 		const wchar_t*	pLine,			//[in]  調べるメモリ全体の先頭アドレス
 		CLogicInt		nLineLen,		//[in]  調べるメモリ全体の有効長
-		CLogicInt		nIdx,			//[out] 調査開始地点:pLineからの相対的な位置
+		CLogicInt		nIdx,			//[in]  調査開始地点:pLineからの相対的な位置
+		bool			bEnableExtEol,	//[in]  Unicode改行文字を改行とみなすかどうか
 		CLogicInt*		pnIdxFrom,		//[out] 単語が見つかった場合は、単語の先頭インデックスを返す。
 		CLogicInt*		pnIdxTo,		//[out] 単語が見つかった場合は、単語の終端の次のバイトの先頭インデックスを返す。
 		CNativeW*		pcmcmWord,		//[out] 単語が見つかった場合は、現在単語を切り出して指定されたCMemoryオブジェクトに格納する。情報が不要な場合はNULLを指定する。
@@ -115,6 +116,9 @@ public:
 		CLogicInt*		pnColumnNew,	//	見つかった位置
 		BOOL			bStopsBothEnds	//	単語の両端で止まる
 	);
+
+	static bool SearchPrevWordPosition(const wchar_t* pLine,
+		CLogicInt nLineLen, CLogicInt nIdx, CLogicInt* pnColumnNew, BOOL bStopsBothEnds);
 
 	template< class CHAR_TYPE >
 	static int GetWord( const CHAR_TYPE* pS, const int nLen, const CHAR_TYPE *pszSplitCharList,
