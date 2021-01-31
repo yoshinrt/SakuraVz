@@ -911,7 +911,7 @@ CLayoutInt CCaret::Cursor_UPDOWN( CLayoutInt nMoveLines, bool bSelect )
 	}
 	
 	// 行モードにする
-	if( bSelect ){
+	if( bSelect && !m_pEditView->GetSelectionInfo().IsBoxSelecting()){
 		m_pEditView->GetSelectionInfo().SetLineSelect(
 			GetDllShareData().m_Common.m_sVzMode.m_nSelectMode == ESelectMode::T_Always
 		);
