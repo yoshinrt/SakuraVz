@@ -2645,6 +2645,15 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			Wrap( &Result )->Receive( iResult );
 			return true;
 		}
+	
+	case F_MoveTo:
+		{
+			CLayoutPoint pt( GetArgI4( 1, 0 ), GetArgI4( 0, 0 ));
+			
+			View->GetCommander().m_pCommanderView->MoveCursorSelecting( pt, GetArgI4( 2, 0 ));
+			return true;
+		}
+	
 	default:
 		return false;
 	}
