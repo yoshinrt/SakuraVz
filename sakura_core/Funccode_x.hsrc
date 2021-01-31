@@ -581,11 +581,11 @@ F_GETVIEWCOLUMNS	= 40057,	// ビューの列数取得
 F_CREATEMENU		= 40058,	// メニュー作成
 F_GETVIEWTOP		= 40059,	// 画面に表示される一番上の行番号を取得
 F_GETMACROINFO,				// 実行中のマクロ名等の情報を返す
-F_GetCursorPosX,			// カーソル位置 X (ルーラ単位，整数)
-F_GetCursorPosXReal,			// カーソル位置 X (ルーラ単位，float)
+F_GetCursorPosX,			// カーソル位置 X (layout 単位)
 F_GetCursorPosXLogic,			// カーソル位置 X (Logic 単位)
 F_GetCursorPosY,			// カーソル位置 Y (Layout 単位)
 F_GetCursorPosYLogic,			// カーソル位置 Y (Logic 単位)
+F_GetLayoutXWidth,			// LayoutX 1桁幅
 F_IsCursorEOF,				// カーソル位置 EOF?
 F_IsCursorEOL,				// カーソル位置 EOL?
 F_GetCursorChar,			// カーソル位置の 1文字取得

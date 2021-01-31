@@ -142,11 +142,11 @@ else throw new Error( "見つかりません: " + FuncName + "\nfile:" + GetMacr
 ### カーソル位置周辺の情報を取得するマクロ関数
 カーソル位置周辺の情報を取得するマクロ関数を追加しました．
 
- - `GetCursorPosX()`: カーソル位置の行頭からのレイアウト桁位置 (行頭 = 0) を返します．GetCursorPosXReal() の結果を四捨五入した整数です．
- - `GetCursorPosXReal()`: カーソル位置の行頭からのレイアウト桁位置 (行頭 = 0) を返します．ルーラの 1文字 = 1 となる **浮動小数** です．
+ - `GetCursorPosX()`: カーソル位置の行頭からのレイアウト桁位置 (行頭 = 0) を返します．
  - `GetCursorPosXLogic()`: カーソル位置の行頭からの論理桁位置 (行頭 = 0) を返します．
  - `GetCursorPosY()`: カーソル位置のファイル先頭からの表示行位置 (先頭行 = 0) を返します．
  - `GetCursorPosYLogic()`: カーソル位置のファイル先頭からの論理行位置 (先頭行 = 0) を返します．
+ - `GetLayoutWidthX()`: レイアウト 1桁分の幅を返します．
  - `GetCursorChar()`: カーソル位置の 1文字を取得します．
  - `IsCursorEOL()`: カーソル位置が EOL の場合，非 0 を返します．
  - `IsCursorEOF()`: カーソル位置が EOF の場合，非 0 を返します．

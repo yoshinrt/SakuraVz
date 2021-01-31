@@ -2519,18 +2519,9 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		return true;
 	
 	case F_GetCursorPosX:
-	case F_GetCursorPosXReal: {
 		// Layout X
-		double dPos = ( double )( Int )View->GetCaret().GetCaretLayoutPos().GetX2()
-			/ ( Int )View->GetTextMetrics().GetLayoutXDefault();
-		
-		if( LOWORD( ID ) == F_GetCursorPosX ){
-			Wrap( &Result )->Receive(( int )( dPos + 0.5 ));
-		}else{
-			Wrap( &Result )->Receive( dPos );
-		}
+		Wrap( &Result )->Receive(( Int )View->GetCaret().GetCaretLayoutPos().GetX2());
 		return true;
-	}
 	
 	case F_GetCursorPosXLogic:
 		// Logic X
@@ -2547,6 +2538,12 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		Wrap( &Result )->Receive( View->GetCaret().GetCaretLogicPos().GetY2());
 		return true;
 		
+	case F_GetLayoutXWidth: {
+		// Layout 1X width
+		Wrap( &Result )->Receive(( Int )View->GetTextMetrics().GetLayoutXDefault());
+		return true;
+	}
+	
 	case F_IsCursorEOF:
 		// EOF?
 		Wrap( &Result )->Receive(

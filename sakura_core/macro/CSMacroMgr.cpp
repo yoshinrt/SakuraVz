@@ -478,11 +478,11 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_CREATEMENU,				L"CreateMenu",				{VT_I4,    VT_BSTR,  VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //メニュー作成
 	{F_GETVIEWTOP,				L"GetViewTop",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //画面に表示される一番上の行番号を取得
 	{F_GETMACROINFO,			L"GetMacroInfo",			{VT_I4,    VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //実行中のマクロ名等の情報を返す
-	{F_GetCursorPosX,			L"GetCursorPosX",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置X (ルーラ単位，整数)
-	{F_GetCursorPosXReal,		L"GetCursorPosXReal",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置X (ルーラ単位，float)
+	{F_GetCursorPosX,			L"GetCursorPosX",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置X Layout
 	{F_GetCursorPosXLogic,		L"GetCursorPosXLogic",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置X Logic
 	{F_GetCursorPosY,			L"GetCursorPosY",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置Y Layout
 	{F_GetCursorPosYLogic,		L"GetCursorPosYLogic",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置Y Logic
+	{F_GetLayoutXWidth,			L"GetLayoutXWidth",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //LayoutX 1桁幅
 	{F_IsCursorEOF,				L"IsCursorEOF",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOF?
 	{F_IsCursorEOL,				L"IsCursorEOL",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOL?
 	{F_GetCursorChar,			L"GetCursorChar",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_BSTR,	NULL }, //カーソル位置の 1文字取得
