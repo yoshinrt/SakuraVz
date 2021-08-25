@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - master
+      - vz_mode
       - feature/*
     paths-ignore:
       - '**/*.md'
@@ -49,6 +50,8 @@ jobs:
     steps:
     ## see https://github.com/actions/checkout
     - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
 
     ## see https://github.com/microsoft/setup-msbuild
     - name: Add msbuild to PATH
