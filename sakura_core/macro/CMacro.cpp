@@ -1481,6 +1481,18 @@ inline bool VariantToI4(Variant& varCopy, const VARIANT& arg)
 	return VariantChangeType(&varCopy.Data, const_cast<VARIANTARG*>( &(arg) ), 0, VT_I4) == S_OK;
 }
 
+void GetIniParameter( VARIANT &Result, bool var ){
+	Wrap( &Result )->Receive(( int ) var );
+}
+
+void SetIniParameter( VARIANT &Result, bool *var, const VARIANT &Val ){
+	Variant varCopy;
+	if( VariantChangeType( &varCopy.Data, const_cast<VARIANTARG*>( &Val ), 0, VT_I4 ) == S_OK ){
+		*var = varCopy.Data.lVal ? 1 : 0;
+	}
+	GetIniParameter( Result, *var );
+}
+
 /**	値を返す関数を処理する
 
 	@param View      [in] 対象となるView
@@ -2652,6 +2664,32 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			View->GetCommander().m_pCommanderView->MoveCursorSelecting( pt, GetArgI4( 2, 0 ));
 			return true;
 		}
+	
+	case F_IniParam:
+		{
+			STypeConfig	*pTypeCfg = const_cast<STypeConfig *>( View->GetCommander().m_pCommanderView->m_pTypeData );
+			
+			if( !( ArgSize >= 1 && VariantToBStr( varCopy, Arguments[ 0 ]))){
+				return false;
+			}
+			
+			WCHAR *szKey = varCopy.Data.bstrVal;
+			
+			// Get
+			if( ArgSize == 1 ){
+				if( 0 );
+				#define IniParam( key, var ) else if( wcscmp( szKey, key ) == 0 ) GetIniParameter( Result, var );
+				#include "env/IniParam.h"
+			}
+			
+			// Set
+			else{
+				if( 0 );
+				#define IniParam( key, var ) else if( wcscmp( szKey, key ) == 0 ) SetIniParameter( Result, &var, Arguments[ 1 ]);
+				#include "env/IniParam.h"
+			}
+		}
+		return true;
 	
 	default:
 		return false;
