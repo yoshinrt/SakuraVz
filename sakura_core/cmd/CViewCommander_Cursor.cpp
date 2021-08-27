@@ -13,6 +13,7 @@
 	Copyright (C) 2006, genta
 	Copyright (C) 2007, kobake, maru
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -24,6 +25,8 @@
 
 #include "CMarkMgr.h"/// 2002/2/3 aroka 追加
 #include "mem/CMemoryIterator.h"	// @@@ 2002.09.28 YAZAKI
+#include "CSelectLang.h"
+#include "String_define.h"
 
 void CViewCommander::Command_MOVECURSOR(CLogicPoint pos, int option)
 {
@@ -225,7 +228,7 @@ int CViewCommander::Command_LEFT( bool bSelect, bool bRepeat )
 				}
 			}
 			if (it.end()) {
-				const bool has_eol = EOL_NONE != pcLayout->GetLayoutEol(); // 改行文字で終わっているか。
+				const bool has_eol = pcLayout->GetLayoutEol().IsValid(); // 改行文字で終わっているか。
 				const CLayoutXInt dx_default = this->m_pCommanderView->GetTextMetrics().GetLayoutXDefault(); // 文字のない部分の移動量。
 				const CLayoutXInt eol_hosei = has_eol ? CLayoutXInt(-it.getColumnDelta() + dx_default) : CLayoutXInt(0);
 				if (ptCaretMove.GetX2() <= it.getColumn() + eol_hosei) {
@@ -304,8 +307,8 @@ void CViewCommander::Command_RIGHT( bool bSelect, bool bIgnoreCurrentSelection, 
 		{
 			// キャレット位置のレイアウト行について。
 			const CLayoutInt x_wrap = pcLayout->CalcLayoutWidth( GetDocument()->m_cLayoutMgr ); // 改行文字、または折り返しの位置。
-			const bool wrapped = EOL_NONE == pcLayout->GetLayoutEol(); // 折り返しているか、改行文字で終わっているか。これにより x_wrapの意味が変わる。
-			const bool nextline_exists = pcLayout->GetNextLayout() || pcLayout->GetLayoutEol() != EOL_NONE; // EOFのみの行も含め、キャレットが移動可能な次行が存在するか。
+			const bool wrapped = pcLayout->GetLayoutEol().IsNone(); // 折り返しているか、改行文字で終わっているか。これにより x_wrapの意味が変わる。
+			const bool nextline_exists = pcLayout->GetNextLayout() || pcLayout->GetLayoutEol().IsValid(); // EOFのみの行も含め、キャレットが移動可能な次行が存在するか。
 
 			const CLayoutXInt dx_default = this->m_pCommanderView->GetTextMetrics().GetLayoutXDefault(); // 文字のない部分(※改行マーク部分を含む)の移動量。
 
@@ -756,6 +759,7 @@ void CViewCommander::Command_1PageUp( bool bSelect, CLayoutYInt nScrollNum )
 		m_pCommanderView->SyncScrollV(nScrolled);
 		m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
 		// カーソル位置が変化しなかった、かつ、スクロール行数が0だった場合、描画を省く
+		// タイプ別設定の「カーソル位置縦線」有効時には省かない
 		if (prevCaretPos == currCaretPos && nScrolled == 0) {
 			return;
 		}
@@ -791,6 +795,7 @@ void CViewCommander::Command_1PageDown( bool bSelect, CLayoutYInt nScrollNum )
 		m_pCommanderView->SyncScrollV(nScrolled);
 		m_pCommanderView->SetDrawSwitch(bDrawSwitchOld);
 		// カーソル位置が変化しなかった、かつ、スクロール行数が0だった場合、描画を省く
+		// タイプ別設定の「カーソル位置縦線」有効時には省かない
 		if (prevCaretPos == currCaretPos && nScrolled == 0) {
 			return;
 		}
@@ -1295,7 +1300,7 @@ void CViewCommander::Command_MODIFYLINE_NEXT( bool bSelect )
 			bool bSkip = false;
 			CLogicPoint pos;
 			if( pcDocLineLast != NULL ){
-				if( pcDocLineLast->GetEol() == EOL_NONE ){
+				if( pcDocLineLast->GetEol().IsNone() ){
 					// ぶら下がり[EOF]
 					pos.x = pcDocLineLast->GetLengthWithoutEOL();
 					pos.y = GetDocument()->m_cDocLineMgr.GetLineCount() - 1;
@@ -1356,7 +1361,7 @@ void CViewCommander::Command_MODIFYLINE_PREV( bool bSelect )
 	}
 	if( !bLast ){
 		const CDocLine* pcDocLineLast = GetDocument()->m_cDocLineMgr.GetDocLineBottom();
-		if( pcDocLineLast != NULL && pcDocLineLast->GetEol() == EOL_NONE ){
+		if( pcDocLineLast != NULL && pcDocLineLast->GetEol().IsNone() ){
 			CLogicPoint pos;
 			pos.x = pcDocLine->GetLengthWithoutEOL();
 			pos.y = GetDocument()->m_cDocLineMgr.GetLineCount() - 1;
@@ -1422,7 +1427,7 @@ void CViewCommander::Command_MODIFYLINE_PREV( bool bSelect )
 			if( CModifyVisitor().IsLineModified(pcDocLineTemp, nSaveSeq) != false ){
 				// 最終行が変更行の場合は、[EOF]に止まる
 				CLogicPoint pos;
-				if( pcDocLineTemp->GetEol() != EOL_NONE ){
+				if( pcDocLineTemp->GetEol().IsValid() ){
 					pos.x = 0;
 					pos.y = GetDocument()->m_cDocLineMgr.GetLineCount();
 					pos.y++;

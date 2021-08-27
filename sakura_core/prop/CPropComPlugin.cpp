@@ -5,6 +5,7 @@
 */
 /*
 	Copyright (C) 2009, syat
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -38,8 +39,12 @@
 #include "dlg/CDlgPluginOption.h"	// 2010/3/22 Uchi
 #include "io/CTextStream.h"
 #include "io/CZipFile.h"
+#include "CSelectLang.h"
+#include "util/shell.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 static void LoadPluginTemp(CommonSetting& common, CMenuDrawer& cMenuDrawer);
 
@@ -238,7 +243,7 @@ INT_PTR CPropPlugin::DispatchEvent( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 							break;
 						}
 					}
-					::ShellExecute( NULL, L"open", sBaseDir.c_str(), NULL, NULL, SW_SHOW );
+					OpenWithExplorer( hwndDlg, sBaseDir );
 				}
 				break;
 			case IDC_PLUGIN_README:		// ReadMe表示	// 2011/11/2 Uchi
@@ -263,7 +268,7 @@ INT_PTR CPropPlugin::DispatchEvent( HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 					if (sel >= 0){
 						CPlugin* plugin = CPluginManager::getInstance()->GetPlugin(sel);
 						if (plugin != NULL){
-							::ShellExecute(NULL, L"Open", plugin->m_sUrl.c_str(), NULL, NULL, SW_SHOW);
+							OpenWithBrowser( hwndDlg, plugin->m_sUrl );
 						}
 					}
 				}

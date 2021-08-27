@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2012, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -27,7 +28,9 @@
 #pragma once
 
 #include "CWnd.h"
+
 class CEditView;
+class CMyPoint;
 
 class CAutoScrollWnd final: public CWnd
 {

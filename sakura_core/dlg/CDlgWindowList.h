@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2015, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -44,8 +45,8 @@ protected:
 	LPVOID	GetHelpIdTable() override;
 	INT_PTR DispatchEvent(HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam) override;
 	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnDestroy( void ) override;
 	BOOL OnSize(WPARAM wParam, LPARAM lParam) override;
-	BOOL OnMove(WPARAM wParam, LPARAM lParam) override;
 	BOOL OnMinMaxInfo(LPARAM lParam);
 	BOOL OnActivate(WPARAM wParam, LPARAM lParam) override;
 

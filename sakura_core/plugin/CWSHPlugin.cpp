@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2009, syat
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,6 +30,8 @@
 #include "plugin/CWSHPlugin.h"
 #include "plugin/CPluginIfObj.h"
 #include "macro/CWSHManager.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 // デストラクタ
 CWSHPlugin::~CWSHPlugin(void)

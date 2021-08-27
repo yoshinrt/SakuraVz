@@ -9,6 +9,7 @@
 	Copyright (C) 2002, aroka CProcessより分離, YAZAKI
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -21,7 +22,10 @@
 #include "CCommandLine.h"
 #include "env/CShareData_IO.h"
 #include "debug/CRunningTimer.h"
+#include "env/CShareData.h"
 #include "sakura_rc.h"/// IDD_EXITTING 2002/2/10 aroka ヘッダ整理
+#include "config/system_constants.h"
+#include "String_define.h"
 
 //-------------------------------------------------
 
@@ -111,7 +115,7 @@ std::filesystem::path CControlProcess::GetPrivateIniFileName(const std::wstring&
 */
 bool CControlProcess::InitializeProcess()
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CControlProcess::InitializeProcess" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CControlProcess::InitializeProcess" );
 
 	// アプリケーション実行検出用(インストーラで使用)
 	m_hMutex = ::CreateMutex( NULL, FALSE, GSTR_MUTEX_SAKURA );
@@ -167,12 +171,12 @@ bool CControlProcess::InitializeProcess()
 	CSelectLang::ChangeLang( GetDllShareData().m_Common.m_sWindow.m_szLanguageDll );
 	RefreshString();
 
-	MY_TRACETIME( cRunningTimer, "Before new CControlTray" );
+	MY_TRACETIME( cRunningTimer, L"Before new CControlTray" );
 
 	/* タスクトレイにアイコン作成 */
 	m_pcTray = new CControlTray;
 
-	MY_TRACETIME( cRunningTimer, "After new CControlTray" );
+	MY_TRACETIME( cRunningTimer, L"After new CControlTray" );
 
 	HWND hwnd = m_pcTray->Create( GetProcessInstance() );
 	if( !hwnd ){

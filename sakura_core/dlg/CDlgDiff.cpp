@@ -12,6 +12,7 @@
 	Copyright (C) 2004, MIK, genta, じゅうじ
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -25,8 +26,11 @@
 #include "util/shell.h"
 #include "util/string_ex2.h"
 #include "util/file.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/system_constants.h"
 
 const DWORD p_helpids[] = {	//13200
 	IDC_BUTTON_DIFF_DST,		HIDC_BUTTON_DIFF_DST,
@@ -513,12 +517,21 @@ BOOL CDlgDiff::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	return CDialog::OnInitDialog( hwndDlg, wParam, lParam );
 }
 
+BOOL CDlgDiff::OnDestroy( void )
+{
+	CDialog::OnDestroy();
+	RECT& rect = GetDllShareData().m_Common.m_sOthers.m_rcDiffDialog;
+	rect.left = m_xPos;
+	rect.top = m_yPos;
+	rect.right = rect.left + m_nWidth;
+	rect.bottom = rect.top + m_nHeight;
+	return TRUE;
+}
+
 BOOL CDlgDiff::OnSize( WPARAM wParam, LPARAM lParam )
 {
 	/* 基底クラスメンバ */
 	CDialog::OnSize( wParam, lParam );
-
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcDiffDialog );
 
 	RECT  rc;
 	POINT ptNew;
@@ -531,13 +544,6 @@ BOOL CDlgDiff::OnSize( WPARAM wParam, LPARAM lParam )
 	}
 	::InvalidateRect( GetHwnd(), NULL, TRUE );
 	return TRUE;
-}
-
-BOOL CDlgDiff::OnMove( WPARAM wParam, LPARAM lParam )
-{
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcDiffDialog );
-	
-	return CDialog::OnMove( wParam, lParam );
 }
 
 BOOL CDlgDiff::OnMinMaxInfo( LPARAM lParam )

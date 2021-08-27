@@ -5,6 +5,7 @@
 */
 /*
 	Copyright (C) 2010-2012 Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -28,12 +29,12 @@
 */
 #include "StdAfx.h"
 #include "CCodePage.h"
-#include "CUnicode.h"
 #include "charcode.h"
 #include "codechecker.h"
 #include "dlg/CDialog.h"
 #include "util/tchar_convert.h"
 #include <algorithm>
+#include "apiwrap/StdControl.h"
 
 typedef BOOL (WINAPI *pfn_GetCPInfoExT_t)(UINT, DWORD, CPINFOEX*);
 
@@ -212,31 +213,6 @@ EConvertResult CCodePage::UnicodeToCP(const CNativeW& cSrc, CMemory* pDst, int c
 	pDst->SetRawDataHoldBuffer(pDstBuffer, nDstLen);
 	delete [] pDstBuffer;
 	return ret;
-}
-
-void CCodePage::GetEol(CMemory* pcmemEol, EEolType eEolType)
-{
-	CNativeW temp;
-	CUnicode().GetEol(temp._GetMemory(), eEolType);
-	UnicodeToCode(temp, pcmemEol);
-	CNativeW temp2;
-	CodeToUnicode(*pcmemEol, &temp2);
-	// 双方向変換ができる場合だけ設定
-	if( !CNativeW::IsEqual(temp, temp2) ){
-		pcmemEol->Clear();
-	}
-}
-
-void CCodePage::GetBom(CMemory* pcmemBom)
-{
-	CNativeW temp;
-	CUnicode().GetBom(temp._GetMemory());
-	UnicodeToCode(temp, pcmemBom);
-	CNativeW temp2;
-	CodeToUnicode(*pcmemBom, &temp2);
-	if( !CNativeW::IsEqual(temp, temp2) ){
-		pcmemBom->Clear();
-	}
 }
 
 // 文字コード表示用	UNICODE → Hex 変換
@@ -593,7 +569,7 @@ int CCodePage::S_UTF32BEToUnicode( const char* pSrc, int nSrcLen, wchar_t* pDst,
 		for(; i < nSrcLen; ){
 			if( i + 3 < nSrcLen ){
 				if( pSrcByte[i+1] == 0x00 && pSrcByte[i] == 0x00 ){
-					wchar_t c = static_cast<wchar_t>(pSrcByte[i+1] << 8 | pSrcByte[i]);
+					wchar_t c = static_cast<wchar_t>(pSrcByte[i+2] << 8 | pSrcByte[i+3]);
 					if( IsUtf16SurrogHi(c) || IsUtf16SurrogLow(c) ){
 						// サロゲート断片。バイトごとに出力する)
 						nDstUseLen += 4;
@@ -621,7 +597,7 @@ int CCodePage::S_UTF32BEToUnicode( const char* pSrc, int nSrcLen, wchar_t* pDst,
 	for(; i < nSrcLen; ){
 		if( i + 3 < nSrcLen ){
 			if( pSrcByte[i] == 0x00 && pSrcByte[i+1] == 0x00 ){
-				wchar_t c = static_cast<wchar_t>(pSrcByte[i+1] << 8 | pSrcByte[i]);
+				wchar_t c = static_cast<wchar_t>(pSrcByte[i+2] << 8 | pSrcByte[i+3]);
 				if( IsUtf16SurrogHi(c) || IsUtf16SurrogLow(c) ){
 					nDstUseCharLen = 4;
 					if( nDstUseLen + nDstUseCharLen <= nDstLen ){

@@ -5,7 +5,7 @@
 */
 
 /*
-	Copyright (C)
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -34,6 +34,8 @@
 #include "charset/charcode.h"
 #include "parse/CWordParse.h"
 #include "mem/CMemory.h"
+#include "util/string_ex.h"
+#include "charset/charset.h"
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //

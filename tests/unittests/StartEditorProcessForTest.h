@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2020 Sakura Editor Organization
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -24,13 +24,6 @@
 */
 #pragma once
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif /* #ifndef NOMINMAX */
-
-#include <tchar.h>
-#include <Windows.h>
-
 #include <string_view>
 
 /*!
@@ -45,4 +38,4 @@
  * googletestでは、ASSERT_EXITで起動したプロセスの完全な終了を待機できないようです。
  * コントロールプロセスが終了する前に他のテストが実行されると期待した動作にならない場合があります。
  */
-int StartEditorProcessForTest( const std::wstring_view& strCommandLine );
+int StartEditorProcessForTest(std::wstring_view commandLine);

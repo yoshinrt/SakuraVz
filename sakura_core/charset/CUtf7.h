@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,8 +34,6 @@ public:
 	//CCodeBaseインターフェース
 	EConvertResult CodeToUnicode(const CMemory& cSrc, CNativeW* pDst) override{ return UTF7ToUnicode(cSrc, pDst); }	//!< 特定コード → UNICODE    変換
 	EConvertResult UnicodeToCode(const CNativeW& cSrc, CMemory* pDst) override{ return UnicodeToUTF7(cSrc, pDst); }	//!< UNICODE    → 特定コード 変換
-	void GetBom(CMemory* pcmemBom) override;	//!< BOMデータ取得
-	void GetEol(CMemory* pcmemEol, EEolType eEolType) override;
 
 public:
 	//実装

@@ -13,6 +13,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2009, ryoji
 	Copyright (C) 2012, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -22,8 +23,12 @@
 #include "dlg/CDlgFind.h"
 #include "view/CEditView.h"
 #include "util/shell.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 //検索 CDlgFind.cpp	//@@@ 2002.01.07 add start MIK
 const DWORD p_helpids[] = {	//11800

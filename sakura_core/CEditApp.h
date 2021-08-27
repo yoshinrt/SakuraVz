@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2007, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -31,6 +32,8 @@
 #include "util/design_template.h"
 #include "uiparts/CSoundSet.h"
 #include "uiparts/CImageListMgr.h"
+#include "types/CType.h"
+
 class CEditDoc;
 class CEditWnd;
 class CLoadAgent;

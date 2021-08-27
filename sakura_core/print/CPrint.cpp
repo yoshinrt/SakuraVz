@@ -10,6 +10,7 @@
 	Copyright (C) 2001, hor
 	Copyright (C) 2002, MIK
 	Copyright (C) 2003, かろと
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,6 +38,9 @@
 #include <WinSpool.h>
 #include "CPrint.h"
 #include "_main/global.h"
+#include "CSelectLang.h"
+#include "basis/CMyString.h"
+#include "String_define.h"
 
 // 2006.08.14 Moca 用紙名一覧の重複削除・情報の統合
 const PAPER_INFO CPrint::m_paperInfoArr[] = {

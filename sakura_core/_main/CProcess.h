@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2002, aroka 新規作成
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -21,7 +22,6 @@
 #include "global.h"
 #include "util/design_template.h"
 #include "env/CShareData.h"
-#include "env/DLLSHAREDATA.h"
 
 #ifdef MINIDUMP_TYPE
 #define USE_CRASHDUMP
@@ -55,10 +55,10 @@ protected:
 #endif
 public:
 	HINSTANCE		GetProcessInstance() const{ return m_hInstance; }
-	CShareData&		GetShareData()   { return *m_pcShareData; }
+	CShareData&		GetShareData()   { return m_cShareData; }
 	HWND			GetMainWindow() const{ return m_hWnd; }
 
-	[[nodiscard]] const CShareData* GetShareDataPtr() const { return m_pcShareData; }
+	[[nodiscard]] const CShareData* GetShareDataPtr() const { return &m_cShareData; }
 
 private:
 	HINSTANCE	m_hInstance;
@@ -74,7 +74,7 @@ private:
 		PMINIDUMP_CALLBACK_INFORMATION CallbackParam
 		);
 #endif
-	CShareData*		m_pcShareData;
+	CShareData		m_cShareData;
 
 private:
 };

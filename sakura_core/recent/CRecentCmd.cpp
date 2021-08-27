@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -25,9 +26,6 @@
 
 #include "StdAfx.h"
 #include "CRecentCmd.h"
-#include "config/maxdata.h"
-#include "env/DLLSHAREDATA.h"
-#include <string.h>
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                           生成                              //

@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,13 +30,14 @@
 #define SAKURA_CFILENAMEMANAGER_2B89B426_470E_40D6_B62E_5321E383ECD6_H_
 #pragma once
 
-// 要先行定義
-// #include "DLLSHAREDATA.h"
+#include <string_view>
 
 #include "util/design_template.h"
 #include "config/maxdata.h"
 
+struct DLLSHAREDATA;
 struct EditInfo;
+DLLSHAREDATA& GetDllShareData();
 
 //!ファイル名管理
 class CFileNameManager : public TSingleton<CFileNameManager>{
@@ -50,7 +52,7 @@ public:
 	//ファイル名関連
 	LPWSTR GetTransformFileNameFast( LPCWSTR, LPWSTR, int nDestLen, HDC hDC, bool bFitMode = true, int cchMaxWidth = 0 );	// 2002.11.24 Moca Add
 	int TransformFileName_MakeCache( void );
-	static LPCWSTR GetFilePathFormat( LPCWSTR, LPWSTR, int, LPCWSTR, LPCWSTR );
+	static LPCWSTR GetFilePathFormat( std::wstring_view strSrc, LPWSTR pszDest, size_t nDestLen, std::wstring_view strFrom, std::wstring_view strTo );
 	static bool ExpandMetaToFolder( LPCWSTR, LPWSTR, int );
 
 	//メニュー類のファイル名作成

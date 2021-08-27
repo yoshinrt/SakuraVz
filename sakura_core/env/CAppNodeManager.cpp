@@ -9,6 +9,7 @@
 	Copyright (C) 2011, syat
 	Copyright (C) 2012, syat, Uchi
 	Copyright (C) 2013, Moca, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -38,6 +39,9 @@
 #include "recent/CRecentEditNode.h"
 #include "util/window.h"
 #include "_main/CMutex.h"
+#include "config/system_constants.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 // GetOpenedWindowArr用静的変数／構造体
 static BOOL s_bSort;	// ソート指定

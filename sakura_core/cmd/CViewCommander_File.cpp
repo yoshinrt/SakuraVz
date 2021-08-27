@@ -12,6 +12,7 @@
 	Copyright (C) 2005, genta
 	Copyright (C) 2006, ryoji, maru
 	Copyright (C) 2007, ryoji, maru, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -51,6 +52,7 @@
 #include "CWriteManager.h"
 #include "CEditApp.h"
 #include "recent/CMRUFile.h"
+#include "util/shell.h"
 #include "util/window.h"
 #include "charset/CCodeFactory.h"
 #include "plugin/CPlugin.h"
@@ -58,7 +60,11 @@
 #include "env/CSakuraEnvironment.h"
 #include "debug/CRunningTimer.h"
 #include "util/os.h"
+#include "apiwrap/CommonControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 /* 新規作成 */
 void CViewCommander::Command_FILENEW( void )
@@ -187,7 +193,7 @@ bool CViewCommander::Command_FILESAVE( bool warnbeep, bool askname )
 	//セーブ情報
 	SSaveInfo sSaveInfo;
 	pcDoc->GetSaveInfo(&sSaveInfo);
-	sSaveInfo.cEol = EOL_NONE; //改行コード無変換
+	sSaveInfo.cEol = EEolType::none; //改行コード無変換
 	sSaveInfo.bOverwriteMode = true; //上書き要求
 
 	//上書き処理
@@ -388,7 +394,7 @@ void CViewCommander::Command_PLSQL_COMPILE_ON_SQLPLUS( void )
 				nBool = Command_FILESAVE();
 			}else{
 				//nBool = HandleCommand( F_FILESAVEAS_DIALOG, true, 0, 0, 0, 0 );
-				nBool = Command_FILESAVEAS_DIALOG(NULL, CODE_NONE, EOL_NONE);
+				nBool = Command_FILESAVEAS_DIALOG(NULL, CODE_NONE, EEolType::none);
 			}
 			if( !nBool ){
 				return;
@@ -445,28 +451,10 @@ void CViewCommander::Command_BROWSE( void )
 		ErrorBeep();
 		return;
 	}
-//	char	szURL[MAX_PATH + 64];
-//	auto_sprintf( szURL, L"%ls", GetDocument()->m_cDocFile.GetFilePath() );
-	/* URLを開く */
-//	::ShellExecuteEx( NULL, L"open", szURL, NULL, NULL, SW_SHOW );
 
-    SHELLEXECUTEINFO info; 
-    info.cbSize =sizeof(info);
-    info.fMask = 0;
-    info.hwnd = NULL;
-    info.lpVerb = NULL;
-    info.lpFile = GetDocument()->m_cDocFile.GetFilePath();
-    info.lpParameters = NULL;
-    info.lpDirectory = NULL;
-    info.nShow = SW_SHOWNORMAL;
-    info.hInstApp = 0;
-    info.lpIDList = NULL;
-    info.lpClass = NULL;
-    info.hkeyClass = 0; 
-    info.dwHotKey = 0;
-    info.hIcon =0;
-
-	::ShellExecuteEx(&info);
+	std::wstring_view path(GetDocument()->m_cDocFile.GetFilePath());
+	std::wstring url(strprintf(L"file:///%s", path.data()));
+	OpenWithBrowser(m_pCommanderView->GetHwnd(), url);
 
 	return;
 }
@@ -497,7 +485,7 @@ void CViewCommander::Command_PROPERTY_FILE( void )
 		/* 全行データを返すテスト */
 		wchar_t*	pDataAll;
 		int		nDataAllLen;
-		CRunningTimer cRunningTimer( "CViewCommander::Command_PROPERTY_FILE 全行データを返すテスト" );
+		CRunningTimer cRunningTimer( L"CViewCommander::Command_PROPERTY_FILE 全行データを返すテスト" );
 		cRunningTimer.Reset();
 		pDataAll = CDocReader(GetDocument()->m_cDocLineMgr).GetAllData( &nDataAllLen );
 //		MYTRACE( L"全データ取得             (%dバイト) 所要時間(ミリ秒) = %d\n", nDataAllLen, cRunningTimer.Read() );
@@ -535,17 +523,9 @@ void CViewCommander::Command_OPEN_FOLDER_IN_EXPLORER(void)
 		return;
 	}
 
-	// ドキュメントパスを変数に入れる
-	LPCWSTR pszDocPath = GetDocument()->m_cDocFile.GetFilePath();
-
-	// Windows Explorerの引数を作る
-	CNativeW explorerCommand;
-	explorerCommand.AppendStringF(L"/select,\"%s\"", pszDocPath);
-	LPCWSTR pszExplorerCommand = explorerCommand.GetStringPtr();
-
-	auto hInstance = ::ShellExecute(GetMainWindow(), L"open", L"explorer.exe", pszExplorerCommand, NULL, SW_SHOWNORMAL);
-	// If the function succeeds, it returns a value greater than 32. 
-	if (hInstance <= (decltype(hInstance))32) {
+	// ドキュメントパスを変数に入れてWindowsエクスプローラーで開く
+	if (std::filesystem::path docPath = GetDocument()->m_cDocFile.GetFilePath();
+		!OpenWithExplorer(GetMainWindow(), docPath)) {
 		ErrorBeep();
 		return;
 	}
@@ -742,7 +722,7 @@ BOOL CViewCommander::Command_PUTFILE(
 			if( 0 < cDst.GetRawLength() )
 				out.Write(cDst.GetRawPtr(),cDst.GetRawLength());
 		}
-		catch(CError_FileOpen)
+		catch(const CError_FileOpen&)
 		{
 			WarningMessage(
 				NULL,
@@ -751,7 +731,7 @@ BOOL CViewCommander::Command_PUTFILE(
 			);
 			bResult = FALSE;
 		}
-		catch(CError_FileWrite)
+		catch(const CError_FileWrite&)
 		{
 			WarningMessage(
 				NULL,
@@ -779,7 +759,7 @@ BOOL CViewCommander::Command_PUTFILE(
 			SSaveInfo(
 				filename,
 				nSaveCharCode,
-				EOL_NONE,
+				CEol(EEolType::none),
 				bBom
 			)
 		);
@@ -901,11 +881,11 @@ BOOL CViewCommander::Command_INSFILE( LPCWSTR filename, ECodeType nCharCode, int
 		// ファイルを明示的に閉じるが、ここで閉じないときはデストラクタで閉じている
 		cfl.FileClose();
 	} // try
-	catch( CError_FileOpen ){
+	catch( const CError_FileOpen& ){
 		WarningMessage( NULL, LS(STR_GREP_ERR_FILEOPEN), filename );
 		bResult = FALSE;
 	}
-	catch( CError_FileRead ){
+	catch( const CError_FileRead& ){
 		WarningMessage( NULL, LS(STR_ERR_DLGEDITVWCMDNW12) );
 		bResult = FALSE;
 	} // 例外処理終わり

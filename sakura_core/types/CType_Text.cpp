@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,6 +33,8 @@
 #include "outline/CFuncInfo.h"
 #include "outline/CFuncInfoArr.h"
 #include "view/colors/EColorIndexType.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 /* テキスト */
 //Sep. 20, 2000 JEPRO テキストの規定値を80→120に変更(不具合一覧.txtがある程度読みやすい桁数)

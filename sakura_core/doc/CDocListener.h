@@ -11,6 +11,7 @@
 /*
 	Copyright (C) 2008, kobake
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -119,7 +120,7 @@ struct SSaveInfo{
 	//モード
 	bool		bOverwriteMode;	//!< 上書き要求
 
-	SSaveInfo() : cFilePath(L""), eCharCode(CODE_AUTODETECT), bBomExist(false), bChgCodeSet(false), cEol(EOL_NONE), bOverwriteMode(false) { }
+	SSaveInfo() : cFilePath(L""), eCharCode(CODE_AUTODETECT), bBomExist(false), bChgCodeSet(false), cEol(EEolType::none), bOverwriteMode(false) { }
 	SSaveInfo(const CFilePath& _cFilePath, ECodeType _eCodeType, const CEol& _cEol, bool _bBomExist)
 		: cFilePath(_cFilePath), eCharCode(_eCodeType), bBomExist(_bBomExist), bChgCodeSet(false), cEol(_cEol), bOverwriteMode(false) { }
 

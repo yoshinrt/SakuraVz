@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,6 +30,8 @@
 #include "window/CEditWnd.h"
 #include "parse/CWordParse.h"
 #include "util/string_ex2.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 const int STRNCMP_MAX = 100;	/* MAXキーワード長：_strnicmp文字列比較最大値(CEditView::KeySearchCore) */	// 2006.04.10 fon
 

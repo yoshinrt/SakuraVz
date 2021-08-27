@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,8 +30,7 @@
 #define SAKURA_CTAGJUMPMANAGER_487A43FC_EB78_44CF_B1E4_6FD78EF1F35A_H_
 #pragma once
 
-// 要先行定義
-// #define DLLSHAREDATA.h
+#include "basis/SakuraBasis.h"
 
 // 2004/06/21 novice タグジャンプ機能追加
 //! タグジャンプ情報
@@ -57,6 +57,9 @@ struct SShare_TagJump{
 	BOOL				m_bTagJumpICase;				//!< 大文字小文字を同一視
 	BOOL				m_bTagJumpPartialMatch;				//!< 文字列の途中にマッチ
 };
+
+struct DLLSHAREDATA;
+DLLSHAREDATA& GetDllShareData();
 
 class CTagJumpManager{
 public:

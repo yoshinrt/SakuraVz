@@ -27,6 +27,9 @@
 #include "StdAfx.h"
 #include "CBregexp.h"
 #include "charset/charcode.h"
+#include "apiwrap/StdControl.h"
+#include "String_define.h"
+#include "CSelectLang.h"
 
 CBregexp::CBregexp(){
 	m_Re					= nullptr;

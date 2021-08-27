@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -74,8 +75,9 @@ public:
 
 	//	May 15, 2000 genta
 	CEol  GetNewLineCode( void ) const;
-	void  SetNewLineCode(const CEol& t){ m_cNewLineCode = t; }
 	CEol  GetNewLineCodeFile() const { return m_cNewLineCode; }
+	void  SetNewLineCode( EEolType t ) noexcept { m_cNewLineCode = t; }
+	void  SetNewLineCode( const CEol& cEol ) noexcept { SetNewLineCode( cEol.GetType() ); }
 
 	//	Oct. 2, 2005 genta 挿入モードの設定
 	bool IsInsMode() const { return m_bInsMode; }

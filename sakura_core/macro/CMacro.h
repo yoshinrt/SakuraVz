@@ -9,6 +9,7 @@
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2002, YAZAKI
 	Copyright (C) 2003, 鬼
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -64,6 +65,9 @@ struct CMacroParam{
 		m_nDataLen = obj.m_nDataLen;
 		m_eType = obj.m_eType;
 	}
+	CMacroParam& operator = (const CMacroParam&) = delete;
+	CMacroParam(CMacroParam&&) noexcept = delete;
+	CMacroParam& operator = (CMacroParam&&) noexcept = delete;
 	~CMacroParam(){
 		Clear();
 	}
@@ -94,11 +98,17 @@ struct CMacroParam{
 */
 class CMacro
 {
+	using Me = CMacro;
+
 public:
 	/*
 	||  Constructors
 	*/
 	CMacro( EFunctionCode nFuncID );	//	機能IDを指定して初期化
+	CMacro(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CMacro(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CMacro();
 	void ClearMacroParam();
 

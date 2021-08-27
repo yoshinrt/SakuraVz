@@ -14,6 +14,7 @@
 	Copyright (C) 2002, aroka
 	Copyright (C) 2007, kobake
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -22,12 +23,16 @@
 #include "StdAfx.h"
 #include <Ole2.h>
 #include <locale.h>
+#include "_main/CCommandLine.h"
 #include "CProcessFactory.h"
 #include "CProcess.h"
 #include "util/os.h"
 #include "util/module.h"
 #include "debug/CRunningTimer.h"
 #include "version.h"
+#include "util/std_macro.h"
+#include "env/DLLSHAREDATA.h"
+#include "config/app_constants.h"
 
 // アプリ名。2007.09.21 kobake 整理
 #define _APP_NAME_(TYPE) TYPE("sakura")
@@ -80,7 +85,7 @@ int WINAPI wWinMain(
 	::_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
 #endif
 
-	MY_RUNNINGTIMER(cRunningTimer, "WinMain" );
+	MY_RUNNINGTIMER(cRunningTimer, L"WinMain" );
 	{
 		// 2014.04.24 DLLの検索パスからカレントディレクトリを削除する
 		::SetDllDirectory( L"" );
@@ -94,12 +99,15 @@ int WINAPI wWinMain(
 	DEBUG_TRACE(L"-- -- WinMain -- --\n");
 	DEBUG_TRACE(L"sizeof(DLLSHAREDATA) = %d\n",sizeof(DLLSHAREDATA));
 
+	//コマンドラインクラスのインスタンスを確保する
+	CCommandLine cCommandLine;
+
 	//プロセスの生成とメッセージループ
 	CProcessFactory aFactory;
 	CProcess *process = 0;
 	try{
 		process = aFactory.Create( hInstance, lpCmdLine );
-		MY_TRACETIME( cRunningTimer, "ProcessObject Created" );
+		MY_TRACETIME( cRunningTimer, L"ProcessObject Created" );
 	}
 	catch(...){
 	}

@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2009, syat
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -231,6 +232,8 @@ protected:
 
 class CPlugin
 {
+	using Me = CPlugin;
+
 	//型定義
 protected:
 	typedef std::wstring wstring;
@@ -243,6 +246,10 @@ public:
 	//コンストラクタ
 public:
 	CPlugin( const wstring& sBaseDir );
+	CPlugin(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CPlugin(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 
 	//デストラクタ
 public:

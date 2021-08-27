@@ -11,6 +11,7 @@
 	Copyright (C) 2003, Moca, genta, wmlhq
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2010, syat
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -27,6 +28,7 @@
 #include "util/module.h"
 #include "debug/CRunningTimer.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
 
 //  2010/06/29 syat MAX_X, MAX_Yの値をCommonSettings.hに移動
 //	Jul. 21, 2003 genta 他でも使うので関数の外に出した
@@ -146,7 +148,7 @@ HBITMAP ConvertTo32bppBMP(HBITMAP hbmpSrc)
 */
 bool CImageListMgr::Create(HINSTANCE hInstance)
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CImageListMgr::Create" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CImageListMgr::Create" );
 	if( m_hIconBitmap != NULL ){	//	既に構築済みなら無視する
 		return true;
 	}
@@ -235,15 +237,6 @@ struct MyRGBQUAD : tagRGBQUAD
 		rgbGreen = 0;
 		rgbRed = 0;
 		rgbReserved = 0;
-	}
-	MyRGBQUAD( std::initializer_list<BYTE> a ) noexcept
-		: tagRGBQUAD()
-	{
-		assert( a.size() <= 4 );
-		decltype(rgbBlue) *p = &rgbBlue;
-		for ( auto it = a.begin(); it != a.end(); ++it, ++p ) {
-			*p = *it;
-		}
 	}
 	bool operator == ( const RGBQUAD &rhs ) const noexcept
 	{

@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -44,6 +45,10 @@ namespace ApiWrap
 	inline LRESULT StatusBar_GetTextLength(HWND hwndStatus, WPARAM opt)
 	{
 		return ::SendMessage( hwndStatus, SB_GETTEXTLENGTH, opt, (LPARAM)0 );
+	}
+	inline LRESULT StatusBar_GetRect(HWND hwndStatus, WPARAM opt, RECT* rect)
+	{
+		return ::SendMessage( hwndStatus, SB_GETRECT, opt, (LPARAM)rect );
 	}
 
 	inline int StatusBar_SetParts(HWND hwndCtl, int num, int* positions)		{ return (int)(DWORD)::SendMessage(hwndCtl, SB_SETPARTS, (WPARAM)num, (LPARAM)positions); }

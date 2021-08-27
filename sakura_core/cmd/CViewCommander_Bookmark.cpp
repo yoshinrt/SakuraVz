@@ -8,6 +8,7 @@
 	Copyright (C) 2000-2001, genta
 	Copyright (C) 2002, hor, YAZAKI, MIK
 	Copyright (C) 2006, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -17,6 +18,8 @@
 #include "CViewCommander.h"
 #include "CViewCommander_inline.h"
 #include "docplus/CFuncListManager.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 //	from CViewCommander_New.cpp
 /*!	検索開始位置へ戻る

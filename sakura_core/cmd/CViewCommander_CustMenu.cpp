@@ -11,6 +11,7 @@
 	Copyright (C) 2007, ryoji, maru, Uchi
 	Copyright (C) 2008, ryoji, nasukoji
 	Copyright (C) 2009, ryoji, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -19,6 +20,8 @@
 #include "StdAfx.h"
 #include "CViewCommander.h"
 #include "CViewCommander_inline.h"
+
+#include "apiwrap/StdApi.h"
 
 /* 右クリックメニュー */
 void CViewCommander::Command_MENU_RBUTTON( void )

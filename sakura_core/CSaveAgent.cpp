@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -34,6 +35,7 @@
 #include "CEditApp.h"
 #include "_main/CAppMode.h"
 #include "env/CShareData.h"
+#include "String_define.h"
 
 CSaveAgent::CSaveAgent()
 {
@@ -79,7 +81,7 @@ ECallbackResult CSaveAgent::OnCheckSave(SSaveInfo* pSaveInfo)
 				::DeleteFile(pSaveInfo->cFilePath);
 			}
 		}
-		catch(CError_FileOpen){
+		catch(const CError_FileOpen&){
 			// ※ たとえ上書き保存の場合でもここでの失敗では書込み禁止へは遷移しない
 			if( bLock ) pcDoc->m_cDocFileOperation.DoFileLock(false);
 			ErrorMessage(
@@ -117,7 +119,7 @@ void CSaveAgent::OnSave(const SSaveInfo& sSaveInfo)
 	
 	// EOL を LF に戻す
 	if( GetDllShareData().m_Common.m_sEdit.m_bConvertEOLPaste ){
-		pcDoc->m_cDocLineMgr.SetEol( EOL_LF );
+		pcDoc->m_cDocLineMgr.SetEol( CEol( EEolType::line_feed ));
 	}
 
 	//セーブ情報の確定

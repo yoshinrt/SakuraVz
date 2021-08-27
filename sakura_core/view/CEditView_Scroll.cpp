@@ -18,6 +18,7 @@
 	Copyright (C) 2009, nasukoji
 	Copyright (C) 2010, Moca
 	Copyright (C) 2012, ryoji, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -29,6 +30,7 @@
 #include "window/CEditWnd.h"
 #include "types/CTypeSupport.h"
 #include <limits.h>
+#include "config/app_constants.h"
 
 /*! スクロールバー作成
 	@date 2006.12.19 ryoji 新規作成（CEditView::Createから分離）
@@ -415,7 +417,6 @@ CLayoutInt CEditView::ScrollAtV( CLayoutInt nPos, BOOL bRedrawScrollBar )
 		if( GetDrawSwitch() ){
 			RECT rcClip2 = {0,0,0,0};
 			ScrollDraw(nScrollRowNum, CLayoutInt(0), rcScrol, rcClip, rcClip2);
-			::UpdateWindow( GetHwnd() );
 		}
 	}
 
@@ -495,7 +496,6 @@ CLayoutInt CEditView::ScrollAtH( CLayoutInt nPos, BOOL bRedrawScrollBar )
 		if( GetDrawSwitch() ){
 			RECT rcClip = {0,0,0,0};
 			ScrollDraw(CLayoutInt(0), nScrollColNum, rcScrol, rcClip, rcClip2);
-			::UpdateWindow( GetHwnd() );
 		}
 	}
 	//	2006.1.28 aroka 判定条件誤り修正 (バーが消えてもスクロールしない)
@@ -600,6 +600,7 @@ void CEditView::ScrollDraw(CLayoutInt nScrollRowNum, CLayoutInt nScrollColNum, c
 	if( nScrollColNum != 0 ){
 		InvalidateRect( &rcClip2, FALSE );
 	}
+	UpdateWindow();
 }
 
 void CEditView::MiniMapRedraw(bool bUpdateAll)

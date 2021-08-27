@@ -11,6 +11,7 @@
 	Copyright (C) 2002, frozen
 	Copyright (C) 2003, zenryaku
 	Copyright (C) 2005, genta, D.S.Koba, じゅうじ
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -28,6 +29,9 @@
 #include "charset/charcode.h"
 #include "io/CTextStream.h"
 #include "extmodule/CBregexp.h"
+#include "CSelectLang.h"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 /*! ルールファイルの1行を管理する構造体
 

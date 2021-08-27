@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,6 +34,8 @@ struct CommonSetting_MainMenu; // defined CommonSetting.h
 struct CommonSetting_KeyBind;	// defined CommonSetting.h
 struct ColorInfo; // defined doc/CDocTypeSetting.h
 struct SFileTree;
+struct SFileTreeItem;
+struct STypeConfig;
 
 // 2008.XX.XX kobake CShareDataから分離
 // 2008.05.24 Uchi   ShareData_IO_CustMenu, ShareData_IO_KeyBind  move Export、Importに使用

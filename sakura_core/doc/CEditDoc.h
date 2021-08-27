@@ -15,6 +15,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, ryoji, maru
 	Copyright (C) 2008, ryoji, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -160,6 +161,7 @@ public:
 	int				m_nPointSizeCur;			// 一時設定フォントサイズ
 	bool			m_blfCurTemp;				// フォント設定適用中
 	int				m_nPointSizeOrg;			// 元のフォントサイズ
+	double			m_nCurrentZoom;				// 一時設定フォントのズーム倍率
 	bool			m_bTabSpaceCurTemp;			// タブ幅一時設定適用中			// 2013.05.30 Moca
 
 	HBITMAP			m_hBackImg;

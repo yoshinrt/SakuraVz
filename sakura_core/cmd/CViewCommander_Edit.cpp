@@ -12,6 +12,7 @@
 	Copyright (C) 2008, ryoji, nasukoji
 	Copyright (C) 2009, ryoji
 	Copyright (C) 2010, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -26,6 +27,7 @@
 #include "plugin/CJackManager.h"
 #include "plugin/CSmartIndentIfObj.h"
 #include "debug/CRunningTimer.h"
+#include "apiwrap/CommonControl.h"
 
 /* wchar_t1個分の文字を入力 */
 void CViewCommander::Command_WCHAR( wchar_t wcChar, bool bConvertEOL )
@@ -295,7 +297,7 @@ void CViewCommander::Command_UNDO( void )
 		return;
 	}
 
-	MY_RUNNINGTIMER( cRunningTimer, "CViewCommander::Command_UNDO()" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CViewCommander::Command_UNDO()" );
 
 	COpe*		pcOpe = NULL;
 
@@ -552,7 +554,7 @@ void CViewCommander::Command_REDO( void )
 	if( !GetDocument()->m_cDocEditor.IsEnableRedo() ){	/* Redo(やり直し)可能な状態か？ */
 		return;
 	}
-	MY_RUNNINGTIMER( cRunningTimer, "CViewCommander::Command_REDO()" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CViewCommander::Command_REDO()" );
 
 	COpe*		pcOpe = NULL;
 	COpeBlk*	pcOpeBlk;
@@ -790,7 +792,7 @@ void CViewCommander::Command_DELETE( void )
 				CLogicInt nIndex;
 				nIndex = m_pCommanderView->LineColumnToIndex2( pcLayout, GetCaret().GetCaretLayoutPos().GetX2(), &nLineLen );
 				if( nLineLen != 0 ){	// 折り返しや改行コードより右の場合には nLineLen に行全体の表示桁数が入る
-					if( EOL_NONE != pcLayout->GetLayoutEol().GetType() ){	// 行終端は改行コードか?
+					if( pcLayout->GetLayoutEol().IsValid() ){	// 行終端は改行コードか?
 						Command_INSTEXT( true, L"", CLogicInt(0), FALSE );	// カーソル位置まで半角スペース挿入
 					}else{	// 行終端が折り返し
 						// 折り返し行末ではスペース挿入後、次の文字を削除する	// 2009.02.19 ryoji
@@ -879,7 +881,7 @@ void CViewCommander::DelCharForOverwrite( const wchar_t* pszInput, int nLen )
 		CLogicInt nIdxTo = m_pCommanderView->LineColumnToIndex( pcLayout, GetCaret().GetCaretLayoutPos().GetX2() );
 		if( nIdxTo >= pcLayout->GetLengthWithoutEOL() ){
 			bEol = true;	// 現在位置は改行または折り返し以後
-			if( pcLayout->GetLayoutEol() != EOL_NONE ){
+			if( pcLayout->GetLayoutEol().IsValid() ){
 				if( GetDllShareData().m_Common.m_sEdit.m_bNotOverWriteCRLF ){	/* 改行は上書きしない */
 					/* 現在位置が改行ならば削除しない */
 					bDelete = FALSE;

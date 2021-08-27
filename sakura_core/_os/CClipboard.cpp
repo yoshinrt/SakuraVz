@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,6 +33,7 @@
 #include "charset/CShiftJis.h"
 #include "charset/CUtf8.h"
 #include "CEol.h"
+#include "mem/CNativeA.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //               コンストラクタ・デストラクタ                  //
@@ -224,15 +226,12 @@ bool CClipboard::SetHtmlText(const CNativeW& cmemBUf)
 	CUtf8().UnicodeToCode(cmemBUf, cmemUtf8._GetMemory());
 
 	CNativeA cmemHeader;
-	char szFormat[32];
 	size_t size = cmemUtf8.GetStringLength() + 134;
 	cmemHeader.AppendString("Version:0.9\r\n");
 	cmemHeader.AppendString("StartHTML:00000097\r\n");
-	sprintf( szFormat, "EndHTML:%08Id\r\n", size + 36 );
-	cmemHeader.AppendString(szFormat);
+	cmemHeader.AppendStringF("EndHTML:%08Id\r\n", size + 36);
 	cmemHeader.AppendString("StartFragment:00000134\r\n");
-	sprintf( szFormat, "EndFragment:%08Id\r\n", size );
-	cmemHeader.AppendString(szFormat);
+	cmemHeader.AppendStringF("EndFragment:%08Id\r\n", size);
 	cmemHeader.AppendString("<html><body>\r\n<!--StartFragment -->\r\n");
 	CNativeA cmemFooter;
 	cmemFooter.AppendString("\r\n<!--EndFragment-->\r\n</body></html>\r\n");
@@ -345,7 +344,7 @@ bool CClipboard::GetText(CNativeW* cmemBuf, bool* pbColumnSelect, bool* pbLineSe
 		CMemory cmemSjis( szData, GlobalSize(hText) );
 		CNativeW cmemUni;
 		CShiftJis::SJISToUnicode(cmemSjis, &cmemUni);
-		cmemSjis.Clean();
+		cmemSjis.Reset();
 		// '\0'までを取得
 		cmemUni._SetStringLength(wcslen(cmemUni.GetStringPtr()));
 		cmemUni.swap(*cmemBuf);

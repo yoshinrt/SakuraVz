@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2000-2003, genta
 	Copyright (C) 2003, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -51,10 +52,16 @@
 		当初の独自描画に戻した．
 */
 class CImageListMgr {
+	using Me = CImageListMgr;
+
 public:
 
 	//	constructor
 	CImageListMgr();
+	CImageListMgr(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CImageListMgr(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CImageListMgr();
 
 	bool Create(HINSTANCE hInstance);	//	生成

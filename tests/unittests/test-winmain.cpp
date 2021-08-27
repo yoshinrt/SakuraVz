@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2020 Sakura Editor Organization
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -38,6 +38,7 @@
 #include <mutex>
 #include <regex>
 #include <string>
+#include <string_view>
 #include <thread>
 
 #include "config/maxdata.h"
@@ -48,6 +49,8 @@
 #include "env/DLLSHAREDATA.h"
 #include "util/file.h"
 #include "config/system_constants.h"
+#include "_main/CCommandLine.h"
+#include "_main/CControlProcess.h"
 
 #include "StartEditorProcessForTest.h"
 
@@ -65,7 +68,7 @@ struct handle_closer
 };
 
 //! HANDLE型のスマートポインタ
-typedef std::unique_ptr<std::remove_pointer<HANDLE>::type, handle_closer> handleHolder;
+using handleHolder = std::unique_ptr<std::remove_pointer<HANDLE>::type, handle_closer>;
 
 /*!
  * WinMain起動テストのためのフィクスチャクラス
@@ -74,7 +77,7 @@ typedef std::unique_ptr<std::remove_pointer<HANDLE>::type, handle_closer> handle
  * 始動前に設定ファイルを削除するようにしている。
  * テスト実行後に設定ファイルを残しておく意味はないので終了後も削除している。
  */
-class WinMainTest : public ::testing::Test {
+class WinMainTest : public ::testing::TestWithParam<const wchar_t*> {
 protected:
 	/*!
 	 * 設定ファイルのパス
@@ -87,12 +90,23 @@ protected:
 	 * テストが起動される直前に毎回呼ばれる関数
 	 */
 	void SetUp() override {
+		// テスト用プロファイル名
+		const std::wstring_view profileName(GetParam());
+
+		// コマンドラインのインスタンスを用意する
+		CCommandLine commandLine;
+		const auto strCommandLine = strprintf(LR"(-PROF="%s")", profileName.data());
+		commandLine.ParseCommandLine(strCommandLine.data(), false);
+
+		// プロセスのインスタンスを用意する
+		CControlProcess dummy(nullptr, strCommandLine.data());
+
 		// INIファイルのパスを取得
 		iniPath = GetIniFileName();
 
-		if( fexist( iniPath.c_str() ) ){
-			// INIファイルを削除する
-			std::filesystem::remove( iniPath );
+		// INIファイルを削除する
+		if (fexist(iniPath.c_str())) {
+			std::filesystem::remove(iniPath);
 		}
 	}
 
@@ -101,7 +115,14 @@ protected:
 	 */
 	void TearDown() override {
 		// INIファイルを削除する
-		std::filesystem::remove( iniPath );
+		if (fexist(iniPath.c_str())) {
+			std::filesystem::remove(iniPath);
+		}
+
+		// プロファイル指定がある場合、フォルダも削除しておく
+		if (const std::wstring_view profileName(GetParam()); profileName.length() > 0) {
+			std::filesystem::remove(iniPath.parent_path());
+		}
 	}
 };
 
@@ -111,12 +132,12 @@ protected:
  * CControlProcess::WaitForInitializedとして実装したいコードです。本体を変えたくないので一時定義しました。
  * 既存CProcessFactory::WaitForInitializedControlProcess()と概ね等価です。
  */
-void CControlProcess_WaitForInitialized( LPCWSTR lpszProfileName )
+void CControlProcess_WaitForInitialized(std::wstring_view profileName)
 {
 	// 初期化完了イベントを作成する
 	std::wstring strInitEvent( GSTR_EVENT_SAKURA_CP_INITIALIZED );
-	if( lpszProfileName && lpszProfileName[0] ){
-		strInitEvent += lpszProfileName;
+	if (profileName.length() > 0) {
+		strInitEvent += profileName;
 	}
 	auto hEvent = ::CreateEventW( NULL, TRUE, FALSE, strInitEvent.data() );
 	if (!hEvent) {
@@ -127,7 +148,7 @@ void CControlProcess_WaitForInitialized( LPCWSTR lpszProfileName )
 	handleHolder eventHolder( hEvent );
 
 	// 初期化完了イベントを待つ
-	DWORD dwRet = ::WaitForSingleObject( hEvent, 10000 );
+	DWORD dwRet = ::WaitForSingleObject( hEvent, 30000 );
 	if( WAIT_TIMEOUT == dwRet ){
 		throw std::runtime_error( "waitEvent is timeout." );
 	}
@@ -139,7 +160,7 @@ void CControlProcess_WaitForInitialized( LPCWSTR lpszProfileName )
  * CControlProcess::Startとして実装したいコードです。本体を変えたくないので一時定義しました。
  * 既存CProcessFactory::StartControlProcess()と概ね等価です。
  */
-void CControlProcess_Start( LPCWSTR lpszProfileName )
+void CControlProcess_Start(std::wstring_view profileName)
 {
 	// スタートアップ情報
 	STARTUPINFO si = { sizeof(STARTUPINFO), 0 };
@@ -147,19 +168,22 @@ void CControlProcess_Start( LPCWSTR lpszProfileName )
 	si.dwFlags = STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_SHOWDEFAULT;
 
-	WCHAR szExePath[MAX_PATH];
-	::GetModuleFileNameW( NULL, szExePath, _countof(szExePath) );
+	const auto exePath = GetExeFileName();
 
-	CNativeW cmemCommandLine;
-	cmemCommandLine.AppendStringF( L"\"%s\" -NOWIN -PROF=\"%s\"", szExePath, lpszProfileName );
+	std::wstring strProfileName;
+	if (profileName.length() > 0) {
+		strProfileName = profileName;
+	}
 
-	LPWSTR pszCommandLine = cmemCommandLine.GetStringPtr();
+	std::wstring strCommandLine = strprintf(LR"("%s" -PROF="%s" -NOWIN)", exePath.c_str(), strProfileName.c_str());
+
+	LPWSTR pszCommandLine = strCommandLine.data();
 	DWORD dwCreationFlag = CREATE_DEFAULT_ERROR_MODE;
 	PROCESS_INFORMATION pi;
 
 	// コントロールプロセスを起動する
 	BOOL createSuccess = ::CreateProcess(
-		szExePath,			// 実行可能モジュールパス
+		exePath.c_str(),	// 実行可能モジュールパス
 		pszCommandLine,		// コマンドラインバッファ
 		NULL,				// プロセスのセキュリティ記述子
 		NULL,				// スレッドのセキュリティ記述子
@@ -179,7 +203,7 @@ void CControlProcess_Start( LPCWSTR lpszProfileName )
 	::CloseHandle( pi.hProcess );
 
 	// コントロールプロセスの初期化完了を待つ
-	CControlProcess_WaitForInitialized( lpszProfileName );
+	CControlProcess_WaitForInitialized(profileName);
 }
 
 /*!
@@ -188,16 +212,17 @@ void CControlProcess_Start( LPCWSTR lpszProfileName )
  * CControlProcess::Terminateとして実装したいコードです。本体を変えたくないので一時定義しました。
  * 既存コードに該当する処理はありません。
  */
-void CControlProcess_Terminate( LPCWSTR lpszProfileName )
+void CControlProcess_Terminate(std::wstring_view profileName)
 {
 	// トレイウインドウを検索する
 	std::wstring strCEditAppName( GSTR_CEDITAPP );
-	if( lpszProfileName && lpszProfileName[0] ){
-		strCEditAppName += lpszProfileName;
+	if (profileName.length() > 0) {
+		strCEditAppName += profileName;
 	}
 	HWND hTrayWnd = ::FindWindow( strCEditAppName.data(), strCEditAppName.data() );
 	if( !hTrayWnd ){
-		throw std::runtime_error( "tray window is not found." );
+		// ウインドウがなければそのまま抜ける
+		return;
 	}
 
 	// トレイウインドウからプロセスIDを取得する
@@ -230,23 +255,39 @@ void CControlProcess_Terminate( LPCWSTR lpszProfileName )
 }
 
 /*!
+ * @brief コントロールプロセスを起動し、終了指示を出して、終了を待つ
+ */
+void CControlProcess_StartAndTerminate(std::wstring_view profileName)
+{
+	// コントロールプロセスを起動する
+	CControlProcess_Start(profileName.data());
+
+	// コントロールプロセスに終了指示を出して終了を待つ
+	CControlProcess_Terminate(profileName.data());
+}
+
+/*!
  * @brief wWinMainを起動してみるテスト
  *  プログラムが起動する正常ルートに潜む障害を検出するためのもの。
  *  コントロールプロセスを実行する。
+ *  プロセス起動は2回行い、1回目でINI作成＆書き込み、2回目でINI読み取りを検証する。
  */
-TEST_F( WinMainTest, runWithNoWin )
+TEST_P(WinMainTest, runWithNoWin)
 {
 	// テスト用プロファイル名
-	constexpr auto szProfileName = L"";
+	const auto szProfileName(GetParam());
 
-	// コントロールプロセスを起動する
-	CControlProcess_Start( szProfileName );
-
-	// コントロールプロセスに終了指示を出して終了を待つ
-	CControlProcess_Terminate( szProfileName );
+	// コントロールプロセスを起動し、終了指示を出して、終了を待つ
+	CControlProcess_StartAndTerminate(szProfileName);
 
 	// コントロールプロセスが終了すると、INIファイルが作成される
-	ASSERT_TRUE( fexist( iniPath.c_str() ) );
+	ASSERT_TRUE(fexist(iniPath.c_str()));
+
+	// コントロールプロセスを起動し、終了指示を出して、終了を待つ
+	CControlProcess_StartAndTerminate(szProfileName);
+
+	// コントロールプロセスが終了すると、INIファイルが作成される
+	ASSERT_TRUE(fexist(iniPath.c_str()));
 }
 
 /*!
@@ -254,43 +295,20 @@ TEST_F( WinMainTest, runWithNoWin )
  *  プログラムが起動する正常ルートに潜む障害を検出するためのもの。
  *  エディタプロセスを実行する。
  */
-TEST_F( WinMainTest, runEditorProcess )
+TEST_P(WinMainTest, runEditorProcess)
 {
+	// テスト用プロファイル名
+	const auto szProfileName(GetParam());
+
 	// エディタプロセスを起動するため、テスト実行はプロセスごと分離して行う
-	auto separatedTestProc = [] {
-		std::mutex mtx;
-		std::condition_variable cv;
-		bool initialized = false;
-
-		// エディタプロセスが起動したコントロールプロセスの終了を待機するスレッド
-		auto waitingThread = std::thread([&mtx, &cv, &initialized] {
-			// 初期化
-			{
-				std::unique_lock<std::mutex> lock( mtx );
-				initialized = true;
-				cv.notify_one();
-			}
-
-			// テスト用プロファイル名
-			constexpr auto szProfileName = L"";
-
-			// コントロールプロセスの初期化完了を待つ
-			CControlProcess_WaitForInitialized( szProfileName );
-
-			// コントロールプロセスに終了指示を出して終了を待つ
-			CControlProcess_Terminate( szProfileName );
-		});
-
-		// スレッドの初期化完了を待機する
-		std::unique_lock<std::mutex> lock( mtx );
-		cv.wait(lock, [&initialized] { return initialized; });
-
+	auto separatedTestProc = [szProfileName]() {
 		// 起動時実行マクロの中身を作る
 		std::wstring strStartupMacro;
 		strStartupMacro += L"Down();";
 		strStartupMacro += L"Up();";
 		strStartupMacro += L"Right();";
 		strStartupMacro += L"Left();";
+		strStartupMacro += L"Outline(0);";		//アウトライン解析
 		strStartupMacro += L"ShowFunckey();";	//ShowFunckey 出す
 		strStartupMacro += L"ShowMiniMap();";	//ShowMiniMap 出す
 		strStartupMacro += L"ShowTab();";		//ShowTab 出す
@@ -301,26 +319,53 @@ TEST_F( WinMainTest, runEditorProcess )
 		strStartupMacro += L"ShowMiniMap();";	//ShowMiniMap 消す
 		strStartupMacro += L"ShowTab();";		//ShowTab 消す
 		strStartupMacro += L"ExpandParameter('$I');";	// INIファイルパスの取得(呼ぶだけ)
+		// フォントサイズ設定のテスト(ここから)
+		strStartupMacro += L"SetFontSize(0, 1, 0);";	// 相対指定 - 拡大 - 対象：共通設定
+		strStartupMacro += L"SetFontSize(0, -1, 0);";	// 相対指定 - 縮小 - 対象：共通設定
+		strStartupMacro += L"SetFontSize(100, 0, 0);";	// 直接指定 - 対象：共通設定
+		strStartupMacro += L"SetFontSize(100, 0, 1);";	// 直接指定 - 対象：タイプ別設定
+		strStartupMacro += L"SetFontSize(100, 0, 2);";	// 直接指定 - 対象：一時適用
+		strStartupMacro += L"SetFontSize(100, 0, 3);";	// 直接指定 - 対象が不正
+		strStartupMacro += L"SetFontSize(0, 0, 0);";	// 直接指定 - フォントサイズ下限未満
+		strStartupMacro += L"SetFontSize(9999, 0, 0);";	// 直接指定 - フォントサイズ上限超過
+		strStartupMacro += L"SetFontSize(0, 0, 2);";	// 相対指定 - サイズ変化なし
+		strStartupMacro += L"SetFontSize(0, 1, 2);";	// 相対指定 - 拡大
+		strStartupMacro += L"SetFontSize(0, -1, 2);";	// 相対指定 - 縮小
+		strStartupMacro += L"SetFontSize(0, 9999, 2);";	// 相対指定 - 限界まで拡大
+		strStartupMacro += L"SetFontSize(0, 1, 2);";	// 相対指定 - これ以上拡大できない
+		strStartupMacro += L"SetFontSize(0, -9999, 2);";// 相対指定 - 限界まで縮小
+		strStartupMacro += L"SetFontSize(0, -1, 2);";	// 相対指定 - これ以上縮小できない
+		strStartupMacro += L"SetFontSize(100, 0, 2);";	// 元に戻す
+		// フォントサイズ設定のテスト(ここまで)
+		strStartupMacro += L"Outline(2);";		//アウトライン解析を閉じる
 		strStartupMacro += L"ExitAll();";		//NOTE: このコマンドにより、エディタプロセスは起動された直後に終了する。
 
 		// コマンドラインを組み立てる
-		std::wstring strCommandLine( _T(__FILE__)  L" -MTYPE=js" );
-		strCommandLine += L" -M=\""s;
-		strCommandLine += std::regex_replace( strStartupMacro, std::wregex( L"\"" ), L"\"\"" );
-		strCommandLine += L"\""s;
+		std::wstring strCommandLine(_T(__FILE__));
+		strCommandLine += strprintf(LR"( -PROF="%s")", szProfileName);
+		strCommandLine += strprintf(LR"( -MTYPE=js -M="%s")", std::regex_replace( strStartupMacro, std::wregex( L"\"" ), L"\"\"" ).c_str());
 
 		// エディタプロセスを起動する
-		StartEditorProcessForTest( strCommandLine );
+		const int ret = StartEditorProcessForTest(strCommandLine);
 
-		// エディタ終了を待機する
-		if( waitingThread.joinable() ){
-			waitingThread.join();
-		}
+		exit(ret);
 	};
 
 	// テストプログラム内のグローバル変数を汚さないために、別プロセスで起動させる
-	ASSERT_EXIT({ separatedTestProc(); exit(0); }, ::testing::ExitedWithCode(0), ".*" );
+	ASSERT_EXIT({ separatedTestProc(); }, ::testing::ExitedWithCode(0), ".*" );
+
+	// コントロールプロセスに終了指示を出して終了を待つ
+	CControlProcess_Terminate(szProfileName);
 
 	// コントロールプロセスが終了すると、INIファイルが作成される
 	ASSERT_TRUE( fexist( iniPath.c_str() ) );
 }
+
+/*!
+ * @brief パラメータテストをインスタンス化する
+ *  プロファイル指定なしとプロファイル指定ありの2パターンで実体化させる
+ */
+INSTANTIATE_TEST_CASE_P(ParameterizedTestWinMain
+	, WinMainTest
+	, ::testing::Values(L"", L"profile1")
+);

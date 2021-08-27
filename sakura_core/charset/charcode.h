@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2007, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -86,15 +87,6 @@ namespace WCODE
 	[[nodiscard]] inline bool IsInRange(wchar_t c, wchar_t front, wchar_t back)
 	{
 		return c>=front && c<=back;
-	}
-
-	//!半角文字(縦長長方形)かどうか判定
-	bool IsHankaku(wchar_t wc);
-
-	//!全角文字(正方形)かどうか判定
-	inline bool IsZenkaku(wchar_t wc)
-	{
-		return !IsHankaku(wc);
 	}
 
 	//!使用フォント番号を返す
@@ -215,13 +207,6 @@ namespace WCODE
 	{
 		return c>=0x2500 && c<=0x257F;
 	}
-
-	//!文字が半角かどうかを取得(DLLSHARE/フォント依存)
-	bool CalcHankakuByFont(wchar_t c);
-	//!文字のpx幅を取得(DLLSHARE/フォント依存)
-	int  CalcPxWidthByFont(wchar_t c);
-	//!文字のpx幅を取得(DLLSHARE/フォント依存)
-	int  CalcPxWidthByFont2(const wchar_t* c);
 }
 
 // 文字幅の動的計算用キャッシュ関連
@@ -245,8 +230,61 @@ enum ECharWidthCacheMode {
 	CWM_CACHE_LOCAL,
 };
 
+/*!
+	文字幅情報のキャッシュクラス。
+	1文字当たり2バイトで文字のピクセル幅を保存しておく。
+*/
+class CCharWidthCache {
+public:
+	CCharWidthCache() = default;
+	CCharWidthCache(const CCharWidthCache&) = delete;
+	CCharWidthCache& operator=(const CCharWidthCache&) = delete;
+	~CCharWidthCache() { DeleteLocalData(); }
+
+	// 再初期化
+	void Init(const LOGFONT& lf, const LOGFONT& lfFull, HDC hdcOrg);
+	void SelectCache(SCharWidthCache* pCache) { m_pCache = pCache; }
+	void Clear();
+	[[nodiscard]] bool GetMultiFont() const { return m_bMultiFont; }
+
+	//!文字が半角かどうかを取得(DLLSHARE/フォント依存)
+	virtual bool CalcHankakuByFont(wchar_t c);
+	//!文字のpx幅を取得(DLLSHARE/フォント依存)
+	virtual int CalcPxWidthByFont(wchar_t c);
+	//!文字のpx幅を取得(DLLSHARE/フォント依存)
+	virtual int CalcPxWidthByFont2(const wchar_t* pc2) const;
+
+private:
+	void DeleteLocalData();
+	int QueryPixelWidth(wchar_t c) const;
+	[[nodiscard]] HDC SelectHDC(wchar_t c) const;
+
+	HDC m_hdc = nullptr;
+	HDC m_hdcFull = nullptr;
+	HFONT m_hFontOld = nullptr;
+	HFONT m_hFontFullOld = nullptr;
+	HFONT m_hFont = nullptr;
+	HFONT m_hFontFull = nullptr;
+	bool m_bMultiFont;
+	SIZE m_han_size;
+	LOGFONT m_lf{};				// 2008/5/15 Uchi
+	LOGFONT m_lf2{};
+	SCharWidthCache* m_pCache = nullptr;
+};
+
 // キャッシュの初期化関数群
 void SelectCharWidthCache( ECharWidthFontMode fMode, ECharWidthCacheMode cMode );  //!< モードを変更したいとき
 void InitCharWidthCache( const LOGFONT &lf, ECharWidthFontMode fMode=CWM_FONT_EDIT ); //!< フォントを変更したとき
 void InitCharWidthCacheFromDC(const LOGFONT* lfs, ECharWidthFontMode fMode, HDC hdcOrg );
+[[nodiscard]] CCharWidthCache& GetCharWidthCache();
+
+namespace WCODE {
+	//!半角文字(縦長長方形)かどうか判定
+	bool IsHankaku(wchar_t wc, CCharWidthCache& cache = GetCharWidthCache());
+	//!全角文字(正方形)かどうか判定
+	inline bool IsZenkaku(wchar_t wc, CCharWidthCache& cache = GetCharWidthCache()) {
+		return !IsHankaku(wc, cache);
+	}
+}
+
 #endif /* SAKURA_CHARCODE_4C34C669_0BAB_441A_9B1D_2B9AC1895380_H_ */

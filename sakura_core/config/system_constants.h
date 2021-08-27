@@ -11,6 +11,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -751,4 +752,7 @@ enum e_PM_SETCARETPOS_SELECTSTATE {
 
 //! ウィンドウ一覧表示
 #define MYWM_DLGWINLIST (WM_APP+225)
+
+//! 行数を取得
+#define MYWM_GETLINECOUNT (WM_APP+226)
 #endif /* SAKURA_SYSTEM_CONSTANTS_DACC287C_DAC4_4FC7_8AEC_8DB5BE6BFB8B_H_ */

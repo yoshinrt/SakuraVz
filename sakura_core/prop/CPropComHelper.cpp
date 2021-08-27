@@ -14,6 +14,7 @@
 	Copyright (C) 2009, ryoji
 	Copyright (C) 2012, Moca
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,8 +42,11 @@
 #include "dlg/CDlgOpenFile.h"
 #include "util/shell.h"
 #include "util/module.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 //@@@ 2001.02.04 Start by MIK: Popup Help
 static const DWORD p_helpids[] = {	//10600

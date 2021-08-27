@@ -9,6 +9,7 @@
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2009, miau
 	Copyright (C) 2012, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -23,6 +24,8 @@
 #include "charset/codechecker.h"
 #include "util/module.h"
 #include "util/file.h"
+#include "util/tchar_convert.h"
+#include "mem/CNativeA.h"
 
 /*! @brief PCRE メタキャラクタのエスケープ処理を行う。
  （CMigemo::migemo_setproc_int2char の引数として使用）

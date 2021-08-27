@@ -10,6 +10,7 @@
 	Copyright (C) 2002, Moca, MIK, YAZAKI
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -44,7 +45,9 @@
 #include "charset/CESI.h"
 #include "io/CBinaryStream.h"
 #include "util/shell.h"
+#include "apiwrap/StdControl.h"
 #include "sakura_rc.h"
+#include "String_define.h"
 
 // プロパティ CDlgProperty.cpp	//@@@ 2002.01.07 add start MIK
 #include "sakura.hh"

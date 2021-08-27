@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -27,7 +28,9 @@
 // #include "doc/CEditDoc.h"	//  in under CEditWnd.h
 #include "window/CEditWnd.h"
 #include "dlg/CDlgFileUpdateQuery.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
+#include "String_define.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //               コンストラクタ・デストラクタ                  //

@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,6 +34,7 @@
 #include "doc/CBlockComment.h"
 #include "charset/charset.h"  // ECodeType
 #include "CRegexKeyword.h"	// RegexKeywordInfo
+#include "charset/charcode.h"
 
 //! タブ表示方法
 enum ETabArrow {

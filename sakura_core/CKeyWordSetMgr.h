@@ -12,6 +12,7 @@
 	Copyright (C) 2001, jepro
 	Copyright (C) 2004, Moca
 	Copyright (C) 2005, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -73,8 +74,7 @@ public:
 	||  Constructors
 	*/
 	CKeyWordSetMgr();
-	~CKeyWordSetMgr();
-	
+
 	///	@name キーワードセット操作
 	bool AddKeyWordSet(							//!< セットの追加
 		const wchar_t*	pszSetName,				//!< [in] セット名
@@ -123,10 +123,6 @@ public:
 	void ResetAllKeyWordSet( void ); // 全キーワードセットの削除と初期化
 	// To Here 2004.07.29 Moca
 
-	/*
-	|| 演算子
-	*/
-	const CKeyWordSetMgr& operator=( CKeyWordSetMgr& );
 	/*
 	||  Attributes & Operations
 	*/

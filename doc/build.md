@@ -23,6 +23,7 @@
   - [開発者向けの情報](#開発者向けの情報)
     - [githash.h の更新のスキップ](#githashh-の更新のスキップ)
     - [Powershell によるZIPファイルの圧縮、解凍、内容確認の強制](#powershell-によるzipファイルの圧縮解凍内容確認の強制)
+    - [CI でのビルドをスキップする方法](#ci-でのビルドをスキップする方法)
     - [MinGW w64 ビルド](#mingw-w64-ビルド)
 
 <!-- /TOC -->
@@ -32,22 +33,20 @@
 ### 実行ファイルのビルドに必要なもの
 
 - (オプション) [7Zip](https://sevenzip.osdn.jp/) (外部依存ファイルの解凍に使用)
-- Visual Studio 2017 Comminity Edition
-   以下オプションも必要です。
-   - Windows XP Support for C++
-   - Windows 8.1 SDK と UCRT SDK
-   - C++ に関する Windows XP サポート
+- Community または Professional エディション以上の Visual Studio 2017 または Visual Studio 2019
+   - Windows 10 SDK のインストールも必要です。
 
 ### HTML ヘルプのビルドに必要なもの
 
 - HTML ヘルプコンパイラ (hhc.exe)
-   - Visual Studio 2017 のインストールにて以下のオプションを有効にすることにより導入されます。
+   - Visual Studio のインストールにて以下のオプションを有効にすることにより導入されます。
       - 「C++ によるデスクトップ開発」を有効にする
       - 右のペインで 「C++ によるデスクトップ開発」を選ぶ
-      - 「x86用とx64用のVisual C++ MFC」をチェックする
+      - Visual Studio 2017 の場合は「x86用とx64用のVisual C++ MFC」を、Visual Studio 2019 の場合は「最新 v142 ビルド ツールの C++ MFC (x86 & x64)」をチェックする
       - 変更を確定する
    - VSインストール後でもVisual Studio Installerを起動して導入可能です。 
 ![vsi](https://user-images.githubusercontent.com/39618965/44622575-012dcc80-a8f6-11e8-906a-14d8cd6dfac9.PNG)
+   - [.vsconfig](.vsconfig) を使用してインストールした場合は自動的にインストールされます。
    - ヘルプファイルを編集する場合 HTML Help Workshop 等の編集ソフトも別途必要になります。
 
 ### インストーラのビルドに必要なもの
@@ -68,7 +67,7 @@
 
 #### 方法1 (GUI)
 
-Visual Studio Community 2017 で `sakura.sln` をダブルクリックして開いてビルドします。
+Visual Studio で `sakura.sln` をダブルクリックして開いてビルドします。
 
 #### 方法2 (コマンドライン)
 
@@ -111,11 +110,12 @@ build-all.bat Win32 Release
 
 ### appveyor でのビルドの仕組み
 
-[こちら](appveyor.md) で appveyor 上でのビルドの仕組みを説明しています。
+AppVeyor では、 [build-all.bat](build-all.bat) を使用してビルドを行っています。
+ビルドに使用されるバッチファイルについては [build-batchfiles.md](ci/build-batchfiles.md) を参照してください。
 
 ### Azure Pipelines でのビルドの仕組み
 
-[こちら](azure-pipelines.md) で [Azure Pipelines](https://azure.microsoft.com/ja-jp/services/devops/pipelines/) 上でのビルドの仕組みを説明しています。
+[こちら](ci/azure-pipelines/azure-pipelines.md) で [Azure Pipelines](https://azure.microsoft.com/ja-jp/services/devops/pipelines/) 上でのビルドの仕組みを説明しています。
 
 ### インストーラの仕組み
 
@@ -170,6 +170,19 @@ build-sln.bat Win32 Debug
 build-sln.bat x64   Release
 build-sln.bat x64   Debug
 ```
+
+### CI でのビルドをスキップする方法
+
+ビルドに関係ない修正 (ドキュメントの修正など) を行った場合に、
+コミットメッセージの中に `[ci skip]` または `[skip ci]` というキーワードを含めることで、 CI ビルドを行わないようにすることができます。  
+ただし PR をマージするときは実行されます。
+
+#### 参考情報
+
+- https://qiita.com/vmmhypervisor/items/f10c77a375c2a663b300
+- https://www.appveyor.com/docs/how-to/filtering-commits/#skip-directive-in-commit-message
+- https://docs.microsoft.com/ja-jp/azure/devops/pipelines/repos/azure-repos-git?view=azure-devops&tabs=yaml#skipping-ci-for-individual-commits
+- https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/
 
 ### MinGW w64 ビルド
 

@@ -12,6 +12,7 @@
 	Copyright (C) 2002, MIK, aroka, YAZAKI
 	Copyright (C) 2003, かろと
 	Copyright (C) 2006, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -40,8 +41,12 @@
 #include "util/shell.h"
 #include "util/window.h"
 #include "util/os.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "util/string_ex.h"
 #include "sakura_rc.h"	// 2002/2/10 aroka
 #include "sakura.hh"
+#include "String_define.h"
 
 // 印刷設定 CDlgPrintSetting.cpp	//@@@ 2002.01.07 add start MIK
 const DWORD p_helpids[] = {	//12500
@@ -155,14 +160,7 @@ BOOL CDlgPrintSetting::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam 
 	//	::SetTimer( GetHwnd(), IDT_PRINTSETTING, 500, NULL );
 	//UpdatePrintableLineAndColumn();
 
-	BOOL bRet = CDialog::OnInitDialog( GetHwnd(), wParam, lParam );
-
-	// ダイアログフォントの寸法を得ておく
-	LOGFONT	lf;
-	::GetObject(GetDialogFont(), sizeof(LOGFONT), &lf);
-	m_nFontHeight = lf.lfHeight;		// フォントサイズ
-
-	return bRet;
+	return CDialog::OnInitDialog( GetHwnd(), wParam, lParam );
 }
 
 BOOL CDlgPrintSetting::OnDestroy( void )
@@ -186,7 +184,6 @@ BOOL CDlgPrintSetting::OnDestroy( void )
 
 BOOL CDlgPrintSetting::OnNotify(NMHDR* pNMHDR)
 {
-	CDlgInput1		cDlgInput1;
 	NM_UPDOWN*		pMNUD;
 	int				idCtrl;
 	BOOL			bSpinDown;
@@ -901,14 +898,17 @@ void CDlgPrintSetting::SetFontName( int idTxt, int idUse, LOGFONT& lf, int nPoin
 	CheckDlgButtonBool( GetHwnd(), idUse, bUseFont);
 	::EnableWindow( GetItemHwnd( idUse ), bUseFont );
 	if (bUseFont) {
-		LOGFONT	lft;
-		lft = lf;
-		lft.lfHeight = m_nFontHeight;		// フォントサイズをダイアログに合せる
+		// サイズだけはダイアログフォントに合わせ
+		// それ以外は引数lfで指定された設定を採用
+		LOGFONT	lfCreate = lf;
+		LOGFONT	lfDialogFont = {};
+		::GetObject( GetDialogFont(), sizeof(LOGFONT), &lfDialogFont );
+		lfCreate.lfHeight = lfDialogFont.lfHeight;
 
 		HFONT	hFontOld = (HFONT)::SendMessage(GetItemHwnd( idTxt ), WM_GETFONT, 0, 0 );
 
 		// 論理フォントを作成
-		HFONT	hFont = ::CreateFontIndirect( &lft );
+		HFONT	hFont = ::CreateFontIndirect( &lfCreate );
 		if (hFont) {
 			// フォントの設定
 			::SendMessage( GetItemHwnd( idTxt ), WM_SETFONT, (WPARAM)hFont, MAKELPARAM(FALSE, 0) );

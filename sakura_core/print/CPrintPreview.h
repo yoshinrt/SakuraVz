@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2002, YAZAKI
 	Copyright (C) 2003, かろと
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,6 +38,7 @@
 #include "basis/SakuraBasis.h"
 #include "util/design_template.h"
 #include "CPrint.h" // 2002/2/10 aroka
+#include "types/CType.h"
 
 class CColorStrategy;
 class CColorStrategyPool;
@@ -44,6 +46,7 @@ class CDlgCancel;
 class CEditWnd;
 class CLayout;
 class CLayoutMgr;
+class CStringRef;
 
 class CPrintPreview {
 /* メンバ関数宣言 */

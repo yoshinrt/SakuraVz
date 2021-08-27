@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -30,6 +31,8 @@
 #include "charset/CCodeMediator.h"
 #include "io/CFileLoad.h"
 #include "util/window.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 /*!
 	ファイルを読み込んで格納する（分割読み込みテスト版）
@@ -193,7 +196,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		// ファイルをクローズする
 		cfl[ 0 ].FileClose();
 	}
-	catch(CAppExitException){
+	catch(const CAppExitException&){
 		//WM_QUITが発生した
 		return RESULT_FAILURE;
 	}
@@ -231,7 +234,7 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 			 );
 		}
 	}
-	catch( CError_FileRead ){
+	catch( const CError_FileRead& ){
 		eRet = RESULT_FAILURE;
 		ErrorMessage(
 			CEditWnd::getInstance()->GetHwnd(),

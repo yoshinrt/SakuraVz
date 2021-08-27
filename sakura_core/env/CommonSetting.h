@@ -2,6 +2,7 @@
 //2007.09.28 kobake Common整理
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -31,6 +32,7 @@
 #include "func/CKeyBind.h"
 #include "func/CFuncLookup.h" //MacroRec
 #include "io/CFile.h" //EShareMode
+#include "basis/SakuraBasis.h"
 #include "CDataProfile.h"
 
 // Apr. 05, 2003 genta WindowCaption用領域（変換前）の長さ

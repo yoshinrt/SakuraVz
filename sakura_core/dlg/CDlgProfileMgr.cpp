@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2013, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -34,8 +35,12 @@
 #include "util/file.h"
 #include "util/shell.h"
 #include "util/window.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "func/Funccode.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 const DWORD p_helpids[] = {
 	IDC_LIST_PROFILE,				HIDC_LIST_PROFILE,				//プロファイル一覧
@@ -342,7 +347,7 @@ void CDlgProfileMgr::CreateProf()
 	std::wstring strTitle = LS(STR_DLGPROFILE_NEW_PROF_TITLE);
 	std::wstring strMessage = LS(STR_DLGPROFILE_NEW_PROF_MSG);
 	szText[0] = L'\0';
-	if( !cDlgInput1.DoModal(::GetModuleHandle(NULL), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size, szText) ){
+	if( !cDlgInput1.DoModal(::GetModuleHandle(NULL), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size - 1, szText) ){
 		return;
 	}
 	if( szText[0] == L'\0' ){
@@ -401,7 +406,7 @@ void CDlgProfileMgr::RenameProf()
 	std::wstring strTitle = LS(STR_DLGPROFILE_RENAME_TITLE);
 	std::wstring strMessage = LS(STR_DLGPROFILE_RENAME_MSG);
 	int max_size = _MAX_PATH;
-	if( !cDlgInput1.DoModal(::GetModuleHandle(NULL), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size, szText) ){
+	if( !cDlgInput1.DoModal(::GetModuleHandle(NULL), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size - 1, szText) ){
 		return;
 	}
 	if( szText[0] == L'\0' ){
@@ -512,7 +517,7 @@ static bool IOProfSettings( SProfileSettings& settings, bool bWrite )
 	if( settings.m_nDefaultIndex < -1 ){
 		settings.m_nDefaultIndex = -1;
 	}
-	cProf.IOProfileData( pSection, L"szDllLanguage", StringBufferW(settings.m_szDllLanguage, _countof(settings.m_szDllLanguage)) );
+	cProf.IOProfileData(pSection, L"szDllLanguage", StringBufferW(settings.m_szDllLanguage));
 	cProf.IOProfileData( pSection, L"bDefaultSelect", settings.m_bDefaultSelect );
 
 	if( bWrite ){

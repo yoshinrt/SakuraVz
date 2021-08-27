@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -26,8 +27,8 @@
 #define SAKURA_CMAINTOOLBAR_FEA7E388_DFEC_4E15_94CC_90A7E779797B_H_
 #pragma once
 
-#include "recent/CRecent.h"
 #include "dlg/CDialog.h"
+#include "recent/CRecentSearch.h"
 
 class CEditWnd;
 class CImageListMgr;

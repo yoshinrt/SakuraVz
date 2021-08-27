@@ -1,4 +1,27 @@
 ﻿/*! @file */
+/*
+	Copyright (C) 2018-2021, Sakura Editor Organization
+
+	This software is provided 'as-is', without any express or implied
+	warranty. In no event will the authors be held liable for any damages
+	arising from the use of this software.
+
+	Permission is granted to anyone to use this software for any purpose,
+	including commercial applications, and to alter it and redistribute it
+	freely, subject to the following restrictions:
+
+		1. The origin of this software must not be misrepresented;
+		   you must not claim that you wrote the original software.
+		   If you use this software in a product, an acknowledgment
+		   in the product documentation would be appreciated but is
+		   not required.
+
+		2. Altered source versions must be plainly marked as such,
+		   and must not be misrepresented as being the original software.
+
+		3. This notice may not be removed or altered from any source
+		   distribution.
+*/
 #include "StdAfx.h"
 #include "CGrepAgent.h"
 #include "CGrepEnumKeys.h"
@@ -7,6 +30,9 @@
 #include "CSearchAgent.h"
 #include "dlg/CDlgCancel.h"
 #include "_main/CAppMode.h"
+#include "_main/CMutex.h"
+#include "env/CShareData.h"
+#include "env/CSakuraEnvironment.h"
 #include "COpeBlk.h"
 #include "window/CEditWnd.h"
 #include "charset/CCodeMediator.h"
@@ -22,7 +48,12 @@
 #include <iterator>
 #include <deque>
 #include <memory>
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 #define UICHECK_INTERVAL_MILLISEC 200	// UI確認の時間間隔
 #define ADDTAIL_INTERVAL_MILLISEC 200	// 結果出力の時間間隔
@@ -179,6 +210,60 @@ void CGrepAgent::AddTail( CEditView* pcEditView, const CNativeW& cmem, bool bAdd
 	}
 }
 
+int GetHwndTitle(HWND& hWndTarget, CNativeW* pmemTitle, WCHAR* pszWindowName, WCHAR* pszWindowPath, const WCHAR* pszFile)
+{
+	if( 0 != wcsncmp(L":HWND:", pszFile, 6) ){
+		return 0; // ハンドルGrepではない
+	}
+#ifdef _WIN64
+	_stscanf(pszFile + 6, L"%016I64x", &hWndTarget);
+#else
+	_stscanf(pszFile + 6, L"%08x", &hWndTarget);
+#endif
+	if( pmemTitle ){
+		const wchar_t* p = L"Window:[";
+		pmemTitle->SetStringHoldBuffer(p, 8);
+	}
+	if( !IsSakuraMainWindow(hWndTarget) ){
+		return -1;
+	}
+	::SendMessageAny(hWndTarget, MYWM_GETFILEINFO, 0, 0);
+	EditInfo* editInfo = &(GetDllShareData().m_sWorkBuffer.m_EditInfo_MYWM_GETFILEINFO);
+	if( '\0' == editInfo->m_szPath[0] ){
+		// Grepかアウトプットか無題
+		WCHAR szTitle[_MAX_PATH];
+		WCHAR szGrep[100];
+		editInfo->m_bIsModified = false;
+		const EditNode* node = CAppNodeManager::getInstance()->GetEditNode(hWndTarget);
+		WCHAR* pszTagName = szTitle;
+		if( editInfo->m_bIsGrep ){
+			// Grepは検索キーとタグがぶつかることがあるので単に(Grep)と表示
+			pszTagName = szGrep;
+			wcsncpy_s(pszTagName, _countof(szGrep), L"(Grep)", _TRUNCATE);
+		}
+		CFileNameManager::getInstance()->GetMenuFullLabel_WinListNoEscape(szTitle, _countof(szTitle), editInfo, node->m_nId, -1, NULL );
+#ifdef _WIN64
+		auto_sprintf(pszWindowName, L":HWND:[%016I64x]%s", hWndTarget, pszTagName);
+#else
+		auto_sprintf(pszWindowName, L":HWND:[%08x]%s", hWndTarget, pszTagName);
+#endif
+		if( pmemTitle ){
+			pmemTitle->AppendString(szTitle);
+		}
+		pszWindowPath[0] = L'\0';
+	}else{
+		SplitPath_FolderAndFile(editInfo->m_szPath, pszWindowPath, pszWindowName);
+		if( pmemTitle ){
+			pmemTitle->AppendString(pszWindowName);
+		}
+	}
+	if( pmemTitle ){
+		pmemTitle->AppendString(L"]");
+	}
+	return 1;
+}
+
+
 /*! Grep実行
 
   @param[in] pcmGrepKey 検索パターン
@@ -211,7 +296,7 @@ DWORD CGrepAgent::DoGrep(
 	bool					bGrepBackup
 )
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CEditView::DoGrep" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CEditView::DoGrep" );
 
 	// 再入不可
 	if( this->m_bGrepRunning ){
@@ -426,13 +511,28 @@ DWORD CGrepAgent::DoGrep(
 		}
 	}
 
-	cmemMessage.AppendString( LS( STR_GREP_SEARCH_TARGET ) );	//L"検索対象   "
+	HWND hWndTarget = NULL;
+	WCHAR szWindowName[_MAX_PATH];
+	WCHAR szWindowPath[_MAX_PATH];
 	{
-		// 解析済みのファイルパターン配列を取得する
-		const auto& vecSearchFileKeys = cGrepEnumKeys.m_vecSearchFileKeys;
-		std::wstring strPatterns = FormatPathList( vecSearchFileKeys );
-		cmemMessage.AppendString( strPatterns.c_str(), strPatterns.length() );
+		int nHwndRet = GetHwndTitle(hWndTarget, &cmemWork, szWindowName, szWindowPath, pcmGrepFile->GetStringPtr());
+		if( -1 == nHwndRet ){
+			cmemMessage.AppendString(L"HWND handle error.\n");
+			if( sGrepOption.bGrepHeader ){
+				AddTail(pcViewDst, cmemMessage, sGrepOption.bGrepStdout);
+			}
+			return 0;
+		}else if( 0 == nHwndRet ){
+			{
+				// 解析済みのファイルパターン配列を取得する
+				const auto& vecSearchFileKeys = cGrepEnumKeys.m_vecSearchFileKeys;
+				std::wstring strPatterns = FormatPathList( vecSearchFileKeys );
+				cmemWork.SetString( strPatterns.c_str(), strPatterns.length() );
+			}
+		}
 	}
+	cmemMessage.AppendString( LS( STR_GREP_SEARCH_TARGET ) );	//L"検索対象   "
+	cmemMessage += cmemWork;
 	cmemMessage.AppendString( L"\r\n" );
 
 	cmemMessage.AppendString( LS( STR_GREP_SEARCH_FOLDER ) );	//L"フォルダ   "
@@ -554,39 +654,90 @@ DWORD CGrepAgent::DoGrep(
 
 	int nGrepTreeResult = 0;
 
-	for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
-		bool bOutputBaseFolder = false;
-		std::wstring sPath = ChopYen( vPaths[nPath] );
-		int nTreeRet = DoGrepTree(
-			pcViewDst,
-			&cDlgCancel,
-			pcmGrepKey->GetStringPtr(),
-			cmemReplace,
-			cGrepEnumKeys,
-			cGrepExceptAbsFiles,
-			cGrepExceptAbsFolders,
-			sPath.c_str(),
-			sPath.c_str(),
-			sSearchOption,
-			sGrepOption,
-			pattern,
-			&cRegexp,
-			0,
-			bOutputBaseFolder,
-			&nHitCount,
-			cmemMessage,
-			cUnicodeBuffer,
-			cOutBuffer
-		);
-		if( nTreeRet == -1 ){
-			nGrepTreeResult = -1;
-			break;
+	if( hWndTarget ){
+		for( HWND hwnd = hWndTarget; NULL != hwnd; hwnd = NULL ){
+			bool bOutputBaseFolder = false;
+			bool bOutputFolderName = false;
+			// 複数ウィンドウループ予約
+			auto nPathLen = wcsnlen_s(szWindowPath, _countof(szWindowPath));
+			std::wstring currentFile = szWindowPath;
+			if( currentFile.size() ){
+				currentFile += L'\\';
+				nPathLen += 1;
+			}
+			currentFile += szWindowName;
+			int nHitCount = nGrepTreeResult;
+			int nTreeRet = DoGrepReplaceFile(
+				pcViewDst,
+				&cDlgCancel,
+				hwnd,
+				pcmGrepKey->GetStringPtr(),
+				cmemReplace,
+				szWindowName,
+				sSearchOption,
+				sGrepOption,
+				pattern,
+				&cRegexp,
+				&nHitCount,
+				currentFile.c_str(),
+				szWindowPath,
+				(sGrepOption.bGrepSeparateFolder && sGrepOption.bGrepOutputBaseFolder ? L"" : szWindowPath),
+				(sGrepOption.bGrepSeparateFolder ? szWindowName : currentFile.c_str() + nPathLen),
+				bOutputBaseFolder,
+				bOutputFolderName,
+				cmemMessage,
+				cUnicodeBuffer,
+				cOutBuffer
+			);
+			if( nTreeRet == -1 ){
+				nGrepTreeResult = -1;
+				break;
+			}
+			nGrepTreeResult += nTreeRet;
 		}
-		nGrepTreeResult += nTreeRet;
-	}
-	if( 0 < cmemMessage.GetStringLength() ) {
-		AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
-		cmemMessage._SetStringLength(0);
+		if( 0 < cmemMessage.GetStringLength() ){
+			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
+			pcViewDst->GetCommander().Command_GOFILEEND( false );
+			if( !CEditWnd::getInstance()->UpdateTextWrap() )
+				CEditWnd::getInstance()->RedrawAllViews( pcViewDst );
+			cmemMessage.Clear();
+		}
+		nHitCount = nGrepTreeResult;
+	}else{
+		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
+			bool bOutputBaseFolder = false;
+			std::wstring sPath = ChopYen( vPaths[nPath] );
+			int nTreeRet = DoGrepTree(
+				pcViewDst,
+				&cDlgCancel,
+				pcmGrepKey->GetStringPtr(),
+				cmemReplace,
+				cGrepEnumKeys,
+				cGrepExceptAbsFiles,
+				cGrepExceptAbsFolders,
+				sPath.c_str(),
+				sPath.c_str(),
+				sSearchOption,
+				sGrepOption,
+				pattern,
+				&cRegexp,
+				0,
+				bOutputBaseFolder,
+				&nHitCount,
+				cmemMessage,
+				cUnicodeBuffer,
+				cOutBuffer
+			);
+			if( nTreeRet == -1 ){
+				nGrepTreeResult = -1;
+				break;
+			}
+			nGrepTreeResult += nTreeRet;
+		}
+		if( 0 < cmemMessage.GetStringLength() ) {
+			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
+			cmemMessage._SetStringLength(0);
+		}
 	}
 	if( -1 == nGrepTreeResult && sGrepOption.bGrepHeader ){
 		const wchar_t* p = LS( STR_GREP_SUSPENDED );	//L"中断しました。\r\n"
@@ -728,6 +879,7 @@ int CGrepAgent::DoGrepTree(
 		int nRet = DoGrepReplaceFile(
 			pcViewDst,
 			pcDlgCancel,
+			NULL,
 			pszKey,
 			cmGrepReplace,
 			lpFileName,
@@ -1061,7 +1213,7 @@ public:
 			name += L".skrnew";
 			try{
 				out = new CBinaryOutputStream(name.c_str(), true);
-			}catch( CError_FileOpen ){
+			}catch( const CError_FileOpen& ){
 				throw CError_WriteFileOpen();
 			}
 			if( bBom ){
@@ -1151,6 +1303,7 @@ private:
 int CGrepAgent::DoGrepReplaceFile(
 	CEditView*				pcViewDst,
 	CDlgCancel*				pcDlgCancel,
+	HWND					hWndTarget,			//!< [in] 対象Windows(NULLでファイル)
 	const wchar_t*			pszKey,
 	const CNativeW&			cmGrepReplace,
 	const WCHAR*			pszFile,
@@ -1184,7 +1337,7 @@ int CGrepAgent::DoGrepReplaceFile(
 	if( !CDocTypeManager().GetTypeConfigMini( CDocTypeManager().GetDocumentTypeOfPath( pszFile ), &type ) ){
 		return -1;
 	}
-	CFileLoad	cfl( type->m_encoding );	// 2012/12/18 Uchi 検査するファイルのデフォルトの文字コードを取得する様に
+	CFileLoadOrWnd	cfl( type->m_encoding, hWndTarget );	// 2012/12/18 Uchi 検査するファイルのデフォルトの文字コードを取得する様に
 	bool bBom;
 	// ファイル名表示
 	const WCHAR* pszDispFilePath = ( sGrepOption.bGrepSeparateFolder || sGrepOption.bGrepOutputBaseFolder ) ? pszRelPath : pszFullPath;
@@ -1414,22 +1567,22 @@ int CGrepAgent::DoGrepReplaceFile(
 		if( sGrepOption.bGrepReplace) pOutput->Close();
 	} // try
 	
-	catch( CError_Regex ){
+	catch( const CError_Regex& ){
 		pRegexp->ShowErrorMsg();
 		return -1;	// ファイル探索も終了
 	}
-	catch( CError_FileOpen ){
+	catch( const CError_FileOpen& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEOPEN));
 		str.Replace(L"%s", pszFullPath);
 		cmemMessage.AppendNativeData( str );
 		return 0;
 	}
-	catch( CError_FileRead ){
+	catch( const CError_FileRead& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEREAD));
 		str.Replace(L"%s", pszFullPath);
 		cmemMessage.AppendNativeData( str );
 	}
-	catch( CError_WriteFileOpen ){
+	catch( const CError_WriteFileOpen& ){
 		std::wstring file = pszFullPath;
 		file += L".skrnew";
 		CNativeW str(LS(STR_GREP_ERR_FILEWRITE));

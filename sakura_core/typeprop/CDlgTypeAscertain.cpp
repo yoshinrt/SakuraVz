@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2010, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,8 +33,12 @@
 #include "env/CDocTypeManager.h"
 #include "util/shell.h"
 #include "util/window.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "env/DLLSHAREDATA.h"
 #include "sakura.hh"
 #include "sakura_rc.h"
+#include "String_define.h"
 
 // タイプ別設定インポート確認 CDlgTypeAscertain.cpp
 const DWORD p_helpids[] = {

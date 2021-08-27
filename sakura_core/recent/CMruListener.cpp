@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,6 +33,8 @@
 #include "charset/CCodePage.h"
 #include "charset/CCodeMediator.h"
 #include "util/file.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                        セーブ前後                           //

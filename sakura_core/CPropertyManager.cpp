@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -27,7 +28,9 @@
 #include "CPropertyManager.h"
 #include "env/DLLSHAREDATA.h"
 #include "env/CDocTypeManager.h"
+#include "apiwrap/StdApi.h"
 #include <memory>
+#include "config/system_constants.h"
 
 void CPropertyManager::Create( HWND hwndOwner, CImageListMgr* pImageList, CMenuDrawer* pMenuDrawer )
 {

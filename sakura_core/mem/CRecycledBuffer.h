@@ -5,6 +5,7 @@
 //取得したメモリブロックはCRecycledBufferの管理下にあるため、解放してはいけない。
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -70,8 +71,8 @@ private:
 };
 
 class CRecycledBufferDynamic{
-//コンフィグ
-private:
+	using Me = CRecycledBufferDynamic;
+
 	static const int CHAIN_COUNT = 64;   //再利用可能なブロック数。
 
 //コンストラクタ・デストラクタ
@@ -83,6 +84,10 @@ public:
 			m_buf[i]=NULL;
 		}
 	}
+	CRecycledBufferDynamic(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CRecycledBufferDynamic(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CRecycledBufferDynamic()
 	{
 		for(int i=0;i<_countof(m_buf);i++){

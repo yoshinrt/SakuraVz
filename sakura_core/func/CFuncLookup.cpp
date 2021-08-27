@@ -10,6 +10,7 @@
 /*
 	Copyright (C) 2001, genta
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -35,6 +36,9 @@
 #include "StdAfx.h"
 #include "func/CFuncLookup.h"
 #include "plugin/CJackManager.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 //	オフセット値
 const int LUOFFSET_MACRO = 0;

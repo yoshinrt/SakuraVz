@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -28,6 +29,8 @@
 
 class CRegKey
 {
+	using Me = CRegKey;
+
 protected:
 	HKEY _root;
 	HKEY _key;
@@ -37,6 +40,11 @@ public:
 		_root = NULL;
 		_key = NULL;
 	}
+
+	CRegKey(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CRegKey(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 
 	virtual ~CRegKey()
 	{

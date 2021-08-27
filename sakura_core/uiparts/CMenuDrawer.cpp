@@ -14,6 +14,7 @@
 	Copyright (C) 2006, aroka, fon
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2008, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -1162,7 +1163,7 @@ void CMenuDrawer::DrawItem( DRAWITEMSTRUCT* lpdis )
 	::DrawText(
 		hdc,
 		pszItemStr,
-		j,
+		static_cast<int>(j),
 		&rcText,
 		DT_LEFT | DT_VCENTER | DT_SINGLELINE
 	);
@@ -1171,7 +1172,7 @@ void CMenuDrawer::DrawItem( DRAWITEMSTRUCT* lpdis )
 		::DrawText(
 			hdc,
 			&pszItemStr[j + 1],
-			nItemStrLen - ( j + 1 ),
+			static_cast<int>(nItemStrLen - ( j + 1 )),
 			&rcText,
 			DT_RIGHT | DT_VCENTER | DT_SINGLELINE
 		);

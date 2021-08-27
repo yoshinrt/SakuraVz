@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -66,7 +67,7 @@ public:
 
 	//セーブフロー
 	bool DoSaveFlow(SSaveInfo* pSaveInfo);
-	bool FileSaveAs( const WCHAR* filename = NULL,ECodeType eCodeType = CODE_NONE, EEolType eEolType = EOL_NONE, bool bDialog = true);	//!< ダイアログでファイル名を入力させ、保存。	// 2006.12.30 ryoji
+	bool FileSaveAs( const WCHAR* filename = NULL,ECodeType eCodeType = CODE_NONE, EEolType eEolType = EEolType::none, bool bDialog = true);	//!< ダイアログでファイル名を入力させ、保存。	// 2006.12.30 ryoji
 	bool FileSave();			//!< 上書き保存。ファイル名が指定されていなかったらダイアログで入力を促す。	// 2006.12.30 ryoji
 
 	//クローズ

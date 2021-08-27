@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -28,6 +29,11 @@
 
 #include "doc/CDocListener.h"
 #include "io/CFileLoad.h"
+#include "config/system_constants.h"
+#include "apiwrap/StdApi.h"
+#include "_main/CMutex.h"
+#include "env/CShareData.h"
+
 class CDlgCancel;
 class CEditView;
 class CSearchStringPattern;
@@ -65,10 +71,97 @@ struct SGrepOption{
 	{}
 };
 
+class CFileLoadOrWnd{
+	CFileLoad m_cfl;
+	HWND m_hWnd;
+	int m_nLineCurrent;
+	int m_nLineNum;
+public:
+	CFileLoadOrWnd(const SEncodingConfig& encode, HWND hWnd)
+		: m_cfl(encode)
+		, m_hWnd(hWnd)
+		, m_nLineCurrent(0)
+		, m_nLineNum(0)
+	{
+	}
+	~CFileLoadOrWnd(){
+	}
+	ECodeType FileOpen(const WCHAR* pszFile, bool bBigFile, ECodeType charCode, int nFlag, bool* pbBomExist = NULL)
+	{
+		if( m_hWnd ){
+			DWORD_PTR dwMsgResult = 0;
+			if( 0 == ::SendMessageTimeout(m_hWnd, MYWM_GETLINECOUNT, 0, 0, SMTO_NORMAL, 10000, &dwMsgResult) ){
+				// エラーかタイムアウト
+				throw CError_FileOpen();
+			}
+			m_nLineCurrent = 0;
+			m_nLineNum = (int)dwMsgResult;
+			::SendMessageAny(m_hWnd, MYWM_GETFILEINFO, 0, 0);
+			const EditInfo* editInfo = &GetDllShareData().m_sWorkBuffer.m_EditInfo_MYWM_GETFILEINFO;
+			return editInfo->m_nCharCode;
+		}
+		return m_cfl.FileOpen(pszFile, bBigFile, charCode, nFlag, pbBomExist);
+	}
+	EConvertResult ReadLine(CNativeW* buffer, CEol* pcEol){
+		if( m_hWnd ){
+			const int max_size = (int)GetDllShareData().m_sWorkBuffer.GetWorkBufferCount<const WCHAR>();
+			const WCHAR* pLineData = GetDllShareData().m_sWorkBuffer.GetWorkBuffer<const WCHAR>();
+			buffer->SetStringHoldBuffer(L"", 0);
+			if( m_nLineNum <= m_nLineCurrent ){
+				return RESULT_FAILURE;
+			}
+			int nLineOffset = 0;
+			int nLineLen = 0; //初回用仮値
+			do{
+				// m_sWorkBuffer#m_Workの排他制御。外部コマンド出力/TraceOut/Diffが対象
+				LockGuard<CMutex> guard( CShareData::GetMutexShareWork() );
+				{
+					nLineLen = ::SendMessageAny(m_hWnd, MYWM_GETLINEDATA, m_nLineCurrent, nLineOffset);
+					if( nLineLen == 0 ){ return RESULT_FAILURE; } // EOF => 正常終了
+					if( nLineLen < 0 ){ return RESULT_FAILURE; } // 何かエラー
+					buffer->AllocStringBuffer(max_size);
+					buffer->AppendString(pLineData, t_min(nLineLen, max_size));
+				}
+				nLineOffset += max_size;
+			}while(max_size < nLineLen);
+			if( 0 < nLineLen ){
+				if( 1 < nLineLen && (*buffer)[nLineLen - 2] == WCODE::CR &&
+						(*buffer)[nLineLen - 1] == WCODE::LF){
+					pcEol->SetType(EEolType::cr_and_lf);
+				}else{
+					pcEol->SetTypeByString(buffer->GetStringPtr() + nLineLen - 1, 1);
+				}
+			}
+			m_nLineCurrent++;
+			return RESULT_COMPLETE;
+		}
+		return m_cfl.ReadLine(buffer, pcEol);
+	}
+	LONGLONG GetFileSize(){
+		if( m_hWnd ){
+			return 0;
+		}
+		return m_cfl.GetFileSize();
+	}
+	int GetPercent(){
+		if( m_hWnd ){
+			return (int)(m_nLineCurrent * 100.0 / m_nLineNum);
+		}
+		return m_cfl.GetPercent();
+	}
+	
+	void FileClose(){
+		if( m_hWnd ){
+			return;
+		}
+		m_cfl.FileClose();
+	}
+};
+
 class CGrepDocInfo {
 public:
 	CGrepDocInfo(
-		CFileLoad		*pFileLoad,
+		CFileLoadOrWnd	*pFileLoad,
 		CNativeW		*pLineBuf,
 		CEol			*pEol,
 		LONGLONG		*piLine
@@ -78,7 +171,7 @@ public:
 		m_piLine( piLine ),
 		m_bUnget( false ){}
 	
-	CFileLoad		*m_pFileLoad;
+	CFileLoadOrWnd	*m_pFileLoad;
 	CNativeW		*m_pLineBuf;
 	CEol			*m_pEol;
 	LONGLONG		*m_piLine;
@@ -152,6 +245,7 @@ private:
 	int DoGrepReplaceFile(
 		CEditView*				pcViewDst,
 		CDlgCancel*				pcDlgCancel,
+		HWND					hWndTarget,
 		const wchar_t*			pszKey,
 		const CNativeW&			cmGrepReplace,
 		const WCHAR*			pszFile,

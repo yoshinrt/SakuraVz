@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2003, かろと
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -35,6 +36,7 @@
 
 #include <WinSpool.h>
 #include <CommDlg.h> // PRINTDLG
+#include "basis/primitive.h"
 
 struct	MYDEVMODE {
 	BOOL	m_bPrinterNotFound;	/* プリンタがなかったフラグ */
@@ -130,6 +132,8 @@ struct PRINTSETTING {
 */
 class CPrint
 {
+	using Me = CPrint;
+
 public:
 	static const PAPER_INFO m_paperInfoArr[];	//!< 用紙情報一覧
 	static const int m_nPaperInfoArrNum; //!< 用紙情報一覧の要素数
@@ -158,6 +162,10 @@ public:
 	||  Constructors
 	*/
 	CPrint();
+	CPrint(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CPrint(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CPrint();
 
 	/*

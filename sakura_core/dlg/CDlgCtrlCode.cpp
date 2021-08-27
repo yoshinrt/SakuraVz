@@ -8,6 +8,7 @@
 	Copyright (C) 2002-2003, MIK
 	Copyright (C) 2006, ryoji
 +	Copyright (C) 2011, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -34,8 +35,11 @@
 #include "dlg/CDlgCtrlCode.h"
 #include "func/Funccode.h"
 #include "util/shell.h"
+#include "CSelectLang.h"
+#include "basis/CMyString.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 const DWORD p_helpids[] = {	//13300
 	IDC_LIST_CTRLCODE,		HIDC_LIST_CTRLCODE,

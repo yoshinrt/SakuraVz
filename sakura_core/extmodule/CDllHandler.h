@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2001, genta
 	Copyright (C) 2002, YAZAKI, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -86,6 +87,9 @@ enum EDllResult{
 	@date 2008.05.10 kobake 整理。派生クラスは、～Impをオーバーロードすれば良いという方式です。
 */
 class CDllImp{
+
+	using Me = CDllImp;
+
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 	//                            型                               //
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
@@ -106,6 +110,10 @@ public:
 public:
 	//コンストラクタ・デストラクタ
 	CDllImp();
+	CDllImp(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CDllImp(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CDllImp();
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

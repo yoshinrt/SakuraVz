@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -27,10 +28,13 @@
 #pragma once
 
 #include "_main/global.h"
+#include "util/design_template.h"
+#include "basis/SakuraBasis.h"
 
 class CDocLineMgr;
 struct DocLineReplaceArg;
 class CBregexp;
+class CNativeW;
 
 class CSearchStringPattern
 {
@@ -87,7 +91,7 @@ public:
 		UINT					uOption = 0		//!< grep オプション
 	);
 
-	void ReplaceData( DocLineReplaceArg* pArg );
+	void ReplaceData( DocLineReplaceArg* pArg, bool bEnableExtEol );
 	
 	//! 8bit の alnum, '_' か?
 	static bool IsAlnum( wchar_t c ){

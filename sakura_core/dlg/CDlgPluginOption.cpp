@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2010, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -36,8 +37,11 @@
 #include "util/window.h"
 #include "util/string_ex2.h"
 #include "util/module.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 // BOOL変数の表示
 #define	BOOL_DISP_TRUE	L"\u2611"

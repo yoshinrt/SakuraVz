@@ -14,6 +14,7 @@
 	Copyright (C) 2009, ryoji
 	Copyright (C) 2011, nasukoji
 	Copyright (C) 2012, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -31,6 +32,8 @@
 #include "util/shell.h"
 #include "util/module.h"
 #include "util/window.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
 
 /* ダイアログプロシージャ */
 INT_PTR CALLBACK MyDialogProc(
@@ -182,12 +185,12 @@ BOOL CDialog::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	// Modified by KEITA for WIN64 2003.9.6
 	::SetWindowLongPtr( m_hWnd, DWLP_USER, lParam );
 
+	m_hFontDialog = UpdateDialogFont( hwndDlg );
+
 	/* ダイアログデータの設定 */
 	SetData();
 
 	SetDialogPosSize();
-
-	m_hFontDialog = UpdateDialogFont( hwndDlg );
 
 	m_bInited = TRUE;
 	return TRUE;
@@ -227,31 +230,67 @@ void CDialog::SetDialogPosSize()
 
 			RECT rc;
 			RECT rcWork;
+			RECT rcMonitor;
 			rc.left = m_xPos;
 			rc.top = m_yPos;
 			rc.right = m_xPos + m_nWidth;
 			rc.bottom = m_yPos + m_nHeight;
-			GetMonitorWorkRect(&rc, &rcWork);
+
+			GetMonitorWorkRect(&rc, &rcWork, &rcMonitor);
+			
+			// １ドットの空きを入れる
 			rcWork.top += 1;
 			rcWork.bottom -= 1;
 			rcWork.left += 1;
 			rcWork.right -= 1;
+
+			// ワークスペース座標のオフセットを求める
+			// タスクバーが左や上にある場合にこの考慮が必要
+			LONG xOffset = rcWork.left - rcMonitor.left;
+			LONG yOffset = rcWork.top - rcMonitor.top;
+
+			// ワークスペース座標のオフセットを加算
+			rc.left += xOffset;
+			rc.right += xOffset;
+			rc.top += yOffset;
+			rc.bottom += yOffset;
+
+			// ワークスペース領域に収まるようにウィンドウ位置調整
+			LONG workHeight = rcWork.bottom - rcWork.top;
+			LONG workWidth = rcWork.right - rcWork.left;
 			if( rc.bottom > rcWork.bottom ){
-				rc.top -= (rc.bottom - rcWork.bottom);
-				rc.bottom = rcWork.bottom;
+				if( m_nHeight > workHeight ){
+					rc.top = rcWork.top;
+					rc.bottom = rc.top + m_nHeight;
+				}else {
+					rc.bottom = rcWork.bottom;
+					rc.top = rc.bottom - m_nHeight;
+				}
 			}
 			if( rc.right > rcWork.right ){
-				rc.left -= (rc.right - rcWork.right);
-				rc.right = rcWork.right;
+				if( m_nWidth > workWidth ){
+					rc.left = rc.left;
+					rc.right = rc.left + m_nHeight;
+				}else {
+					rc.right = rcWork.right;
+					rc.left = rc.right - m_nWidth;
+				}
 			}
 			if( rc.top < rcWork.top ){
-				rc.bottom += (rcWork.top - rc.top);
 				rc.top = rcWork.top;
+				rc.bottom = rc.top + m_nHeight;
 			}
 			if( rc.left < rcWork.left ){
-				rc.right += (rcWork.left - rc.left);
 				rc.left = rcWork.left;
+				rc.right = rc.left + m_nWidth;
 			}
+
+			// ワークスペース座標のオフセットを引いて元に戻す
+			rc.left -= xOffset;
+			rc.right -= xOffset;
+			rc.top -= yOffset;
+			rc.bottom -= yOffset;
+
 			m_xPos = rc.left;
 			m_yPos = rc.top;
 			m_nWidth = rc.right - rc.left;
@@ -315,12 +354,6 @@ BOOL CDialog::OnSize( WPARAM wParam, LPARAM lParam )
 	RECT	rc;
 	::GetWindowRect( m_hWnd, &rc );
 
-	/* ダイアログのサイズの記憶 */
-	m_xPos = rc.left;
-	m_yPos = rc.top;
-	m_nWidth = rc.right - rc.left;
-	m_nHeight = rc.bottom - rc.top;
-
 	/* サイズボックスの移動 */
 	if( NULL != m_hwndSizeBox ){
 		::GetClientRect( m_hWnd, &rc );
@@ -357,19 +390,6 @@ BOOL CDialog::OnSize( WPARAM wParam, LPARAM lParam )
 
 BOOL CDialog::OnMove( WPARAM wParam, LPARAM lParam )
 {
-	/* ダイアログの位置の記憶 */
-	if( !m_bInited ){
-		return TRUE;
-	}
-	RECT	rc;
-	::GetWindowRect( m_hWnd, &rc );
-
-	/* ダイアログのサイズの記憶 */
-	m_xPos = rc.left;
-	m_yPos = rc.top;
-	m_nWidth = rc.right - rc.left;
-	m_nHeight = rc.bottom - rc.top;
-	DEBUG_TRACE( L"CDialog::OnMove() m_xPos=%d m_yPos=%d\n", m_xPos, m_yPos );
 	return TRUE;
 }
 

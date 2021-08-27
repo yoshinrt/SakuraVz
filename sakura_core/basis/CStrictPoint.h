@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -25,6 +26,8 @@
 #ifndef SAKURA_CSTRICTPOINT_61EFDE2B_5ACD_464A_8F49_7FB76A4A34C4_H_
 #define SAKURA_CSTRICTPOINT_61EFDE2B_5ACD_464A_8F49_7FB76A4A34C4_H_
 #pragma once
+
+#include "basis/primitive.h"
 
 //単位が明示的に区別されたポイント型。※POINTは継承しないことにした
 /*

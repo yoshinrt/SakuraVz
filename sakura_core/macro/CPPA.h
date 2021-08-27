@@ -10,6 +10,7 @@
 	Copyright (C) 2001, YAZAKI, genta
 	Copyright (C) 2002, YAZAKI, Moca
 	Copyright (C) 2003, genta, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -43,6 +44,7 @@ PPA(Poor-Pascal for Application)はDelphi/C++Builder用のPascalインタプリ�
 #include <stdio.h>
 #include "macro/CSMacroMgr.h"
 #include "extmodule/CDllHandler.h"
+#include "mem/CNativeA.h"
 
 #define PPADLL_VER 123
 

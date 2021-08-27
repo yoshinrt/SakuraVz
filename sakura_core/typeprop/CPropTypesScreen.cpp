@@ -14,6 +14,7 @@
 	Copyright (C) 2007, ryoji, genta
 	Copyright (C) 2008, nasukoji
 	Copyright (C) 2009, ryoji, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -27,9 +28,15 @@
 #include "util/window.h"
 #include "util/file.h" // _IS_REL_PATH
 #include "util/os.h"
+#include "apiwrap/CommonControl.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
 #include "doc/layout/CTsvModeInfo.h"
+#include "env/DLLSHAREDATA.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 static const DWORD p_helpids1[] = {	//11300
 	IDC_EDIT_TYPENAME,				HIDC_EDIT_TYPENAME,			//設定の名前

@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -32,24 +33,6 @@ class CLineData final {
 public:
 	CNativeW cmemLine;
 	int nSeq;
-	CLineData() = default;
-	CLineData(const CLineData& source) = default;
-	CLineData(CLineData&& other) noexcept {
-		swap(other);
-	}
-
-private:
-	void swap(CLineData& o) noexcept {
-		std::swap(cmemLine, o.cmemLine);
-		std::swap(nSeq, o.nSeq);
-	}
-
-public:
-	CLineData& operator = (const CLineData& rhs) = default;
-	CLineData& operator = (CLineData&& rhs) noexcept {
-		swap(rhs);
-		return *this;
-	}
 };
 
 typedef std::vector<CLineData> COpeLineData;

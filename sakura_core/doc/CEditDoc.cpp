@@ -18,6 +18,7 @@
 	Copyright (C) 2009, nasukoji
 	Copyright (C) 2011, ryoji
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -79,6 +80,8 @@
 #include "util/string_ex2.h"
 #include "util/window.h"
 #include "sakura_rc.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 #define IDT_ROLLMOUSE	1
 
@@ -172,7 +175,7 @@ CEditDoc::CEditDoc(CEditApp* pcApp)
 , m_nCommandExecNum( 0 )			/* コマンド実行回数 */
 , m_hBackImg(NULL)
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CEditDoc::CEditDoc" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CEditDoc::CEditDoc" );
 
 	// レイアウト管理情報の初期化
 	m_cLayoutMgr.Create( this, &m_cDocLineMgr );
@@ -419,7 +422,7 @@ void CEditDoc::InitAllView( void )
 */
 BOOL CEditDoc::Create( CEditWnd* pcEditWnd )
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CEditDoc::Create" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CEditDoc::Create" );
 
 	m_pcEditWnd = pcEditWnd;
 
@@ -428,7 +431,7 @@ BOOL CEditDoc::Create( CEditWnd* pcEditWnd )
 
 	SetBackgroundImage();
 
-	MY_TRACETIME( cRunningTimer, "End: PropSheet" );
+	MY_TRACETIME( cRunningTimer, L"End: PropSheet" );
 
 	return TRUE;
 }

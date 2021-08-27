@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -25,6 +26,8 @@
 #ifndef SAKURA_CHARSET_CD85F6F9_5224_44A2_9BC4_5F631B467701_H_
 #define SAKURA_CHARSET_CD85F6F9_5224_44A2_9BC4_5F631B467701_H_
 #pragma once
+
+#include <Windows.h>
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                           定数                              //

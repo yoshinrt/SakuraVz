@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -25,6 +26,9 @@
 #ifndef SAKURA_CCARET_78A7C1D0_0D47_4FF9_AE73_3421E35ABCB0_H_
 #define SAKURA_CCARET_78A7C1D0_0D47_4FF9_AE73_3421E35ABCB0_H_
 #pragma once
+
+#include "basis/SakuraBasis.h"
+#include "basis/CMySize.h"
 
 #define _CARETMARGINRATE 20
 #define _CARETMARGINRATE_JUMP (( int )( -0x10000 * 0.45 ))	// Tag Jmp 等の大幅に jmp する場合のマージン
@@ -86,8 +90,14 @@ private:
 };
 
 class CCaret{
+	using Me = CCaret;
+
 public:
 	CCaret(CEditView* pEditView, const CEditDoc* pEditDoc);
+	CCaret(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CCaret(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CCaret();
 
 	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //

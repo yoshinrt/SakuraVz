@@ -15,6 +15,7 @@
 	Copyright (C) 2003, Moca, ryoji, genta, かろと
 	Copyright (C) 2004, genta, Moca
 	Copyright (C) 2005, D.S.Koba, ryoji, かろと
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -196,7 +197,7 @@ const CDocLine* CDocLineMgr::GetLine( CLogicInt nLine ) const
 	  || m_nLines - nLine < nPrevToLineNumDiff
 	){
 		if( m_pCodePrevRefer == NULL ){
-			MY_RUNNINGTIMER( cRunningTimer, "CDocLineMgr::GetLine() 	m_pCodePrevRefer == NULL" );
+			MY_RUNNINGTIMER( cRunningTimer, L"CDocLineMgr::GetLine() 	m_pCodePrevRefer == NULL" );
 		}
 
 		if( nLine < (m_nLines / 2) ){
@@ -455,7 +456,7 @@ void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
 	
 	// Doc が空
 	if( !Line ){
-		if( pcOrgEol ) *pcOrgEol = EOL_NONE;
+		if( pcOrgEol ) *pcOrgEol = CEol( EEolType::none );
 		return;
 	}
 	

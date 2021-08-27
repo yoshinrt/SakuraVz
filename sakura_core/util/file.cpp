@@ -2,6 +2,7 @@
 	Copyright (C) 2002, SUI
 	Copyright (C) 2003, MIK
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -30,7 +31,10 @@
 
 #include <Shlwapi.h>
 
-#include "charset/CharPointer.h"
+#include <regex>
+#include <string_view>
+
+#include "charset/codechecker.h"
 #include "util/module.h"
 #include "util/window.h"
 #include "env/CShareData.h"
@@ -202,22 +206,21 @@ bool IsLocalDrive( const WCHAR* pszDrive )
 	return true;
 }
 
+/*! フルパスからファイル名を返す
+
+	@date 2006.04.10 fon 新規作成
+	@date 2006.09.14 genta ディレクトリがない場合に最初の1文字が切れないように
+ */
 const WCHAR* GetFileTitlePointer(const WCHAR* pszPath)
 {
-	CharPointerT p;
-	const WCHAR* pszName;
-	p = pszName = pszPath;
-	while( *p )
-	{
-		if( *p == L'\\' ){
-			pszName = p + 1;
-			p++;
+	std::wstring_view name(pszPath);
+	if (const size_t sep = name.find_last_of(L'\\'); sep != std::wstring_view::npos) {
+		if (sep + 1 == name.length()) {
+			return pszPath + name.length();
 		}
-		else{
-			p++;
-		}
+		return pszPath + sep + 1;
 	}
-	return pszName;
+	return pszPath;
 }
 
 /*! fnameが相対パスの場合は、実行ファイルのパスからの相対パスとして開く
@@ -295,6 +298,19 @@ void AddLastYenFromDirectoryPath( WCHAR* pszFolder )
 		}
 	}
 	return;
+}
+
+//! パスらしき文字列の末尾に'\\'または'/'がなかったら'\\'を付加する
+std::wstring AddLastYenPath(std::wstring_view path)
+{
+	std::wstring ret{ path };
+	if (0 == ret.size()) {
+		return ret;
+	}
+	if (auto c = ret.back(); !(c == L'\\' || c == L'/')) {
+		ret.append(L"\\");
+	}
+	return ret;
 }
 
 /* ファイルのフルパスを、フォルダとファイル名に分割 */
@@ -431,23 +447,28 @@ int CalcDirectoryDepth(
 )
 {
 	int depth = 0;
- 
+
 	//	とりあえず\の数を数える
-	for( CharPointerT p = path; *p != L'\0'; ++p ){
-		if( *p == L'\\' ){
-			++depth;
-			//	フルパスには入っていないはずだが念のため
-			//	.\はカレントディレクトリなので，深さに関係ない．
-			while( p[1] == L'.' && p[2] == L'\\' ){
-				p += 2;
-			}
+	std::wstring_view p(path);
+	std::wstring_view::size_type pos = 0;
+	do {
+		pos = p.find_first_of(L'\\', pos);
+		if (pos == std::wstring_view::npos) break;
+		++depth;
+		++pos;
+
+		//	フルパスには入っていないはずだが念のため
+		//	.\はカレントディレクトリなので，深さに関係ない．
+		while (pos + 2 <= p.length()
+			&& p[pos + 0] == L'.'
+			&& p[pos + 1] == L'\\') {
+			pos += 2;
 		}
-	}
+	} while (pos < p.length());
  
 	//	補正
 	//	ドライブ名はパスの深さに数えない
-	if( ((L'A' <= path[0] && path[0] <= L'Z') || (L'a' <= path[0] && path[0] <= L'z'))
-		&& path[1] == L':' && path[2] == L'\\' ){
+	if (std::regex_search(path, std::wregex(LR"(^[A-Z]:\\)", std::wregex::icase))) {
 		//フルパス
 		--depth; // C:\ の \ はルートの記号なので階層深さではない
 	}
@@ -612,6 +633,31 @@ LPCWSTR GetRelPath( LPCWSTR pszPath )
 	return pszFileName;
 }
 
+//! パスに使えない文字が含まれていないかチェックする
+// ファイル名、フォルダ名には「<>*|"?」が使えない
+// しかし「\\?\C:\Program files\」の形式では?が3文字目にあるので除外
+// ストリーム名とのセパレータにはfilename.ext:streamの形式でコロンが使われる
+// コロンは除外文字に入っていない
+bool IsValidPathAvailableChar(std::wstring_view path)
+{
+	if (path.empty()) {
+		// 空文字列セーフ
+		return true;
+	}
+	constexpr auto& dos_device_path = LR"(\\?\)";
+	constexpr size_t len = _countof(dos_device_path) - 1;
+	size_t pos = 0;
+	if (wcsncmp(path.data(), dos_device_path, len) == 0) {
+		pos = len;
+	}
+	for (size_t i = pos; i < path.size(); ++i) {
+		if (!WCODE::IsValidFilenameChar(path[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /**	ファイルの存在チェック
 
 	指定されたパスのファイルが存在するかどうかを確認する。
@@ -627,6 +673,10 @@ LPCWSTR GetRelPath( LPCWSTR pszPath )
 */
 bool IsFileExists(const WCHAR* path, bool bFileOnly)
 {
+	if (!IsValidPathAvailableChar(path)) {
+		// ワイルドカード指定を除外
+		return false;
+	}
 	WIN32_FIND_DATA fd;
 	HANDLE hFind = ::FindFirstFile( path, &fd );
 	if( hFind != INVALID_HANDLE_VALUE ){
@@ -651,6 +701,10 @@ bool IsFileExists(const WCHAR* path, bool bFileOnly)
 */
 bool IsDirectory(LPCWSTR pszPath)
 {
+	if (!IsValidPathAvailableChar(pszPath)) {
+		// ワイルドカード指定を除外
+		return false;
+	}
 	WIN32_FIND_DATA fd;
 	HANDLE hFind = ::FindFirstFile( pszPath, &fd );
 	if(hFind!=INVALID_HANDLE_VALUE){
@@ -837,7 +891,7 @@ void GetExistPathW( wchar_t *po , const wchar_t *pi )
 			break;		/* ループを抜ける */
 		}
 		/* ↓ルートディレクトリを引っかけるための処理 */
-		if( ( *pw == L'\\' )&&( *(pw-1) == L':' ) ){	/* C:\ とかの \ っぽい */
+		if( ( *pw == L'\\' )&&( ps < pw )&&( *(pw-1) == L':' ) ){	/* C:\ とかの \ っぽい */
 			* (pw+1) = L'\0';		/* \ の後ろの位置を文字列の終端にする。 */
 			if( _waccess(po,0) == 0 )	break;	/* 有効なパス文字列が見つかった */
 		}

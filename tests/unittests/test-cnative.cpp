@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2020 Sakura Editor Organization
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -24,8 +24,45 @@
 */
 #include <stdexcept>
 #include <gtest/gtest.h>
+#include "charset/charcode.h"
 #include "mem/CNativeW.h"
 #include "mem/CNativeA.h"
+
+/*!
+	CStringRefのテスト
+ */
+TEST(CStringRef, CStringRef)
+{
+	constexpr const wchar_t sz[] = L"test";
+	constexpr const size_t cch = _countof(sz) - 1;
+
+	CStringRef v1;
+	EXPECT_EQ(nullptr, v1.GetPtr());
+	EXPECT_EQ(0, v1.GetLength());
+	EXPECT_FALSE(v1.IsValid());
+	EXPECT_EQ(L'\0', v1.At(0));
+
+	CStringRef v2(sz, cch);
+	EXPECT_STREQ(sz, v2.GetPtr());
+	EXPECT_EQ(cch, v2.GetLength());
+	EXPECT_TRUE(v2.IsValid());
+	EXPECT_EQ(L't', v2.At(0));
+	EXPECT_EQ(L'e', v2.At(1));
+	EXPECT_EQ(L's', v2.At(2));
+	EXPECT_EQ(L't', v2.At(3));
+	EXPECT_EQ(L'\0', v2.At(4));
+
+	CNativeW cmem(sz, cch);
+	CStringRef v3(cmem);
+	EXPECT_STREQ(sz, v3.GetPtr());
+	EXPECT_EQ(cch, v3.GetLength());
+	EXPECT_TRUE(v3.IsValid());
+	EXPECT_EQ(L't', v3.At(0));
+	EXPECT_EQ(L'e', v3.At(1));
+	EXPECT_EQ(L's', v3.At(2));
+	EXPECT_EQ(L't', v3.At(3));
+	EXPECT_EQ(L'\0', v3.At(4));
+}
 
 /*!
  * @brief コンストラクタ(パラメータなし)の仕様
@@ -327,7 +364,8 @@ TEST(CNativeW, AppendStringWithFormatting)
 	ASSERT_STREQ(L"いちご100%", value.GetStringPtr());
 
 	// フォーマットに NULL を渡したケースをテストする
-	ASSERT_THROW(value.AppendStringF(NULL), std::invalid_argument);
+	ASSERT_THROW(value.AppendStringF(std::wstring_view(nullptr, 0)), std::invalid_argument);
+	ASSERT_THROW(value.AppendStringF(std::wstring_view(L"ダミー", 0)), std::invalid_argument);
 
 	// 文字列長を0にして、追加確保が行われないケースをテストする
 	value = L"いちご100%"; //テスト前の初期値(念のため再代入しておく
@@ -740,4 +778,177 @@ TEST(CNativeW, globalOperatorAdd)
 	constexpr const wchar_t v3[] = L"前半";
 	CNativeW v4(L"後半");
 	EXPECT_STREQ(L"前半後半", (v3 + v4).GetStringPtr());
+}
+
+/*!
+ * @brief GetSizeOfCharの仕様
+ * @remark 指定した文字の符号単位数を返す。
+ */
+TEST(CNativeW, GetSizeOfChar)
+{
+	// 基本多言語面の文字ならば1を返す。
+	EXPECT_EQ(CNativeW::GetSizeOfChar(L"a", 1, 0), 1);
+	EXPECT_EQ(CNativeW::GetSizeOfChar(CStringRef(L"a", 1), 0), 1);
+	// 範囲外なら0を返す。
+	EXPECT_EQ(CNativeW::GetSizeOfChar(L"", 0, 0), 0);
+	EXPECT_EQ(CNativeW::GetSizeOfChar(CStringRef(L"", 0), 0), 0);
+	// 上位・下位サロゲートの組み合わせであれば2を返す。
+	EXPECT_EQ(CNativeW::GetSizeOfChar(L"\xd83c\xdf38", 2, 0), 2);
+	EXPECT_EQ(CNativeW::GetSizeOfChar(CStringRef(L"\xd83c\xdf38", 2), 0), 2);
+	// 指定位置が下位サロゲートならその他の文字と同様に1を返す。
+	EXPECT_EQ(CNativeW::GetSizeOfChar(L"\xd83c\xdf38", 2, 1), 1);
+	EXPECT_EQ(CNativeW::GetSizeOfChar(CStringRef(L"\xd83c\xdf38", 2), 1), 1);
+}
+
+/*!
+ * @brief GetKetaOfCharの仕様
+ * @remark 指定した文字の桁数を返す。
+ */
+TEST(CNativeW, GetKetaOfChar)
+{
+	// 範囲外なら0を返す。
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"", 0, 0), 0);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"", 0), 0), 0);
+	// 上位サロゲートなら2を返す。
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"\xd83c\xdf38", 2, 0), 2);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"\xd83c\xdf38", 2), 0), 2);
+	// 上位サロゲートに続く下位サロゲートであれば0を返す。
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"\xd83c\xdf38", 2, 1), 0);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"\xd83c\xdf38", 2), 1), 0);
+	// 下位サロゲートだけなら2を返す。
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"\xdf38", 1, 0), 2);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"\xdf38", 1), 0), 2);
+
+	// サクラエディタでは Unicode で表現できない文字コードの破壊を防ぐため、
+	// 不明バイトを下位サロゲートにマップして保持している。
+	// この1バイト文字は半角として扱わなければ不自然なので、
+	// 上位対を持たない下位サロゲート 0xdc00 ～ 0xdcff の範囲に限り、1を返すことになっている。
+	//
+	// https://sourceforge.net/p/sakura-editor/patchunicode/57/
+	// http://sakura-editor.sourceforge.net/cgi-bin/cyclamen/cyclamen.cgi?log=unicode&v=833
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"\xdbff", 1, 0), 2);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"\xdbff", 1), 0), 2);
+	for (wchar_t ch = 0xdc00; ch <= 0xdcff; ++ch) {
+		EXPECT_EQ(CNativeW::GetKetaOfChar(&ch, 1, 0), 1);
+		EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(&ch, 1), 0), 1);
+	}
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"\xdd00", 1, 0), 2);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"\xdd00", 1), 0), 2);
+
+	// 文字が半角なら1を返す。
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"a", 1, 0), 1);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"a", 1), 0), 1);
+
+	// 文字が全角なら2を返す。
+	class FakeCache : public CCharWidthCache {
+	public:
+		bool CalcHankakuByFont(wchar_t c) override { return false; }
+	} cache;
+	EXPECT_EQ(CNativeW::GetKetaOfChar(L"あ", 1, 0, cache), 2);
+	EXPECT_EQ(CNativeW::GetKetaOfChar(CStringRef(L"あ", 1), 0, cache), 2);
+}
+
+/*!
+ * @brief GetKetaOfCharの仕様
+ * @remark 指定した文字のピクセル単位幅を返す。
+ */
+TEST(CNativeW, GetHabaOfChar)
+{
+	// 範囲外なら0を返す。
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"", 0, 1, false, GetCharWidthCache()), 0);
+
+	// 改行コードなら1を返す。
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\r\n", 2, 0, false, GetCharWidthCache()), 1);
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\r\n", 2, 1, false, GetCharWidthCache()), 1);
+
+	// CalcPxWidthByFont で計算した結果を返す。
+	class FakeCache1 : public CCharWidthCache {
+	public:
+		int CalcPxWidthByFont(wchar_t ch) override {
+			if (ch == L'a') return 10000;
+			else if (ch == L'b') return 20000;
+			else return 0;
+		}
+	} cache1;
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"ab", 2, 0, false, cache1), 10000);
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"ab", 2, 1, false, cache1), 20000);
+
+	// サロゲートペアの幅は CalcPxWidthByFont2 で計算する。
+	// 指定された位置が下位サロゲートなら0を返す。
+	class FakeCache2 : public CCharWidthCache {
+	public:
+		int CalcPxWidthByFont2(const wchar_t* pc2) const override {
+			return 20000;
+		}
+	} cache2;
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\xd83c\xdf38", 2, 0, false, cache2), 20000);
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\xd83c\xdf38", 2, 1, false, cache2), 0);
+
+	// サロゲートペアが片方しかないときは CalcPxWidthByFont で計算している。
+	class FakeCache3 : public CCharWidthCache {
+	public:
+		int CalcPxWidthByFont(wchar_t c) override {
+			return 10000;
+		}
+	} cache3;
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\xd83cあ", 2, 0, false, cache3), 10000);
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"\xdf38あ", 2, 0, false, cache3), 10000);
+	EXPECT_EQ((Int)CNativeW::GetHabaOfChar(L"あ\xdf38", 2, 1, false, cache3), 10000);
+}
+
+/*!
+ * @brief GetCharNextの仕様
+ */
+TEST(CNativeW, GetCharNext)
+{
+	constexpr const wchar_t* text = L"a\xd83c\xdf38";
+	// 次の文字のアドレスを返す。
+	EXPECT_EQ(CNativeW::GetCharNext(text, 3, text), text + 1);
+	// 上位サロゲートが渡された場合は下位サロゲートを飛ばす。
+	EXPECT_EQ(CNativeW::GetCharNext(text, 3, text + 1), text + 3);
+	// ポインタを進めた結果が範囲外なら &pData[nDataLen] を返す。
+	EXPECT_EQ(CNativeW::GetCharNext(text, 3, text + 3), text + 3);
+}
+
+/*!
+ * @brief GetCharPrevの仕様
+ */
+TEST(CNativeW, GetCharPrev)
+{
+	constexpr const wchar_t* text = L"a\xd83c\xdf38" L"d";
+	// 前の文字のアドレスを返す。
+	EXPECT_EQ(CNativeW::GetCharPrev(text, 4, text + 1), text);
+	// 前の文字が下位サロゲートだった場合は下位サロゲートを飛ばす。
+	EXPECT_EQ(CNativeW::GetCharPrev(text, 4, text + 3), text + 1);
+	// ポインタを戻した結果が範囲外なら pData を返す。
+	EXPECT_EQ(CNativeW::GetCharPrev(text, 4, text), text);
+}
+
+/*!
+ * @brief GetCharPrevの潜在バグ評価
+ */
+TEST(CNativeW, GetCharPrev_Bugs_Preview)
+{
+	// a、カラー絵文字「男性のシンボル」、x
+	constexpr const wchar_t text[] = L"a\U0001F6B9x";
+
+	// text[0] = L'a'
+	// text[1] = (\U0001F6B9 の1ワード目)
+	// text[2] = (\U0001F6B9 の2ワード目)
+	// text[3] = L'x'
+
+	// textのような配列であれば問題はない
+	EXPECT_EQ(&text[0], CNativeW::GetCharPrev(text, _countof(text) - 1, text + 1));
+	EXPECT_EQ(&text[1], CNativeW::GetCharPrev(text, _countof(text) - 1, text + 2));
+	EXPECT_EQ(&text[1], CNativeW::GetCharPrev(text, _countof(text) - 1, text + 3));
+	EXPECT_EQ(&text[3], CNativeW::GetCharPrev(text, _countof(text) - 1, text + 4));
+
+	// 配列の一部を参照した、ないし、異常データを扱う場合に問題がある。
+	const auto *pText = &text[2];
+
+	// これがバグ。範囲外アドレスを返してはならない。
+	// EXPECT_EQ(&text[1], CNativeW::GetCharPrev(pText, 2, pText));
+
+	// 対処方法 関数コメントにある仕様通りに修正する。
+	ASSERT_EQ(&text[2], CNativeW::GetCharPrev(pText, 2, pText));
 }

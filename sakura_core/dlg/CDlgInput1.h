@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -13,6 +14,8 @@
 #ifndef SAKURA_CDLGINPUT1_43CB765B_D257_4DBC_85E9_D2587B7E9D8E_H_
 #define SAKURA_CDLGINPUT1_43CB765B_D257_4DBC_85E9_D2587B7E9D8E_H_
 #pragma once
+
+#include "mem/CNativeW.h"
 
 class CDlgInput1;
 
@@ -25,11 +28,6 @@ class CDlgInput1;
 class CDlgInput1
 {
 public:
-	/*
-	||  Constructors
-	*/
-	CDlgInput1();
-	~CDlgInput1();
 	BOOL DoModal( HINSTANCE hInstApp, HWND hwndParent, const WCHAR* pszTitle,
 				  const WCHAR* pszMessage, int nMaxTextLen, WCHAR* pszText );	/* モードレスダイアログの表示 */
 

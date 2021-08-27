@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -28,9 +29,16 @@ class COpeBlk;/// 2002/2/10 aroka
 	@brief アンドゥ・リドゥバッファ
 */
 class COpeBuf {
+
+	using Me = COpeBuf;
+
 public:
 	//コンストラクタ・デストラクタ
 	COpeBuf();
+	COpeBuf(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	COpeBuf(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~COpeBuf();
 
 	//状態

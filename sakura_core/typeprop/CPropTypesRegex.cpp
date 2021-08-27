@@ -9,6 +9,7 @@
 	Copyright (C) 2002, MIK
 	Copyright (C) 2003, MIK, KEITA
 	Copyright (C) 2006, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -24,8 +25,11 @@
 #include "typeprop/CImpExpManager.h"	// 2010/4/23 Uchi
 #include "util/shell.h"
 #include "view/colors/EColorIndexType.h"
+#include "apiwrap/StdControl.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 using namespace std;
 

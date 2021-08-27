@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2013, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,6 +34,7 @@
 
 #include "dlg/CDialog.h"
 #include "_main/CCommandLine.h"
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>

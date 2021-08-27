@@ -16,6 +16,7 @@
 	Copyright (C) 2009, ryoji, genta
 	Copyright (C) 2010, ryoji
 	Copyright (C) 2011, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -30,7 +31,12 @@
 #include "util/window.h"
 #include "util/string_ex2.h"
 #include <limits.h>
+#include "apiwrap/CommonControl.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 /*!
 検索(ボックス)コマンド実行.
@@ -87,6 +93,10 @@ void CViewCommander::Command_SEARCH_NEXT(
 	CLogicRange*	pcSelectLogic		//!< [out] 選択範囲のロジック版。マッチ範囲を返す。すべて置換/高速モードで使用
 )
 {
+	// 見つからないときのメッセージをリソースから指定できるようにローカルコピーしておく
+	const std::wstring copyOfNotFoundMessage(pszNotFoundMessage ? pszNotFoundMessage : L"");
+	pszNotFoundMessage = pszNotFoundMessage ? copyOfNotFoundMessage.data() : nullptr;
+
 	bool		bSelecting;
 	bool		bFlag1 = false;
 	bool		bSelectingLock_Old = false;

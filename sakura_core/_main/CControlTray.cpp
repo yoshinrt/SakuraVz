@@ -19,6 +19,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2008, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -49,7 +50,11 @@
 #include "recent/CMRUFolder.h"
 #include "_main/CCommandLine.h"
 #include "CGrepEnumKeys.h"
+#include "apiwrap/StdApi.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 #define ID_HOTKEY_TRAYMENU	0x1234
 
@@ -63,6 +68,8 @@ static LRESULT CALLBACK CControlTrayWndProc( HWND, UINT, WPARAM, LPARAM );
 //Stonee, 2001/07/01  多重起動された場合は前回のダイアログを前面に出すようにした。
 void CControlTray::DoGrep()
 {
+	m_cDlgGrep.m_bEnableThisText = false;
+
 	//Stonee, 2001/06/30
 	//前回のダイアログがあれば前面に (suggested by genta)
 	if ( ::IsWindow(m_cDlgGrep.GetHwnd()) ){
@@ -218,7 +225,7 @@ CControlTray::~CControlTray()
 /* 作成 */
 HWND CControlTray::Create( HINSTANCE hInstance )
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CControlTray::Create" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CControlTray::Create" );
 
 	//同名同クラスのウィンドウが既に存在していたら、失敗
 	m_hInstance = hInstance;
@@ -1151,6 +1158,10 @@ bool CControlTray::OpenNewEditor(
 	struct CResponsefileDeleter{
 		LPCWSTR fileName;
 		CResponsefileDeleter(): fileName(NULL){}
+		CResponsefileDeleter(const CResponsefileDeleter&) = delete;
+		CResponsefileDeleter operator = (const CResponsefileDeleter&) = delete;
+		CResponsefileDeleter(CResponsefileDeleter&&) noexcept = delete;
+		CResponsefileDeleter operator = (CResponsefileDeleter&&) noexcept = delete;
 		~CResponsefileDeleter(){
 			if( fileName && fileName[0] ){
 				::DeleteFile( fileName );

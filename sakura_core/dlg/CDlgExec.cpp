@@ -11,6 +11,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, maru
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -24,8 +25,11 @@
 #include "util/window.h"
 #include "_main/CAppMode.h"
 #include "doc/CEditDoc.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 //外部コマンド CDlgExec.cpp	//@@@ 2002.01.07 add start MIK
 const DWORD p_helpids[] = {	//12100
@@ -156,7 +160,7 @@ void CDlgExec::SetData( void )
 	int nOpt;
 	hwndCombo = GetItemHwnd( IDC_COMBO_CODE_GET );
 	nOpt = m_pShareData->m_nExecFlgOpt & 0x88;
-	for( i = 0; _countof(codeTable1); i++ ){
+	for( i = 0; i < _countof(codeTable1); i++ ){
 		if( codeTable1[i] == nOpt ){
 			Combo_SetCurSel( hwndCombo, i );
 			break;
@@ -164,7 +168,7 @@ void CDlgExec::SetData( void )
 	}
 	hwndCombo = GetItemHwnd( IDC_COMBO_CODE_SEND );
 	nOpt = m_pShareData->m_nExecFlgOpt & 0x110;
-	for( i = 0; _countof(codeTable2); i++ ){
+	for( i = 0; i < _countof(codeTable2); i++ ){
 		if( codeTable2[i] == nOpt ){
 			Combo_SetCurSel( hwndCombo, i );
 			break;
@@ -258,7 +262,7 @@ BOOL CDlgExec::OnBnClicked( int wID )
 
 	case IDC_BUTTON_REFERENCE2:
 		{
-			if( SelectDir( GetHwnd(), LS(STR_DLGEXEC_SELECT_CURDIR), &m_szCurDir[0], &m_szCurDir[0] ) ){
+			if( SelectDir( GetHwnd(), LS(STR_DLGEXEC_SELECT_CURDIR), &m_szCurDir[0], &m_szCurDir[0], m_szCurDir.GetBufferCount() ) ){
 				::DlgItem_SetText( GetHwnd(), IDC_COMBO_CUR_DIR, &m_szCurDir[0] );
 			}
 		}

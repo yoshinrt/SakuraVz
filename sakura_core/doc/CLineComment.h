@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2002, Yazaki
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -23,6 +24,8 @@
 -----------------------------------------------------------------------*/
 #define COMMENT_DELIMITER_NUM	3
 #define COMMENT_DELIMITER_BUFFERSIZE	16
+
+class CStringRef;
 
 /*! 行コメントデリミタを管理する
 

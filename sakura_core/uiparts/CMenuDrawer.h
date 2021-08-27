@@ -10,6 +10,7 @@
 	Copyright (C) 2003, MIK
 	Copyright (C) 2005, aroka, genta
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -20,6 +21,7 @@
 #pragma once
 
 #include "Funccode_enum.h"
+#include "mem/CNativeW.h"
 
 class CMenuDrawer;
 
@@ -45,11 +47,17 @@ struct DLLSHAREDATA;
 */
 class CMenuDrawer
 {
+	using Me = CMenuDrawer;
+
 public:
 	/*
 	||  Constructors
 	*/
 	CMenuDrawer();
+	CMenuDrawer(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CMenuDrawer(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CMenuDrawer();
 	void Create( HINSTANCE hInstance, HWND hWndOwner, CImageListMgr* pcIcons );
 

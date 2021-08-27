@@ -11,6 +11,7 @@
 	Copyright (C) 2002, aroka, MIK, YAZAKI
 	Copyright (C) 2004, genta
 	Copyright (C) 2006, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -24,8 +25,11 @@
 #include "util/shell.h"
 #include "util/os.h"
 #include "window/CEditWnd.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 // ジャンプ CDlgJump.cpp	//@@@ 2002.01.07 add start MIK
 const DWORD p_helpids[] = {	//12800

@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,12 +30,18 @@
 #include "doc/CDocTypeSetting.h" // ColorInfo !!
 
 class CViewFont{
+	using Me = CViewFont;
+
 public:
 	CViewFont(const LOGFONT *plf, bool bMiniMap = false)
 	{
 		m_bMiniMap = bMiniMap;
 		CreateFont(plf);
 	}
+	CViewFont(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CViewFont(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CViewFont()
 	{
 		DeleteFont();

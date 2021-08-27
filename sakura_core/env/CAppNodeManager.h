@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -26,8 +27,9 @@
 #define SAKURA_CAPPNODEMANAGER_CAE7A323_DEA3_47E4_91DE_C99A88C32683_H_
 #pragma once
 
-#include "util/design_template.h"
+#include "basis/CMyString.h"
 #include "config/maxdata.h"
+#include "util/design_template.h"
 
 class CAppNodeGroupHandle;
 

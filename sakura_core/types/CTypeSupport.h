@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,7 +38,8 @@
 	今のところタイプ別設定の色情報取得の補助
 */
 class CTypeSupport{
-private:
+	using Me = CTypeSupport;
+
 	static const COLORREF INVALID_COLOR=0xFFFFFFFF; //無効な色定数
 
 public:
@@ -51,6 +53,10 @@ public:
 
 		m_gr = NULL;
 	}
+	CTypeSupport(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CTypeSupport(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CTypeSupport()
 	{
 		if(m_gr){

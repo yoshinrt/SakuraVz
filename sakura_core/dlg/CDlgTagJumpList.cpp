@@ -10,6 +10,7 @@
 	Copyright (C) 2005, MIK
 	Copyright (C) 2006, genta, ryoji
 	Copyright (C) 2010, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,6 +42,12 @@
 #include "util/shell.h"
 #include "util/file.h"
 #include "util/window.h"
+#include "util/tchar_convert.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "mem/CNativeA.h"
+#include "String_define.h"
+
 #include "sakura_rc.h"
 #include "sakura.hh"
 
@@ -530,6 +537,17 @@ BOOL CDlgTagJumpList::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	return bRet;
 }
 
+BOOL CDlgTagJumpList::OnDestroy( void )
+{
+	CDialog::OnDestroy();
+	RECT& rect = GetDllShareData().m_Common.m_sOthers.m_rcTagJumpDialog;
+	rect.left = m_xPos;
+	rect.top = m_yPos;
+	rect.right = rect.left + m_nWidth;
+	rect.bottom = rect.top + m_nHeight;
+	return TRUE;
+}
+
 BOOL CDlgTagJumpList::OnBnClicked( int wID )
 {
 	switch( wID )
@@ -594,8 +612,6 @@ BOOL CDlgTagJumpList::OnSize( WPARAM wParam, LPARAM lParam )
 	/* 基底クラスメンバ */
 	CDialog::OnSize( wParam, lParam );
 
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcTagJumpDialog );
-
 	RECT  rc;
 	POINT ptNew;
 	::GetWindowRect( GetHwnd(), &rc );
@@ -607,13 +623,6 @@ BOOL CDlgTagJumpList::OnSize( WPARAM wParam, LPARAM lParam )
 	}
 	::InvalidateRect( GetHwnd(), NULL, TRUE );
 	return TRUE;
-}
-
-BOOL CDlgTagJumpList::OnMove( WPARAM wParam, LPARAM lParam )
-{
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcTagJumpDialog );
-
-	return CDialog::OnMove( wParam, lParam );
 }
 
 BOOL CDlgTagJumpList::OnMinMaxInfo( LPARAM lParam )

@@ -2,6 +2,7 @@
 /*
 	Copyright (C) 2008, kobake, ryoji
 	Copyright (C) 2012, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -43,6 +44,9 @@
 #include "util/module.h" //GetAppVersionInfo
 #include "util/shell.h"
 #include "util/window.h"
+#include "config/system_constants.h"
+#include "config/app_constants.h"
+#include "String_define.h"
 
 typedef std::wstring wstring;
 

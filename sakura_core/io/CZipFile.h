@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2011, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,8 +38,14 @@ private:
 	Folder*			pZipFile;
 	std::wstring	sZipName;
 
+	using Me = CZipFile;
+
 public:
 	CZipFile();		// コンストラクタ
+	CZipFile(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CZipFile(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CZipFile();	// デストラクタ
 
 public:

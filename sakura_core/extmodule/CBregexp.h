@@ -29,6 +29,7 @@
 #pragma once
 
 #include "CDllHandler.h"
+#include "basis/SakuraBasis.h"
 
 class CBregexp {
 public:

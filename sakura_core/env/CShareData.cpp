@@ -18,6 +18,7 @@
 	Copyright (C) 2009, nasukoji, ryoji
 	Copyright (C) 2011, nasukoji
 	Copyright (C) 2012, Moca, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -42,7 +43,10 @@
 #include "util/window.h"
 #include "util/os.h"
 #include "CDataProfile.h"
+#include "apiwrap/StdApi.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 struct ARRHEAD {
 	int		nLength;
@@ -106,7 +110,7 @@ CMutex& CShareData::GetMutexShareWork(){
 */
 bool CShareData::InitShareData()
 {
-	MY_RUNNINGTIMER(cRunningTimer,"CShareData::InitShareData" );
+	MY_RUNNINGTIMER(cRunningTimer,L"CShareData::InitShareData" );
 
 	m_hwndTraceOutSource = NULL;	// 2006.06.26 ryoji
 

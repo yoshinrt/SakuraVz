@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2002, Yazaki
 	Copyright (C) 2005, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -33,6 +34,8 @@ enum ECommentType{
 */
 #define BLOCKCOMMENT_NUM	2
 #define BLOCKCOMMENT_BUFFERSIZE	16
+
+class CStringRef;
 
 //	2005.11.10 Moca アクセス関数追加
 class CBlockComment{

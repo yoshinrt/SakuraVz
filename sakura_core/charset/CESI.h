@@ -9,6 +9,7 @@
 /*
 	Copyright (C) 2006
 	Copyright (C) 2007
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -84,8 +85,15 @@ enum EBOMType {
 //*/
 
 class CESI {
+
+	using Me = CESI;
+
 public:
 
+	CESI(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CESI(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CESI() { ; }
 	explicit CESI( const SEncodingConfig& ref ) : m_pEncodingConfig(&ref) {
 		m_dwStatus = ESI_NOINFORMATION;
@@ -148,9 +156,9 @@ protected:
 	void GetEncodingInfo_latin1( const char* pS, const int nLen );
 	void GetEncodingInfo_meta( const char* pS, const int nLen );
 
-	bool _CheckUtf16Eol( const char* pS, const int nLen, const bool bbig_endian );
-	inline bool _CheckUtf16EolLE( const char* p, const int n ){ return _CheckUtf16Eol( p, n, false ); }
-	inline bool _CheckUtf16EolBE( const char* p, const int n ){ return _CheckUtf16Eol( p, n, true ); }
+	bool _CheckUtf16Eol( const char* pS, const size_t nLen, const bool bbig_endian );
+	inline bool _CheckUtf16EolLE( const char* p, const size_t n ){ return _CheckUtf16Eol( p, n, false ); }
+	inline bool _CheckUtf16EolBE( const char* p, const size_t n ){ return _CheckUtf16Eol( p, n, true ); }
 
 public:
 	//

@@ -10,6 +10,7 @@
 	Copyright (C) 2001, YAZAKI
 	Copyright (C) 2002, YAZAKI, aroka, genta, Moca
 	Copyright (C) 2003, Moca, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,6 +42,8 @@
 #include "env/CShareData.h"
 #include "env/DLLSHAREDATA.h"
 #include "_os/OleTypes.h"
+#include "util/tchar_convert.h"
+#include "String_define.h"
 
 #define NEVER_USED_PARAM(p) ((void)p)
 

@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,6 +42,8 @@
 #include "plugin/CPlugin.h"
 #include "plugin/CJackManager.h"
 #include "util/format.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                          ロック                             //
@@ -118,7 +121,7 @@ bool CDocFileOperation::DoLoadFlow(SLoadInfo* pLoadInfo)
 		eLoadResult = m_pcDocRef->NotifyLoad(*pLoadInfo);	//本処理
 		m_pcDocRef->NotifyAfterLoad(*pLoadInfo);			//後処理
 	}
-	catch(CFlowInterruption){
+	catch(const CFlowInterruption&){
 		eLoadResult = LOADED_INTERRUPT;
 	}
 	catch(...){
@@ -224,7 +227,8 @@ bool CDocFileOperation::SaveFileDialog(
 	//拡張子指定
 	// 一時適用や拡張子なしの場合の拡張子をタイプ別設定から持ってくる
 	// 2008/6/14 大きく改造 Uchi
-	WCHAR	szDefaultWildCard[_MAX_PATH + 10];	// ユーザー指定拡張子
+	std::wstring strDefaultWildCard;	// ユーザー指定拡張子
+	
 	{
 		LPCWSTR	szExt;
 
@@ -240,28 +244,27 @@ bool CDocFileOperation::SaveFileDialog(
 			// 基本
 			if (szExt[0] == L'\0') { 
 				// ファイルパスが無いまたは拡張子なし
-				wcscpy(szDefaultWildCard, L"*.txt");
+				strDefaultWildCard = L"*.txt";
 			}
 			else {
 				// 拡張子あり
-				wcscpy(szDefaultWildCard, L"*");
-				wcscat(szDefaultWildCard, szExt);
+				strDefaultWildCard = L"*";
+				strDefaultWildCard += szExt;
 			}
 		}
 		else {
-			szDefaultWildCard[0] = L'\0'; 
-			CDocTypeManager::ConvertTypesExtToDlgExt(type.m_szTypeExts, szExt, szDefaultWildCard);
+			strDefaultWildCard = CDocTypeManager::ConvertTypesExtToDlgExt(type.m_szTypeExts, szExt);
 		}
 
 		if(!this->m_pcDocRef->m_cDocFile.GetFilePathClass().IsValidPath()){
 			//「新規から保存時は全ファイル表示」オプション	// 2008/6/15 バグフィックス Uchi
 			if( GetDllShareData().m_Common.m_sFile.m_bNoFilterSaveNew )
-				wcscat(szDefaultWildCard, L";*.*");	// 全ファイル表示
+				strDefaultWildCard += L";*.*";	// 全ファイル表示
 		}
 		else {
 			//「新規以外から保存時は全ファイル表示」オプション
 			if( GetDllShareData().m_Common.m_sFile.m_bNoFilterSaveFile )
-				wcscat(szDefaultWildCard, L";*.*");	// 全ファイル表示
+				strDefaultWildCard += L";*.*";	// 全ファイル表示
 		}
 	}
 
@@ -280,7 +283,7 @@ bool CDocFileOperation::SaveFileDialog(
 	cDlgOpenFile.Create(
 		G_AppInstance(),
 		CEditWnd::getInstance()->GetHwnd(),
-		szDefaultWildCard,
+		strDefaultWildCard.c_str(),
 		CSakuraEnvironment::GetDlgInitialDir().c_str(),	// 初期フォルダ
 		CMRUFile().GetPathList(),		//	最近のファイル
 		CMRUFolder().GetPathList()	//	最近のフォルダ
@@ -318,7 +321,7 @@ bool CDocFileOperation::DoSaveFlow(SSaveInfo* pSaveInfo)
 			if(pSaveInfo->bOverwriteMode){
 				// 無変更の場合は警告音を出し、終了
 				if (!m_pcDocRef->m_cDocEditor.IsModified() &&
-					pSaveInfo->cEol==EOL_NONE &&	//※改行コード指定保存がリクエストされた場合は、「変更があったもの」とみなす
+					pSaveInfo->cEol.IsNone() &&	//※改行コード指定保存がリクエストされた場合は、「変更があったもの」とみなす
 					!pSaveInfo->bChgCodeSet) {		// 文字コードセットの変更が有った場合は、「変更があったもの」とみなす
 					CEditApp::getInstance()->m_cSoundSet.NeedlessToSaveBeep();
 					throw CFlowInterruption();
@@ -354,7 +357,7 @@ bool CDocFileOperation::DoSaveFlow(SSaveInfo* pSaveInfo)
 		//結果
 		eSaveResult = SAVED_OK; //###仮
 	}
-	catch(CFlowInterruption){
+	catch(const CFlowInterruption&){
 		eSaveResult = SAVED_INTERRUPT;
 	}
 	catch(...){
@@ -387,7 +390,7 @@ bool CDocFileOperation::FileSave()
 	//セーブ情報
 	SSaveInfo sSaveInfo;
 	m_pcDocRef->GetSaveInfo(&sSaveInfo);
-	sSaveInfo.cEol = EOL_NONE; //改行コード無変換
+	sSaveInfo.cEol = EEolType::none; //改行コード無変換
 	sSaveInfo.bOverwriteMode = true; //上書き要求
 
 	//上書き処理
@@ -403,11 +406,11 @@ bool CDocFileOperation::FileSaveAs( const WCHAR* filename,ECodeType eCodeType, E
 	//セーブ情報
 	SSaveInfo sSaveInfo;
 	m_pcDocRef->GetSaveInfo(&sSaveInfo);
-	sSaveInfo.cEol = EOL_NONE; // 初期値は変換しない
+	sSaveInfo.cEol = EEolType::none; // 初期値は変換しない
 	if( filename ){
 		// ダイアログなし保存、またはマクロの引数あり
 		sSaveInfo.cFilePath = filename;
-		if( EOL_NONE <= eEolType && eEolType < EOL_CODEMAX ){
+		if( CEol::IsNoneOrValid( eEolType ) ){
 			sSaveInfo.cEol = eEolType;
 		}
 		if( IsValidCodeType(eCodeType) && eCodeType != sSaveInfo.eCharCode ){

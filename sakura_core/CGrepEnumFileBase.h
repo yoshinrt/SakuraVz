@@ -7,6 +7,7 @@
 */
 /*
 	Copyright (C) 2008, wakura
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -59,10 +60,14 @@ class CGrepEnumFileBase {
 private:
 	VPGrepEnumItem m_vpItems;
 
-public:
-	CGrepEnumFileBase(){
-	}
+	using Me = CGrepEnumFileBase;
 
+public:
+	CGrepEnumFileBase() noexcept = default;
+	CGrepEnumFileBase(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CGrepEnumFileBase(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CGrepEnumFileBase(){
 		ClearItems();
 	}
@@ -179,4 +184,5 @@ public:
 		return found;
 	}
 };
+
 #endif /* SAKURA_CGREPENUMFILEBASE_6B85547E_13E4_4183_AE06_B4D6395ABC88_H_ */

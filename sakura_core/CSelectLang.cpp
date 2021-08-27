@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2011, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -15,6 +16,8 @@
 #include "CSelectLang.h"
 #include "util/os.h"
 #include "util/module.h"
+#include "debug/Debug2.h"
+#include "String_define.h"
 
 #include <new>
 
@@ -334,7 +337,7 @@ int CLoadString::CLoadStrBuffer::LoadString( UINT uid )
 			try{
 				pTemp = new WCHAR[nTemp];
 			}
-			catch(std::bad_alloc){
+			catch(const std::bad_alloc&){
 				// メモリ割り当て例外（例外の発生する環境の場合でも旧来の処理にする）
 				pTemp = NULL;
 			}

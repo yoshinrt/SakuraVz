@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2002, YAZAKI
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -20,6 +21,8 @@ class CFuncInfo;
 #include <string>
 #include <map>
 #include "util/design_template.h"
+#include "basis/SakuraBasis.h"
+#include "basis/CMyString.h"
 
 // 標準的な付加情報定数
 #define FL_OBJ_DEFINITION	0	// 親クラスの定義位置

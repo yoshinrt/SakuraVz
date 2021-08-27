@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -26,10 +27,12 @@
 #define SAKURA_CTEXTAREA_E3BB290D_608F_4F86_B460_8D84F171CB11_H_
 #pragma once
 
+#include "DispPos.h"
+
 class CViewFont;
 class CEditView;
 class CLayoutMgr;
-#include "DispPos.h"
+class CMySize;
 
 class CTextArea{
 public:

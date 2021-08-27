@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2005, MIK, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -30,6 +31,8 @@
 
 #include "StdAfx.h"
 #include "CSortedTagJumpList.h"
+
+#include "util/tchar_convert.h"
 
 /*!
 	@date 2005.04.23 genta 管理数の最大値を指定する引数追加

@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2009, syat
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -38,12 +39,18 @@
 class CWSHPlug final :
 	public CPlug
 {
+	using Me = CWSHPlug;
+
 public:
 	CWSHPlug( CPlugin& plugin, PlugId id, wstring sJack, wstring sHandler, wstring sLabel ) :
 		CPlug( plugin, id, sJack, sHandler, sLabel )
 	{
 		m_Wsh = NULL;
 	}
+	CWSHPlug(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CWSHPlug(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CWSHPlug() {
 		if( m_Wsh ){
 			delete m_Wsh;
@@ -56,11 +63,17 @@ public:
 class CWSHPlugin final :
 	public CPlugin
 {
+	using Me = CWSHPlugin;
+
 	//コンストラクタ
 public:
 	CWSHPlugin( const wstring& sBaseDir ) : CPlugin( sBaseDir ) {
 		m_bUseCache = false;
 	}
+	CWSHPlugin(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CWSHPlugin(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 
 	//デストラクタ
 public:

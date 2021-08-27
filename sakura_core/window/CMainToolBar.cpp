@@ -4,6 +4,7 @@
 	Copyright (C) 2008, kobake
 	Copyright (C) 2010, Uchi, Moca
 	Copyright (C) 2012, aroka, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,6 +33,10 @@
 #include "util/os.h"
 #include "util/window.h"
 #include "uiparts/CImageListMgr.h"
+#include "apiwrap/CommonControl.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
+#include "String_define.h"
 
 CMainToolBar::CMainToolBar(CEditWnd* pOwner)
 : m_pOwner(pOwner)

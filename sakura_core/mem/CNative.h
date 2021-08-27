@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -43,6 +44,4 @@ public:
 // 派生クラスでメンバー追加禁止
 static_assert(sizeof(CNative) == sizeof(CMemory), "size check");
 
-#include "mem/CNativeA.h"
-#include "mem/CNativeW.h"
 #endif /* SAKURA_CNATIVE_D712C69D_7FA3_49CE_B63A_49273441B558_H_ */

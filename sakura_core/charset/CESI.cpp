@@ -8,6 +8,7 @@
 /*
 	Copyright (C) 2006
 	Copyright (C) 2007
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -40,6 +41,7 @@
 #include "charset/CCodeMediator.h"
 #include "charset/CEuc.h"
 #include "charset/codeutil.h"
+#include "String_define.h"
 
 // 非依存推奨
 #include "window/CEditWnd.h"
@@ -105,8 +107,11 @@ int CESI::GetIndexById( const ECodeType eCodeType ) const
 		nret = 0;
 	}else if( CODE_UNICODEBE == eCodeType ){
 		nret = 1;
-	}else{
+	}else if( 0 <= eCodeType && eCodeType < _countof(gm_aMbcPriority) ){
 		nret = gm_aMbcPriority[eCodeType]; // 優先順位表の優先度数をそのまま m_aMbcInfo の添え字として使う。
+	}else{
+		assert(0);
+		nret = -1;
 	}
 	return nret;
 }
@@ -522,7 +527,7 @@ void CESI::GetEncodingInfo_meta( const char* pS, const int nLen )
 /*!
 	UTF-16 チェッカ内で使う改行コード確認関数
 */
-bool CESI::_CheckUtf16Eol( const char* pS, const int nLen, const bool bbig_endian )
+bool CESI::_CheckUtf16Eol( const char* pS, const size_t nLen, const bool bbig_endian )
 {
 	wchar_t wc0;
 	wchar_t wc1;

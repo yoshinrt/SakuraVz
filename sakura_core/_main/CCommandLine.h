@@ -11,6 +11,7 @@
 	Copyright (C) 2002, genta
 	Copyright (C) 2005, D.S.Koba
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -36,9 +37,8 @@
 /*!
  * @brief コマンドラインパーサ クラス
  */
-class CCommandLine : public TSingleton<CCommandLine> {
-	friend class TSingleton<CCommandLine>;
-protected:
+class CCommandLine : public TInstanceHolder<CCommandLine> {
+public:
 	CCommandLine() noexcept;
 
 private:
@@ -83,7 +83,7 @@ public:
 	tagSIZE GetWindowSize() const noexcept { return { m_fi.m_nWindowSizeX, m_fi.m_nWindowSizeY }; }
 	tagPOINT GetWindowOrigin() const noexcept { return { m_fi.m_nWindowOriginX, m_fi.m_nWindowOriginY }; }
 	LPCWSTR GetOpenFile() const noexcept { return m_fi.m_szPath; }
-	int GetFileNum(void) const noexcept { return m_vFiles.size(); }
+	int GetFileNum(void) const noexcept { return static_cast<int>(m_vFiles.size()); }
 	const WCHAR* GetFileName(int i) const noexcept { return i < GetFileNum() ? m_vFiles[i].c_str() : NULL; }
 	void ClearFile(void) noexcept { m_vFiles.clear(); }
 	LPCWSTR GetDocType() const noexcept { return m_fi.m_szDocType; }

@@ -12,6 +12,7 @@
 	Copyright (C) 2005, D.S.Koba, genta, susu
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -29,6 +30,9 @@
 #include "util/shell.h"
 #include "util/file.h"
 #include "env/CSakuraEnvironment.h"
+#include "CSelectLang.h"
+#include "util/string_ex.h"
+#include "String_define.h"
 
 /* コマンドラインオプション用定数 */
 #define CMDLINEOPT_R			1002 //!< ビューモード
@@ -239,7 +243,7 @@ void CCommandLine::ParseKanjiCodeFromFileName(LPWSTR pszExeFileName, int cchExeF
 */
 void CCommandLine::ParseCommandLine( LPCWSTR pszCmdLineSrc, bool bResponse )
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CCommandLine::Parse" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CCommandLine::Parse" );
 
 	WCHAR	szPath[_MAX_PATH];
 	bool	bFind = false;				// ファイル名発見フラグ

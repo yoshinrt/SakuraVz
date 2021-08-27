@@ -10,6 +10,7 @@
 	Copyright (C) 2002, aroka, YAZAKI
 	Copyright (C) 2003, MIK
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -22,6 +23,10 @@
 #include "outline/CDlgFuncList.h"
 #include "env/DLLSHAREDATA.h"
 #include "uiparts/CGraphics.h"
+#include "apiwrap/StdApi.h"
+#include "CSelectLang.h"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 constexpr auto SPLITTER_FRAME_WIDTH = 3;
 constexpr auto SPLITTER_MARGIN = 2;

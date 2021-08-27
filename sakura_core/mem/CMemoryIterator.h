@@ -8,6 +8,7 @@
 	Copyright (C) 2002, Yazaki
 	Copyright (C) 2003, genta
 	Copyright (C) 2005, D.S.Koba
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -19,15 +20,16 @@
 //	sakura
 #include "_main/global.h"
 #include "charset/charcode.h"
+#include "doc/layout/CLayout.h"
 #include "doc/layout/CTsvModeInfo.h"
+#include "doc/logic/CDocLine.h"
+#include "env/DLLSHAREDATA.h"
+#include "mem/CNativeW.h"
 
 /*-----------------------------------------------------------------------
 クラスの宣言
 -----------------------------------------------------------------------*/
 // 2007.10.23 kobake テンプレートである必要も無いので、非テンプレートに変更。
-
-#include "doc/layout/CLayout.h"
-#include "doc/logic/CDocLine.h"
 
 //! ブロックコメントデリミタを管理する
 class CMemoryIterator
@@ -103,12 +105,11 @@ public:
 		} else if (m_pLine[m_nIndex] == L',' && m_tsvInfo.m_nTsvMode == TSV_MODE_CSV){
 			m_nColumn_Delta = m_tsvInfo.GetActualTabLength(m_nColumn, m_tsvInfo.m_nMaxCharLayoutX);
 		}else{
-			m_nColumn_Delta = CNativeW::GetColmOfChar( m_pLine, m_nLineLen, m_nIndex );
+			m_nColumn_Delta = CNativeW::GetColmOfChar( m_pLine, m_nLineLen, m_nIndex,
+				GetDllShareData().m_Common.m_sEdit.m_bEnableExtEol );
 			if( m_nSpacing ){
 				m_nColumn_Delta += CLayoutXInt(CNativeW::GetKetaOfChar(m_pLine, m_nLineLen, m_nIndex) * m_nSpacing);
 			}
-//			if( 0 == m_nColumn_Delta )				// 削除 サロゲートペア対策	2008/7/5 Uchi
-//				m_nColumn_Delta = CLayoutInt(1);
 		}
 	}
 	

@@ -13,6 +13,7 @@
 	Copyright (C) 2008, nasukoji
 	Copyright (C) 2012, ossan (ossan@ongs.net)
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -49,7 +50,12 @@
 #include "env/CSakuraEnvironment.h"
 // CColorStrategyは本来はCEditViewが必要だが、CEditWnd.hあたりでinclude済み
 #include "view/colors/CColorStrategy.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 using namespace std;
 
@@ -888,7 +894,7 @@ void CPrintPreview::OnPreviewGoDirectPage( void )
 		m_hwndPrintPreviewBar, 
 		LS(STR_ERR_DLGPRNPRVW5),
 		szMessage,
-		INPUT_PAGE_NUM_LEN,
+		_countof(szPageNum) - 1,
 		szPageNum
 	);
 	if( FALSE != bDlgInputPageResult ){

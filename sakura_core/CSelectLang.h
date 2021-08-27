@@ -6,6 +6,7 @@
 */
 /*
 	Copyright (C) 2011, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -22,6 +23,9 @@
 
 class CSelectLang
 {
+
+	using Me = CSelectLang;
+
 public:
 	// メッセージリソース用構造体
 	struct SSelLangInfo {
@@ -43,7 +47,11 @@ public:
 	/*
 	||  Constructors
 	*/
-	CSelectLang(){}
+	CSelectLang() noexcept = default;
+	CSelectLang(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CSelectLang(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CSelectLang();
 
 	/*

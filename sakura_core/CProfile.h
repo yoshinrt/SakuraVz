@@ -9,6 +9,7 @@
 */
 /*
 	Copyright (C) 2003-2006, D.S.Koba
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,6 +38,7 @@
 
 #include <Windows.h>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <map>
 
@@ -61,8 +63,8 @@ class CProfile
 	};
 
 public:
-	CProfile() {}
-	~CProfile() {}
+	CProfile() = default;
+	virtual ~CProfile() = default;
 	void Init( void );
 	bool IsReadingMode( void ) { return m_bRead; }
 	void SetReadingMode( void ) { m_bRead = true; }
@@ -70,6 +72,8 @@ public:
 	bool ReadProfile( const WCHAR* );
 	bool ReadProfileRes( const WCHAR*, const WCHAR*, std::vector<std::wstring>* = NULL );				// 200/5/19 Uchi
 	bool WriteProfile( const WCHAR*, const WCHAR* pszComment, bool bHistory = false );
+	bool GetProfileData(std::wstring_view sectionName, std::wstring_view entryKey, std::wstring& strEntryValue) const;
+	void SetProfileData(std::wstring_view sectionName, std::wstring_view entryKey, std::wstring_view entryValue);
 	
 	static WCHAR *GetHistFileName( WCHAR *szHistFileName, const WCHAR *szIniFileName ){
 		_tcsncpy( szHistFileName, szIniFileName, _MAX_PATH + 1 );
@@ -85,10 +89,6 @@ public:
 protected:
 	void ReadOneline( const wstring& line );
 	bool _WriteFile( const WCHAR *strFilename, const std::vector< wstring >& vecLine);
-
-	bool GetProfileDataImp( const wstring& strSectionName, const wstring& strEntryKey, wstring& strEntryValue);
-
-	bool SetProfileDataImp( const wstring& strSectionName, const wstring& strEntryKey, const wstring& strEntryValue );
 
 protected:
 	// メンバ変数

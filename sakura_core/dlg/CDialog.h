@@ -11,6 +11,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2011, nasukoji
 	Copyright (C) 2012, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -61,13 +62,19 @@ struct SAnchorList
 
 	@date 2002.2.17 YAZAKI CShareDataのインスタンスは、CProcessにひとつあるのみ。
 */
-class CDialog
-{
+class CDialog{
+
+	using Me = CDialog;
+
 public:
 	/*
 	||  Constructors
 	*/
 	CDialog( bool bSizable = false, bool bCheckShareData = true );
+	CDialog(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CDialog(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	virtual ~CDialog();
 	/*
 	||  Attributes & Operations
@@ -169,16 +176,16 @@ public:
 	BOOL			m_bModal;		/* モーダル ダイアログか */
 	bool			m_bSizable;		// 可変ダイアログかどうか
 	int				m_nShowCmd;		//	最大化/最小化
-	int				m_nWidth;
-	int				m_nHeight;
-	int				m_xPos;
-	int				m_yPos;
 //	void*			m_pcEditView;
 	DLLSHAREDATA*	m_pShareData;
 	BOOL			m_bInited;
 	HINSTANCE		m_hLangRsrcInstance;		// メッセージリソースDLLのインスタンスハンドル	// 2011.04.10 nasukoji
 
 protected:
+	int				m_nWidth;
+	int				m_nHeight;
+	int				m_xPos;
+	int				m_yPos;
 	void CreateSizeBox( void );
 	BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 

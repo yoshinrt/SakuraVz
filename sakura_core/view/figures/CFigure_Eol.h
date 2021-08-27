@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -30,7 +31,14 @@
 
 //! 改行描画
 class CFigure_Eol final : public CFigureSpace{
+	using Me = CFigure_Eol;
+
 public:
+	CFigure_Eol() noexcept = default;
+	CFigure_Eol(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CFigure_Eol(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CFigure_Eol()
 	{
 		if (m_hPen) {

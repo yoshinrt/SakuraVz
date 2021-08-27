@@ -2,6 +2,7 @@
 /*
 	Copyright (C) 2002, SUI
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -38,6 +39,7 @@ bool IsFileExists(const WCHAR* path, bool bFileOnly = false);
 bool IsDirectory(LPCWSTR pszPath);	// 2009.08.20 ryoji
 
 bool IsInvalidFilenameChars( const std::wstring_view& strPath );
+[[nodiscard]] bool IsValidPathAvailableChar(std::wstring_view path);
 
 //	Apr. 30, 2003 genta
 //	ディレクトリの深さを調べる
@@ -53,6 +55,7 @@ FILE *_wfopen_absini(LPCWSTR fname, LPCWSTR mode, BOOL bOrExedir = TRUE); // 200
 //パス文字列処理
 void CutLastYenFromDirectoryPath( WCHAR* pszFolder );			/* フォルダの最後が半角かつ'\\'の場合は、取り除く "c:\\"等のルートは取り除かない*/
 void AddLastYenFromDirectoryPath( WCHAR* pszFolder );			/* フォルダの最後が半角かつ'\\'でない場合は、付加する */
+std::wstring AddLastYenPath(std::wstring_view path);
 void SplitPath_FolderAndFile( const WCHAR* pszFilePath, WCHAR* pszFolder, WCHAR* pszFile );	/* ファイルのフルパスを、フォルダとファイル名に分割 */
 void Concat_FolderAndFile( const WCHAR* pszDir, const WCHAR* pszTitle, WCHAR* pszPath );/* フォルダ、ファイル名から、結合したパスを作成 */
 BOOL GetLongFileName( const WCHAR* pszFilePathSrc, WCHAR* pszFilePathDes );					/* ロングファイル名を取得する */

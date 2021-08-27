@@ -9,6 +9,7 @@
 	Copyright (C) 2002, aroka 新規作成
 	Copyright (C) 2004, Moca
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -17,6 +18,9 @@
 #include "StdAfx.h"
 #include "CProcess.h"
 #include "util/module.h"
+#include "env/CShareData.h"
+#include "env/DLLSHAREDATA.h"
+#include "config/app_constants.h"
 
 /*!
 	@brief プロセス基底クラス
@@ -34,7 +38,6 @@ CProcess::CProcess(
 , m_pfnMiniDumpWriteDump(NULL)
 #endif
 {
-	m_pcShareData = CShareData::getInstance();
 }
 
 /*!
@@ -42,7 +45,7 @@ CProcess::CProcess(
  */
 std::filesystem::path CProcess::GetIniFileName() const
 {
-	if (m_pcShareData->IsPrivateSettings()) {
+	if (m_cShareData.IsPrivateSettings()) {
 		const DLLSHAREDATA *pShareData = &GetDllShareData();
 		return pShareData->m_szPrivateIniFile.c_str();
 	}
@@ -160,5 +163,5 @@ int CProcess::WriteDump( PEXCEPTION_POINTERS pExceptPtrs )
 */
 void CProcess::RefreshString()
 {
-	m_pcShareData->RefreshString();
+	m_cShareData.RefreshString();
 }

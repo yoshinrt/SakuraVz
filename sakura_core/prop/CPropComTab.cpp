@@ -14,6 +14,7 @@
 	Copyright (C) 2007, genta, ryoji
 	Copyright (C) 2012, Moca
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,8 +42,11 @@
 #include "CPropertyManager.h"
 #include "util/shell.h"
 #include "util/window.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 static const DWORD p_helpids[] = {
 	IDC_CHECK_DispTabWnd,			HIDC_CHECK_DispTabWnd,			//タブウインドウ表示	//@@@ 2003.05.31 MIK

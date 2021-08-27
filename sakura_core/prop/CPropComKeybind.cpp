@@ -11,6 +11,7 @@
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2009, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -21,8 +22,12 @@
 #include "env/CShareData.h"
 #include "typeprop/CImpExpManager.h"	// 20210/4/23 Uchi
 #include "util/shell.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 #define STR_SHIFT_PLUS        L"Shift+"  //@@@ 2001.11.08 add MIK
 #define STR_CTRL_PLUS         L"Ctrl+"  //@@@ 2001.11.08 add MIK

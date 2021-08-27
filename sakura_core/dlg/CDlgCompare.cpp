@@ -11,6 +11,7 @@
 	Copyright (C) 2003, MIK
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2009, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -23,8 +24,11 @@
 #include "util/shell.h"
 #include "util/file.h"
 #include "util/string_ex2.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/StdControl.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/system_constants.h"
 
 // ファイル内容比較 CDlgCompare.cpp	//@@@ 2002.01.07 add start MIK
 const DWORD p_helpids[] = {	//12300
@@ -261,12 +265,21 @@ BOOL CDlgCompare::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	return CDialog::OnInitDialog( hwndDlg, wParam, lParam );
 }
 
+BOOL CDlgCompare::OnDestroy( void )
+{
+	CDialog::OnDestroy();
+	RECT& rect = GetDllShareData().m_Common.m_sOthers.m_rcCompareDialog;
+	rect.left = m_xPos;
+	rect.top = m_yPos;
+	rect.right = rect.left + m_nWidth;
+	rect.bottom = rect.top + m_nHeight;
+	return TRUE;
+}
+
 BOOL CDlgCompare::OnSize( WPARAM wParam, LPARAM lParam )
 {
 	/* 基底クラスメンバ */
 	CDialog::OnSize( wParam, lParam );
-
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcCompareDialog );
 
 	RECT  rc;
 	POINT ptNew;
@@ -279,13 +292,6 @@ BOOL CDlgCompare::OnSize( WPARAM wParam, LPARAM lParam )
 	}
 	::InvalidateRect( GetHwnd(), NULL, TRUE );
 	return TRUE;
-}
-
-BOOL CDlgCompare::OnMove( WPARAM wParam, LPARAM lParam )
-{
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcCompareDialog );
-	
-	return CDialog::OnMove( wParam, lParam );
 }
 
 BOOL CDlgCompare::OnMinMaxInfo( LPARAM lParam )

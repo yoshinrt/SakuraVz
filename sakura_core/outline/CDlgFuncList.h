@@ -13,6 +13,7 @@
 	Copyright (C) 2005, genta
 	Copyright (C) 2006, aroka
 	Copyright (C) 2007, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -136,8 +137,8 @@ protected:
 	||  実装ヘルパ関数
 	*/
 	BOOL OnJump( bool bCheckAutoClose = true, bool bFileJump = true );	//	bCheckAutoClose：「このダイアログを自動的に閉じる」をチェックするかどうか
-	void SetTreeJava(HWND hwndDlg, BOOL bAddClass);	/* ツリーコントロールの初期化：Javaメソッドツリー */
-	void SetTree(bool tagjump = false, bool nolabel = false);		/* ツリーコントロールの初期化：汎用品 */
+	void SetTreeJava(HWND hwndDlg, HTREEITEM hInsertAfter, BOOL bAddClass);	/* ツリーコントロールの初期化：Javaメソッドツリー */
+	void SetTree(HTREEITEM hInsertAfter, bool tagjump = false, bool nolabel = false);		/* ツリーコントロールの初期化：汎用品 */
 	void SetTreeFile();				// ツリーコントロールの初期化：ファイルツリー
 	void SetListVB( void );			/* リストビューコントロールの初期化：VisualBasic */		// Jul 10, 2003  little YOSHI
 	void SetDocLineFuncList();

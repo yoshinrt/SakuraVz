@@ -8,6 +8,7 @@
 	Copyright (C) 2003, MIK
 	Copyright (C) 2006, ryoji
 	Copyright (C) 2010, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,8 +42,12 @@
 #include "util/file.h"
 #include "util/os.h"
 #include "util/input.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "config/system_constants.h"
+#include "String_define.h"
 
 const DWORD p_helpids[] = {
 	IDC_TAB_FAVORITE,				HIDC_TAB_FAVORITE,				//タブ
@@ -479,6 +484,17 @@ BOOL CDlgFavorite::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	//ChangeSlider( m_nCurrentTab );
 
 	return CDialog::OnInitDialog( GetHwnd(), wParam, lParam );
+}
+
+BOOL CDlgFavorite::OnDestroy( void )
+{
+	CDialog::OnDestroy();
+	RECT& rect = GetDllShareData().m_Common.m_sOthers.m_rcFavoriteDialog;
+	rect.left = m_xPos;
+	rect.top = m_yPos;
+	rect.right = rect.left + m_nWidth;
+	rect.bottom = rect.top + m_nHeight;
+	return TRUE;
 }
 
 BOOL CDlgFavorite::OnBnClicked( int wID )
@@ -933,7 +949,7 @@ void CDlgFavorite::AddItem()
 	CDlgInput1	cDlgInput1;
 	std::wstring strTitle = LS( STR_DLGFAV_ADD );
 	std::wstring strMessage = LS( STR_DLGFAV_ADD_PROMPT );
-	if( !cDlgInput1.DoModal( G_AppInstance(), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size, szAddText ) ){
+	if( !cDlgInput1.DoModal( G_AppInstance(), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size - 1, szAddText ) ){
 		return;
 	}
 
@@ -964,7 +980,7 @@ void CDlgFavorite::EditItem()
 			CDlgInput1	cDlgInput1;
 			std::wstring strTitle = LS( STR_DLGFAV_EDIT );
 			std::wstring strMessage = LS( STR_DLGFAV_EDIT_PROMPT );
-			if( !cDlgInput1.DoModal(G_AppInstance(), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size, szText) ){
+			if( !cDlgInput1.DoModal(G_AppInstance(), GetHwnd(), strTitle.c_str(), strMessage.c_str(), max_size - 1, szText) ){
 				return;
 			}
 			GetFavorite(m_nCurrentTab);
@@ -1184,8 +1200,6 @@ BOOL CDlgFavorite::OnSize( WPARAM wParam, LPARAM lParam )
 	/* 基底クラスメンバ */
 	CDialog::OnSize( wParam, lParam );
 
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcFavoriteDialog );
-
 	RECT rc;
 	POINT ptNew;
 	::GetWindowRect( GetHwnd(), &rc );
@@ -1202,13 +1216,6 @@ BOOL CDlgFavorite::OnSize( WPARAM wParam, LPARAM lParam )
 	}
 	::InvalidateRect( GetHwnd(), NULL, TRUE );
 	return TRUE;
-}
-
-BOOL CDlgFavorite::OnMove( WPARAM wParam, LPARAM lParam )
-{
-	::GetWindowRect( GetHwnd(), &GetDllShareData().m_Common.m_sOthers.m_rcFavoriteDialog );
-	
-	return CDialog::OnMove( wParam, lParam );
 }
 
 BOOL CDlgFavorite::OnMinMaxInfo( LPARAM lParam )

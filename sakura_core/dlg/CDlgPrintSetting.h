@@ -6,6 +6,7 @@
 /*
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2002, YAZAKI
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -57,7 +58,6 @@ private:
 	PRINTSETTING	m_PrintSettingArr[MAX_PRINTSETTINGARR];
 	int				m_nLineNumberColumns;					// 行番号表示する場合の桁数
 	bool			m_bPrintableLinesAndColumnInvalid;
-	int				m_nFontHeight;							// ダイアログのフォントのサイズ
 
 protected:
 	/*

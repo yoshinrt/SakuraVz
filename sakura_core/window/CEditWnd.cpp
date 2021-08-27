@@ -18,6 +18,7 @@
 	Copyright (C) 2010, ryoji, Moca、Uchi
 	Copyright (C) 2011, ryoji
 	Copyright (C) 2013, Uchi
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -53,7 +54,6 @@
 #include "env/CShareData.h"
 #include "env/CSakuraEnvironment.h"
 #include "print/CPrintPreview.h"	/// 2002/2/3 aroka
-#include "charset/CharPointer.h"
 #include "charset/CCodeFactory.h"
 #include "charset/CCodeBase.h"
 #include "CEditApp.h"
@@ -69,7 +69,15 @@
 #include "CMarkMgr.h"
 #include "doc/layout/CLayout.h"
 #include "debug/CRunningTimer.h"
+#include "apiwrap/StdApi.h"
+#include "apiwrap/CommonControl.h"
 #include "sakura_rc.h"
+#include "config/system_constants.h"
+#include "config/app_constants.h"
+#include "String_define.h"
+#include "recent/CRecentEditNode.h"
+#include "recent/CRecentFile.h"
+#include "recent/CRecentFolder.h"
 
 //@@@ 2002.01.14 YAZAKI 印刷プレビューをCPrintPreviewに独立させたので
 //	定義を削除
@@ -579,7 +587,7 @@ HWND CEditWnd::Create(
 	int				nGroup		//!< [in] グループID
 )
 {
-	MY_RUNNINGTIMER( cRunningTimer, "CEditWnd::Create" );
+	MY_RUNNINGTIMER( cRunningTimer, L"CEditWnd::Create" );
 
 	/* 共有データ構造体のアドレスを返す */
 	m_pShareData = &GetDllShareData();
@@ -677,7 +685,7 @@ HWND CEditWnd::Create(
 	hWndArr[1] = NULL;
 	m_cSplitterWnd.SetChildWndArr( hWndArr );
 
-	MY_TRACETIME( cRunningTimer, "View created" );
+	MY_TRACETIME( cRunningTimer, L"View created" );
 
 	// -- -- -- -- 各種バー作成 -- -- -- -- //
 
@@ -793,11 +801,11 @@ void CEditWnd::SetDocumentTypeWhenCreate(
 		}
 		if( nCharCode == eDefaultCharCode ){	// デフォルト文字コードと同じ文字コードが選択されたとき
 			GetDocument()->SetDocumentEncoding( nCharCode, types.m_encoding.m_bDefaultBom );
-			GetDocument()->m_cDocEditor.SetNewLineCode( static_cast<EEolType>( types.m_encoding.m_eDefaultEoltype ));
+			GetDocument()->m_cDocEditor.SetNewLineCode( types.m_encoding.m_eDefaultEoltype );
 		}
 		else{
 			GetDocument()->SetDocumentEncoding( nCharCode, CCodeTypeName( nCharCode ).IsBomDefOn() );
-			GetDocument()->m_cDocEditor.SetNewLineCode( EOL_CRLF );
+			GetDocument()->m_cDocEditor.SetNewLineCode( EEolType::cr_and_lf );
 		}
 	}
 
@@ -1475,19 +1483,19 @@ LRESULT CEditWnd::DispatchEvent(
 						NULL
 					);
 					::DestroyMenu( hMenuPopUp );
-					int nEOLCode = 0;
+					EEolType nEOLCode;
 					switch(nId){
-					case F_CHGMOD_EOL_CRLF: nEOLCode = EOL_CRLF; break;
-					case F_CHGMOD_EOL_CR: nEOLCode = EOL_CR; break;
-					case F_CHGMOD_EOL_LF: nEOLCode = EOL_LF; break;
-					case F_CHGMOD_EOL_NEL: nEOLCode = EOL_NEL; break;
-					case F_CHGMOD_EOL_PS: nEOLCode = EOL_PS; break;
-					case F_CHGMOD_EOL_LS: nEOLCode = EOL_LS; break;
+					case F_CHGMOD_EOL_CRLF:	nEOLCode = EEolType::cr_and_lf; break;
+					case F_CHGMOD_EOL_CR:	nEOLCode = EEolType::carriage_return; break;
+					case F_CHGMOD_EOL_LF:	nEOLCode = EEolType::line_feed; break;
+					case F_CHGMOD_EOL_NEL:	nEOLCode = EEolType::next_line; break;
+					case F_CHGMOD_EOL_PS:	nEOLCode = EEolType::paragraph_separator; break;
+					case F_CHGMOD_EOL_LS:	nEOLCode = EEolType::line_separator; break;
 					default:
-						nEOLCode = -1;
+						nEOLCode = EEolType::none;
 					}
-					if( nEOLCode != -1 ){
-						GetActiveView().GetCommander().HandleCommand( F_CHGMOD_EOL, true, nEOLCode, 0, 0, 0 );
+					if( !CEol::IsNone( nEOLCode ) ){
+						GetActiveView().GetCommander().HandleCommand( F_CHGMOD_EOL, true, static_cast<LPARAM>(nEOLCode), 0, 0, 0 );
 					}
 				}
 			}
@@ -1939,6 +1947,10 @@ LRESULT CEditWnd::DispatchEvent(
 		size_t nEnd = t_min<size_t>(nLineLen, m_pShareData->m_sWorkBuffer.GetWorkBufferCount<EDIT_CHAR>());
 		wmemcpy( m_pShareData->m_sWorkBuffer.GetWorkBuffer<EDIT_CHAR>(), pLine, nEnd );
 		return nLineLen;
+	}
+	case MYWM_GETLINECOUNT:
+	{
+		return GetDocument()->m_cDocLineMgr.GetLineCount();
 	}
 
 	// 2010.05.11 Moca MYWM_ADDSTRINGLEN_Wを追加 NULセーフ
@@ -4871,6 +4883,19 @@ ECharWidthCacheMode CEditWnd::GetLogfontCacheMode()
 		return CWM_CACHE_LOCAL;
 	}
 	return CWM_CACHE_SHARE;
+}
+
+/*!
+	@brief 現在のズーム倍率を取得
+	@return 1.0を等倍とするズーム倍率
+*/
+double CEditWnd::GetFontZoom()
+{
+	if( GetDocument()->m_blfCurTemp ){
+		return GetDocument()->m_nCurrentZoom;
+	}else{
+		return 1.0;
+	}
 }
 
 void CEditWnd::ClearViewCaretPosInfo()

@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2002, MIK
 	Copyright (C) 2004, genta
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,9 +34,12 @@
 #define SAKURA_CDLGDIFF_57739DBD_0797_4F83_9DB0_F4D51A54157F_H_
 #pragma once
 
+#include "dlg/CDialog.h"
+#include "basis/CMyString.h"
+#include "charset/charset.h"
+
 class CDlgDiff;
 
-#include "dlg/CDialog.h"
 /*!
 	@brief DIFF差分表示ダイアログボックス
 */
@@ -64,8 +68,8 @@ protected:
 	LPVOID	GetHelpIdTable(void) override;
 	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;	// 標準以外のメッセージを捕捉する
 	BOOL OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL OnDestroy( void ) override;
 	BOOL OnSize( WPARAM wParam, LPARAM lParam ) override;
-	BOOL OnMove( WPARAM wParam, LPARAM lParam ) override;
 	BOOL OnMinMaxInfo( LPARAM lParam );
 
 	void	SetData( void ) override;	/* ダイアログデータの設定 */

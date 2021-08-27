@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2020 Sakura Editor Organization
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,6 +33,7 @@
 
 #include "_main/CCommandLine.h"
 #include "env/CSakuraEnvironment.h"
+#include "util/string_ex.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -62,21 +63,12 @@ std::wstring GetLocalPath(const std::wstring_view& filename)
 }
 
 /*!
- * テスト用の極薄ラッパークラス
- */
-class CCommandLineWrapper : public CCommandLine
-{
-public:
-	CCommandLineWrapper() = default;
-};
-
-/*!
  * @brief コンストラクタ(パラメータなし)の仕様
  * @remark パラメータを何も指定しなかった状態になる
  */
 TEST(CCommandLine, ConstructWithoutParam)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	EXPECT_FALSE(cCommandLine.IsNoWindow());
 	EXPECT_FALSE(cCommandLine.IsGrepMode());
 	EXPECT_FALSE(cCommandLine.IsGrepDlg());
@@ -106,7 +98,7 @@ TEST(CCommandLine, ConstructWithoutParam)
  */
 TEST(CCommandLine, ParseNoWin)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsNoWindow());
 	cCommandLine.ParseCommandLine(L"-NOWIN", false);
@@ -121,7 +113,7 @@ TEST(CCommandLine, ParseNoWin)
  */
 TEST(CCommandLine, ParseGrepMode)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsGrepMode());
 	cCommandLine.ParseCommandLine(L"-GREPMODE", false);
@@ -138,7 +130,7 @@ TEST(CCommandLine, ParseGrepMode)
  */
 TEST(CCommandLine, ParseGrepDialog)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsGrepDlg());
 	cCommandLine.ParseCommandLine(L"-GREPDLG", false);
@@ -154,7 +146,7 @@ TEST(CCommandLine, ParseGrepDialog)
  */
 TEST(CCommandLine, ParseDebugMode)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsDebugMode());
 	cCommandLine.ParseCommandLine(L"-DEBUGMODE", false);
@@ -171,7 +163,7 @@ TEST(CCommandLine, ParseDebugMode)
  */
 TEST(CCommandLine, ParseViewMode)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsViewMode());
 	cCommandLine.ParseCommandLine(L"-R", false);
@@ -185,7 +177,7 @@ TEST(CCommandLine, ParseViewMode)
  */
 TEST(CCommandLine, ParseGroup)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(-1, cCommandLine.GetGroupId());
 	cCommandLine.ParseCommandLine(L"-GROUP=2", false);
@@ -199,7 +191,7 @@ TEST(CCommandLine, ParseGroup)
  */
 TEST(CCommandLine, ParseMacroFileName)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetMacro());
 #define TESTLOCAL_MACRO_NAME L"真っ黒.mac"
@@ -216,7 +208,7 @@ TEST(CCommandLine, ParseMacroFileName)
  */
 TEST(CCommandLine, ParseMacroType)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetMacroType());
 #define TESTLOCAL_MACRO_TYPE L"PascalScript"
@@ -232,7 +224,7 @@ TEST(CCommandLine, ParseMacroType)
  */
 TEST(CCommandLine, ParseProfileName)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_STREQ(L"", cCommandLine.GetProfileName());
 	EXPECT_FALSE(cCommandLine.IsSetProfile());
@@ -250,7 +242,7 @@ TEST(CCommandLine, ParseProfileName)
  */
 TEST(CCommandLine, ParseProfileManager)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.IsProfileMgr());
 	cCommandLine.ParseCommandLine(L"-PROFMGR", false);
@@ -264,7 +256,7 @@ TEST(CCommandLine, ParseProfileManager)
  */
 TEST(CCommandLine, ParseCaretLocationX)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, cCommandLine.GetCaretLocation().x);
 	cCommandLine.ParseCommandLine(L"-X=123", false);
@@ -278,7 +270,7 @@ TEST(CCommandLine, ParseCaretLocationX)
  */
 TEST(CCommandLine, ParseCaretLocationY)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, cCommandLine.GetCaretLocation().y);
 	cCommandLine.ParseCommandLine(L"-Y=123", false);
@@ -292,7 +284,7 @@ TEST(CCommandLine, ParseCaretLocationY)
  */
 TEST(CCommandLine, ParseViewLeftCol)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, (Int)cCommandLine.GetViewLocation().x);
 	cCommandLine.ParseCommandLine(L"-VX=123", false);
@@ -306,7 +298,7 @@ TEST(CCommandLine, ParseViewLeftCol)
  */
 TEST(CCommandLine, ParseViewTopLine)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, (Int)cCommandLine.GetViewLocation().y);
 	cCommandLine.ParseCommandLine(L"-VY=123", false);
@@ -320,7 +312,7 @@ TEST(CCommandLine, ParseViewTopLine)
  */
 TEST(CCommandLine, ParseWindowSizeX)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, cCommandLine.GetWindowSize().cx);
 	cCommandLine.ParseCommandLine(L"-SX=123", false);
@@ -334,7 +326,7 @@ TEST(CCommandLine, ParseWindowSizeX)
  */
 TEST(CCommandLine, ParseWindowSizeY)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(-1, cCommandLine.GetWindowSize().cy);
 	cCommandLine.ParseCommandLine(L"-SY=123", false);
@@ -348,7 +340,7 @@ TEST(CCommandLine, ParseWindowSizeY)
  */
 TEST(CCommandLine, ParseWindowOriginX)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(CW_USEDEFAULT, cCommandLine.GetWindowOrigin().x);
 	cCommandLine.ParseCommandLine(L"-WX=123", false);
@@ -362,7 +354,7 @@ TEST(CCommandLine, ParseWindowOriginX)
  */
 TEST(CCommandLine, ParseWindowOriginY)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	ASSERT_EQ(CW_USEDEFAULT, cCommandLine.GetWindowOrigin().y);
 	cCommandLine.ParseCommandLine(L"-WY=123", false);
@@ -378,7 +370,7 @@ TEST(CCommandLine, ParseWindowOriginY)
  */
 TEST(CCommandLine, ParseDocType)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_STREQ(L"", cCommandLine.GetDocType());
 #define TESTLOCAL_DOC_TYPE L"C/C++"
@@ -398,7 +390,7 @@ TEST(CCommandLine, ParseDocType)
  */
 TEST(CCommandLine, ParseDocCode)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	// 初期値は99(自動選択)
 	EXPECT_EQ(CODE_AUTODETECT, cCommandLine.GetDocCode());
 
@@ -424,7 +416,7 @@ TEST(CCommandLine, ParseDocCode)
  */
 TEST(CCommandLine, SetProfileName)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	EXPECT_FALSE(cCommandLine.IsSetProfile());
 	cCommandLine.SetProfileName(L"");
 	ASSERT_TRUE(cCommandLine.IsSetProfile());
@@ -437,7 +429,7 @@ TEST(CCommandLine, SetProfileName)
  */
 TEST(CCommandLine, ParseGrepKey)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetGrepInfoRef().cmGrepKey.GetStringPtr());
 #define TESTLOCAL_GREP_KEY L"\\w+"
@@ -453,7 +445,7 @@ TEST(CCommandLine, ParseGrepKey)
  */
 TEST(CCommandLine, ParseGrepReplaceKey)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetGrepInfoRef().cmGrepRep.GetStringPtr());
 #define TESTLOCAL_GREP_REPR L"$1。"
@@ -469,7 +461,7 @@ TEST(CCommandLine, ParseGrepReplaceKey)
  */
 TEST(CCommandLine, ParseGrepFile)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetGrepInfoRef().cmGrepFile.GetStringPtr());
 #define TESTLOCAL_GREP_FILE L"#.git"
@@ -485,7 +477,7 @@ TEST(CCommandLine, ParseGrepFile)
  */
 TEST(CCommandLine, ParseGrepFolder)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(NULL, cCommandLine.GetGrepInfoRef().cmGrepFolder.GetStringPtr());
 #define TESTLOCAL_GREP_FOLDER L"C:\\work\\sakura"
@@ -501,7 +493,7 @@ TEST(CCommandLine, ParseGrepFolder)
 */
 TEST(CCommandLine, ParseGrepCurFolder)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepCurFolder);
 	cCommandLine.ParseCommandLine(L"-GOPT=X", false);
@@ -515,7 +507,7 @@ TEST(CCommandLine, ParseGrepCurFolder)
 */
 TEST(CCommandLine, ParseGrepStdout)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepStdout);
 	cCommandLine.ParseCommandLine(L"-GOPT=U", false);
@@ -529,7 +521,7 @@ TEST(CCommandLine, ParseGrepStdout)
 */
 TEST(CCommandLine, ParseGrepHeader)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(!cCommandLine.GetGrepInfoRef().bGrepHeader);
 	cCommandLine.ParseCommandLine(L"-GOPT=H", false);
@@ -543,7 +535,7 @@ TEST(CCommandLine, ParseGrepHeader)
 */
 TEST(CCommandLine, ParseGrepSubFolder)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepSubFolder);
 	cCommandLine.ParseCommandLine(L"-GOPT=S", false);
@@ -557,7 +549,7 @@ TEST(CCommandLine, ParseGrepSubFolder)
 */
 TEST(CCommandLine, ParseGrepCaseSensitive)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().sGrepSearchOption.bLoHiCase);
 	cCommandLine.ParseCommandLine(L"-GOPT=L", false);
@@ -571,7 +563,7 @@ TEST(CCommandLine, ParseGrepCaseSensitive)
 */
 TEST(CCommandLine, ParseGrepUseRegularExpressions)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().sGrepSearchOption.bRegularExp);
 	cCommandLine.ParseCommandLine(L"-GOPT=R", false);
@@ -586,7 +578,7 @@ TEST(CCommandLine, ParseGrepUseRegularExpressions)
 */
 TEST(CCommandLine, ParseGrepCodeAutoDetect)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(CODE_SJIS, cCommandLine.GetGrepInfoRef().nGrepCharSet);
 	cCommandLine.ParseCommandLine(L"-GOPT=K", false);
@@ -599,7 +591,7 @@ TEST(CCommandLine, ParseGrepCodeAutoDetect)
 */
 TEST(CCommandLine, ParseGrepOutputLineType)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(0, cCommandLine.GetGrepInfoRef().nGrepOutputLineType);
 	cCommandLine.ParseCommandLine(L"-GOPT=P", false); //Positive?
@@ -615,7 +607,7 @@ TEST(CCommandLine, ParseGrepOutputLineType)
 */
 TEST(CCommandLine, ParseGrepUseWordParse)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().sGrepSearchOption.bWordOnly);
 	cCommandLine.ParseCommandLine(L"-GOPT=W", false);
@@ -628,7 +620,7 @@ TEST(CCommandLine, ParseGrepUseWordParse)
 */
 TEST(CCommandLine, ParseGrepOutputStyle)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(1, cCommandLine.GetGrepInfoRef().nGrepOutputStyle);
 	cCommandLine.ParseCommandLine(L"-GOPT=1", false);
@@ -646,7 +638,7 @@ TEST(CCommandLine, ParseGrepOutputStyle)
 */
 TEST(CCommandLine, ParseGrepListFileNameOnly)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepOutputFileOnly);
 	cCommandLine.ParseCommandLine(L"-GOPT=F", false);
@@ -660,7 +652,7 @@ TEST(CCommandLine, ParseGrepListFileNameOnly)
 */
 TEST(CCommandLine, ParseGrepDisplayRoot)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepOutputBaseFolder);
 	cCommandLine.ParseCommandLine(L"-GOPT=B", false);
@@ -674,7 +666,7 @@ TEST(CCommandLine, ParseGrepDisplayRoot)
 */
 TEST(CCommandLine, ParseGrepSplitResultPerFolder)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepSeparateFolder);
 	cCommandLine.ParseCommandLine(L"-GOPT=D", false);
@@ -688,7 +680,7 @@ TEST(CCommandLine, ParseGrepSplitResultPerFolder)
 */
 TEST(CCommandLine, ParseGrepReplacePasteFromClipBoard)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepPaste);
 	cCommandLine.ParseCommandLine(L"-GOPT=C", false);
@@ -702,7 +694,7 @@ TEST(CCommandLine, ParseGrepReplacePasteFromClipBoard)
 */
 TEST(CCommandLine, ParseGrepReplaceCreateBackupFiles)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_FALSE(cCommandLine.GetGrepInfoRef().bGrepBackup);
 	cCommandLine.ParseCommandLine(L"-GOPT=O", false);
@@ -716,7 +708,7 @@ TEST(CCommandLine, ParseGrepReplaceCreateBackupFiles)
  */
 TEST(CCommandLine, ParseGrepCode)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"", false);
 	EXPECT_EQ(CODE_SJIS, cCommandLine.GetGrepInfoRef().nGrepCharSet);
 	cCommandLine.ParseCommandLine(L"-GCODE=99", false);
@@ -736,7 +728,7 @@ TEST(CCommandLine, ParseFromResponseFile)
 		resp << "-R" << std::endl;
 	}
 
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-@=test.response", true);
 	EXPECT_TRUE(cCommandLine.IsViewMode());
 
@@ -752,7 +744,7 @@ TEST(CCommandLine, ParseFromResponseFile)
  */
 TEST(CCommandLine, QuotedOption)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"\"-GROUP=1\"", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -763,7 +755,7 @@ TEST(CCommandLine, QuotedOption)
  */
 TEST(CCommandLine, QuotedOptionWithMissingEndQuote)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"\"-GROUP=1", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -774,7 +766,7 @@ TEST(CCommandLine, QuotedOptionWithMissingEndQuote)
  */
 TEST(CCommandLine, OptionWithArgumentAssign)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP=1", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -785,7 +777,7 @@ TEST(CCommandLine, OptionWithArgumentAssign)
  */
 TEST(CCommandLine, OptionWithArgumentColon)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP:1", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -796,7 +788,7 @@ TEST(CCommandLine, OptionWithArgumentColon)
  */
 TEST(CCommandLine, OptionWithDoubleQuotedArgument)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP=\"1\"", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -807,7 +799,7 @@ TEST(CCommandLine, OptionWithDoubleQuotedArgument)
  */
 TEST(CCommandLine, OptionWithSingleQuotedArgument)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP=\'1\'", false);
 	ASSERT_EQ(1, cCommandLine.GetGroupId());
 }
@@ -818,7 +810,7 @@ TEST(CCommandLine, OptionWithSingleQuotedArgument)
  */
 TEST(CCommandLine, OptionWithoutNeededArgument)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP", false);
 	EXPECT_EQ(-1, cCommandLine.GetGroupId());
 }
@@ -829,7 +821,7 @@ TEST(CCommandLine, OptionWithoutNeededArgument)
  */
 TEST(CCommandLine, OptionWithInvalidArgumentEmpty)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP=", false);
 	EXPECT_EQ(-1, cCommandLine.GetGroupId());
 	cCommandLine.ParseCommandLine(L"-GROUP:", false);
@@ -842,7 +834,7 @@ TEST(CCommandLine, OptionWithInvalidArgumentEmpty)
  */
 TEST(CCommandLine, OptionWithInvalidArgumentNAN)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-GROUP=Admin", false);
 	EXPECT_EQ(0, cCommandLine.GetGroupId());
 	cCommandLine.ParseCommandLine(L"-GROUP:Admin", false);
@@ -857,7 +849,7 @@ TEST(CCommandLine, OptionWithInvalidArgumentNAN)
  */
 TEST(CCommandLine, EndOfOptionMark)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"-- -GROUP=2", false);
 	EXPECT_EQ(-1, cCommandLine.GetGroupId());
 	EXPECT_STREQ(GetLocalPath(L"-GROUP=2").data(), cCommandLine.GetOpenFile());
@@ -872,14 +864,14 @@ TEST(CCommandLine, EndOfOptionMark)
  */
 TEST(CCommandLine, ParseOpenFile)
 {
-	CCommandLineWrapper cCommandLine1;
+	CCommandLine cCommandLine1;
 	std::wstring strCmdLine1 = L"test.txt";
 	cCommandLine1.ParseCommandLine(strCmdLine1.data(), false);
 	EXPECT_STREQ(GetLocalPath(L"test.txt").data(), cCommandLine1.GetOpenFile());
 	EXPECT_EQ(NULL, cCommandLine1.GetFileName(0));
 	EXPECT_EQ(0, cCommandLine1.GetFileNum());
 
-	CCommandLineWrapper cCommandLine2;
+	CCommandLine cCommandLine2;
 	std::wstring strCmdLine2 = L"test1.txt test2.txt";
 	cCommandLine2.ParseCommandLine(strCmdLine2.data(), false);
 	EXPECT_STREQ(GetLocalPath(L"test1.txt").data(), cCommandLine2.GetOpenFile());
@@ -893,7 +885,7 @@ TEST(CCommandLine, ParseOpenFile)
  */
 TEST(CCommandLine, UnterminatedQuotedFilename)
 {
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	cCommandLine.ParseCommandLine(L"\"", false);
 	EXPECT_STREQ(L"", cCommandLine.GetOpenFile());
 	EXPECT_EQ(NULL, cCommandLine.GetFileName(0));
@@ -919,7 +911,7 @@ TEST(CCommandLine, ParseFileNameIncludesInvalidFilenameChars)
 	};
 
 	// ファイル名に使えない文字を含んでいたら、ファイル名としては認識されない。
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	for (const auto& badName : badNames) {
 		cCommandLine.ParseCommandLine( badName.data(), false );
 		EXPECT_STREQ(L"", cCommandLine.GetOpenFile());
@@ -935,7 +927,7 @@ TEST(CCommandLine, ParseFileNameIncludesInvalidFilenameChars)
 TEST(CCommandLine, ParseTooLongFilePath)
 {
 	// _MAX_PATH - 1を超えるパスは無視される
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	std::wstring strCmdLine;
 	std::wstring strPath(_MAX_PATH, L'a');
 	strprintf(strCmdLine, L"%s test.txt", strPath.c_str());
@@ -960,7 +952,7 @@ TEST(CCommandLine, ParseMaxFilePath)
 	strPath.resize(_MAX_PATH - 1, L'a');
 
 	// _MAX_PATH - 1までのパスは受け付けられる
-	CCommandLineWrapper cCommandLine;
+	CCommandLine cCommandLine;
 	std::wstring strCmdLine;
 	strprintf(strCmdLine, L"%s test.txt", strPath.c_str());
 	cCommandLine.ParseCommandLine(strCmdLine.data(), false);

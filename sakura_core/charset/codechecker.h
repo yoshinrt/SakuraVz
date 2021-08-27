@@ -10,6 +10,7 @@
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2006, D. S. Koba, genta
 	Copyright (C) 2007
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -37,6 +38,7 @@
 
 #include "_main/global.h"
 #include "convert/convert_util2.h"
+#include "basis/primitive.h"
 
 /*!
 	認識する文字コード種別
@@ -407,9 +409,9 @@ inline int GuessEucjpCharsz( const char uc_ ){
 	文字長検査
 */
 /* --- ローカル文字コードチェック */
-int CheckSjisChar( const char*, const int, ECharSet* );
-int CheckEucjpChar( const char*, const int, ECharSet* );
-int DetectJisEscseq( const char*, const int, EMyJisEscseq* ); // JIS エスケープシーケンス検出器
+int CheckSjisChar( const char*, const size_t, ECharSet* );
+int CheckEucjpChar( const char*, const size_t, ECharSet* );
+int DetectJisEscseq( const char*, const size_t, EMyJisEscseq* ); // JIS エスケープシーケンス検出器
 int _CheckJisAnyPart( const char*, const int, const char **ppNextChar, EMyJisEscseq *peNextEsc, int *pnErrorCount, const int nType );
 enum EJisChecker{
 	JISCHECK_ASCII7,

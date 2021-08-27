@@ -8,6 +8,7 @@
 	Copyright (C) 2003, MIK
 	Copyright (C) 2005, MIK
 	Copyright (C) 2010, Moca
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -36,6 +37,7 @@
 
 #include "dlg/CDialog.h"
 #include "recent/CRecentTagjumpKeyword.h"
+#include "mem/CNativeW.h"
 
 //タグファイル名	//	@@ 2005.03.31 MIK 定数化
 #define TAG_FILENAME_T        L"tags"
@@ -76,10 +78,10 @@ protected:
 	||  実装ヘルパ関数
 	*/
 	BOOL	OnInitDialog(HWND hwndDlg, WPARAM wParam, LPARAM lParam) override;
+	BOOL	OnDestroy( void ) override;
 	BOOL	OnBnClicked(int wID) override;
 	INT_PTR DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnSize( WPARAM wParam, LPARAM lParam ) override;
-	BOOL	OnMove( WPARAM wParam, LPARAM lParam ) override;
 	BOOL	OnMinMaxInfo( LPARAM lParam );
 	BOOL	OnNotify(NMHDR* pNMHDR) override;
 	//	@@ 2005.03.31 MIK キーワード入力エリアのイベント処理

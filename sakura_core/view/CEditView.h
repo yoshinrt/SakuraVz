@@ -16,6 +16,7 @@
 	Copyright (C) 2007, ryoji, maru
 	Copyright (C) 2008, ryoji
 	Copyright (C) 2009, nasukoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -45,6 +46,9 @@
 #include <Windows.h>
 #include <ObjIdl.h>  // LPDATAOBJECT
 #include <ShellAPI.h>  // HDROP
+
+#include <thread>
+
 #include "CTextMetrics.h"
 #include "CTextDrawer.h"
 #include "CTextArea.h"
@@ -119,6 +123,8 @@ class CEditView
 , public CMyWnd
 , public CDocListenerEx
 {
+	std::thread m_threadUrlOpen;
+
 public:
 	const CEditDoc* GetDocument() const
 	{
@@ -326,7 +332,7 @@ public:
 	// 2002/01/19 novice public属性に変更
 	bool GetSelectedDataSimple( CNativeW& cmemBuf );// 選択範囲のデータを取得
 	bool GetSelectedDataOne( CNativeW& cmemBuf, int nMaxLen );
-	bool GetSelectedData( CNativeW* cmemBuf, BOOL bLineOnly, const wchar_t* pszQuote, BOOL bWithLineNumber, bool bAddCRLFWhenCopy, EEolType neweol = EOL_UNKNOWN);/* 選択範囲のデータを取得 */
+	bool GetSelectedData( CNativeW* cmemBuf, BOOL bLineOnly, const wchar_t* pszQuote, BOOL bWithLineNumber, bool bAddCRLFWhenCopy, EEolType neweol = EEolType::none);/* 選択範囲のデータを取得 */
 	int IsCurrentPositionSelected( CLayoutPoint ptCaretPos );					/* 指定カーソル位置が選択エリア内にあるか */
 	int IsCurrentPositionSelectedTEST( const CLayoutPoint& ptCaretPos, const CLayoutRange& sSelect ) const;/* 指定カーソル位置が選択エリア内にあるか */
 	// 2006.07.09 genta 行桁指定によるカーソル移動(選択領域を考慮)

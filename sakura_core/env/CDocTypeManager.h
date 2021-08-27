@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,7 +30,10 @@
 #define SAKURA_CDOCTYPEMANAGER_ACE5AE64_5C6A_4A70_BACF_99F9A448360D_H_
 #pragma once
 
-#include "DLLSHAREDATA.h"
+#include "types/CType.h"
+
+struct DLLSHAREDATA;
+DLLSHAREDATA& GetDllShareData();
 
 //! ドキュメントタイプ管理
 class CDocTypeManager{
@@ -51,7 +55,7 @@ public:
 
 	static bool IsFileNameMatch(const WCHAR* pszTypeExts, const WCHAR* pszFileName);	// タイプ別拡張子にファイル名がマッチするか
 	static void GetFirstExt(const WCHAR* pszTypeExts, WCHAR szFirstExt[], int nBuffSize);	// タイプ別拡張子の先頭拡張子を取得する
-	static bool ConvertTypesExtToDlgExt( const WCHAR *pszSrcExt, const WCHAR* szExt, WCHAR *pszDstExt );	// タイプ別設定の拡張子リストをダイアログ用リストに変換する
+	static std::wstring ConvertTypesExtToDlgExt(const WCHAR *pszSrcExt, const WCHAR* szExt);	// タイプ別設定の拡張子リストをダイアログ用リストに変換する
 
 	static const WCHAR* m_typeExtSeps;			// タイプ別拡張子の区切り文字
 	static const WCHAR* m_typeExtWildcards;		// タイプ別拡張子のワイルドカード

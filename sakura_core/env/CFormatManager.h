@@ -4,6 +4,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -29,8 +30,8 @@
 #define SAKURA_CFORMATMANAGER_4161FE80_FFA1_4619_BD0A_74FF4F59BDDA_H_
 #pragma once
 
-// 要先行定義
-// #include "DLLSHAREDATA.h"
+struct DLLSHAREDATA;
+DLLSHAREDATA& GetDllShareData();
 
 //!書式管理
 class CFormatManager{

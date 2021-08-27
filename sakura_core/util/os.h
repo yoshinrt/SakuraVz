@@ -1,6 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -90,8 +91,14 @@ private:
 //コンストラクタでカレントディレクトリを保存し、デストラクタでカレントディレクトリを復元するモノ。
 //2008.03.01 kobake 作成
 class CCurrentDirectoryBackupPoint{
+	using Me = CCurrentDirectoryBackupPoint;
+
 public:
 	CCurrentDirectoryBackupPoint();
+	CCurrentDirectoryBackupPoint(const Me&) = delete;
+	Me& operator = (const Me&) = delete;
+	CCurrentDirectoryBackupPoint(Me&&) noexcept = delete;
+	Me& operator = (Me&&) noexcept = delete;
 	~CCurrentDirectoryBackupPoint();
 private:
 	WCHAR m_szCurDir[_MAX_PATH];

@@ -7,6 +7,7 @@
 /*
 	Copyright (C) 2003, MIK
 	Copyright (C) 2006, ryoji
+	Copyright (C) 2018-2021, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -31,11 +32,17 @@
 
 #include "StdAfx.h"
 #include "dlg/CDlgTagsMake.h"
+
+#include <Shlwapi.h>
+
 #include "env/DLLSHAREDATA.h"
 #include "func/Funccode.h"
 #include "util/shell.h"
+#include "apiwrap/StdControl.h"
+#include "CSelectLang.h"
 #include "sakura_rc.h"
 #include "sakura.hh"
+#include "String_define.h"
 
 const DWORD p_helpids[] = {	//13700
 	IDC_EDIT_TAG_MAKE_FOLDER,	HIDC_EDIT_TAG_MAKE_FOLDER,	//タグ作成フォルダ
@@ -124,12 +131,7 @@ void CDlgTagsMake::SelectFolder( HWND hwndDlg )
 	if( SelectDir( hwndDlg, LS(STR_DLGTAGMAK_SELECTDIR), szPath, szPath ) )
 	{
 		//末尾に\\マークを追加する．
-		int pos = wcslen( szPath );
-		if( pos > 0 && szPath[ pos - 1 ] != L'\\' )
-		{
-			szPath[ pos     ] = L'\\';
-			szPath[ pos + 1 ] = L'\0';
-		}
+		::PathAddBackslashW( szPath );
 
 		::DlgItem_SetText( hwndDlg, IDC_EDIT_TAG_MAKE_FOLDER, szPath );
 	}
