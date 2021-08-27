@@ -1,12 +1,15 @@
 # Sakura Editor VZ 化 fork
-[![Build status](https://ci.appveyor.com/api/projects/status/mf8tx836jtb7epq8/branch/vz_mode?svg=true)](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode)
+
 [![License: Zlib](https://img.shields.io/badge/License-Zlib-lightgrey.svg)](https://opensource.org/licenses/Zlib)
+[![build sakura](https://github.com/yoshinrt/SakuraVz/workflows/build%20sakura/badge.svg)](https://github.com/yoshinrt/SakuraVz/actions?query=workflow%3A%22build+sakura%22)
+[![Star History](https://img.shields.io/badge/star-histroy-yellow.svg)](https://star-history.t9t.io/#yoshinrt/SakuraVz)
 
 サクラエディタに VZ Editor (以下，Vz と表記) の機能のいくつか (と追加で細かい機能) を実装するプロジェクトです．現在以下の機能が追加されています．下記以外の細かい修正点は [issues](https://github.com/yoshinrt/SakuraVz/issues?q=is%3Aissue+is%3Aclosed+-label%3Awontfix+-label%3Atask+-label%3Aenbug+-label%3Arefactoring+sort%3Aupdated-desc) を参照してください．
 
 機能の on/off を GUI で設定する機能はありませんので，`sakura.ini` を直接編集してください．本 fork のビルドでは，デフォルトで全て有効になっています．
 
-最新バイナリは [AppVeyor](https://ci.appveyor.com/project/YoshiNRT/sakura/branch/vz_mode) の Platform:Win32 (または x64)→ARTIFACTS にあります．
+最新バイナリは [GitHub Actions](https://github.com/yoshinrt/SakuraVz/actions/workflows/build-sakura.yml) の Artifacts にあります (運が良ければ)．
+
 ### 一覧
 
 - [テキストスタック](#テキストスタック)
