@@ -149,11 +149,14 @@ else throw new Error( "見つかりません: " + FuncName + "\nfile:" + GetMacr
  - `GetCursorPosXLogic()`: カーソル位置の行頭からの論理桁位置 (行頭 = 0) を返します．
  - `GetCursorPosY()`: カーソル位置のファイル先頭からの表示行位置 (先頭行 = 0) を返します．
  - `GetCursorPosYLogic()`: カーソル位置のファイル先頭からの論理行位置 (先頭行 = 0) を返します．
- - `GetLayoutWidthX()`: レイアウト 1桁分の幅を返します．
+ - `GetLayoutXWidth()`: レイアウト 1桁分の幅を返します．
+ - `GetScreenTop()`: スクリーン上端のレイアウト行位置 (先頭行 = 0) を返します．
+ - `GetScreenLeft()`: スクリーン左端のレイアウト桁位置 (行頭 = 0) を返します．
  - `GetCursorChar()`: カーソル位置の 1文字を取得します．
  - `IsCursorEOL()`: カーソル位置が EOL の場合，非 0 を返します．
  - `IsCursorEOF()`: カーソル位置が EOF の場合，非 0 を返します．
  - `MoveTo( line, col [, sel] )`: レイアウト座標 line 行，col 桁に移動します．sel に 1 を指定した場合，選択状態を維持します．
+ - `MoveScreen( line, col )`: 画面表示の左上が line 行，col 桁になるようにスクロールします．
 
 ### 検索・置換ダイアログのオプション，デフォルトボタンを固定できるパラメータ追加
 `SearchDialog( mode )`, `ReplaceDialog( mode )` に引数を追加しました．mode には以下の値のいくつかを `|` で繋げて指定します．
