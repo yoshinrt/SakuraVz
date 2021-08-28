@@ -2691,6 +2691,11 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		}
 		return true;
 	
+	case F_ClearModifyFlag:
+		View->m_pcEditDoc->m_cDocEditor.SetModified( false, false );
+		View->m_pcEditDoc->m_cDocEditor.m_cOpeBuf.SetNoModified();
+		return true;
+	
 	default:
 		return false;
 	}
