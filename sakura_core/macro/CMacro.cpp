@@ -2555,6 +2555,16 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 		return true;
 	}
 	
+	case F_GetScreenTop: {
+		Wrap( &Result )->Receive(( Int )View->GetTextArea().GetViewTopLine());
+		return true;
+	}
+	
+	case F_GetScreenLeft: {
+		Wrap( &Result )->Receive(( Int )View->GetTextArea().GetViewLeftCol());
+		return true;
+	}
+	
 	case F_IsCursorEOF:
 		// EOF?
 		Wrap( &Result )->Receive(

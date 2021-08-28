@@ -585,6 +585,8 @@ F_GetCursorPosX,			// カーソル位置 X (layout 単位)
 F_GetCursorPosXLogic,			// カーソル位置 X (Logic 単位)
 F_GetCursorPosY,			// カーソル位置 Y (Layout 単位)
 F_GetCursorPosYLogic,			// カーソル位置 Y (Logic 単位)
+F_GetScreenTop,				// 画面上端行 (Layout)
+F_GetScreenLeft,			// 画面左端桁 (Layout)
 F_GetLayoutXWidth,			// LayoutX 1桁幅
 F_IsCursorEOF,				// カーソル位置 EOF?
 F_IsCursorEOL,				// カーソル位置 EOL?

@@ -483,6 +483,8 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_GetCursorPosXLogic,		L"GetCursorPosXLogic",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置X Logic
 	{F_GetCursorPosY,			L"GetCursorPosY",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置Y Layout
 	{F_GetCursorPosYLogic,		L"GetCursorPosYLogic",		{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置Y Logic
+	{F_GetScreenTop,			L"GetScreenTop",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //画面上端行 (Layout)
+	{F_GetScreenLeft,			L"GetScreenLeft",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //画面左端桁 (Layout)
 	{F_GetLayoutXWidth,			L"GetLayoutXWidth",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //LayoutX 1桁幅
 	{F_IsCursorEOF,				L"IsCursorEOF",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOF?
 	{F_IsCursorEOL,				L"IsCursorEOL",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //カーソル位置 EOL?
