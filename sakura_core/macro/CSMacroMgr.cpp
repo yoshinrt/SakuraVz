@@ -492,6 +492,7 @@ MacroFuncInfo CSMacroMgr::m_MacroFuncInfoArr[] =
 	{F_ExecFuncCode,			L"ExecFuncCode",			{VT_I4,    VT_I4,    VT_I4,    VT_I4},		VT_I4,		&s_MacroInfoEx_i }, //function code 実行
 	{F_SetFileType,				L"SetFileType",				{VT_BSTR,  VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, //ChangeType のマクロ版，type 名 or 拡張子指定
 	{F_MoveTo,					L"MoveTo",					{VT_I4,    VT_I4,    VT_I4,    VT_EMPTY},	VT_I4,		NULL}, // Layout 座標に移動
+	{F_MoveScreen,				L"MoveScreen",				{VT_I4,    VT_I4,    VT_EMPTY, VT_EMPTY},	VT_I4,		NULL}, // Layout 座標にスクロール移動
 	{F_IniParam,				L"IniParam",				{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, // .ini パラメータアクセス
 	{F_ClearModifyFlag,			L"ClearModifyFlag",			{VT_EMPTY, VT_EMPTY, VT_EMPTY, VT_EMPTY},	VT_I4,		NULL }, // 編集状態クリア
 

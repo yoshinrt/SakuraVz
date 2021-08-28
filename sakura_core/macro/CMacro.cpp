@@ -2675,6 +2675,22 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 			return true;
 		}
 	
+	case F_MoveScreen:
+		{
+			int iLeft = GetArgI4( 1, -1 );
+			int iTop  = GetArgI4( 0, -1 );
+			
+			if( iTop >= 0 && iTop != View->GetTextArea().GetViewTopLine()){
+				View->ScrollAtV( CLayoutInt( iTop ));
+			}
+			
+			if( iLeft >= 0 && iLeft != View->GetTextArea().GetViewLeftCol()){
+				View->ScrollAtH( CLayoutInt( iLeft ));
+			}
+			
+			return true;
+		}
+	
 	case F_IniParam:
 		{
 			STypeConfig	*pTypeCfg = const_cast<STypeConfig *>( View->GetCommander().m_pCommanderView->m_pTypeData );

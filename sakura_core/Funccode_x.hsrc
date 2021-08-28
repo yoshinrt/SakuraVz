@@ -594,6 +594,7 @@ F_GetCursorChar,			// カーソル位置の 1文字取得
 F_ExecFuncCode,				// function code 実行
 F_SetFileType,				// ChangeType のマクロ版，type 名 or 拡張子指定
 F_MoveTo,				// Layout 座標に移動
+F_MoveScreen,				// Layout 座標にスクロール移動
 F_IniParam,				// .ini パラメータアクセス
 F_ClearModifyFlag,			// 編集状態クリア
 
