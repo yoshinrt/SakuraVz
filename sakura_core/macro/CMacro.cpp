@@ -2720,6 +2720,7 @@ bool CMacro::HandleFunction(CEditView *View, EFunctionCode ID, const VARIANT *Ar
 	case F_ClearModifyFlag:
 		View->m_pcEditDoc->m_cDocEditor.SetModified( false, false );
 		View->m_pcEditDoc->m_cDocEditor.m_cOpeBuf.SetNoModified();
+		CModifyVisitor().ResetAllModifyFlag(&View->m_pcEditDoc->m_cDocLineMgr, View->m_pcEditDoc->m_cDocEditor.m_cOpeBuf.GetCurrentPointer());
 		return true;
 	
 	default:
