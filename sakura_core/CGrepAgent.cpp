@@ -1510,9 +1510,7 @@ int CGrepAgent::DoGrepReplaceFile(
 					
 					// 
 					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
-						if( sGrepOption.bGrepReplace ){
-							bOutput = false;	// replace 時は，出力のみ抑制
-						}else{
+						if( !sGrepOption.bGrepReplace ){
 							break;				// grep 時は行処理終了
 						}
 					}
