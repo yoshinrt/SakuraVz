@@ -1453,17 +1453,18 @@ int CGrepAgent::DoGrepReplaceFile(
 					pRegexp->Match( nullptr, 0, nIndex );
 				bRestartGrep = false;
 				
+				// cat した serch buf に切り替わっているかもしれないので，pLine nLineLen をそちらに更新
+				pLine		= pRegexp->GetSubject();
+				nLineLen	= pRegexp->GetSubjectLen();
+				
 				if( sGrepOption.nGrepOutputLineType == 2/*非該当行*/ ) bMatch = !bMatch;
+				
 				if( !bMatch ) break;
 				
 				// 置換
 				if( sGrepOption.bGrepReplace && !sGrepOption.bGrepPaste ){
 					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 				}
-				
-				// cat した serch buf に切り替わっているかもしれないので，pLine nLineLen をそちらに更新
-				pLine		= pRegexp->GetSubject();
-				nLineLen	= pRegexp->GetSubjectLen();
 				
 				// log 表示用行，match 位置
 				int iLogMatchIdx;
