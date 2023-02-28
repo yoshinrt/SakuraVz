@@ -86,5 +86,9 @@
     <None Include="..\resource\MainMenu.ini">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="sakura_lang_rc.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\sakura_core\sakura_rc.h" />
   </ItemGroup>
 </Project>
