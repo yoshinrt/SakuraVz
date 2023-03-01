@@ -17,7 +17,7 @@
 	Copyright (C) 2006, genta, ryoji
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2010, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -248,9 +248,8 @@ INT_PTR CDlgFuncList::DispatchEvent( HWND hWnd, UINT wMsg, WPARAM wParam, LPARAM
 		// それでは都合が悪いので，特別に以下の処理を行って他と同様な挙動が得られるようにする．
 		if( (BOOL)wParam ){
 			CEditView* pcEditView = (CEditView*)m_lParam;
-			CEditWnd* pcEditWnd = pcEditView->m_pcEditWnd;
 			if( ::GetActiveWindow() == GetHwnd() ){
-				::SetActiveWindow( pcEditWnd->GetHwnd() );
+				::SetActiveWindow( GetEditWnd().GetHwnd() );
 				BlockingHook( NULL );	// キュー内に溜まっているメッセージを処理
 				::SetActiveWindow( GetHwnd() );
 				return 0L;
@@ -400,7 +399,7 @@ HWND CDlgFuncList::DoModeless(
 		pDlgTemplate->style = (WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | DS_SETFONT);
 		hwndRet = CDialog::DoModeless( hInstance, MyGetAncestor(hwndParent, GA_ROOT), pDlgTemplate, lParam, SW_HIDE );
 		::GlobalFree( pDlgTemplate );
-		pcEditView->m_pcEditWnd->EndLayoutBars( m_bEditWndReady );	// 画面の再レイアウト
+		GetEditWnd().EndLayoutBars( m_bEditWndReady );	// 画面の再レイアウト
 	}else{
 		hwndRet = CDialog::DoModeless( hInstance, MyGetAncestor(hwndParent, GA_ROOT), IDD_FUNCLIST, lParam, SW_SHOW );
 	}
@@ -741,7 +740,7 @@ void CDlgFuncList::SetData()
 		::ShowWindow( GetItemHwnd( IDC_COMBO_nSortType ), SW_HIDE );
 		::ShowWindow( GetItemHwnd( IDC_STATIC_nSortType ), SW_HIDE );
 		//ListView_SortItems( hwndList, CompareFunc_Asc, (LPARAM)this );  // 2005.04.05 zenryaku ソート状態を保持
-		SortListView( hwndList, m_nSortCol );	// 2005.04.23 genta 関数化(ヘッダ書き換えのため)
+		SortListView( hwndList, m_nSortCol );	// 2005.04.23 genta 関数化(ヘッダー書き換えのため)
 	}
 
 	//2002.02.08 hor
@@ -763,7 +762,7 @@ void CDlgFuncList::SetData()
 
 bool CDlgFuncList::GetTreeFileFullName(HWND hwndTree, HTREEITEM target, std::wstring* pPath, int* pnItem)
 {
-	*pPath = L"";
+	(*pPath).clear();
 	*pnItem = -1;
 	do{
 		TVITEM tvItem;
@@ -778,7 +777,7 @@ bool CDlgFuncList::GetTreeFileFullName(HWND hwndTree, HTREEITEM target, std::wst
 			std::wstring path = m_pcFuncInfoArr->GetAt(*pnItem)->m_cmemFileName.GetStringPtr();
 			path += L"\\";
 			path += *pPath;
-			*pPath = path;
+			*pPath = std::move(path);
 			return true;
 		}
 		if( tvItem.lParam != -1 && tvItem.lParam != -2 ){
@@ -788,7 +787,7 @@ bool CDlgFuncList::GetTreeFileFullName(HWND hwndTree, HTREEITEM target, std::wst
 			std::wstring path = szFileName;
 			path += L"\\";
 			path += *pPath;
-			*pPath = path;
+			*pPath = std::move(path);
 		}else{
 			*pPath = szFileName;
 		}
@@ -831,7 +830,7 @@ int CDlgFuncList::GetData( void )
 	TV_ITEM			tvi;
 
 	m_cFuncInfo = NULL;
-	m_sJumpFile = L"";
+	m_sJumpFile.clear();
 	hwndList = GetItemHwnd( IDC_LIST_FL );
 	if( m_nViewType == VIEWTYPE_LIST ){
 		//	List
@@ -871,7 +870,7 @@ int CDlgFuncList::GetData( void )
 						if( tvi.lParam == -1 ){
 							int nItem;
 							if( !GetTreeFileFullName( hwndTree, htiItem, &m_sJumpFile, &nItem ) ){
-								m_sJumpFile = L""; // error
+								m_sJumpFile.clear(); // error
 							}
 						}
 					}
@@ -1574,8 +1573,8 @@ void CDlgFuncList::SetTreeFile()
 		// lvis.item.lParam
 		// 0 以下(nFuncInfo): m_pcFuncInfoArr->At(nFuncInfo)にファイル名
 		// -1: Grepのファイル名要素
-		// -2: Grepのサブフォルダ要素
-		// -(nFuncInfo * 10 + 3): Grepルートフォルダ要素
+		// -2: Grepのサブフォルダー要素
+		// -(nFuncInfo * 10 + 3): Grepルートフォルダー要素
 		// -4: データ・追加操作なし
 		TVINSERTSTRUCT tvis;
 		tvis.hParent      = hParentTree.back();
@@ -1643,7 +1642,7 @@ void CDlgFuncList::SetTreeFileSub( HTREEITEM hParent, const WCHAR* pszFile )
 	CGrepEnumFolders cGrepExceptAbsFolders;
 	cGrepExceptAbsFolders.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFolderKeys, cGrepEnumOptions);
 
-	//フォルダ一覧作成
+	//フォルダー一覧作成
 	CGrepEnumFilterFolders cGrepEnumFilterFolders;
 	cGrepEnumFilterFolders.Enumerates( basePath.c_str(), cGrepEnumKeys, cGrepEnumOptions, cGrepExceptAbsFolders );
 	int nItemCount = cGrepEnumFilterFolders.GetCount();
@@ -1748,7 +1747,7 @@ BOOL CDlgFuncList::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 		if( !IsDocking() && m_pShareData->m_Common.m_sOutline.m_bRememberOutlineWindowPos ){
 			WINDOWPLACEMENT cWindowPlacement;
 			cWindowPlacement.length = sizeof( cWindowPlacement );
-			if (::GetWindowPlacement( pcEditView->m_pcEditWnd->GetHwnd(), &cWindowPlacement )){
+			if (::GetWindowPlacement( GetEditWnd().GetHwnd(), &cWindowPlacement )){
 				/* ウィンドウ位置・サイズを-1以外の値にしておくと、CDialogで使用される． */
 				m_xPos = m_pShareData->m_Common.m_sOutline.m_xOutlineWindowPos + cWindowPlacement.rcNormalPosition.left;
 				m_yPos = m_pShareData->m_Common.m_sOutline.m_yOutlineWindowPos + cWindowPlacement.rcNormalPosition.top;
@@ -1792,7 +1791,7 @@ BOOL CDlgFuncList::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 		}
 		// 他ウィンドウに変更を通知する
 		if( ProfDockSync() ){
-			HWND hwndEdit = pcEditView->m_pcEditWnd->GetHwnd();
+			HWND hwndEdit = GetEditWnd().GetHwnd();
 			PostOutlineNotifyToAllEditors( (WPARAM)0, (LPARAM)hwndEdit );
 		}
 	}
@@ -2103,7 +2102,7 @@ BOOL CDlgFuncList::OnNotify(NMHDR* pNMHDR)
 }
 /*!
 	指定されたカラムでリストビューをソートする．
-	同時にヘッダも書き換える．
+	同時にヘッダーも書き換える．
 
 	ソート後はフォーカスが画面内に現れるように表示位置を調整する．
 
@@ -2282,7 +2281,7 @@ BOOL CDlgFuncList::OnDestroy( void )
 	/* アウトライン ■位置とサイズを記憶する */ // 20060201 aroka
 	// 前提条件：m_lParam が CDialog::OnDestroy でクリアされないこと
 	CEditView* pcEditView=(CEditView*)m_lParam;
-	HWND hwndEdit = pcEditView->m_pcEditWnd->GetHwnd();
+	HWND hwndEdit = GetEditWnd().GetHwnd();
 	if( !IsDocking() && m_pShareData->m_Common.m_sOutline.m_bRememberOutlineWindowPos ){
 		/* 親のウィンドウ位置・サイズを記憶 */
 		WINDOWPLACEMENT cWindowPlacement;
@@ -2299,7 +2298,7 @@ BOOL CDlgFuncList::OnDestroy( void )
 	// ドッキング画面を閉じるときは画面を再レイアウトする
 	// ドッキングでアプリ終了時には hwndEdit は NULL になっている（親に先に WM_DESTROY が送られるため）
 	if( IsDocking() && hwndEdit )
-		pcEditView->m_pcEditWnd->EndLayoutBars();
+		GetEditWnd().EndLayoutBars();
 
 	// 明示的にアウトライン画面を閉じたときだけアウトライン表示フラグを OFF にする
 	// フローティングでアプリ終了時やタブモードで裏にいる場合は ::IsWindowVisible( hwndEdit ) が FALSE を返す
@@ -2485,7 +2484,7 @@ BOOL CDlgFuncList::OnJump( bool bCheckAutoClose, bool bFileJump )	//2002.02.08 h
 				m_pShareData->m_sWorkBuffer.m_LogicPoint = poCaret;
 
 				//	2006.07.09 genta 移動時に選択状態を保持するように
-				::SendMessageAny( ((CEditView*)m_lParam)->m_pcEditWnd->GetHwnd(),
+				::SendMessageAny( GetEditWnd().GetHwnd(),
 					MYWM_SETCARETPOS, 0, PM_SETCARETPOS_KEEPSELECT );
 			}
 			if( bCheckAutoClose && bFileJumpSelf ){
@@ -2636,7 +2635,7 @@ void CDlgFuncList::GetDockSpaceRect( LPRECT pRect )
 		hwnd[nCount] = GetHwnd();
 		nCount++;
 	}
-	hwnd[nCount] = pcEditView->m_pcEditWnd->GetMiniMap().GetHwnd();
+	hwnd[nCount] = GetEditWnd().GetMiniMap().GetHwnd();
 	if( hwnd[nCount] != NULL ){
 		nCount++;
 	}
@@ -2958,7 +2957,7 @@ INT_PTR CDlgFuncList::OnMouseMove( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 		::SetWindowPos( GetHwnd(), NULL,
 			rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOACTIVATE );
-		((CEditView*)m_lParam)->m_pcEditWnd->EndLayoutBars( m_bEditWndReady );
+		GetEditWnd().EndLayoutBars( m_bEditWndReady );
 
 		// 移動後の配置情報を記憶する
 		GetWindowRect( GetHwnd(), &rc );
@@ -3045,7 +3044,7 @@ INT_PTR CDlgFuncList::OnLButtonUp( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 		if( ProfDockSync() ){
 			// 他ウィンドウに変更を通知する
-			HWND hwndEdit = ((CEditView*)m_lParam)->m_pcEditWnd->GetHwnd();
+			HWND hwndEdit = GetEditWnd().GetHwnd();
 			PostOutlineNotifyToAllEditors( (WPARAM)0, (LPARAM)hwndEdit );
 		}
 		return 1L;
@@ -3183,7 +3182,7 @@ INT_PTR CDlgFuncList::OnNcPaint( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 void CDlgFuncList::DoMenu( POINT pt, HWND hwndFrom )
 {
 	// メニューを作成する
-	CEditView* pcEditView = &CEditDoc::GetInstance(0)->m_pcEditWnd->GetActiveView();
+	CEditView* pcEditView = &GetEditWnd().GetActiveView();
 	CDocTypeManager().GetTypeConfig( CTypeConfig(m_nDocType), m_type );
 	EDockSide eDockSide = ProfDockSide();	// 設定上の配置
 	UINT uFlags = MF_BYPOSITION | MF_STRING;
@@ -3262,7 +3261,7 @@ void CDlgFuncList::DoMenu( POINT pt, HWND hwndFrom )
 
 	// メニュー選択された状態に切り替える
 	EFunctionCode nFuncCode = GetFuncCodeRedraw(m_nOutlineType);
-	HWND hwndEdit = pcEditView->m_pcEditWnd->GetHwnd();
+	HWND hwndEdit = GetEditWnd().GetHwnd();
 	if( nId == 450 ){	// 更新
 		CEditView* pcEditView = (CEditView*)m_lParam;
 		pcEditView->GetCommander().HandleCommand( nFuncCode, true, SHOW_RELOAD, 0, 0, 0 );
@@ -3292,7 +3291,7 @@ void CDlgFuncList::DoMenu( POINT pt, HWND hwndFrom )
 			if( pCDocLine ){
 				CBookmarkSetter cBookmark(pCDocLine);
 				cBookmark.SetBookmark(false);
-				pcEditView->m_pcEditWnd->Views_Redraw();
+				GetEditWnd().Views_Redraw();
 			}
 		}
 		pcEditView->GetCommander().HandleCommand(nFuncCode, true, SHOW_RELOAD, 0, 0, 0);
@@ -3395,7 +3394,7 @@ void CDlgFuncList::DoMenu( POINT pt, HWND hwndFrom )
 */
 void CDlgFuncList::Refresh( void )
 {
-	CEditWnd* pcEditWnd = CEditDoc::GetInstance(0)->m_pcEditWnd;
+	CEditWnd* pcEditWnd = &GetEditWnd();
 	BOOL bReloaded = ChangeLayout( OUTLINE_LAYOUT_FILECHANGED );	// 現在設定に従ってアウトライン画面を再配置する
 	if( !bReloaded && pcEditWnd->m_cDlgFuncList.GetHwnd() ){
 		EOutlineType nOutlineType = GetOutlineTypeRedraw(m_nOutlineType);
@@ -3439,8 +3438,8 @@ bool CDlgFuncList::ChangeLayout( int nId )
 				if( nId == OUTLINE_LAYOUT_FILECHANGED ) return false;	// ファイル切替ではフローティングは開かない（従来互換）
 			}
 			// ※ 裏では一時的に Disable 化しておいて開く（タブモードでの不正な画面切り替え抑止）
-			CEditView* pcEditView = &pDoc->m_pcEditWnd->GetActiveView();
-			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( pcEditView->m_pcEditWnd->GetHwnd(), FALSE );
+			CEditView* pcEditView = &GetEditWnd().GetActiveView();
+			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( GetEditWnd().GetHwnd(), FALSE );
 			if( m_nOutlineType == OUTLINE_DEFAULT ){
 				bool bType = (ProfDockSet() != 0);
 				if( bType ){
@@ -3452,7 +3451,7 @@ bool CDlgFuncList::ChangeLayout( int nId )
 			}
 			EOutlineType nOutlineType = GetOutlineTypeRedraw(m_nOutlineType);	// ブックマークかアウトライン解析かは最後に開いていた時の状態を引き継ぐ（初期状態はアウトライン解析）
 			pcEditView->GetCommander().Command_FUNCLIST( SHOW_NORMAL, nOutlineType );	// 開く	※ HandleCommand(F_OUTLINE,...) だと印刷プレビュー状態で実行されないので Command_FUNCLIST()
-			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( pcEditView->m_pcEditWnd->GetHwnd(), TRUE );
+			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( GetEditWnd().GetHwnd(), TRUE );
 			return true;	// 解析した
 		}
 	}else{	// 現在は表示
@@ -3477,7 +3476,7 @@ bool CDlgFuncList::ChangeLayout( int nId )
 				if( nId == OUTLINE_LAYOUT_FILECHANGED ) return false;	// ファイル切替ではフローティングは開かない（従来互換）
 			}
 			// ※ 裏では一時的に Disable 化しておいて開く（タブモードでの不正な画面切り替え抑止）
-			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( pcEditView->m_pcEditWnd->GetHwnd(), FALSE );
+			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( GetEditWnd().GetHwnd(), FALSE );
 			if( m_nOutlineType == OUTLINE_DEFAULT ){
 				bool bType = (ProfDockSet() != 0);
 				if( bType ){
@@ -3489,7 +3488,7 @@ bool CDlgFuncList::ChangeLayout( int nId )
 			}
 			EOutlineType nOutlineType = GetOutlineTypeRedraw(m_nOutlineType);
 			pcEditView->GetCommander().Command_FUNCLIST( SHOW_NORMAL, nOutlineType );	// 開く	※ HandleCommand(F_OUTLINE,...) だと印刷プレビュー状態で実行されないので Command_FUNCLIST()
-			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( pcEditView->m_pcEditWnd->GetHwnd(), TRUE );
+			if( nId == OUTLINE_LAYOUT_BACKGROUND ) ::EnableWindow( GetEditWnd().GetHwnd(), TRUE );
 			return true;	// 解析した
 		}
 
@@ -3532,7 +3531,7 @@ bool CDlgFuncList::ChangeLayout( int nId )
 		::SetWindowPos( GetHwnd(), NULL,
 			rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOACTIVATE | ((eDockSideOld == eDockSideNew)? 0: SWP_FRAMECHANGED) );	// SWP_FRAMECHANGED 指定で WM_NCCALCSIZE（非クライアント領域の再計算）に誘導する
-		pcEditView->m_pcEditWnd->EndLayoutBars( m_bEditWndReady );
+		GetEditWnd().EndLayoutBars( m_bEditWndReady );
 	}
 	return false;
 }
@@ -3549,7 +3548,7 @@ void CDlgFuncList::OnOutlineNotify( WPARAM wParam, LPARAM lParam )
 	CEditDoc* pDoc = CEditDoc::GetInstance(0);	// 今は非表示かもしれないので (CEditView*)m_lParam は使えない
 	switch( wParam ){
 	case 0:	// 設定変更通知（ドッキングモード or サイズ）, lParam: 通知元の HWND
-		if( (HWND)lParam == pDoc->m_pcEditWnd->GetHwnd() )
+		if( (HWND)lParam == GetEditWnd().GetHwnd() )
 			return;	// 自分からの通知は無視
 		ChangeLayout( OUTLINE_LAYOUT_BACKGROUND );	// アウトライン画面を再配置
 		break;
@@ -3796,7 +3795,7 @@ BOOL CDlgFuncList::Track( POINT ptDrag )
 					::MoveWindow( GetHwnd(), rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE );
 				}
 				if( ProfDockSync() ){
-					PostOutlineNotifyToAllEditors( (WPARAM)0, (LPARAM)((CEditView*)m_lParam)->m_pcEditWnd->GetHwnd() );	// 他ウィンドウにドッキング配置変更を通知する
+					PostOutlineNotifyToAllEditors( (WPARAM)0, (LPARAM)GetEditWnd().GetHwnd() );	// 他ウィンドウにドッキング配置変更を通知する
 				}
 				return TRUE;
 			}
@@ -3868,7 +3867,7 @@ void CDlgFuncList::LoadFileTreeSetting( CFileTreeSetting& data, SFilePath& IniDi
 	data.m_szDefaultProjectIni = pFileTree->m_szProjectIni;
 	data.m_szLoadProjectIni = L"";
 	if( data.m_bProject ){
-		// 各フォルダのプロジェクトファイル読み込み
+		// 各フォルダーのプロジェクトファイル読み込み
 		WCHAR szPath[_MAX_PATH];
 		::GetLongFileName( L".", szPath );
 		wcscat( szPath, L"\\" );

@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -33,13 +33,10 @@
 //                           名前                              //
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
-extern const WCHAR g_szGStrAppName[];
-extern const CHAR  g_szGStrAppNameA[];
-extern const WCHAR g_szGStrAppNameW[];
+LPCWSTR GetAppName( void );
 
-#define GSTR_APPNAME    g_szGStrAppName		//!< アプリ名の文字列 (TCHAR版)
-#define GSTR_APPNAME_A  g_szGStrAppNameA	//!< アプリ名の文字列 (CHAR版)
-#define GSTR_APPNAME_W  g_szGStrAppNameW	//!< アプリ名の文字列 (UNICODE版)
+#define GSTR_APPNAME_W  GetAppName()		//!< アプリ名の文字列
+#define GSTR_APPNAME    GSTR_APPNAME_W
 
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 //                      テキストエリア                         //

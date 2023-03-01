@@ -13,7 +13,7 @@
 	Copyright (C) 2005, MIK, Moca, genta
 	Copyright (C) 2006, aroka, ryoji
 	Copyright (C) 2007, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -173,10 +173,6 @@ struct SSearchOption{
 	bool operator == (const SSearchOption& rhs) const noexcept;
 	bool operator != (const SSearchOption& rhs) const noexcept;
 };
-
-//2007.10.02 kobake CEditWndのインスタンスへのポインタをここに保存しておく
-class CEditWnd;
-extern CEditWnd* g_pcEditWnd;
 
 HINSTANCE G_AppInstance();
 #endif /* SAKURA_GLOBAL_BD124BE7_A850_41F3_9F5D_8A4F0E45A4C9_H_ */

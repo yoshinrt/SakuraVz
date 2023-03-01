@@ -15,7 +15,7 @@
 	Copyright (C) 2007, ryoji, maru, Uchi
 	Copyright (C) 2008, MIK
 	Copyright (C) 2010, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -46,7 +46,7 @@
 static bool GetQuoteFilePath(const wchar_t* pLine, std::wstring& str, size_t size)
 {
 	const wchar_t* pFileEnd = wcschr( pLine, L'\"' );
-	str = L"";
+	str.clear();
 	if (pFileEnd == nullptr) {
 		return false;
 	}
@@ -74,7 +74,7 @@ static bool IsFileExists2( const wchar_t* pszFile )
 static bool IsHWNDTag( const wchar_t* pLine, std::wstring& str, int* pnLen = NULL )
 {
 	if( 0 == wcsncmp(pLine, L":HWND:[", 7) ){
-		const wchar_t* pFileEnd = wcsstr( pLine, L"]" );
+		const wchar_t* pFileEnd = wcschr( pLine, L']' );
 		if( pFileEnd ){
 			const int nLen = pFileEnd - pLine + 1;
 			int i = 7;
@@ -137,7 +137,7 @@ static int GetLineColumnPos(const wchar_t* pLine)
 
 	@date 2003.04.03 genta 元ウィンドウを閉じるかどうかの引数を追加
 	@date 2004.05.13 Moca 行桁位置の指定が無い場合は、行桁を移動しない
-	@date 2011.11.24 Moca Grepフォルダ毎表示対応
+	@date 2011.11.24 Moca Grepフォルダー毎表示対応
 */
 bool CViewCommander::Command_TAGJUMP( bool bClose )
 {
@@ -186,7 +186,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 	// :HWND:[01234567] 無題1(1234,56): str
 	// :HWND:[01234567] 無題1(1234,56)  [SJIS]: str
 
-	// ノーマル/ベースフォルダ/フォルダ毎
+	// ノーマル/ベースフォルダー/フォルダー毎
 	// ◎"C:\RootFolder"
 	// ■
 	// ・FileName.ext(5395,11): str
@@ -195,14 +195,14 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 	// ・FileName.ext(5396,11): str
 	// ・FileName2.ext(123,12): str
 
-	// ノーマル/ベースフォルダ
+	// ノーマル/ベースフォルダー
 	// ■"C:\RootFolder"
 	// ・FileName.ext(5395,11): str
 	// ・SubFolders\FileName2.ext(5395,11): str
 	// ・SubFolders\FileName2.ext(5396,11): str
 	// ・SubFolders\FileName3.ext(123,11): str
 
-	// ノーマル/フォルダ毎
+	// ノーマル/フォルダー毎
 	// ■"C:\RootFolder"
 	// ・FileName.cpp(5395,11): str
 	// ■"C:\RootFolder\SubFolders"
@@ -219,7 +219,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 	// ■"C:\RootFolder\SubFolders\FileName3.ext"
 	// ・(   123,12   ): str
 
-	// ファイル毎/ベースフォルダ
+	// ファイル毎/ベースフォルダー
 	// ◎"C:\RootFolder"
 	// ■"FileName.ext"
 	// ・(  5395,11   ): str
@@ -229,7 +229,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 	// ■"SubFolders\FileName3.ext"
 	// ・(   123,12   ): str
 
-	// ファイル毎/ベースフォルダ/フォルダ毎
+	// ファイル毎/ベースフォルダー/フォルダー毎
 	// ◎"C:\RootFolder"
 	// ■
 	// ◆"FileName.ext"
@@ -241,7 +241,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 	// ◆"FileName3.ext"
 	// ・(   123,12   ): str
 
-	// ファイル毎/フォルダ毎
+	// ファイル毎/フォルダー毎
 	// ■"C:\RootFolder"
 	// ◆"FileName.ext"
 	// ・(  5395,11   ): str
@@ -351,14 +351,14 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 				if( IsHWNDTag(&pLine[2], strJumpToFile) ){
 					break;
 				}
-				// フォルダ毎：ファイル名
+				// フォルダー毎：ファイル名
 				if (GetQuoteFilePath(&pLine[2], strFile, MAX_TAG_PATH)) {
 					searchMode = TAGLIST_SUBPATH;
 					continue;
 				}
 				break;
 			}else if( 2 <= nLineLen && pLine[0] == L'■' && (pLine[1] == L'\r' || pLine[1] == L'\n') ){
-				// ルートフォルダ
+				// ルートフォルダー
 				if( searchMode == TAGLIST_ROOT ){
 					continue;
 				}
@@ -375,7 +375,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 					strJumpToFile.assign(&pLine[2 + nBgn], nPathLen);
 					break;
 				}
-				// 相対フォルダorファイル名
+				// 相対フォルダーorファイル名
 				std::wstring strPath;
 				if (GetQuoteFilePath(&pLine[2], strPath, MAX_TAG_PATH)) {
 					if (strFile.empty() == false) {
@@ -390,7 +390,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 						break;
 					}
 					// 相対パスだった→◎”を探す
-					strFile = strPath;
+					strFile = std::move(strPath);
 					searchMode = TAGLIST_ROOT;
 					continue;
 				}
@@ -404,7 +404,7 @@ bool CViewCommander::Command_TagJumpNoMessage( bool bClose )
 						break;
 					}
 					if (IsFileExists2(strPath.c_str())) {
-						strJumpToFile = strPath;
+						strJumpToFile = std::move(strPath);
 						break;
 					}
 				}
@@ -503,7 +503,7 @@ void CViewCommander::Command_TAGJUMPBACK( void )
 
 	@author	MIK
 	@date	2003.04.13	新規作成
-	@date	2003.05.12	ダイアログ表示でフォルダ等を細かく指定できるようにした。
+	@date	2003.05.12	ダイアログ表示でフォルダー等を細かく指定できるようにした。
 	@date 2008.05.05 novice GetModuleHandle(NULL)→NULLに変更
 */
 bool CViewCommander::Command_TagsMake( void )
@@ -518,7 +518,7 @@ bool CViewCommander::Command_TagsMake( void )
 	}
 	else
 	{
-		// 20100722 Moca サクラのフォルダからカレントディレクトリに変更
+		// 20100722 Moca サクラのフォルダーからカレントディレクトリに変更
 		::GetCurrentDirectory( _countof(szTargetPath), szTargetPath );
 	}
 
@@ -527,7 +527,7 @@ bool CViewCommander::Command_TagsMake( void )
 	if( !cDlgTagsMake.DoModal( G_AppInstance(), m_pCommanderView->GetHwnd(), 0, szTargetPath ) ) return false;
 
 	WCHAR	cmdline[1024];
-	/* exeのあるフォルダ */
+	/* exeのあるフォルダー */
 	WCHAR	szExeFolder[_MAX_PATH + 1];
 
 	GetExedir( cmdline, CTAGS_COMMAND );
@@ -579,7 +579,7 @@ bool CViewCommander::Command_TagsMake( void )
 
 	WCHAR	options[1024];
 	wcscpy( options, L"--excmd=n" );	//デフォルトのオプション
-	if( cDlgTagsMake.m_nTagsOpt & 0x0001 ) wcscat( options, L" -R" );	//サブフォルダも対象
+	if( cDlgTagsMake.m_nTagsOpt & 0x0001 ) wcscat( options, L" -R" );	//サブフォルダーも対象
 	if( cDlgTagsMake.m_szTagsCmdLine[0] != L'\0' )	//個別指定のコマンドライン
 	{
 		wcscat( options, L" " );
@@ -724,7 +724,7 @@ bool CViewCommander::Command_TagJumpByTagsFileMsg( bool bMsg )
 
 	@author	MIK
 	@date	2003.04.13	新規作成
-	@date	2003.05.12	フォルダ階層も考慮して探す
+	@date	2003.05.12	フォルダー階層も考慮して探す
 	@date
 */
 bool CViewCommander::Command_TagJumpByTagsFile( bool bClose )

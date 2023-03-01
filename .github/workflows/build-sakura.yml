@@ -3,11 +3,10 @@ name: build sakura
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  workflow_dispatch:
   push:
     branches:
-      - master
       - vz_mode
-      - feature/*
     paths-ignore:
       - '**/*.md'
       - .gitignore
@@ -15,12 +14,7 @@ on:
       - appveyor.yml
       - 'azure-pipelines*.yml'
       - 'ci/azure-pipelines/template*.yml'
-
   pull_request:
-    branches:
-      - master
-      - feature/*
-      - release/*
     paths-ignore:
       - '**/*.md'
       - .gitignore
@@ -49,8 +43,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     ## see https://github.com/actions/checkout
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
+        fetch-depth: 0
         submodules: 'recursive'
 
     ## see https://github.com/microsoft/setup-msbuild
@@ -90,13 +85,33 @@ jobs:
       run: build-sln.bat ${{ matrix.platform }} ${{ matrix.config }}
       shell: cmd
 
+    - name: Run unit tests
+      run: .\tests1.exe --gtest_output=xml:${{github.workspace}}\tests1.exe-googletest-${{matrix.platform}}-${{matrix.config}}.xml
+      working-directory: ${{github.workspace}}\${{matrix.platform}}\${{matrix.config}}
+      shell: pwsh
+
     - name: Install Locale Emulator
-      run: choco install locale-emulator -y
-      shell: cmd
+      run: |
+        choco install autohotkey.install --confirm
+        $LEExpandDir = "${{github.workspace}}\tools\locale-emulator"
+        $LEInitScript = "${{github.workspace}}\ci\init-locale-emulator.ahk"
+        New-Item "${LEExpandDir}" -ItemType Directory
+        Invoke-WebRequest `
+          "https://github.com/xupefei/Locale-Emulator/releases/download/v2.5.0.1/Locale.Emulator.2.5.0.1.zip" `
+          -OutFile "${LEExpandDir}\locale-emulator.zip"
+        Expand-Archive "${LEExpandDir}\locale-emulator.zip" "${LEExpandDir}"
+        Start-Process "AutoHotKey" "${LEInitScript}"
+        Start-Process "${LEExpandDir}\LEInstaller.exe"
+        echo "${LEExpandDir}" >> $env:GITHUB_PATH
+      shell: pwsh
 
     - name: Build HTML Help
       run: build-chm.bat
       shell: cmd
+
+    - name: Update/Install Inno Setup
+      run: choco upgrade innosetup --confirm
+      shell: pwsh
 
     - name: Build installer with Inno Setup
       run: build-installer.bat ${{ matrix.platform }} ${{ matrix.config }}
@@ -109,49 +124,49 @@ jobs:
 
     ## see https://github.com/actions/upload-artifact
     - name: Upload Installer
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Installer ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Installer.zip'
 
     - name: Upload Installer MD5
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Installer MD5 ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Installer.zip.md5'
 
     - name: Upload Exe
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Exe ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Exe.zip'
 
     - name: Upload Exe MD5
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Exe MD5 ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Exe.zip.md5'
 
     - name: Upload Log
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Log ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Log.zip'
 
     - name: Upload Asm
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Asm ${{ matrix.platform }} ${{ matrix.config }}
         path: 'sakura-*-Asm.zip'
 
     - name: Upload Dev
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ matrix.config == 'Release' }}
       with:
         name: Dev ${{ matrix.platform }} ${{ matrix.config }}

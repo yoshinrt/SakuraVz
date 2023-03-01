@@ -10,7 +10,7 @@
 	Copyright (C) 1998-2001, Norio Nakatani
 	Copyright (C) 2006, D. S. Koba, genta
 	Copyright (C) 2007
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -447,6 +447,6 @@ int CheckUtf8Char( const char*, const int, ECharSet*, const bool bAllow4byteCode
 int CheckUtf8Char2( const char*, const int, ECharSet*, const bool bAllow4byteCode, const int nOption );
 int CheckCesu8Char( const char*, const int, ECharSet*, const int nOption );
 // UTF-7 フォーマットチェック
-int CheckUtf7DPart( const char*, const int, char **ppNextChar, bool *pbError );
-int CheckUtf7BPart( const char*, const int, char **ppNextChar, bool *pbError, const int nOption, bool *pbNoAddPoint = NULL );
+int CheckUtf7DPart( const char* pS, size_t nLen, const char **ppNextChar, bool *pbError );
+int CheckUtf7BPart( const char* pS, size_t nLen, const char **ppNextChar, bool *pbError, const int nOption, bool *pbNoAddPoint = NULL );
 #endif /* SAKURA_CODECHECKER_62A18A31_2ECD_47B6_AEE1_38EDDAD3FF2B_H_ */

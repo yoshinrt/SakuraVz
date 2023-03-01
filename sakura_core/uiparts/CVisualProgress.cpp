@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -95,7 +95,7 @@ void CVisualProgress::_Begin()
 	//プログレスバー
 	HWND hwndProgress = CEditWnd::getInstance()->m_cStatusBar.GetProgressHwnd();
 	if( hwndProgress ){
-		::ShowWindow( hwndProgress, SW_SHOW );
+		CEditWnd::getInstance()->m_cStatusBar.ShowProgressBar(true);
 		//範囲設定・リセット
 		Progress_SetRange( hwndProgress, 0, 101 );
 		Progress_SetPos( hwndProgress, 0);
@@ -121,7 +121,7 @@ void CVisualProgress::_End()
 	HWND hwndProgress = CEditWnd::getInstance()->m_cStatusBar.GetProgressHwnd();
 	if( hwndProgress ){
 		Progress_SetPos( hwndProgress, 0);
-		::ShowWindow( hwndProgress, SW_HIDE );
+		CEditWnd::getInstance()->m_cStatusBar.ShowProgressBar(false);
 	}
 
 	//砂時計

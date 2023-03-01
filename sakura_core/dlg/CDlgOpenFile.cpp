@@ -12,7 +12,7 @@
 	Copyright (C) 2004, genta
 	Copyright (C) 2005, novice, ryoji
 	Copyright (C) 2006, ryoji, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -25,9 +25,7 @@
 extern std::shared_ptr<IDlgOpenFile> New_CDlgOpenFile_CommonFileDialog();
 extern std::shared_ptr<IDlgOpenFile> New_CDlgOpenFile_CommonItemDialog();
 
-CDlgOpenFile::CDlgOpenFile()
-{
-}
+CDlgOpenFile::CDlgOpenFile() = default;
 
 void CDlgOpenFile::Create(
 	HINSTANCE					hInstance,

@@ -6,7 +6,7 @@
 */
 /*
 	Copyright (C) 2011, nasukoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -130,9 +130,9 @@ public:
 	/*
 	||  Constructors
 	*/
-	CLoadString(){}
+	CLoadString() = default;
 	CLoadString( UINT uid ){ LoadString( uid ); }		// 文字列読み込み付きコンストラクタ
-	/*virtual*/ ~CLoadString(){}
+	/*virtual*/ ~CLoadString() = default;
 
 	/*
 	||  Attributes & Operations

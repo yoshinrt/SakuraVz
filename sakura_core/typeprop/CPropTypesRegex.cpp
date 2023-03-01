@@ -9,7 +9,7 @@
 	Copyright (C) 2002, MIK
 	Copyright (C) 2003, MIK, KEITA
 	Copyright (C) 2006, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -130,17 +130,7 @@ INT_PTR CPropTypesRegex::DispatchEvent(
 		if( CheckRegexpVersion( hwndDlg, IDC_LABEL_REGEX_VERSION, false ) == false )	//@@@ 2001.11.17 add MIK
 		{
 			::DlgItem_SetText( hwndDlg, IDC_LABEL_REGEX_VERSION, LS(STR_PROPTYPEREGEX_NOUSE) );
-			//ライブラリがなくて、使用しないになっている場合は、無効にする。
-			if( ! IsDlgButtonChecked( hwndDlg, IDC_CHECK_REGEX ) )
-			{
-				//Disableにする。
-				EnableWindow( GetDlgItem( hwndDlg, IDC_CHECK_REGEX ), FALSE );
-			}
-			else
-			{
-				//使用するになってるんだけどDisableにする。もうユーザは変更できない。
-				EnableWindow( GetDlgItem( hwndDlg, IDC_CHECK_REGEX ), FALSE );
-			}
+			EnableWindow( GetDlgItem( hwndDlg, IDC_CHECK_REGEX ), FALSE );
 		}
 		return TRUE;
 

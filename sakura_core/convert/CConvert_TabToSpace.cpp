@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -36,7 +36,7 @@
 bool CConvert_TabToSpace::DoConvert(CNativeW* pcData)
 {
 	const std::wstring_view source(pcData->GetStringPtr(), pcData->GetStringLength());
-	const std::ptrdiff_t numOfTabs = std::count(source.begin(), source.end(), L'\t');
+	const auto numOfTabs = std::count(source.cbegin(), source.cend(), L'\t');
 	std::wstring buffer;
 	buffer.reserve(source.length() + numOfTabs * (m_nTabWidth - 1));
 

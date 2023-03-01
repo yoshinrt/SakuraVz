@@ -7,7 +7,7 @@
 */
 /*
 	Copyright (C) 2008, wakura
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -115,14 +115,15 @@ public:
 	int Enumerates( LPCWSTR lpBaseFolder, VGrepEnumKeys& vecKeys, CGrepEnumOptions& option, CGrepEnumFileBase* pExceptItems = NULL ){
 		int found = 0;
 
+		const auto cchBaseFolder = lpBaseFolder ? wcsnlen_s(lpBaseFolder, 4096 - 1) : 0; // FIXME: パス長の上限は暫定値。
 		for( int i = 0; i < (int)vecKeys.size(); i++ ){
-			int baseLen = wcslen( lpBaseFolder );
+			int baseLen = cchBaseFolder;
 			LPWSTR lpPath = new WCHAR[ baseLen + wcslen( vecKeys[ i ] ) + 2 ];
 			if( NULL == lpPath ) break;
 			wcscpy( lpPath, lpBaseFolder );
 			wcscpy( lpPath + baseLen, L"\\" );
 			wcscpy( lpPath + baseLen + 1, vecKeys[ i ] );
-			// vecKeys[ i ] ==> "subdir\*.h" 等の場合に後で(ファイル|フォルダ)名に "subdir\" を連結する
+			// vecKeys[ i ] ==> "subdir\*.h" 等の場合に後で(ファイル|フォルダー)名に "subdir\" を連結する
 			const WCHAR* keyDirYen = wcsrchr( vecKeys[ i ], L'\\' );
 			const WCHAR* keyDirSlash = wcsrchr( vecKeys[ i ], L'/' );
 			const WCHAR* keyDir;
@@ -163,11 +164,11 @@ public:
 					if( IsValid( w32fd, lpName ) ){
 						if( pExceptItems && pExceptItems->IsExist( lpFullPath ) ){
 						}else{
-							m_vpItems.push_back( PairGrepEnumItem( lpName, w32fd.nFileSizeLow ) );
+							m_vpItems.emplace_back( lpName, w32fd.nFileSizeLow );
 							found++; // 2011.11.19
 							if( pExceptItems && nKeyDirLen ){
-								// フォルダを含んだパスなら検索済みとして除外指定に追加する
-								pExceptItems->m_vpItems.push_back( PairGrepEnumItem( lpFullPath, w32fd.nFileSizeLow ) );
+								// フォルダーを含んだパスなら検索済みとして除外指定に追加する
+								pExceptItems->m_vpItems.emplace_back( lpFullPath, w32fd.nFileSizeLow );
 							}else{
 								delete [] lpFullPath;
 							}

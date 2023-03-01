@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -84,6 +84,7 @@
 #include <initializer_list>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <optional>
 #include <string>
@@ -97,25 +98,32 @@
 #include "pcre2.h"
 
 #include <Windows.h>
+#include <windowsx.h>
 #include <CommCtrl.h>
 #include <HtmlHelp.h>
 #include <ImageHlp.h>
 #include <imm.h>
 #include <ObjIdl.h>
-#include <ShellAPI.h>
+#include <shellapi.h>
 #include <ShlObj.h>
 #include <wrl.h>
+
+// Windows SDKのマクロ定数「NULL」を訂正する。
+// マクロ定数「NULL」は、省略可能なポインタ型パラメータに「省略」を指定するために使う。
+// オリジナルでは「#define NULL 0」と定義されている。
+// C++ではC++11からnullptrキーワードが導入されており、
+// ポインタ型に0を渡すのは「不適切」になっている。
+// 従来通りマクロ定数「NULL」を書けるようにするため、独自に上書き定義してしまう。
+#ifdef __cplusplus
+# pragma warning( push )
+# pragma warning( disable : 4005 )
+# define NULL nullptr
+# pragma warning( pop )
+#endif // end of #ifdef __cplusplus
 
 // プロジェクト内のファイルだがプリコンパイル対象とする。
 // プリコンパイルの有無がビルドパフォーマンスに大きく影響するため。
 #include "env/DLLSHAREDATA.h"
-
-//その他
-#define malloc_char (char*)malloc
-#define GlobalLockChar  (char*)::GlobalLock
-#define GlobalLockUChar (unsigned char*)::GlobalLock
-#define GlobalLockWChar (wchar_t*)::GlobalLock
-#define GlobalLockBYTE  (BYTE*)::GlobalLock
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。

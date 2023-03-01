@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -193,4 +193,21 @@ bool CMainStatusBar::SetStatusText(int nIndex, int nOption, const WCHAR* pszText
 		StatusBar_SetText(m_hwndStatusBar, nIndex | nOption, pszText);
 	}
 	return bDraw;
+}
+
+//! プログレスバーの表示/非表示を切り替える
+void CMainStatusBar::ShowProgressBar(bool bShow) const {
+	if (m_hwndStatusBar && m_hwndProgressBar) {
+		// プログレスバーを表示するステータスバー上の領域を取得
+		RECT rcProgressArea = {};
+		ApiWrap::StatusBar_GetRect(m_hwndStatusBar, 0, &rcProgressArea);
+		if (bShow) {
+			::ShowWindow(m_hwndProgressBar, SW_SHOW);
+		} else {
+			::ShowWindow(m_hwndProgressBar, SW_HIDE);
+		}
+		// プログレスバー表示領域を再描画
+		::InvalidateRect(m_hwndStatusBar, &rcProgressArea, TRUE);
+		::UpdateWindow(m_hwndStatusBar);
+	}
 }

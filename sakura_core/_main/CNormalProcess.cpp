@@ -14,7 +14,7 @@
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2008, Uchi
 	Copyright (C) 2009, syat, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -245,7 +245,7 @@ bool CNormalProcess::InitializeProcess()
 			CNativeW cmemGrepFolder = gi.cmGrepFolder;
 			if( gi.cmGrepFolder.GetStringLength() < MAX_GREP_PATH ){
 				CSearchKeywordManager().AddToGrepFolderArr( gi.cmGrepFolder.GetStringPtr() );
-				// 2013.05.21 指定なしの場合はカレントフォルダにする
+				// 2013.05.21 指定なしの場合はカレントフォルダーにする
 				if( cmemGrepFolder.GetStringLength() == 0 ){
 					WCHAR szCurDir[_MAX_PATH];
 					::GetCurrentDirectory( _countof(szCurDir), szCurDir );
@@ -275,7 +275,7 @@ bool CNormalProcess::InitializeProcess()
 			wcsncpy( dlg->m_szFile, gi.cmGrepFile.GetStringPtr(), nSize );	/* 検索ファイル */
 			dlg->m_szFile[nSize-1] = L'\0';
 			nSize = _countof2(dlg->m_szFolder);
-			wcsncpy( dlg->m_szFolder, cmemGrepFolder.GetStringPtr(), nSize );	/* 検索フォルダ */
+			wcsncpy( dlg->m_szFolder, cmemGrepFolder.GetStringPtr(), nSize );	/* 検索フォルダー */
 			dlg->m_szFolder[nSize-1] = L'\0';
 			
 			if( gi.cmGrepRep.GetStringLength() == 0 ){

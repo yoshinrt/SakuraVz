@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -50,6 +50,6 @@ protected:
 
 	static int _UniToUtf7SetD_block( const wchar_t* pSrc, const int nSrcLen, char* pDst );
 	static int _UniToUtf7SetB_block( const wchar_t* pSrc, const int nSrcLen, char* pDst );
-	static int UniToUtf7( const wchar_t* pSrc, const int nSrcLen, char* pDst );
+	static int UniToUtf7( const wchar_t* pSrc, const int nSrcLen, char* pDst, int nDstLen );
 };
 #endif /* SAKURA_CUTF7_55498766_1C8A_416B_9F39_88D3D83B8B65_H_ */

@@ -16,7 +16,7 @@
 	Copyright (C) 2009, ryoji, genta
 	Copyright (C) 2010, ryoji
 	Copyright (C) 2011, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -986,8 +986,8 @@ void CViewCommander::Command_REPLACE_ALL()
 					  out = left < right && (...) というのがまさに対応を迫られた痕跡ですよ。
 				*/
 				const CLayoutInt firstLeft =  ptNewFrom.x - raggedLeftDiff;
-				const CLogicInt  lastRight = (Int)ptNew.x - colDif;
 				if (ptNewFrom.y == ptNew.y) { // 一番よくあるケースではレイアウトの取得・計算が不要。
+					const CLogicInt lastRight = (Int)ptNew.x - colDif;
 					out = firstLeft < sRangeA.GetFrom().x || boxRight.x < lastRight;
 				} else {
 					for (CLayoutInt ll = ptNewFrom.y; ll <= ptNew.y; ++ll) { // ll = Layout Line

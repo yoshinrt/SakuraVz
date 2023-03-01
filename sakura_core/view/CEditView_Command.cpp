@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -77,14 +77,11 @@ bool CEditView::TagJumpSub(
 	//	予め絶対パスに変換する．(キーワードヘルプジャンプで用いる)
 	// 2007.05.19 ryoji 相対パスは設定ファイルからのパスを優先
 	WCHAR	szJumpToFile[1024];
-	HWND hwndTarget = NULL;
-	if( 0 == wcsncmp(pszFileName, L":HWND:[", 7) ){
-#ifdef _WIN64
-		_stscanf(pszFileName + 7, L"%016I64x", &hwndTarget);
-#else
-		_stscanf(pszFileName + 7, L"%08x", &hwndTarget);
-#endif
-		if( !IsSakuraMainWindow(hwndTarget) ){
+	HWND hwndTarget = nullptr;
+	constexpr auto& szTargetPrefix = L":HWND:[";
+	constexpr auto cchTargetPrefix = _countof(szTargetPrefix) - 1;
+	if( 0 == wcsncmp(pszFileName, szTargetPrefix, cchTargetPrefix) ){
+		if( 0 >= ::swscanf_s(pszFileName + cchTargetPrefix, L"%x", (size_t*)&hwndTarget) || !IsSakuraMainWindow(hwndTarget) ){
 			return false;
 		}
 	}else{
@@ -188,7 +185,7 @@ bool CEditView::TagJumpSub(
 
 /*! 指定拡張子のファイルに対応するファイルを開く補助関数
 
-	@date 2003.06.28 Moca ヘッダ・ソースファイルオープン機能のコードを統合
+	@date 2003.06.28 Moca ヘッダー・ソースファイルオープン機能のコードを統合
 	@date 2008.04.09 ryoji 処理対象(file_ext)と開く対象(open_ext)の扱いが逆になっていたのを修正
 */
 BOOL CEditView::OPEN_ExtFromtoExt(
@@ -413,7 +410,7 @@ BOOL CEditView::ChangeCurRegexp( bool bRedrawIfChanged )
 		if( bRedrawIfChanged ){
 			Redraw();
 		}
-		m_pcEditWnd->m_cToolbar.AcceptSharedSearchKey();
+		GetEditWnd().m_cToolbar.AcceptSharedSearchKey();
 		return TRUE;
 	}
 	if( ! m_bCurSrchKeyMark ){
@@ -486,7 +483,7 @@ void CEditView::DrawBracketCursorLine(bool bDraw)
 
 HWND CEditView::StartProgress()
 {
-	HWND hwndProgress = m_pcEditWnd->m_cStatusBar.GetProgressHwnd();
+	HWND hwndProgress = GetEditWnd().m_cStatusBar.GetProgressHwnd();
 	if( NULL != hwndProgress ){
 		::ShowWindow( hwndProgress, SW_SHOW );
 		Progress_SetRange( hwndProgress, 0, 101 );

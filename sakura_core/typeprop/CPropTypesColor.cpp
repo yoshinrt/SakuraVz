@@ -15,7 +15,7 @@
 	Copyright (C) 2007, ryoji, genta
 	Copyright (C) 2008, nasukoji
 	Copyright (C) 2009, ryoji, genta
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -28,6 +28,7 @@
 #include "CDlgSameColor.h"
 #include "CDlgKeywordSelect.h"
 #include "view/colors/EColorIndexType.h"
+#include "view/CViewFont.h"
 #include "uiparts/CGraphics.h"
 #include "util/shell.h"
 #include "util/window.h"
@@ -184,7 +185,7 @@ LRESULT APIENTRY ColorList_SubclassProc( HWND hwnd, UINT uMsg, WPARAM wParam, LP
 		if( -1 == nIndex ){
 			break;
 		}
-		if( 18 <= xPos && xPos <= rcItem.right - 29 ){	// 2009.02.22 ryoji 有効範囲の制限追加
+		if( DpiScaleX(18) <= xPos && xPos <= rcItem.right - DpiScaleX(29) ){	// 2009.02.22 ryoji 有効範囲の制限追加
 			List_SetCurSel( hwnd, nIndex );
 			::SendMessageCmd( ::GetParent( hwnd ), WM_COMMAND, MAKELONG( IDC_LIST_COLORS, LBN_SELCHANGE ), (LPARAM)hwnd );
 			pColorInfo = (ColorInfo*)List_GetItemData( hwnd, nIndex );
@@ -202,7 +203,7 @@ LRESULT APIENTRY ColorList_SubclassProc( HWND hwnd, UINT uMsg, WPARAM wParam, LP
 		if( -1 == nIndex ){
 			break;
 		}
-		if( 18 <= xPos && xPos <= rcItem.right - 29 ){	// 2009.02.22 ryoji 有効範囲の制限追加
+		if( DpiScaleX(18) <= xPos && xPos <= rcItem.right - DpiScaleX(29) ){	// 2009.02.22 ryoji 有効範囲の制限追加
 			pColorInfo = (ColorInfo*)List_GetItemData( hwnd, nIndex );
 			/* 太字で表示 */
 			if( 0 == (g_ColorAttributeArr[nIndex].fAttribute & COLOR_ATTRIB_NO_BOLD) )	// 2006.12.18 ryoji フラグ利用で簡素化
@@ -219,7 +220,7 @@ LRESULT APIENTRY ColorList_SubclassProc( HWND hwnd, UINT uMsg, WPARAM wParam, LP
 		}
 		pColorInfo = (ColorInfo*)List_GetItemData( hwnd, nIndex );
 		/* 色分け/表示 する */
-		if( 2 <= xPos && xPos <= 16
+		if( DpiScaleX(2) <= xPos && xPos <= DpiScaleX(16)
 			&& ( 0 == (g_ColorAttributeArr[nIndex].fAttribute & COLOR_ATTRIB_FORCE_DISP) )	// 2006.12.18 ryoji フラグ利用で簡素化
 			)
 		{
@@ -320,7 +321,16 @@ INT_PTR CPropTypesColor::DispatchEvent(
 		m_wpColorListProc = (WNDPROC) ::SetWindowLongPtr( hwndListColor, GWLP_WNDPROC, (LONG_PTR)ColorList_SubclassProc );
 		// 2005.11.30 Moca カスタム色を保持
 		::SetProp( hwndListColor, TSTR_PTRCUSTOMCOLORS, m_dwCustColors );
-		
+
+		{
+			LOGFONT	lf = {};
+			const auto hFont = (HFONT)::SendMessageAny(hwndListColor, WM_GETFONT, 0, 0);
+			::GetObject(hFont, sizeof(LOGFONT), &lf);
+			m_pViewFont = std::make_shared<CViewFont>(&lf);
+		}
+		SystemParametersInfo(SPI_GETFOCUSBORDERWIDTH, 0, &m_uFocusBorderWidth, 0);
+		SystemParametersInfo(SPI_GETFOCUSBORDERHEIGHT, 0, &m_uFocusBorderHeight, 0);
+
 		return TRUE;
 
 	case WM_COMMAND:
@@ -1112,26 +1122,23 @@ void CPropTypesColor::DrawColorListItem( DRAWITEMSTRUCT* pDis )
 		gr.SetTextForeColor( ::GetSysColor( COLOR_WINDOWTEXT ) );
 	}
 
-	rc1.left+= (2 + 16);
-	rc1.top += 2;
-	rc1.right -= ( 2 + 27 );
-	rc1.bottom -= 2;
+	const int xOffset = ::MulDiv(m_uFocusBorderWidth, 2, 3);
+	const int yOffset = ::MulDiv(m_uFocusBorderHeight, 2, 3); // 少し重ならせる
+	const int colorSampleWidth = DpiScaleX(12);
+	rc1.left += xOffset + DpiScaleX(16);
+	rc1.top += yOffset;
+	rc1.right -= 2 * (colorSampleWidth + xOffset) + DpiScaleX(2);
+	rc1.bottom -= yOffset;
 	/* 選択ハイライト矩形 */
 	gr.FillMyRect(rc1);
 	/* テキスト */
 	::SetBkMode( gr, TRANSPARENT );
-	::TextOut( gr, rc1.left, rc1.top, pColorInfo->m_szName, wcslen( pColorInfo->m_szName ) );
-	if( pColorInfo->m_sFontAttr.m_bBoldFont ){	/* 太字か */
-		::TextOut( gr, rc1.left + 1, rc1.top, pColorInfo->m_szName, wcslen( pColorInfo->m_szName ) );
-	}
-	if( pColorInfo->m_sFontAttr.m_bUnderLine ){	/* 下線か */
-		SIZE	sz;
-		::GetTextExtentPoint32( gr, pColorInfo->m_szName, wcslen( pColorInfo->m_szName ), &sz );
-		::MoveToEx( gr, rc1.left,		rc1.bottom - 2, NULL );
-		::LineTo( gr, rc1.left + sz.cx,	rc1.bottom - 2 );
-		::MoveToEx( gr, rc1.left,		rc1.bottom - 1, NULL );
-		::LineTo( gr, rc1.left + sz.cx,	rc1.bottom - 1 );
-	}
+	SFontAttr sFontAttr;
+	sFontAttr.m_bBoldFont = pColorInfo->m_sFontAttr.m_bBoldFont;
+	sFontAttr.m_bUnderLine = pColorInfo->m_sFontAttr.m_bUnderLine;
+	gr.PushMyFont(m_pViewFont->ChooseFontHandle(0, sFontAttr));
+	::DrawText(gr, pColorInfo->m_szName, -1, &rc1, DT_SINGLELINE | DT_VCENTER);
+	gr.PopMyFont();
 
 	/* アイテムにフォーカスがある */	// 2006.05.01 ryoji 描画条件の不正を修正
 	if( pDis->itemState & ODS_FOCUS ){
@@ -1140,34 +1147,27 @@ void CPropTypesColor::DrawColorListItem( DRAWITEMSTRUCT* pDis )
 
 	/* 「色分け/表示する」のチェック */
 	rc1 = pDis->rcItem;
-	rc1.left += 2;
-	rc1.top += 3;
-	rc1.right = rc1.left + 12;
-	rc1.bottom = rc1.top + 12;
+	rc1.left += DpiScaleX(2);
+	rc1.top += DpiScaleY(3);
+	rc1.right = rc1.left + DpiScaleX(12);
+	rc1.bottom = rc1.top + DpiScaleY(12);
 	if( pColorInfo->m_bDisp ){	/* 色分け/表示する */
 		// 2006.04.26 ryoji テキスト色を使う（「ハイコントラスト黒」のような設定でも見えるように）
 		gr.SetPen( ::GetSysColor( COLOR_WINDOWTEXT ) );
-
-		::MoveToEx( gr,	rc1.left + 2, rc1.top + 6, NULL );
-		::LineTo( gr,	rc1.left + 5, rc1.bottom - 3 );
-		::LineTo( gr,	rc1.right - 2, rc1.top + 4 );
-		rc1.top -= 1;
-		rc1.bottom -= 1;
-		::MoveToEx( gr,	rc1.left + 2, rc1.top + 6, NULL );
-		::LineTo( gr,	rc1.left + 5, rc1.bottom - 3 );
-		::LineTo( gr,	rc1.right - 2, rc1.top + 4 );
-		rc1.top -= 1;
-		rc1.bottom -= 1;
-		::MoveToEx( gr,	rc1.left + 2, rc1.top + 6, NULL );
-		::LineTo( gr,	rc1.left + 5, rc1.bottom - 3 );
-		::LineTo( gr,	rc1.right - 2, rc1.top + 4 );
+		// チェックマークを2本の直線で描画する際に使用する3点の座標
+		const POINT pts[3] = {
+			{ rc1.left + DpiScaleX(2), rc1.top + DpiScaleY(3) }, // 左
+			{ rc1.left + DpiScaleX(5), rc1.bottom - DpiScaleY(6) }, // 中
+			{ rc1.right - DpiScaleX(2), rc1.top + DpiScaleY(1) }, // 右
+		};
+		const int nrep = DpiScaleY(3); // 線幅1の直線を座標を縦にずらして複数回描画して太線描画
+		for (int i = 0; i < nrep; ++i) {
+			::MoveToEx( gr, pts[0].x, pts[0].y + i, NULL );
+			::LineTo( gr, pts[1].x, pts[1].y + i );
+			::LineTo( gr, pts[2].x, pts[2].y + i );
+		}
 	}
 //	return;
-
-	const int colorSampleWidth = DpiScaleX(12);
-	const int scaled1 = DpiScaleX(1);
-	const int scaled2 = DpiScaleX(2);
-	const int scaled3 = DpiScaleX(3);
 
 	// 2002/11/02 Moca 比較方法変更
 //	if( 0 != strcmp( "カーソル行アンダーライン", pColorInfo->m_szName ) )
@@ -1175,34 +1175,34 @@ void CPropTypesColor::DrawColorListItem( DRAWITEMSTRUCT* pDis )
 	{
 		/* 背景色 見本矩形 */
 		rc1 = pDis->rcItem;
-		rc1.left = rc1.right - (colorSampleWidth + scaled1);
-		rc1.top += scaled2;
+		rc1.left = rc1.right - colorSampleWidth - xOffset;
+		rc1.top += DpiScaleY(2);
 		rc1.right = rc1.left + colorSampleWidth;
-		rc1.bottom -= scaled2;
+		rc1.bottom -= DpiScaleY(2);
 
 		m_bgColorSampleLeft = rc1.left;
 		m_bgColorSampleRight = rc1.right;
 
 		gr.SetBrushColor( pColorInfo->m_sColorAttr.m_cBACK );
 		gr.SetPen( cRim );
-		::RoundRect( pDis->hDC, rc1.left, rc1.top, rc1.right, rc1.bottom , scaled3, scaled3 );
+		::RoundRect( pDis->hDC, rc1.left, rc1.top, rc1.right, rc1.bottom, DpiScaleX(3), DpiScaleY(3) );
 	}
 
 	if( 0 == (g_ColorAttributeArr[pColorInfo->m_nColorIdx].fAttribute & COLOR_ATTRIB_NO_TEXT) )
 	{
 		/* 前景色 見本矩形 */
 		rc1 = pDis->rcItem;
-		rc1.left = rc1.right - (2 * colorSampleWidth + scaled3);
-		rc1.top += scaled2;
+		rc1.left = rc1.right - colorSampleWidth - xOffset - colorSampleWidth - DpiScaleX(2);
+		rc1.top += DpiScaleY(2);
 		rc1.right = rc1.left + colorSampleWidth;
-		rc1.bottom -= scaled2;
+		rc1.bottom -= DpiScaleY(2);
 
 		m_fgColorSampleLeft = rc1.left;
 		m_fgColorSampleRight = rc1.right;
 
 		gr.SetBrushColor( pColorInfo->m_sColorAttr.m_cTEXT );
 		gr.SetPen( cRim );
-		::RoundRect( pDis->hDC, rc1.left, rc1.top, rc1.right, rc1.bottom , scaled3, scaled3 );
+		::RoundRect( pDis->hDC, rc1.left, rc1.top, rc1.right, rc1.bottom , DpiScaleX(3), DpiScaleY(3));
 	}
 }
 

@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -28,7 +28,6 @@
 #pragma once
 
 #include "doc/CDocListener.h"
-#include "_os/CClipboard.h"
 #include "COpeBuf.h"
 
 class CEditDoc;
@@ -96,15 +95,6 @@ public:
 	}
 
 	//! クリップボードから貼り付け可能か？
-	bool IsEnablePaste( void ) const
-	{
-		return
-			// テキストスタックモードで，スタックにデータが有る
-			GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack &&
-			GetDllShareData().m_TextStack.GetSize() != 0 ||
-			
-			// クリップボードにデータが有る
-			CClipboard::HasValidData();
-	}
+	bool IsEnablePaste( void ) const;
 };
 #endif /* SAKURA_CDOCEDITOR_87202DA6_D60E_4235_AD2F_02507F4E101A_H_ */

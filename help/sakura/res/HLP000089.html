@@ -17,7 +17,6 @@
 </HEAD>
 <BODY>
 <script type="text/javascript" src="item.js"></script>
-<script type="text/javascript">HHCtrlPopup();</script>
 <noscript>[<a href="HLP000001.html">目次</a>]<br></noscript>
 <h2>利用可能な正規表現</h2>
 使える(かも知れない)正規表現についての解説です。すべての動作を確認することは難しく、またライブラリの更新により動作が変更になることもあります。最終的にはご自分でご確認ください。<br>
@@ -48,8 +47,8 @@
 <tr><td><code><span style="color: blue">x</span>-<span style="color: blue">y</span></code></td><td>範囲<br><code>[A-Z]</code>は、「A」から「Z」までの文字のどれか1つとマッチします。</td></tr>
 <tr><td><code>[<span style="color: blue">...</span>]</code></td><td><span style="color: green">(鬼)</span> 文字集合内文字集合</td></tr>
 <tr><td><code><span style="color: blue">..</span>&amp;&amp;<span style="color: blue">..</span></code></td><td><span style="color: green">(鬼)</span> 積演算</td></tr>
-<tr><td><code>[:<span style="color: blue">xxxxx</span>:]</code></td><td><span style="color: green">(鬼)</span> <a href="http://www.geocities.jp/kosako3/oniguruma/doc/RE.ja.txt" target="_blank" rel="noopener">POSIXブラケット</a></td></tr>
-<tr><td><code>[:^<span style="color: blue">xxxxx</span>:]</code></td><td><span style="color: green">(鬼)</span> <a href="http://www.geocities.jp/kosako3/oniguruma/doc/RE.ja.txt" target="_blank" rel="noopener">POSIXブラケット</a>（否定）</td></tr>
+<tr><td><code>[:<span style="color: blue">xxxxx</span>:]</code></td><td><span style="color: green">(鬼)</span> <a href="https://github.com/kkos/oniguruma/blob/master/doc/RE.ja" target="_blank" rel="noopener">POSIXブラケット</a></td></tr>
+<tr><td><code>[:^<span style="color: blue">xxxxx</span>:]</code></td><td><span style="color: green">(鬼)</span> <a href="https://github.com/kkos/oniguruma/blob/master/doc/RE.ja" target="_blank" rel="noopener">POSIXブラケット</a>（否定）</td></tr>
 </table>
 <span style="color: green">(鬼)</span> はbregonig.dllのみ<br>
 <br>
@@ -98,21 +97,19 @@
 <table style="border-collapse: collapse;" border="1" bordercolor="#111111" cellpadding="0" cellspacing="0">
 	<caption style="display: none">無題</caption>
 <tr style="display: none"><th scope="col"></th><th scope="col"></th></tr>
-<tr><td><code>.</code></td><td>\nを除く任意の1文字 <strong>[^\n]</strong>と同じ<br><span style="color: green">(Unicode版)</span> 改行を除く任意の1文字。<strong>[^\r\n]</strong>と同じ
-<a href="javascript:id=hhctrl.TextPopup('この処理は正規表現DLLではなくsakura側が入力された.を[^\\r\\n]に置き換えています。','ＭＳゴシック,11',9,9,-1,-1)">*1</a>
-</td></tr>
+<tr><td><code>.</code></td><td>\nを除く任意の1文字 <strong>[^\n]</strong>と同じ<br><span style="color: green">(Unicode版)</span> 改行を除く任意の1文字。<strong>[^\r\n]</strong>と同じ *1</td></tr>
 <tr><td><code>\w</code></td><td>単語の構成文字 <strong>[0-9A-Za-z_]</strong>と同じ<br><span style="color: green">(鬼)</span> 2バイト文字も含む</td></tr>
 <tr><td><code>\W</code></td><td>単語の構成文字以外</td></tr>
 <tr><td><code>\s</code></td><td>空白類文字 [ \t\v\x0a\x0d]と同じ<br><span style="color: green">(鬼)</span> <code>[:space:]</code>と同じ</td></tr>
 <tr><td><code>\S</code></td><td>空白類文字以外</td></tr>
 <tr><td><code>\d</code></td><td>10進数字 <br><span style="color: green">(Unicode版)</span> 2バイト文字=全角数字も含む</td></tr>
 <tr><td><code>\D</code></td><td>10進数字以外</td></tr>
-<tr><td><code>\p{<span style="color: blue">property-name</span>}</code></td><td><span style="color: green">(鬼)</span> <a href="http://www.geocities.jp/kosako3/oniguruma/doc/RE.ja.txt" target="_blank" rel="noopener">キャラクタプロパティ</a></td></tr>
-<tr><td><code>\p{^<span style="color: blue">property-name</span>}<br>\P{<span style="color: blue">property-name</span>}</code></td><td><span style="color: green">(鬼)</span> <a href="http://www.geocities.jp/kosako3/oniguruma/doc/RE.ja.txt" target="_blank" rel="noopener">キャラクタプロパティ</a>（否定）</td></tr>
+<tr><td><code>\p{<span style="color: blue">property-name</span>}</code></td><td><span style="color: green">(鬼)</span> <a href="https://github.com/kkos/oniguruma/blob/master/doc/UNICODE_PROPERTIES" target="_blank" rel="noopener">キャラクタプロパティ</a></td></tr>
+<tr><td><code>\p{^<span style="color: blue">property-name</span>}<br>\P{<span style="color: blue">property-name</span>}</code></td><td><span style="color: green">(鬼)</span> <a href="https://github.com/kkos/oniguruma/blob/master/doc/UNICODE_PROPERTIES" target="_blank" rel="noopener">キャラクタプロパティ</a>（否定）</td></tr>
 </table>
 <span style="color: green">(鬼)</span> はbregonig.dllのみ<br>
 <span style="color: green">(Unicode版)</span> はUnicode版のサクラエディタ<br>
-
+<small>*1 この処理は正規表現DLLではなくsakura側が入力された.を[^\r\n]に置き換えています。</small><br>
 <h4>位置(錨)</h4>
 <table style="border-collapse: collapse;" border="1" bordercolor="#111111" cellpadding="0" cellspacing="0">
 	<caption style="display: none">無題</caption>

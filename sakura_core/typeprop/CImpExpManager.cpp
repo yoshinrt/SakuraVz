@@ -6,7 +6,7 @@
 */
 /*
 	Copyright (C) 2010, Uchi, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -133,7 +133,7 @@ bool CImpExpManager::ImportUI( HINSTANCE hInstance, HWND hwndParent )
 		hInstance,
 		hwndParent,
 		GetDefaultExtension(),
-		GetDllShareData().m_sHistory.m_szIMPORTFOLDER // インポート用フォルダ
+		GetDllShareData().m_sHistory.m_szIMPORTFOLDER // インポート用フォルダー
 	);
 	WCHAR	szPath[_MAX_PATH + 1];
 	szPath[0] = L'\0';
@@ -180,7 +180,7 @@ bool CImpExpManager::ExportUI( HINSTANCE hInstance, HWND hwndParent )
 		hInstance,
 		hwndParent,
 		GetDefaultExtension(),
-		GetDllShareData().m_sHistory.m_szIMPORTFOLDER // インポート用フォルダ
+		GetDllShareData().m_sHistory.m_szIMPORTFOLDER // インポート用フォルダー
 	);
 	WCHAR			szPath[_MAX_PATH + 1];
 	szPath[0] = L'\0';
@@ -357,7 +357,6 @@ bool CImpExpType::Import( const wstring& sFileName, wstring& sErrMsg )
 	wchar_t* pSlashPos;
 	wchar_t	szFileName[_MAX_PATH+1];
 	bool	bCase;
-	wstring	sErrMag;
 	CommonSetting& common = m_pShareData->m_Common;
 
 	// 強調キーワード
@@ -566,7 +565,7 @@ bool CImpExpColors::Import( const wstring& sFileName, wstring& sErrMsg )
 	}
 
 	/* ファイル先頭 */
-	//ヘッダ読取
+	//ヘッダー読取
 	wstring szHeader = in.ReadLineW();
 	if(szHeader.length()>=2) {
 		//コメントを抜く
@@ -636,7 +635,7 @@ bool CImpExpRegex::Import( const wstring& sFileName, wstring& sErrMsg )
 		if( line.length() < 12 ) continue;
 		if( wmemcmp(&line[0], L"RxKey[", 6) != 0 ) continue;
 		if( wmemcmp(&line[9], L"]=", 2) != 0 ) continue;
-		auto sepPos = line.find_first_of(L",", 11); // ColorName と RegexKeyword の間の区切り文字の存在を確認する
+		auto sepPos = line.find_first_of(L',', 11); // ColorName と RegexKeyword の間の区切り文字の存在を確認する
 		if( sepPos == decltype(line)::npos ) continue;
 		line[sepPos] = L'\0'; // 区切り文字をNULL終端に置き換える事で標準Cライブラリの関数で ColorName を読み取りやすくする
 		const wchar_t* pColorNameInLine = &line[11];
@@ -766,10 +765,10 @@ bool CImpExpKeyHelp::Import( const wstring& sFileName, wstring& sErrMsg )
 		WCHAR *p1, *p2, *p3;
 		p1 = &buff[9];
 		p3 = p1;					//結果確認用に初期化
-		if( NULL != (p2=wcsstr(p1,LTEXT(","))) ){
+		if( p2 = wcschr(p1, L',') ){
 			*p2 = LTEXT('\0');
 			p2 += 1;				//カンマの次が、次の要素
-			if( NULL != (p3=wcsstr(p2,LTEXT(","))) ){
+			if( NULL != (p3=wcschr(p2,LTEXT(','))) ){
 				*p3 = LTEXT('\0');
 				p3 += 1;			//カンマの次が、次の要素
 			}
@@ -910,7 +909,7 @@ bool CImpExpKeybind::Import( const wstring& sFileName, wstring& sErrMsg )
 			sErrMsg += sFileName;
 			return false;
 		}
-		// ヘッダチェック
+		// ヘッダーチェック
 		wstring	szLine = in.ReadLineW();
 		bVer2 = true;
 		if ( wcscmp(szLine.c_str(), WSTR_KEYBIND_HEAD2) != 0)	bVer2 = false;
@@ -1034,7 +1033,7 @@ bool CImpExpKeybind::Export( const wstring& sFileName, wstring& sErrMsg )
 	// 書き込みモード設定
 	cProfile.SetWritingMode();
 
-	// ヘッダ
+	// ヘッダー
 	StaticString<wchar_t,256> szKeydataHead = WSTR_KEYBIND_HEAD4;
 	cProfile.IOProfileData( szSecInfo, L"KEYBIND_VERSION", szKeydataHead );
 	cProfile.IOProfileData(szSecInfo, L"KEYBIND_COUNT", m_Common.m_sKeyBind.m_nKeyNameArrNum );
@@ -1060,7 +1059,7 @@ bool CImpExpCustMenu::Import( const wstring& sFileName, wstring& sErrMsg )
 {
 	const auto& strPath = sFileName;
 
-	//ヘッダ確認
+	//ヘッダー確認
 	CTextInputStream in(strPath.c_str());
 	if (!in) {
 		sErrMsg = LS(STR_IMPEXP_ERR_FILEOPEN);
@@ -1101,14 +1100,14 @@ bool CImpExpCustMenu::Export( const wstring& sFileName, wstring& sErrMsg )
 	out.Close();
 
 	/* カスタムメニュー情報 */
-	//ヘッダ
+	//ヘッダー
 	CDataProfile	cProfile;
 	CommonSetting_CustomMenu* menu=&m_Common.m_sCustomMenu;
 
 	// 書き込みモード設定
 	cProfile.SetWritingMode();
 
-	//ヘッダ
+	//ヘッダー
 	cProfile.IOProfileData(szSecInfo, L"MENU_VERSION", StringBufferW(WSTR_CUSTMENU_HEAD_V2));
 	int iWork = MAX_CUSTOM_MENU;
 	cProfile.IOProfileData(szSecInfo, L"MAX_CUSTOM_MENU", iWork );
@@ -1224,7 +1223,7 @@ bool CImpExpMainMenu::Import( const wstring& sFileName, wstring& sErrMsg )
 {
 	const auto& strPath = sFileName;
 
-	//ヘッダ確認
+	//ヘッダー確認
 	CTextInputStream in(strPath.c_str());
 	if (!in) {
 		sErrMsg = LS(STR_IMPEXP_ERR_FILEOPEN);
@@ -1264,14 +1263,14 @@ bool CImpExpMainMenu::Export( const wstring& sFileName, wstring& sErrMsg )
 
 	out.Close();
 
-	//ヘッダ
+	//ヘッダー
 	CDataProfile	cProfile;
 	CommonSetting_MainMenu* menu=&m_Common.m_sMainMenu;
 
 	// 書き込みモード設定
 	cProfile.SetWritingMode();
 
-	//ヘッダ
+	//ヘッダー
 	cProfile.IOProfileData(szSecInfo, L"MENU_VERSION", StringBufferW(WSTR_MAINMENU_HEAD_V1));
 	
 	//内容

@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -24,7 +24,7 @@
 */
 #include "StdAfx.h"
 #include "charset/CCodeMediator.h"
-#include "charset/icu4c/CharsetDetector.h"
+#include "charset/CharsetDetector.h"
 #include "charset/CESI.h"
 #include "io/CBinaryStream.h"
 #include "mem/CMemory.h"

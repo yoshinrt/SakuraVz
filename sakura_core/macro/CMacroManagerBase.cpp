@@ -6,7 +6,7 @@
 */
 /*
 	Copyright (C) 2002, genta
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -64,7 +64,7 @@ void CMacroBeforeAfter::ExecKeyMacroAfter( class CEditView* pcEditView, int flag
 			pcEditView->SetUndoBuffer();
 		}
 	}
-	bool bDrawSwitch = pcEditView->m_pcEditWnd->SetDrawSwitchOfAllViews(m_bDrawSwitchOld);
+	bool bDrawSwitch = GetEditWnd().SetDrawSwitchOfAllViews(m_bDrawSwitchOld);
 	
 	// 表示 off→on にしたら再表示
 	if( !bDrawSwitch && m_bDrawSwitchOld ){

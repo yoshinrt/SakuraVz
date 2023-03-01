@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,9 +41,8 @@ public:
 	CRangeBase(Me&&) noexcept = default;
 	Me& operator = (Me&&) noexcept = default;
 	CRangeBase(const PointType& _ptFrom,const PointType& _ptTo)
+		: m_ptFrom(_ptFrom), m_ptTo(_ptTo)
 	{
-		m_ptFrom=_ptFrom;
-		m_ptTo=_ptTo;
 	}
 	~CRangeBase() = default;
 

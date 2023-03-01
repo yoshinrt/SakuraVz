@@ -10,7 +10,7 @@
 	Copyright (C) 2011, Moca, syat
 	Copyright (C) 2012, ryoji, Moca
 	Copyright (C) 2013, Moca, Uchi
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -299,6 +299,38 @@ CLayoutInt CCaret::MoveCursor(
 	}
 	//	To Here 2007.07.28 じゅうじ
 	if( bScroll ){
+		if( abs( (Int)nScrollRowNum ) < 7 &&
+			( m_pEditView->GetSelectionInfo().IsMouseSelecting() || m_pEditView->m_bDragMode )){
+			struct ScrollRowRecord{
+				Int nScrollRowNum;
+				DWORD dwTime;
+			};
+			static std::array<ScrollRowRecord, 512> s_records{};
+			static size_t s_recordPos = 0;
+			DWORD dwNow = GetTickCount();
+			Int nScrollRowsPerTiming = 0;
+			DWORD dwPerTiming = 80;
+			if( nScrollRowNum > 0 && m_pEditView->m_bDragMode ){
+				dwPerTiming = 30;
+			}
+
+			std::for_each(s_records.begin(), s_records.end(),
+				[ dwNow, dwPerTiming, &nScrollRowsPerTiming ]( ScrollRowRecord rec ){
+					if( ( dwNow - rec.dwTime ) <= dwPerTiming ){
+						nScrollRowsPerTiming += rec.nScrollRowNum;
+					}
+			});
+			if( abs( nScrollRowsPerTiming ) >= 1 ){
+				nScrollRowNum = 0;
+			}
+			auto& rec = s_records[s_recordPos];
+			rec.dwTime = dwNow;
+			rec.nScrollRowNum = nScrollRowNum;
+			++s_recordPos;
+			if( s_recordPos >=  s_records.size() ){
+				s_recordPos = 0;
+			}
+		}
 		/* スクロール */
 		if( t_abs( nScrollColNum ) >= m_pEditView->GetTextArea().m_nViewColNum ||
 			t_abs( nScrollRowNum ) >= m_pEditView->GetTextArea().m_nViewRowNum ){
@@ -306,7 +338,7 @@ CLayoutInt CCaret::MoveCursor(
 			if( m_pEditView->GetDrawSwitch() ){
 				m_pEditView->InvalidateRect( NULL );
 				m_pEditView->UpdateWindow();
-				if( m_pEditView->m_pcEditWnd->GetMiniMap().GetHwnd() ){
+				if( GetEditWnd().GetMiniMap().GetHwnd() ){
 					m_pEditView->MiniMapRedraw(true);
 				}
 			}
@@ -341,7 +373,7 @@ CLayoutInt CCaret::MoveCursor(
 
 			if( m_pEditView->GetDrawSwitch() ){
 				m_pEditView->ScrollDraw(nScrollRowNum, nScrollColNum, rcScroll, rcClip, rcClip2);
-				if( m_pEditView->m_pcEditWnd->GetMiniMap().GetHwnd() ){
+				if( GetEditWnd().GetMiniMap().GetHwnd() ){
 					m_pEditView->MiniMapRedraw(false);
 				}
 			}
@@ -388,7 +420,7 @@ CLayoutInt CCaret::MoveCursor(
 
 	// アウトライン表示の選択位置を更新
 	CLayoutPoint poCaret = GetCaretLayoutPos();
-	m_pEditDoc->m_pcEditWnd->m_cDlgFuncList.NotifyCaretMovement( poCaret.GetY2() + 1, poCaret.GetX2() + 1 );
+	GetEditWnd().m_cDlgFuncList.NotifyCaretMovement( poCaret.GetY2() + 1, poCaret.GetX2() + 1 );
 
 	return nScrollRowNum;
 }
@@ -670,7 +702,7 @@ void CCaret::ShowCaretPosInfo()
 	}
 
 	// ステータスバーハンドルを取得
-	HWND hwndStatusBar = m_pEditDoc->m_pcEditWnd->m_cStatusBar.GetStatusHwnd();
+	HWND hwndStatusBar = GetEditWnd().m_cStatusBar.GetStatusHwnd();
 
 	// カーソル位置の文字列を取得
 	const CLayout*	pcLayout;
@@ -831,7 +863,7 @@ void CCaret::ShowCaretPosInfo()
 			szLeft,
 			szRight
 		);
-		m_pEditDoc->m_pcEditWnd->PrintMenubarMessage( szText );
+		GetEditWnd().PrintMenubarMessage( szText );
 	}
 	// ステータスバーに状態を書き出す
 	else{
@@ -846,13 +878,13 @@ void CCaret::ShowCaretPosInfo()
 		}
 
 		WCHAR szFontSize[16];
-		if( const double nZoomPercentage = m_pEditDoc->m_pcEditWnd->GetFontZoom() * 100.0; nZoomPercentage < 5.0 ){
+		if( const double nZoomPercentage = GetEditWnd().GetFontZoom() * 100.0; nZoomPercentage < 5.0 ){
 			auto_sprintf_s( szFontSize, _countof(szFontSize), LS( STR_STATUS_FONTZOOM_1 ), nZoomPercentage );
 		}else{
 			auto_sprintf_s( szFontSize, _countof(szFontSize), LS( STR_STATUS_FONTZOOM_0 ), nZoomPercentage );
 		}
 
-		auto& statusBar = m_pEditDoc->m_pcEditWnd->m_cStatusBar;
+		auto& statusBar = GetEditWnd().m_cStatusBar;
 		// SB_SETTEXT メッセージでステータスバーに文字列を設定する度に再描画が行われるのを防ぐ為に
 		// 設定時にパートのRECTを取得し最後にまとめて再描画を行う
 		HWND hWnd = statusBar.GetStatusHwnd();

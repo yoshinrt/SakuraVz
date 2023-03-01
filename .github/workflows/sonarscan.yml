@@ -3,6 +3,7 @@ name: SonarCloud
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
       - '**/*.md'
@@ -32,11 +33,11 @@ jobs:
     env:
       BUILD_PLATFORM: x64
       BUILD_CONFIGURATION: Debug
-      SONAR_QUBE_VERSION: '4.5.0.2216'
+      SONAR_QUBE_VERSION: '4.7.0.2747'
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: '${{ github.event.pull_request.head.sha }}'
         fetch-depth: 0
@@ -146,6 +147,7 @@ jobs:
         -D"sonar.cfamily.cache.path=.sonar\analysis-cache" `
         -D"sonar.cfamily.cppunit.reportPath=tests1-googletest.xml" `
         -D"sonar.cfamily.threads=2" `
-        -D"sonar.coverage.exclusions=help\**\*.js,tests\unittests\coverage.cpp,tools\**\*.js" `
+        -D"sonar.python.version=3" `
+        -D"sonar.coverage.exclusions=help\**\*.js,tests\unittests\coverage.cpp,tests\stubs\**\*.cpp,tools\**\*.js" `
         -D"sonar.coverageReportPaths=tests1-coverage.xml" `
-        -D"sonar.exclusions=.sonar\**\*,build\**\*,bw-output\**\*,HeaderMake\**\*,tests\build\**\*,tests\googletest\**\*,**\test-*,tests*-*.xml"
+        -D"sonar.exclusions=.sonar\**\*,build\**\*,bw-output\**\*,HeaderMake\**\*,tests\googletest\**\,**\test-*,tests\stubs\**\*,tests*-*.xml*"

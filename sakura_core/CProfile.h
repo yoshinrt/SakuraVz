@@ -9,7 +9,7 @@
 */
 /*
 	Copyright (C) 2003-2006, D.S.Koba
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -54,7 +54,6 @@ class CProfile
 	typedef std::wstring wstring;
 	typedef std::string string;
 
-	typedef std::pair< wstring, wstring > PAIR_STR_STR;
 	typedef std::map< wstring, wstring > MAP_STR_STR;
 	struct Section
 	{

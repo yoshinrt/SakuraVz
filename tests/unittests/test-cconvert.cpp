@@ -1,5 +1,5 @@
 ﻿/*
-	Copyright (C) 2021, Sakura Editor Organization
+	Copyright (C) 2021-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -41,6 +41,8 @@
 #include "convert/CConvert_Trim.h"
 #include "convert/CConvert_ZeneisuToHaneisu.h"
 #include "convert/CConvert_ZenkataToHankata.h"
+
+#include "_main/CNormalProcess.h"
 
 TEST(CConvert, ZenkataToHankata)
 {
@@ -405,6 +407,10 @@ class ConvTest : public ::testing::TestWithParam<ConvTestParamType> {};
  */
 TEST_P(ConvTest, test)
 {
+	// メモリ確保失敗時に表示するメッセージボックスで、
+	// 「アプリ名」を取得するためにプロセスのインスタンスが必要。
+	CNormalProcess cProcess(::GetModuleHandle(nullptr), L"");
+
 	const auto eFuncCode = std::get<0>(GetParam());
 	std::wstring_view source = std::get<1>(GetParam());
 	std::wstring_view expected = std::get<2>(GetParam());

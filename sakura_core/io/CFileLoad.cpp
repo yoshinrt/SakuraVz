@@ -9,7 +9,7 @@
 	Copyright (C) 2002, Moca, genta
 	Copyright (C) 2003, Moca, ryoji
 	Copyright (C) 2006, rastiv
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -389,7 +389,7 @@ EConvertResult CFileLoad::ReadLine_core(
 		if( m_bBomExist && 1 <= pUnicodeBuffer->GetStringLength() ){
 			if( pUnicodeBuffer->GetStringPtr()[0] == 0xfeff ){
 				CNativeW tmp(pUnicodeBuffer->GetStringPtr() + 1, pUnicodeBuffer->GetStringLength() - 1);
-				*pUnicodeBuffer = tmp;
+				*pUnicodeBuffer = std::move(tmp);
 			}
 		}
 	}

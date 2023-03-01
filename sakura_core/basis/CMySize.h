@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -32,7 +32,7 @@
 class CMySize : public SIZE{
 public:
 	//コンストラクタ・デストラクタ
-	CMySize(){} //※初期化なし
+	CMySize() : CMySize(0, 0) {}
 	CMySize(int _cx,int _cy){ cx=_cx; cy=_cy; }
 	CMySize(const SIZE& rhs){ cx=rhs.cx; cy=rhs.cy; }
 

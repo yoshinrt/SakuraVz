@@ -7,7 +7,7 @@
 /*
 	Copyright (C) 2001, genta
 	Copyright (C) 2002, YAZAKI, genta
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -131,7 +131,7 @@ public:
 	//! 終了処理とDLLアンロード
 	bool DeinitDll(
 		bool force = false	//!< [in] 終了処理に失敗してもDLLを解放するかどうか
-	);
+	) noexcept;
 
 	//! インスタンスハンドルの取得
 	HINSTANCE GetInstance() const { return m_hInstance; }

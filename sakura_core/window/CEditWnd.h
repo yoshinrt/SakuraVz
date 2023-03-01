@@ -17,7 +17,7 @@
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2008, ryoji
 	Copyright (C) 2009, nasukoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -44,7 +44,7 @@
 #define SAKURA_CEDITWND_6C771A35_3CC8_4932_BF15_823C40487A9F_H_
 #pragma once
 
-#include <ShellAPI.h>// HDROP
+#include <shellapi.h>// HDROP
 #include "_main/global.h"
 #include "CMainToolBar.h"
 #include "CTabWnd.h"	//@@@ 2003.05.31 MIK
@@ -64,6 +64,7 @@
 #include "doc/CDocListener.h"
 #include "uiparts/CMenuDrawer.h"
 #include "view/CViewFont.h"
+#include "view/CMiniMapView.h"
 
 static const int MENUBAR_MESSAGE_MAX_LEN = 30;
 
@@ -275,7 +276,7 @@ public:
 	CEditView&			GetActiveView()       { return *m_pcEditView; }
 	const CEditView&    GetView(int n) const { return *m_pcEditViewArr[n]; }
 	CEditView&          GetView(int n)       { return *m_pcEditViewArr[n]; }
-	CEditView&          GetMiniMap()       { return *m_pcEditViewMiniMap; }
+	CMiniMapView&       GetMiniMap( void ) { return m_cMiniMapView; }
 	bool                IsEnablePane(int n) const { return 0 <= n && n < m_nEditViewCount; }
 	int                 GetAllViewCount() const { return m_nEditViewCount; }
 
@@ -379,7 +380,7 @@ private:
 	CEditDoc* 		m_pcEditDoc;
 	CEditView*		m_pcEditViewArr[4];	//!< ビュー
 	CEditView*		m_pcEditView;		//!< 有効なビュー
-	CEditView*		m_pcEditViewMiniMap;	//!< ミニマップ
+	CMiniMapView	m_cMiniMapView;		//!< ミニマップ
 	int				m_nActivePaneIndex;	//!< 有効なビューのindex
 	int				m_nEditViewCount;	//!< 有効なビューの数
 	const int		m_nEditViewMaxCount;//!< ビューの最大数=4
@@ -422,4 +423,7 @@ private:
 public:
 	ESelectCountMode	m_nSelectCountMode; // 選択文字カウント方法
 };
+
+CEditWnd& GetEditWnd( void );
+
 #endif /* SAKURA_CEDITWND_6C771A35_3CC8_4932_BF15_823C40487A9F_H_ */

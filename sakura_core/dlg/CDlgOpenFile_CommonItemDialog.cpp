@@ -12,7 +12,7 @@
 	Copyright (C) 2004, genta
 	Copyright (C) 2005, novice, ryoji
 	Copyright (C) 2006, ryoji, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -439,7 +439,7 @@ void CDlgOpenFile_CommonItemDialog::Create(
 		m_strDefaultWildCard = pszUserWildCard;
 	}
 
-	/* 「開く」での初期フォルダ */
+	/* 「開く」での初期フォルダー */
 	if( pszDefaultPath && pszDefaultPath[0] != L'\0' ){	//現在編集中のファイルのパス	//@@@ 2002.04.18
 		WCHAR szDrive[_MAX_DRIVE];
 		WCHAR szDir[_MAX_DIR];
@@ -462,6 +462,7 @@ bool CDlgOpenFile_CommonItemDialog::DoModal_GetOpenFileName( WCHAR* pszPath, EFi
 {
 	//	2003.05.12 MIK
 	std::vector<COMDLG_FILTERSPEC> specs;
+	specs.reserve(7);
 	std::vector<std::wstring> strs;
 	strs.reserve(8);
 
@@ -929,7 +930,7 @@ int CDlgOpenFile_CommonItemDialog::AddComboCodePages( int nSelCode )
 		nSel = nSelCode;
 	}
 	CCodePage::CodePageList& cpList = CCodePage::GetCodePageList();
-	for( auto it = cpList.begin(); it != cpList.end(); ++it ){
+	for( auto it = cpList.cbegin(); it != cpList.cend(); ++it ){
 		hr = AddControlItem(CtrlId::COMBO_CODE, (DWORD)it->first, it->second.c_str());
 		if( nSelCode == it->first ){
 			SetSelectedControlItem(CtrlId::COMBO_CODE, (DWORD)it->first);

@@ -6,7 +6,7 @@
 */
 /*
 	Copyright (C) 2013, Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -203,7 +203,7 @@ int CDlgProfileMgr::GetData(bool bStart)
 	MyList_GetText( hwndList, nCurIndex, szText );
 	m_strProfileName = szText;
 	if( m_strProfileName == L"(default)" ){
-		m_strProfileName = L"";
+		m_strProfileName.clear();
 	}
 	bool bDefaultSelect = IsDlgButtonCheckedBool( GetHwnd(), IDC_CHECK_PROF_DEFSTART );
 	SProfileSettings settings;

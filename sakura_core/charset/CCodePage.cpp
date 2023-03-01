@@ -5,7 +5,7 @@
 */
 /*
 	Copyright (C) 2010-2012 Moca
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -394,8 +394,8 @@ CCodePage::CodePageList& CCodePage::GetCodePageList()
 		}
 	}
 	// 独自実装部分を定義
-	result.push_back( CCodePage::CodePageList::value_type(12000, L"12000 (UTF-32LE)") );
-	result.push_back( CCodePage::CodePageList::value_type(12001, L"12001 (UTF-32BE)") );
+	result.emplace_back( 12000, L"12000 (UTF-32LE)" );
+	result.emplace_back( 12001, L"12001 (UTF-32BE)" );
 
 	std::sort(result.begin(),result.end(), sortByCodePage());
 	return result;
@@ -426,7 +426,7 @@ int CCodePage::AddComboCodePages(HWND hwnd, HWND combo, int nSelCode)
 	}
 	Combo_SetItemData( combo, nIdx, CODE_CPOEM );
 	CCodePage::CodePageList& cpList = CCodePage::GetCodePageList();
-	for( auto it = cpList.begin(); it != cpList.end(); ++it ){
+	for( auto it = cpList.cbegin(); it != cpList.cend(); ++it ){
 		nIdx = Combo_AddString(combo, it->second.c_str());
 		Combo_SetItemData(combo, nIdx, it->first);
 		if( nSelCode == it->first ){

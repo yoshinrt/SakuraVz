@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -1325,5 +1325,6 @@
 #define STR_FILEDIALOG_EOL				35039
 #define STR_FILEDIALOG_MRU				35040
 #define STR_FILEDIALOG_OPENFOLDER		35041
+#define STR_GSTR_APPNAME				35047
 
-// Now using max number 35044 by STR_STATUS_FONTZOOM_1
+// Now using max number 35047 by STR_GSTR_APPNAME

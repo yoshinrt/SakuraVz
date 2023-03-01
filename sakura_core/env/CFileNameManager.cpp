@@ -4,7 +4,7 @@
 */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -117,17 +117,17 @@ int CFileNameManager::TransformFileName_MakeCache( void ){
 	return nCount;
 }
 
-/*!	ファイル・フォルダ名を置換して、簡易表示名を取得する
+/*!	ファイル・フォルダー名を置換して、簡易表示名を取得する
 	@date 2002.11.27 Moca 新規作成
 	@note 大小文字を区別しない。nDestLenに達したときは後ろを切り捨てられる
 */
 LPCWSTR CFileNameManager::GetFilePathFormat( std::wstring_view strSrc, LPWSTR pszDest, size_t nDestLen, std::wstring_view strFrom, std::wstring_view strTo )
 {
-	auto it = strSrc.begin();
+	auto it = strSrc.cbegin();
 	wchar_t* pDest = pszDest;
 	const wchar_t* pEnd = pszDest + nDestLen;
-	while( it < strSrc.end() && pDest + 1 < pEnd ){
-		if( strFrom.length() <= static_cast<size_t>(strSrc.end() - it) && 0 == ::_wcsnicmp( &*it, strFrom.data(), strFrom.length() ) ){
+	while( it < strSrc.cend() && pDest + 1 < pEnd ){
+		if( strFrom.length() <= static_cast<size_t>(strSrc.cend() - it) && 0 == ::_wcsnicmp( &*it, strFrom.data(), strFrom.length() ) ){
 			if( strTo.length() < static_cast<size_t>(pEnd - pDest) ){
 				::wcsncpy_s( pDest, pEnd - pDest, strTo.data(), strTo.length() );
 			}else{
@@ -213,13 +213,13 @@ bool CFileNameManager::ExpandMetaToFolder( LPCWSTR pszSrc, LPWSTR pszDes, int nD
 			ps++;
 			// %SAKURA%
 			if( 0 == wmemicmp( L"SAKURA%", ps, 7 ) ){
-				// exeのあるフォルダ
+				// exeのあるフォルダー
 				GetExedir( szPath );
 				nMetaLen = 6;
 			}
 			// %SAKURADATA%	// 2007.06.06 ryoji
 			else if( 0 == wmemicmp( L"SAKURADATA%", ps, 11 ) ){
-				// iniのあるフォルダ
+				// iniのあるフォルダー
 				GetInidir( szPath );
 				nMetaLen = 10;
 			}
@@ -298,7 +298,7 @@ bool CFileNameManager::ExpandMetaToFolder( LPCWSTR pszSrc, LPWSTR pszDes, int nD
 				}
 			}
 
-			// 最後のフォルダ区切り記号を削除する
+			// 最後のフォルダー区切り記号を削除する
 			// [A:\]などのルートであっても削除
 			for(nPathLen = 0; pStr2[nPathLen] != L'\0'; nPathLen++ ){
 #ifdef _MBCS

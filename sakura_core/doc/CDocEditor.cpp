@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -34,6 +34,7 @@
 #include "CEol.h"
 #include "window/CEditWnd.h"
 #include "debug/CRunningTimer.h"
+#include "_os/CClipboard.h"
 
 CDocEditor::CDocEditor(CEditDoc* pcDoc)
 : m_pcDocRef(pcDoc)
@@ -57,7 +58,7 @@ CDocEditor::CDocEditor(CEditDoc* pcDoc)
 void CDocEditor::SetModified( bool flag, bool redraw)
 {
 	if( redraw ){
-		m_pcDocRef->m_pcEditWnd->m_cDlgFuncList.NotifyDocModification();
+		GetEditWnd().m_cDlgFuncList.NotifyDocModification();
 	}
 
 	if( m_bIsDocModified == flag )	//	変更がなければ何もしない
@@ -65,13 +66,13 @@ void CDocEditor::SetModified( bool flag, bool redraw)
 
 	m_bIsDocModified = flag;
 	if( redraw )
-		m_pcDocRef->m_pcEditWnd->UpdateCaption();
+		GetEditWnd().UpdateCaption();
 }
 
 void CDocEditor::OnBeforeLoad(SLoadInfo* sLoadInfo)
 {
 	//ビューのテキスト選択解除
-	GetListeningDoc()->m_pcEditWnd->Views_DisableSelectArea(true);
+	GetEditWnd().Views_DisableSelectArea(true);
 }
 
 void CDocEditor::OnAfterLoad(const SLoadInfo& sLoadInfo)
@@ -137,7 +138,7 @@ void CDocEditor::SetImeMode( int mode )
 {
 	DWORD	conv, sent;
 	HIMC	hIme;
-	HWND	hwnd = m_pcDocRef->m_pcEditWnd->GetActiveView().GetHwnd();
+	HWND	hwnd = GetEditWnd().GetActiveView().GetHwnd();
 
 	hIme = ImmGetContext( hwnd ); //######大丈夫？ // 2013.06.04 EditWndからViewに変更
 
@@ -173,6 +174,11 @@ void CDocEditor::SetImeMode( int mode )
 	ImmReleaseContext( hwnd, hIme ); //######大丈夫？
 }
 //	To Here Nov. 20, 2000 genta
+
+bool CDocEditor::IsEnablePaste() const
+{
+	return CClipboard::HasValidData();
+}
 
 // 改行混在禁止時は LF 固定
 CEol CDocEditor::GetNewLineCode( void ) const {

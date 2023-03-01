@@ -12,7 +12,7 @@
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2009, ryoji
 	Copyright (C) 2012, Uchi
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -284,7 +284,7 @@ int CDlgReplace::GetData( void )
 
 	/* 置換後文字列 */
 	if( ::IsDlgButtonChecked( GetHwnd(), IDC_RADIO_LINEDELETE ) ){
-		m_strText2 = L"";
+		m_strText2.clear();
 	}else{
 		ApiWrap::DlgItem_GetText( GetHwnd(), IDC_COMBO_TEXT2, m_strText2 );
 	}
@@ -369,7 +369,7 @@ BOOL CDlgReplace::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 	//	Combo_LimitText( GetItemHwnd( IDC_COMBO_TEXT ), _MAX_PATH - 1 );
 	//	Combo_LimitText( GetItemHwnd( IDC_COMBO_TEXT2 ), _MAX_PATH - 1 );
 
-	/* コンボボックスのユーザー インターフェイスを拡張インターフェースにする */
+	/* コンボボックスのユーザー インターフェースを拡張インターフェースにする */
 	Combo_SetExtendedUI( GetItemHwnd( IDC_COMBO_TEXT ), TRUE );
 	Combo_SetExtendedUI( GetItemHwnd( IDC_COMBO_TEXT2 ), TRUE );
 

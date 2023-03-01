@@ -12,7 +12,7 @@
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2012, Moca, syat
 	Copyright (C) 2013, Uchi, aroka, novice, syat, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -99,7 +99,6 @@ protected:
 	void GetTabName( EditNode* pEditNode, BOOL bFull, BOOL bDupamp, LPWSTR pszName, int nLen );	/* タブ名取得処理 */	// 2007.06.28 ryoji 新規作成
 
 	/* 仮想関数 */
-	void AfterCreateWindow( void ) override{}	/*!< ウィンドウ作成後の処理 */	// 2007.03.13 ryoji 可視化しない
 
 	/* 仮想関数 メッセージ処理 */
 	LRESULT OnSize( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam ) override;		/*!< WM_SIZE処理 */
@@ -193,7 +192,7 @@ private:
 	BOOL		m_bHovering;
 	BOOL		m_bListBtnHilighted;
 	BOOL		m_bCloseBtnHilighted;	//!< 閉じるボタンハイライト状態	// 2006.10.21 ryoji
-	CaptureSrc	m_eCaptureSrc;			//!< キャプチャー元
+	CaptureSrc	m_eCaptureSrc;			//!< キャプチャ元
 	BOOL		m_bTabSwapped;			//!< ドラッグ中にタブの入れ替えがあったかどうか
 	LONG*		m_nTabBorderArray;		//!< ドラッグ前のタブ境界位置配列
 	LOGFONT		m_lf;					//!< 表示フォントの特性情報

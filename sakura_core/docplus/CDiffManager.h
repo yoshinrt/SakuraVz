@@ -3,7 +3,7 @@
 //2008.02.23 kobake 大整理
 /*
 	Copyright (C) 2008, kobake
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -50,7 +50,7 @@ enum EDiffMark : char {
 //! DIFF挙動の管理
 class CDiffManager : public TSingleton<CDiffManager>{
 	friend class TSingleton<CDiffManager>;
-	CDiffManager(){}
+	CDiffManager() = default;
 
 public:
 	void SetDiffUse(bool b){ m_bIsDiffUse = b; }

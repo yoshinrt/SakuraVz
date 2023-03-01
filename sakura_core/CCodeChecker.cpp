@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -189,7 +189,7 @@ ECallbackResult CCodeChecker::OnCheckSave(SSaveInfo* pSaveInfo)
 		point, cmemChar
 	);
 
-	//ユーザ問い合わせ
+	//ユーザー問い合わせ
 	if(nTmpResult==RESULT_LOSESOME){
 		WCHAR szCpName[100];
 		WCHAR  szLineNum[60];  // 123桁
@@ -222,7 +222,7 @@ ECallbackResult CCodeChecker::OnCheckSave(SSaveInfo* pSaveInfo)
 		case IDCANCEL:
 			{
 				CLogicPoint pt(point.x < 0 ? CLogicInt(0) : point.x, point.y);
-				pcDoc->m_pcEditWnd->GetActiveView().GetCommander().Command_MOVECURSOR(pt, 0);
+				GetEditWnd().GetActiveView().GetCommander().Command_MOVECURSOR(pt, 0);
 			}
 			return CALLBACK_INTERRUPT; //中断
 		}

@@ -8,7 +8,7 @@
 	Copyright (C) 2000-2001, genta
 	Copyright (C) 2002, hor, YAZAKI, MIK
 	Copyright (C) 2006, genta
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -268,14 +268,18 @@ void CViewCommander::Command_BOOKMARK_SET(void)
 		);
 		for(CLogicInt nY=ptFrom.GetY2();nY<=ptTo.y;nY++){
 			pCDocLine=GetDocument()->m_cDocLineMgr.GetLine( nY );
-			CBookmarkSetter cBookmark(pCDocLine);
-			if(pCDocLine)cBookmark.SetBookmark(!cBookmark.IsBookmarked());
+			if(pCDocLine){
+				CBookmarkSetter cBookmark(pCDocLine);
+				cBookmark.SetBookmark(!cBookmark.IsBookmarked());
+			}
 		}
 	}
 	else{
 		pCDocLine=GetDocument()->m_cDocLineMgr.GetLine( GetCaret().GetCaretLogicPos().GetY2() );
-		CBookmarkSetter cBookmark(pCDocLine);
-		if(pCDocLine)cBookmark.SetBookmark(!cBookmark.IsBookmarked());
+		if(pCDocLine){
+			CBookmarkSetter cBookmark(pCDocLine);
+			cBookmark.SetBookmark(!cBookmark.IsBookmarked());
+		}
 	}
 
 	// 2002.01.16 hor 分割したビューも更新

@@ -11,7 +11,7 @@
 	Copyright (C) 2002, aroka, MIK, YAZAKI
 	Copyright (C) 2004, genta
 	Copyright (C) 2006, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -21,7 +21,7 @@
 #include "doc/CEditDoc.h"
 #include "func/Funccode.h"		// Stonee, 2001/03/12
 #include "outline/CFuncInfo.h"
-#include "outline/CFuncInfoArr.h"// 2002/2/10 aroka ヘッダ整理
+#include "outline/CFuncInfoArr.h"// 2002/2/10 aroka ヘッダー整理
 #include "util/shell.h"
 #include "util/os.h"
 #include "window/CEditWnd.h"
@@ -177,8 +177,7 @@ BOOL CDlgJump::OnBnClicked( int wID )
 		}
 //To Here Feb. 20, 2001
 		{	//@@@ 2002.2.2 YAZAKI 指定行へジャンプを、ダイアログを表示するコマンドと、実際にジャンプするコマンドに分離。
-			CEditDoc*		pCEditDoc = (CEditDoc*)m_lParam;
-			pCEditDoc->m_pcEditWnd->GetActiveView().GetCommander().HandleCommand(F_JUMP, true, 0, 0, 0, 0);	//	ジャンプコマンド発行
+			GetEditWnd().GetActiveView().GetCommander().HandleCommand(F_JUMP, true, 0, 0, 0, 0);	//	ジャンプコマンド発行
 		}
 		return TRUE;
 	case IDCANCEL:

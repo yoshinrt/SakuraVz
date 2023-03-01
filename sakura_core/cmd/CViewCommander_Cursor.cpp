@@ -13,7 +13,7 @@
 	Copyright (C) 2006, genta
 	Copyright (C) 2007, kobake, maru
 	Copyright (C) 2009, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -1153,12 +1153,7 @@ void CViewCommander::Command_GOPREVPARAGRAPH( bool bSelect )
 	}
 	else {
 		//	いま見ているところは空行の1行目
-		if ( GetDllShareData().m_Common.m_sGeneral.m_bStopsBothEndsWhenSearchParagraph ){	//	段落の両端で止まる
-			nCaretPointer++;
-		}
-		else {
-			nCaretPointer++;
-		}
+		nCaretPointer++;
 	}
 
 	//	EOFまで来たり、目的の場所まできたので移動終了。

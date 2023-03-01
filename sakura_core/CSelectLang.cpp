@@ -6,7 +6,7 @@
 */
 /*
 	Copyright (C) 2011, nasukoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -14,6 +14,8 @@
 
 #include "stdafx.h"
 #include "CSelectLang.h"
+
+#include "_main/CProcess.h"
 #include "util/os.h"
 #include "util/module.h"
 #include "debug/Debug2.h"
@@ -129,7 +131,7 @@ HINSTANCE CSelectLang::InitializeLanguageEnvironment( void )
 	//カレントディレクトリを保存。関数から抜けるときに自動でカレントディレクトリは復元される。
 	CCurrentDirectoryBackupPoint cCurDirBackup;
 	ChangeCurrentDirectoryToExeDir();
-// ★iniまたはexeフォルダとなるように改造が必要
+// ★iniまたはexeフォルダーとなるように改造が必要
 
 	WIN32_FIND_DATA w32fd;
 	WCHAR szPath[] = L"sakura_lang_*.dll";			// サーチするメッセージリソースDLL
@@ -137,7 +139,7 @@ HINSTANCE CSelectLang::InitializeLanguageEnvironment( void )
 	BOOL result = (INVALID_HANDLE_VALUE != handle) ? TRUE : FALSE;
 
 	while( result ){
-		if( ! (w32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ){		//フォルダでない
+		if( ! (w32fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ){		//フォルダーでない
 			// バッファに登録する。
 			psLangInfo = new SSelLangInfo();
 			wcscpy( psLangInfo->szDllName, w32fd.cFileName );
@@ -403,6 +405,12 @@ HINSTANCE CSelectLang::ChangeLang( UINT nIndex )
 
 	// ロケールを設定
 	::SetThreadUILanguage( m_psLangInfo->wLangId );
+
+	// アプリ名をリソースから読み込む
+	if( auto pcProcess = CProcess::getInstance() )
+	{
+		pcProcess->UpdateAppName(LS(STR_GSTR_APPNAME));
+	}
 
 	return m_psLangInfo->hInstance;
 }

@@ -8,7 +8,7 @@
 /*
 	Copyright (C) 2006
 	Copyright (C) 2007
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -361,8 +361,7 @@ void CESI::GetEncodingInfo_eucjp( const char* pS, const int nLen )
 */
 void CESI::GetEncodingInfo_utf7( const char* pS, const int nLen )
 {
-	const char *pr, *pr_end;
-	char *pr_next;
+	const char *pr, *pr_end, *pr_next;
 	int npoints, nlen_setb;
 	bool berror;
 

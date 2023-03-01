@@ -14,7 +14,7 @@
 	Copyright (C) 2002, aroka
 	Copyright (C) 2007, kobake
 	Copyright (C) 2009, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holder to use this code for other purpose.
@@ -32,34 +32,6 @@
 #include "version.h"
 #include "util/std_macro.h"
 #include "env/DLLSHAREDATA.h"
-#include "config/app_constants.h"
-
-// アプリ名。2007.09.21 kobake 整理
-#define _APP_NAME_(TYPE) TYPE("sakura")
-
-#ifdef _DEBUG
-#define _APP_NAME_2_(TYPE) TYPE("(デバッグ版)")
-#else
-#define _APP_NAME_2_(TYPE) TYPE("")
-#endif
-
-#ifdef ALPHA_VERSION
-#define _APP_NAME_3_(TYPE) TYPE("(Alpha Version)")
-#else
-#define _APP_NAME_3_(TYPE) TYPE("")
-#endif
-
-#ifdef DEV_VERSION
-#define _APP_NAME_DEV_(TYPE) TYPE("(dev Version)")
-#else
-#define _APP_NAME_DEV_(TYPE) TYPE("")
-#endif
-
-#define _GSTR_APPNAME_(TYPE)  _APP_NAME_(TYPE) _APP_NAME_2_(TYPE) _APP_NAME_DEV_(TYPE) _APP_NAME_3_(TYPE)
-
-const WCHAR g_szGStrAppName[]  = (_GSTR_APPNAME_(_T)   ); // この変数を直接参照せずに GSTR_APPNAME を使うこと
-const CHAR  g_szGStrAppNameA[] = (_GSTR_APPNAME_(ATEXT)); // この変数を直接参照せずに GSTR_APPNAME_A を使うこと
-const WCHAR g_szGStrAppNameW[] = (_GSTR_APPNAME_(LTEXT)); // この変数を直接参照せずに GSTR_APPNAME_W を使うこと
 
 /*!
 	Windows Entry point

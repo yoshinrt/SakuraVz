@@ -1,7 +1,7 @@
 ﻿/*! @file */
 /*
 	Copyright (C) 2013, novice
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -39,7 +39,7 @@ inline CEditDoc* CViewCommander::GetDocument()
 }
 inline CEditWnd* CViewCommander::GetEditWindow()
 {
-	return m_pCommanderView->m_pcEditWnd;
+	return &GetEditWnd();
 }
 inline HWND CViewCommander::GetMainWindow()
 {

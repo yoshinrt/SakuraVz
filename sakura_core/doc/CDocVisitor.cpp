@@ -1,6 +1,6 @@
 ﻿/*! @file */
 /*
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -81,7 +81,7 @@ void CDocVisitor::SetAllEol(CEol cEol)
 
 	if( bReplace ){
 		m_pcDocRef->m_cLayoutMgr._DoLayout(false);
-		m_pcDocRef->m_pcEditWnd->ClearViewCaretPosInfo();
+		GetEditWnd().ClearViewCaretPosInfo();
 		if( m_pcDocRef->m_nTextWrapMethodCur == WRAP_NO_TEXT_WRAP ){
 			m_pcDocRef->m_cLayoutMgr.CalculateTextWidth();
 		}else{

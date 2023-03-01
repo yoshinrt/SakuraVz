@@ -9,7 +9,7 @@
 /*
 	Copyright (C) 2006, D. S. Koba, genta
 	Copyright (C) 2007
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This software is provided 'as-is', without any express or implied
 	warranty. In no event will the authors be held liable for any damages
@@ -635,16 +635,9 @@ EndFunc:
 
 	// 非文字と予約コードポイントをチェック
 	if( nOption != 0 && echarset != CHARSET_BINARY ){
-		wchar32_t wc32;
-		wc32 = DecodeUtf8( reinterpret_cast<const unsigned char*>(pS), ncwidth );
-		if( (nOption & UC_NONCHARACTER) && IsUnicodeNoncharacter(wc32) ){
-			echarset = CHARSET_BINARY;
-			ncwidth = 1;
-		}else{
-			// 保護コード
-			echarset = CHARSET_BINARY;
-			ncwidth = 1;
-		}
+		// 保護コード
+		echarset = CHARSET_BINARY;
+		ncwidth = 1;
 	}
 
 	if( peCharset ){
@@ -888,7 +881,7 @@ EndFunc:;
 	戻り値と ppNextChar に格納されるポインタは使えない。
 	1つ以上のエラーが見つかれば候補から外れるのでそういう適当な仕様に。
 */
-int CheckUtf7DPart( const char *pS, const int nLen, char **ppNextChar, bool *pbError )
+int CheckUtf7DPart( const char *pS, size_t nLen, const char **ppNextChar, bool *pbError )
 {
 	const char *pr, *pr_end;
 	bool berror = false;
@@ -921,11 +914,11 @@ int CheckUtf7DPart( const char *pS, const int nLen, char **ppNextChar, bool *pbE
 
 	if( pr < pr_end ){
 		// '+' をスキップ
-		*ppNextChar = const_cast<char*>(pr) + 1;
+		*ppNextChar = pr + 1;
 	}else{
-		*ppNextChar = const_cast<char*>(pr);
+		*ppNextChar = pr;
 	}
-	return pr - pS;
+	return static_cast<int>( pr - pS );
 }
 
 /*!
@@ -937,7 +930,7 @@ int CheckUtf7DPart( const char *pS, const int nLen, char **ppNextChar, bool *pbE
 
 	@note この関数の前に CheckUtf7DPart() が実行される必要がある。
 */
-int CheckUtf7BPart( const char *pS, const int nLen, char **ppNextChar, bool *pbError, const int nOption, bool* pbNoAddPoint )
+int CheckUtf7BPart( const char *pS, size_t nLen, const char **ppNextChar, bool *pbError, const int nOption, bool* pbNoAddPoint )
 {
 	const char *pr, *pr_end;
 	bool berror_found, bminus_found;
@@ -969,7 +962,7 @@ int CheckUtf7BPart( const char *pS, const int nLen, char **ppNextChar, bool *pbE
 		// セットＢの文字でなくなるまでループ
 		if( !IsBase64(*pr) ){
 			if( *pr == '-' ){
-				bminus_found= true;
+				bminus_found = true;
 			}else{
 				bminus_found = false;
 			}
@@ -977,7 +970,7 @@ int CheckUtf7BPart( const char *pS, const int nLen, char **ppNextChar, bool *pbE
 		}
 	}
 
-	nchecklen = pr - pS;
+	nchecklen = static_cast<int>( pr - pS );
 
 	// 保護コード
 	if( nchecklen < 1 ){
@@ -1065,7 +1058,7 @@ EndFunc:;
 
 	if( (berror_found == false || UC_LOOSE == (nOption & UC_LOOSE)) && (pr < pr_end && bminus_found == true) ){
 		// '-' をスキップ。
-		*ppNextChar = const_cast<char*>(pr) + 1;
+		*ppNextChar = pr + 1;
 	}else{
 		*ppNextChar = const_cast<char*>(pr);
 

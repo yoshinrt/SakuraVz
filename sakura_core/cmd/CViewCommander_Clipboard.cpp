@@ -12,7 +12,7 @@
 	Copyright (C) 2005, genta
 	Copyright (C) 2007, ryoji
 	Copyright (C) 2010, ryoji
-	Copyright (C) 2018-2021, Sakura Editor Organization
+	Copyright (C) 2018-2022, Sakura Editor Organization
 
 	This source code is designed for sakura editor.
 	Please contact the copyright holders to use this code for other purpose.
@@ -26,6 +26,7 @@
 #include "uiparts/CWaitCursor.h"
 #include "util/os.h"
 #include "apiwrap/CommonControl.h"
+#include "_os/CClipboard.h"
 
 /** 切り取り(選択範囲をクリップボードにコピーして削除)
 
@@ -985,17 +986,7 @@ void CViewCommander::Command_COPY_COLOR_HTML(bool bLineNumber)
 				bool bAddLineNum = true;
 				const CLayout* pcLayoutNext = pcLayout->GetNextLayout();
 				if( pcLayoutNext ){
-					if( type.m_bLineNumIsCRLF ){
-						if( bLineNumLayout && pcLayoutNext->GetLogicOffset() != 0 ){
-							bAddLineNum = true;
-						}else{
-							bAddLineNum = true;
-						}
-					}else{
-						if( bLineNumLayout || pcLayoutNext->GetLogicOffset() == 0 ){
-							bAddLineNum = true;
-						}
-					}
+					bAddLineNum = type.m_bLineNumIsCRLF || bLineNumLayout || pcLayoutNext->GetLogicOffset() == 0;
 				}
 				if( bAddLineNum ){
 					if( sFontAttrLast2.m_bBoldFont ){
@@ -1130,7 +1121,7 @@ void CViewCommander::Command_COPYPATH( void )
 	}
 }
 
-/* 現在編集中のファイルのフォルダ名をクリップボードにコピー */
+/* 現在編集中のファイルのフォルダー名をクリップボードにコピー */
 void CViewCommander::Command_COPYDIRPATH( void )
 {
 	if (!GetDocument()->m_cDocFile.GetFilePathClass().IsValidPath()) {
@@ -1147,7 +1138,7 @@ void CViewCommander::Command_COPYDIRPATH( void )
 		strFolder.erase(itrClear);
 	}
 	
-	/* クリップボードにフォルダ名をコピー */
+	/* クリップボードにフォルダー名をコピー */
 	m_pCommanderView->MySetClipboardData( strFolder.c_str(), strFolder.size(), false );
 }
 
