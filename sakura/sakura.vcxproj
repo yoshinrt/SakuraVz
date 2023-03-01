@@ -54,7 +54,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Label="sakura.common">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\sakura_core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sakura_core;../libs/pcre2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=_WIN32_WINNT_WIN7;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
@@ -77,7 +77,7 @@
     </Manifest>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>comctl32.lib;Imm32.lib;mpr.lib;imagehlp.lib;Shlwapi.lib;Dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\libpcre2-16-static.lib;comctl32.lib;Imm32.lib;mpr.lib;imagehlp.lib;Shlwapi.lib;Dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
@@ -148,6 +148,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\libs\pcre2\include\pcre2.h" />
     <ClInclude Include="..\sakura_core\apiwrap\CommonControl.h" />
     <ClInclude Include="..\sakura_core\apiwrap\StdApi.h" />
     <ClInclude Include="..\sakura_core\apiwrap\StdControl.h" />
@@ -307,9 +308,9 @@
     <ClInclude Include="..\sakura_core\env\CShareData.h" />
     <ClInclude Include="..\sakura_core\env\CShareData_IO.h" />
     <ClInclude Include="..\sakura_core\env\CTagJumpManager.h" />
+    <ClInclude Include="..\sakura_core\env\CTextStack.h" />
     <ClInclude Include="..\sakura_core\env\DLLSHAREDATA.h" />
     <ClInclude Include="..\sakura_core\extmodule\CBregexp.h" />
-    <ClInclude Include="..\sakura_core\extmodule\CBregexpDll2.h" />
     <ClInclude Include="..\sakura_core\extmodule\CDllHandler.h" />
     <ClInclude Include="..\sakura_core\extmodule\CHtmlHelp.h" />
     <ClInclude Include="..\sakura_core\extmodule\CIcu4cI18n.h" />
@@ -348,7 +349,6 @@
     <ClInclude Include="..\sakura_core\mem\CNative.h" />
     <ClInclude Include="..\sakura_core\mem\CNativeA.h" />
     <ClInclude Include="..\sakura_core\mem\CNativeW.h" />
-    <ClInclude Include="..\sakura_core\mem\CPoolResource.h" />
     <ClInclude Include="..\sakura_core\mem\CRecycledBuffer.h" />
     <ClInclude Include="..\sakura_core\mfclike\CMyWnd.h" />
     <ClInclude Include="..\sakura_core\outline\CDlgFileTree.h" />
@@ -677,9 +677,9 @@
     <ClCompile Include="..\sakura_core\env\CShareData.cpp" />
     <ClCompile Include="..\sakura_core\env\CShareData_IO.cpp" />
     <ClCompile Include="..\sakura_core\env\CTagJumpManager.cpp" />
+    <ClCompile Include="..\sakura_core\env\CTextStack.cpp" />
     <ClCompile Include="..\sakura_core\env\DLLSHAREDATA.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CBregexp.cpp" />
-    <ClCompile Include="..\sakura_core\extmodule\CBregexpDll2.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CDllHandler.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CHtmlHelp.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CIcu4cI18n.cpp" />

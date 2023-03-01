@@ -1064,9 +1064,6 @@
       <Filter>Cpp Source Files\uiparts</Filter>
     </ClInclude>
     <ClInclude Include="..\sakura_core\githash.h" />
-    <ClInclude Include="..\sakura_core\env\CTextStack.h">
-      <Filter>Cpp Source Files\env</Filter>
-    </ClInclude>
     <ClInclude Include="..\sakura_core\version.h">
       <Filter>Other Files</Filter>
     </ClInclude>
@@ -1075,9 +1072,6 @@
     </ClInclude>
     <ClInclude Include="..\sakura_core\recent\CRecentExcludeFolder.h">
       <Filter>Cpp Source Files\recent</Filter>
-    </ClInclude>
-    <ClInclude Include="..\libs\pcre2\include\pcre2.h">
-      <Filter>Other Files</Filter>
     </ClInclude>
     <ClInclude Include="..\sakura_core\extmodule\CIcu4cI18n.h">
       <Filter>Cpp Source Files\extmodule</Filter>
@@ -1115,6 +1109,8 @@
     <ClInclude Include="..\sakura_core\view\CMiniMapView.h">
       <Filter>Cpp Source Files\view</Filter>
     </ClInclude>
+    <ClInclude Include="..\libs\pcre2\include\pcre2.h" />
+    <ClInclude Include="..\sakura_core\env\CTextStack.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\resource\auto_scroll_center.cur">
@@ -2267,9 +2263,6 @@
     <ClCompile Include="..\sakura_core\config\build_config.cpp">
       <Filter>Cpp Source Files\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\sakura_core\env\CTextStack.cpp">
-      <Filter>Cpp Source Files\env</Filter>
-    </ClCompile>
     <ClCompile Include="..\sakura_core\recent\CRecentExcludeFile.cpp">
       <Filter>Cpp Source Files\recent</Filter>
     </ClCompile>
@@ -2314,6 +2307,9 @@
     </ClCompile>
     <ClCompile Include="..\sakura_core\view\CMiniMapView.cpp">
       <Filter>Cpp Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sakura_core\env\CTextStack.cpp">
+      <Filter>Cpp Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
