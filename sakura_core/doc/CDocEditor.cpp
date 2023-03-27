@@ -177,7 +177,13 @@ void CDocEditor::SetImeMode( int mode )
 
 bool CDocEditor::IsEnablePaste() const
 {
-	return CClipboard::HasValidData();
+	return
+		// テキストスタックモードで，スタックにデータが有る
+		GetDllShareData().m_Common.m_sVzMode.m_bEnableTextStack &&
+		GetDllShareData().m_TextStack.GetSize() != 0 ||
+		
+		// クリップボードにデータが有る
+		CClipboard::HasValidData();
 }
 
 // 改行混在禁止時は LF 固定
