@@ -153,6 +153,10 @@ public:
 		const wchar_t *szReplacement, std::wstring *pResult, UINT uOption = 0
 	);
 	
+	BOOL IsSearchBufExists( void ){
+		return m_szSearchBuf != nullptr;
+	}
+	
 protected:
 
 	//!	コンパイルバッファを解放する

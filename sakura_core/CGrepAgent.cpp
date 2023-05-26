@@ -1505,11 +1505,16 @@ int CGrepAgent::DoGrepReplaceFile(
 						);
 					}
 					
-					// 
-					if( sGrepOption.nGrepOutputLineType != 0 || sGrepOption.bGrepOutputFileOnly ){
-						if( !sGrepOption.bGrepReplace ){
-							break;				// grep 時は行処理終了
-						}
+					// 1行 (厳密には SerchBuf 内) の処理終了
+					// - replace 時は，終了しない (置換を継続)
+					// - 検索時は
+					//   - ファイル検索時は終了
+					//   - (非)該当モード時は，search buf に行 cat されていなければ終了
+					if( !sGrepOption.bGrepReplace && (
+						sGrepOption.bGrepOutputFileOnly ||
+						( sGrepOption.nGrepOutputLineType != 0/*該当部分*/ && !pRegexp->IsSearchBufExists())
+					)){
+						break;
 					}
 				}
 				
