@@ -71,6 +71,34 @@ struct SGrepOption{
 	{}
 };
 
+typedef struct {
+	// window
+	CEditView*					pcViewDst;
+	CDlgCancel*					pcDlgCancel;			//!< [in] Cancelダイアログへのポインタ
+	
+	// grep 情報
+	const wchar_t*				pszKey;					//!< [in] 検索キー
+	const CNativeW&				cmGrepReplace;			//!< [in] 置換後文字列
+	CGrepEnumKeys&				cGrepEnumKeys;			//!< [in] 検索対象ファイルパターン
+	CGrepEnumFiles&				cGrepExceptAbsFiles;	//!< [in] 除外ファイル絶対パス
+	CGrepEnumFolders&			cGrepExceptAbsFolders;	//!< [in] 除外フォルダー絶対パス
+	const SSearchOption&		sSearchOption;			//!< [in] 検索オプション
+	const SGrepOption&			sGrepOption;			//!< [in] Grepオプション
+	const CSearchStringPattern&	pattern;				//!< [in] 検索パターン
+	CBregexp*					pRegexp;				//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
+	
+	bool&						bOutputBaseFolder;		//!< [i/o] ベースフォルダー名出力
+	int*						pnHitCount;				//!< [i/o] ヒット数の合計
+	
+	// path
+	const WCHAR*				pszBasePath;			//!< [in] 検索対象パス(ベースフォルダー)
+	
+	// buffer
+	CNativeW&					cmemMessage;			//!< [i/o] Grep結果文字列
+	CNativeW&					cUnicodeBuffer;			//!< [i/o] ファイルオーブンバッファ
+	CNativeW&					cOutBuffer;				//!< [o] 置換後ファイルバッファ
+} tGrepArg;
+
 class CFileLoadOrWnd{
 	CFileLoad m_cfl;
 	HWND m_hWnd;
@@ -221,48 +249,19 @@ private:
 	
 	// Grep実行
 	int DoGrepTree(
-		CEditView*				pcViewDst,
-		CDlgCancel*				pcDlgCancel,		//!< [in] Cancelダイアログへのポインタ
-		const wchar_t*			pszKey,				//!< [in] 検索パターン
-		const CNativeW&			cmGrepReplace,
-		CGrepEnumKeys&			cGrepEnumKeys,		//!< [in] 検索対象ファイルパターン(!で除外指定)
-		CGrepEnumFiles&			cGrepExceptAbsFiles,
-		CGrepEnumFolders&		cGrepExceptAbsFolders,
-		const WCHAR*			pszPath,			//!< [in] 検索対象パス
-		const WCHAR*			pszBasePath,		//!< [in] 検索対象パス(ベース)
-		const SSearchOption&	sSearchOption,		//!< [in] 検索オプション
-		const SGrepOption&		sGrepOption,		//!< [in] Grepオプション
-		const CSearchStringPattern& pattern,		//!< [in] 検索パターン
-		CBregexp*				pRegexp,			//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
+		tGrepArg				*pArg,
 		int						nNest,				//!< [in] ネストレベル
-		bool&					bOutputBaseFolder,
-		int*					pnHitCount,			//!< [i/o] ヒット数の合計
-		CNativeW&				cmemMessage,
-		CNativeW&				cUnicodeBuffer,
-		CNativeW&				cOutBuffer
+		const WCHAR*			pszPath				//!< [in] 検索対象パス
 	);
 
 	int DoGrepReplaceFile(
-		CEditView*				pcViewDst,
-		CDlgCancel*				pcDlgCancel,
-		HWND					hWndTarget,
-		const wchar_t*			pszKey,
-		const CNativeW&			cmGrepReplace,
+		tGrepArg				*pArg,
+		HWND					hWndTarget,			//!< [in] 対象Windows(NULLでファイル)
 		const WCHAR*			pszFile,
-		const SSearchOption&	sSearchOption,
-		const SGrepOption&		sGrepOption,
-		const CSearchStringPattern& pattern,
-		CBregexp*				pRegexp,
-		int*					pnHitCount,
 		const WCHAR*			pszFullPath,
-		const WCHAR*			pszBaseFolder,
 		const WCHAR*			pszFolder,
 		const WCHAR*			pszRelPath,
-		bool&					bOutputBaseFolder,
-		bool&					bOutputFolderName,
-		CNativeW&				cmemMessage,
-		CNativeW&				cUnicodeBuffer,
-		CNativeW&				cOutBuffer
+		bool&					bOutputFolderName
 	);
 
 	// Grep結果をpszWorkに格納

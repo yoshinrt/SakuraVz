@@ -656,7 +656,36 @@ DWORD CGrepAgent::DoGrep(
 	cGrepExceptAbsFolders.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFolderKeys, cGrepEnumOptions);
 
 	int nGrepTreeResult = 0;
-
+	
+	bool bOutputBaseFolder = false;
+	tGrepArg Arg = {
+		// window
+		pcViewDst,
+		&cDlgCancel,					//!< [in] Cancelダイアログへのポインタ
+		
+		// grep 情報
+		pcmGrepKey->GetStringPtr(),		//!< [in] 検索キー
+		cmemReplace,					//!< [in] 置換後文字列
+		cGrepEnumKeys,					//!< [in] 検索対象ファイルパターン
+		cGrepExceptAbsFiles,			//!< [in] 除外ファイル絶対パス
+		cGrepExceptAbsFolders,			//!< [in] 除外フォルダー絶対パス
+		sSearchOption,					//!< [in] 検索オプション
+		sGrepOption,					//!< [in] Grepオプション
+		pattern,						//!< [in] 検索パターン
+		&cRegexp,						//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
+		
+		bOutputBaseFolder,				//!< [i/o] ベースフォルダー名出力
+		&nHitCount,						//!< [i/o] ヒット数の合計
+		
+		// path
+		nullptr,						//!< [in] 検索対象パス(ベースフォルダー)
+		
+		// buffer
+		cmemMessage,					//!< [i/o] Grep結果文字列
+		cUnicodeBuffer,					//!< [i/o] ファイルオーブンバッファ
+		cOutBuffer						//!< [o] 置換後ファイルバッファ
+	};
+	
 	if( hWndTarget ){
 		for( HWND hwnd = hWndTarget; NULL != hwnd; hwnd = NULL ){
 			bool bOutputBaseFolder = false;
@@ -668,29 +697,19 @@ DWORD CGrepAgent::DoGrep(
 				currentFile += L'\\';
 				nPathLen += 1;
 			}
+			
+			Arg.pszBasePath = szWindowPath;
+			
 			currentFile += szWindowName;
 			int nHitCount = nGrepTreeResult;
 			int nTreeRet = DoGrepReplaceFile(
-				pcViewDst,
-				&cDlgCancel,
+				&Arg,
 				hwnd,
-				pcmGrepKey->GetStringPtr(),
-				cmemReplace,
 				szWindowName,
-				sSearchOption,
-				sGrepOption,
-				pattern,
-				&cRegexp,
-				&nHitCount,
 				currentFile.c_str(),
-				szWindowPath,
 				(sGrepOption.bGrepSeparateFolder && sGrepOption.bGrepOutputBaseFolder ? L"" : szWindowPath),
 				(sGrepOption.bGrepSeparateFolder ? szWindowName : currentFile.c_str() + nPathLen),
-				bOutputBaseFolder,
-				bOutputFolderName,
-				cmemMessage,
-				cUnicodeBuffer,
-				cOutBuffer
+				bOutputFolderName
 			);
 			if( nTreeRet == -1 ){
 				nGrepTreeResult = -1;
@@ -708,28 +727,14 @@ DWORD CGrepAgent::DoGrep(
 		nHitCount = nGrepTreeResult;
 	}else{
 		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
-			bool bOutputBaseFolder = false;
 			std::wstring sPath = ChopYen( vPaths[nPath] );
+			
+			Arg.pszBasePath = sPath.c_str();
+			
 			int nTreeRet = DoGrepTree(
-				pcViewDst,
-				&cDlgCancel,
-				pcmGrepKey->GetStringPtr(),
-				cmemReplace,
-				cGrepEnumKeys,
-				cGrepExceptAbsFiles,
-				cGrepExceptAbsFolders,
-				sPath.c_str(),
-				sPath.c_str(),
-				sSearchOption,
-				sGrepOption,
-				pattern,
-				&cRegexp,
+				&Arg,
 				0,
-				bOutputBaseFolder,
-				&nHitCount,
-				cmemMessage,
-				cUnicodeBuffer,
-				cOutBuffer
+				sPath.c_str()
 			);
 			if( nTreeRet == -1 ){
 				nGrepTreeResult = -1;
@@ -807,25 +812,9 @@ DWORD CGrepAgent::DoGrep(
 		大部分が変更されたため，個別の変更点記入は無し．
 */
 int CGrepAgent::DoGrepTree(
-	CEditView*				pcViewDst,
-	CDlgCancel*				pcDlgCancel,		//!< [in] Cancelダイアログへのポインタ
-	const wchar_t*			pszKey,				//!< [in] 検索キー
-	const CNativeW&			cmGrepReplace,
-	CGrepEnumKeys&			cGrepEnumKeys,		//!< [in] 検索対象ファイルパターン
-	CGrepEnumFiles&			cGrepExceptAbsFiles,	//!< [in] 除外ファイル絶対パス
-	CGrepEnumFolders&		cGrepExceptAbsFolders,	//!< [in] 除外フォルダー絶対パス
-	const WCHAR*			pszPath,			//!< [in] 検索対象パス
-	const WCHAR*			pszBasePath,		//!< [in] 検索対象パス(ベースフォルダー)
-	const SSearchOption&	sSearchOption,		//!< [in] 検索オプション
-	const SGrepOption&		sGrepOption,		//!< [in] Grepオプション
-	const CSearchStringPattern& pattern,		//!< [in] 検索パターン
-	CBregexp*				pRegexp,			//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
+	tGrepArg				*pArg,
 	int						nNest,				//!< [in] ネストレベル
-	bool&					bOutputBaseFolder,	//!< [i/o] ベースフォルダー名出力
-	int*					pnHitCount,			//!< [i/o] ヒット数の合計
-	CNativeW&				cmemMessage,		//!< [i/o] Grep結果文字列
-	CNativeW&				cUnicodeBuffer,
-	CNativeW&				cOutBuffer
+	const WCHAR*			pszPath				//!< [in] 検索対象パス，末尾の \ 無し
 )
 {
 	int			i;
@@ -834,10 +823,10 @@ int CGrepAgent::DoGrepTree(
 	int			nWork = 0;
 	int			nHitCountOld = -100;
 	bool		bOutputFolderName = false;
-	int			nBasePathLen = wcslen(pszBasePath);
+	int			nBasePathLen = wcslen(pArg->pszBasePath);
 	CGrepEnumOptions cGrepEnumOptions;
 	CGrepEnumFilterFiles cGrepEnumFilterFiles;
-	cGrepEnumFilterFiles.Enumerates( pszPath, cGrepEnumKeys, cGrepEnumOptions, cGrepExceptAbsFiles );
+	cGrepEnumFilterFiles.Enumerates( pszPath, pArg->cGrepEnumKeys, cGrepEnumOptions, pArg->cGrepExceptAbsFiles );
 
 	/*
 	 * カレントフォルダーのファイルを探索する。
@@ -850,24 +839,24 @@ int CGrepAgent::DoGrepTree(
 		if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
 			m_dwTickUICheck = dwNow;
 			/* 処理中のユーザー操作を可能にする */
-			if( !::BlockingHook( pcDlgCancel->GetHwnd() ) ){
+			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
 				goto cancel_return;
 			}
 			/* 中断ボタン押下チェック */
-			if( pcDlgCancel->IsCanceled() ){
+			if( pArg->pcDlgCancel->IsCanceled() ){
 				goto cancel_return;
 			}
 
 			/* 表示設定をチェック */
 			CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-				0 != ::IsDlgButtonChecked( pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+				0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
 			);
 		}
 
 		// 定期的に grep 中のファイル名表示を更新
 		if( dwNow - m_dwTickUIFileName > UIFILENAME_INTERVAL_MILLISEC ){
 			m_dwTickUIFileName = dwNow;
-			::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, lpFileName );
+			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, lpFileName );
 		}
 
 		std::wstring currentFile = pszPath;
@@ -880,31 +869,18 @@ int CGrepAgent::DoGrepTree(
 
 		/* ファイル内の検索 */
 		int nRet = DoGrepReplaceFile(
-			pcViewDst,
-			pcDlgCancel,
+			pArg,
 			NULL,
-			pszKey,
-			cmGrepReplace,
 			lpFileName,
-			sSearchOption,
-			sGrepOption,
-			pattern,
-			pRegexp,
-			pnHitCount,
 			currentFile.c_str(),
-			pszBasePath,
-			(sGrepOption.bGrepSeparateFolder && sGrepOption.bGrepOutputBaseFolder ? pszPath + nBasePathLen2 : pszPath),
-			(sGrepOption.bGrepSeparateFolder ? lpFileName : currentFile.c_str() + nBasePathLen + 1),
-			bOutputBaseFolder,
-			bOutputFolderName,
-			cmemMessage,
-			cUnicodeBuffer,
-			cOutBuffer
+			(pArg->sGrepOption.bGrepSeparateFolder && pArg->sGrepOption.bGrepOutputBaseFolder ? pszPath + nBasePathLen2 : pszPath),
+			(pArg->sGrepOption.bGrepSeparateFolder ? lpFileName : currentFile.c_str() + nBasePathLen + 1),
+			bOutputFolderName
 		);
 
 		// 2003.06.23 Moca リアルタイム表示のときは早めに表示
-		if( pcViewDst->GetDrawSwitch() ){
-			if( LTEXT('\0') != pszKey[0] ){
+		if( pArg->pcViewDst->GetDrawSwitch() ){
+			if( LTEXT('\0') != pArg->pszKey[0] ){
 				// データ検索のときファイルの合計が最大10MBを超えたら表示
 				nWork += ( cGrepEnumFilterFiles.GetFileSizeLow( i ) + 1023 ) / 1024;
 			}
@@ -913,14 +889,14 @@ int CGrepAgent::DoGrepTree(
 			}
 		}
 		/* 結果出力 */
-		if( 0 < cmemMessage.GetStringLength() &&
-		   (*pnHitCount - nHitCountOld) >= 10 &&
+		if( 0 < pArg->cmemMessage.GetStringLength() &&
+		   (*pArg->pnHitCount - nHitCountOld) >= 10 &&
 		   (::GetTickCount() - m_dwTickAddTail) > ADDTAIL_INTERVAL_MILLISEC
 		){
-			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
-			cmemMessage._SetStringLength(0);
+			AddTail( pArg->pcViewDst, pArg->cmemMessage, pArg->sGrepOption.bGrepStdout );
+			pArg->cmemMessage._SetStringLength(0);
 			nWork = 0;
-			nHitCountOld = *pnHitCount;
+			nHitCountOld = *pArg->pnHitCount;
 		}
 		if( -1 == nRet ){
 			goto cancel_return;
@@ -930,10 +906,10 @@ int CGrepAgent::DoGrepTree(
 	/*
 	 * サブフォルダーを検索する。
 	 */
-	if( sGrepOption.bGrepSubFolder ){
+	if( pArg->sGrepOption.bGrepSubFolder ){
 		CGrepEnumOptions cGrepEnumOptionsDir;
 		CGrepEnumFilterFolders cGrepEnumFilterFolders;
-		cGrepEnumFilterFolders.Enumerates( pszPath, cGrepEnumKeys, cGrepEnumOptionsDir, cGrepExceptAbsFolders );
+		cGrepEnumFilterFolders.Enumerates( pszPath, pArg->cGrepEnumKeys, cGrepEnumOptionsDir, pArg->cGrepExceptAbsFolders );
 
 		count = cGrepEnumFilterFolders.GetCount();
 		for( i = 0; i < count; i++ ){
@@ -944,16 +920,16 @@ int CGrepAgent::DoGrepTree(
 				m_dwTickUICheck = dwNow;
 				//サブフォルダーの探索を再帰呼び出し。
 				/* 処理中のユーザー操作を可能にする */
-				if( !::BlockingHook( pcDlgCancel->GetHwnd() ) ){
+				if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
 					goto cancel_return;
 				}
 				/* 中断ボタン押下チェック */
-				if( pcDlgCancel->IsCanceled() ){
+				if( pArg->pcDlgCancel->IsCanceled() ){
 					goto cancel_return;
 				}
 				/* 表示設定をチェック */
 				CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-					0 != ::IsDlgButtonChecked( pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+					0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
 				);
 			}
 
@@ -964,42 +940,26 @@ int CGrepAgent::DoGrepTree(
 			currentPath += lpFileName;
 
 			int nGrepTreeResult = DoGrepTree(
-				pcViewDst,
-				pcDlgCancel,
-				pszKey,
-				cmGrepReplace,
-				cGrepEnumKeys,
-				cGrepExceptAbsFiles,
-				cGrepExceptAbsFolders,
-				currentPath.c_str(),
-				pszBasePath,
-				sSearchOption,
-				sGrepOption,
-				pattern,
-				pRegexp,
+				pArg,
 				nNest + 1,
-				bOutputBaseFolder,
-				pnHitCount,
-				cmemMessage,
-				cUnicodeBuffer,
-				cOutBuffer
+				currentPath.c_str()
 			);
 			if( -1 == nGrepTreeResult ){
 				goto cancel_return;
 			}
-			::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszPath );	//@@@ 2002.01.10 add サブフォルダーから戻ってきたら...
+			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszPath );	//@@@ 2002.01.10 add サブフォルダーから戻ってきたら...
 		}
 	}
 
-	::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, LTEXT(" ") );	// 2002/09/09 Moca add
+	::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, LTEXT(" ") );	// 2002/09/09 Moca add
 
 	return 0;
 
 cancel_return:;
 	/* 結果出力 */
-	if( 0 < cmemMessage.GetStringLength() ){
-		AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
-		cmemMessage._SetStringLength(0);
+	if( 0 < pArg->cmemMessage.GetStringLength() ){
+		AddTail( pArg->pcViewDst, pArg->cmemMessage, pArg->sGrepOption.bGrepStdout );
+		pArg->cmemMessage._SetStringLength(0);
 	}
 
 	return -1;
@@ -1302,26 +1262,13 @@ private:
 	Grep検索・置換実行
 */
 int CGrepAgent::DoGrepReplaceFile(
-	CEditView*				pcViewDst,
-	CDlgCancel*				pcDlgCancel,
+	tGrepArg				*pArg,
 	HWND					hWndTarget,			//!< [in] 対象Windows(NULLでファイル)
-	const wchar_t*			pszKey,
-	const CNativeW&			cmGrepReplace,
 	const WCHAR*			pszFile,
-	const SSearchOption&	sSearchOption,
-	const SGrepOption&		sGrepOption,
-	const CSearchStringPattern& pattern,
-	CBregexp*				pRegexp,		//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
-	int*					pnHitCount,
 	const WCHAR*			pszFullPath,
-	const WCHAR*			pszBaseFolder,
 	const WCHAR*			pszFolder,
 	const WCHAR*			pszRelPath,
-	bool&					bOutputBaseFolder,
-	bool&					bOutputFolderName,
-	CNativeW&				cmemMessage,
-	CNativeW&				cUnicodeBuffer,
-	CNativeW&				cOutBuffer
+	bool&					bOutputFolderName
 )
 {
 	LONGLONG	nLine = 0;
@@ -1331,7 +1278,7 @@ int CGrepAgent::DoGrepReplaceFile(
 	CEol		cEol;
 	int			nEolCodeLen;
 	int			nOldPercent = 0;
-	int			nKeyLen = wcslen( pszKey );
+	int			nKeyLen = wcslen( pArg->pszKey );
 	const WCHAR*	pszCodeName = L"";
 
 	const STypeConfigMini* type = NULL;
@@ -1341,21 +1288,21 @@ int CGrepAgent::DoGrepReplaceFile(
 	CFileLoadOrWnd	cfl( type->m_encoding, hWndTarget );	// 2012/12/18 Uchi 検査するファイルのデフォルトの文字コードを取得する様に
 	bool bBom;
 	// ファイル名表示
-	const WCHAR* pszDispFilePath = ( sGrepOption.bGrepSeparateFolder || sGrepOption.bGrepOutputBaseFolder ) ? pszRelPath : pszFullPath;
+	const WCHAR* pszDispFilePath = ( pArg->sGrepOption.bGrepSeparateFolder || pArg->sGrepOption.bGrepOutputBaseFolder ) ? pszRelPath : pszFullPath;
 	
 	try{
 		// ファイルを開く
 		// FileCloseで明示的に閉じるが、閉じていないときはデストラクタで閉じる
 		// 2003.06.10 Moca 文字コード判定処理もFileOpenで行う
-		nCharCode = cfl.FileOpen( pszFullPath, true, sGrepOption.nGrepCharSet, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
+		nCharCode = cfl.FileOpen( pszFullPath, true, pArg->sGrepOption.nGrepCharSet, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
 		std::unique_ptr<CWriteData> pOutput;
 		
-		if( sGrepOption.bGrepReplace ){
-			pOutput.reset( new CWriteData( nHitCount, pszFullPath, nCharCode, bBom, sGrepOption.bGrepBackup, cmemMessage ));
+		if( pArg->sGrepOption.bGrepReplace ){
+			pOutput.reset( new CWriteData( nHitCount, pszFullPath, nCharCode, bBom, pArg->sGrepOption.bGrepBackup, pArg->cmemMessage ));
 		}
 		
 		WCHAR szCpName[100];
-		if( CODE_AUTODETECT == sGrepOption.nGrepCharSet ){
+		if( CODE_AUTODETECT == pArg->sGrepOption.nGrepCharSet ){
 			if( IsValidCodeType(nCharCode) ){
 				wcscpy( szCpName, CCodeTypeName(nCharCode).Bracket() );
 				pszCodeName = szCpName;
@@ -1369,11 +1316,11 @@ int CGrepAgent::DoGrepReplaceFile(
 		if ( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ) {
 			m_dwTickUICheck = dwNow;
 			/* 処理中のユーザー操作を可能にする */
-			if( !::BlockingHook( pcDlgCancel->GetHwnd() ) ){
+			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
 				return -1;
 			}
 			/* 中断ボタン押下チェック */
-			if( pcDlgCancel->IsCanceled() ){
+			if( pArg->pcDlgCancel->IsCanceled() ){
 				return -1;
 			}
 		}
@@ -1382,18 +1329,18 @@ int CGrepAgent::DoGrepReplaceFile(
 		// 注意 : cfl.ReadLine が throw する可能性がある
 		
 		// next line callback 設定
-		CGrepDocInfo GrepLineInfo( &cfl, &cUnicodeBuffer, &cEol, &nLine );
-		pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
+		CGrepDocInfo GrepLineInfo( &cfl, &pArg->cUnicodeBuffer, &cEol, &nLine );
+		pArg->pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
 		
 		LONGLONG iMatchLinePrev = -1;
 		
 		// 非該当行表示時は，partial match を off
-		UINT uMatchOpt = sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ? CBregexp::optNoPartialMatch : 0;
+		UINT uMatchOpt = pArg->sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ? CBregexp::optNoPartialMatch : 0;
 		
 		while( RESULT_FAILURE != ReadLine( &GrepLineInfo ))
 		{
-			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
-			int		nLineLen = cUnicodeBuffer.GetStringLength();
+			const wchar_t*	pLine = pArg->cUnicodeBuffer.GetStringPtr();
+			int		nLineLen = pArg->cUnicodeBuffer.GetStringLength();
 			
 			nEolCodeLen = cEol.GetLen();
 			
@@ -1401,16 +1348,16 @@ int CGrepAgent::DoGrepReplaceFile(
 			if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
 				m_dwTickUICheck = dwNow;
 				/* 処理中のユーザー操作を可能にする */
-				if( !::BlockingHook( pcDlgCancel->GetHwnd() ) ){
+				if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
 					return -1;
 				}
 				/* 中断ボタン押下チェック */
-				if( pcDlgCancel->IsCanceled() ){
+				if( pArg->pcDlgCancel->IsCanceled() ){
 					return -1;
 				}
 				//	2003.06.23 Moca 表示設定をチェック
 				CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-					0 != ::IsDlgButtonChecked( pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+					0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
 				);
 				// 2002/08/30 Moca 進行状態を表示する(5MB以上)
 				if( 5000000 < cfl.GetFileSize() ){
@@ -1421,22 +1368,22 @@ int CGrepAgent::DoGrepReplaceFile(
 						::auto_sprintf( szWork, L" (%3d%%)", nPercent );
 						std::wstring str;
 						str = str + pszFile + szWork;
-						::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, str.c_str() );
+						::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, str.c_str() );
 					}
 				}else{
-					::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, pszFile );
+					::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, pszFile );
 				}
-				::SetDlgItemInt( pcDlgCancel->GetHwnd(), IDC_STATIC_HITCOUNT, *pnHitCount, FALSE );
-				::DlgItem_SetText( pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszFolder );
+				::SetDlgItemInt( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_HITCOUNT, *pArg->pnHitCount, FALSE );
+				::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszFolder );
 			}
 			int nHitOldLine = nHitCount;
-			int nHitCountOldLine = *pnHitCount;
+			int nHitCountOldLine = *pArg->pnHitCount;
 			
-			if( sGrepOption.bGrepReplace ) cOutBuffer.SetString( L"", 0 );
+			if( pArg->sGrepOption.bGrepReplace ) pArg->cOutBuffer.SetString( L"", 0 );
 			
 			// replace 時の結果 2回目以降の表示
 			bool bOutput = true;
-			if( sGrepOption.bGrepOutputFileOnly && 1 <= nHitCount ){
+			if( pArg->sGrepOption.bGrepOutputFileOnly && 1 <= nHitCount ){
 				bOutput = false;
 			}
 			
@@ -1453,21 +1400,21 @@ int CGrepAgent::DoGrepReplaceFile(
 				
 				// マッチ
 				bool bMatch = bRestartGrep ?
-					pRegexp->Match( pLine,   nLineLen, nIndex, uMatchOpt ) :
-					pRegexp->Match( nullptr, 0,        nIndex, uMatchOpt );
+					pArg->pRegexp->Match( pLine,   nLineLen, nIndex, uMatchOpt ) :
+					pArg->pRegexp->Match( nullptr, 0,        nIndex, uMatchOpt );
 				bRestartGrep = false;
 				
 				// cat した serch buf に切り替わっているかもしれないので，pLine nLineLen をそちらに更新
-				pLine		= pRegexp->GetSubject();
-				nLineLen	= pRegexp->GetSubjectLen();
+				pLine		= pArg->pRegexp->GetSubject();
+				nLineLen	= pArg->pRegexp->GetSubjectLen();
 				
-				if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ) bMatch = !bMatch;
+				if( pArg->sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ) bMatch = !bMatch;
 				
 				if( !bMatch ) break;
 				
 				// 置換
-				if( sGrepOption.bGrepReplace && !sGrepOption.bGrepPaste ){
-					if( pRegexp->Replace( cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
+				if( pArg->sGrepOption.bGrepReplace && !pArg->sGrepOption.bGrepPaste ){
+					if( pArg->pRegexp->Replace( pArg->cmGrepReplace.GetStringPtr()) < 0 ) throw CError_Regex();
 				}
 				
 				// log 表示用行，match 位置
@@ -1476,43 +1423,43 @@ int CGrepAgent::DoGrepReplaceFile(
 				int iLogMatchLineOffs;
 				const wchar_t*	pMatchStr = pLine;
 				
-				pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
+				pArg->pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
 				
-				if( sGrepOption.nGrepOutputLineType == GREP_MATCH_LINE ){
-					iLogMatchIdx	= pRegexp->GetIndex();
-				}else if( sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
-					iLogMatchIdx	= pRegexp->GetIndex();
-					iLogMatchLen	= pRegexp->GetMatchLen();
+				if( pArg->sGrepOption.nGrepOutputLineType == GREP_MATCH_LINE ){
+					iLogMatchIdx	= pArg->pRegexp->GetIndex();
+				}else if( pArg->sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
+					iLogMatchIdx	= pArg->pRegexp->GetIndex();
+					iLogMatchLen	= pArg->pRegexp->GetMatchLen();
 					pMatchStr		= pLine + iLogMatchIdx;
 				}
 				
 				++nHitCount;
-				++(*pnHitCount);
+				++(*pArg->pnHitCount);
 				
 				if( bOutput ){
 					
 					if(
-						sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ||
+						pArg->sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ||
 						iMatchLinePrev != iLineDisp + iLogMatchLineOffs
 					){
 						
 						iMatchLinePrev = iLineDisp + iLogMatchLineOffs;
 						
 						OutputPathInfo(
-							cmemMessage, sGrepOption,
-							pszFullPath, pszBaseFolder, pszFolder, pszRelPath, pszCodeName,
-							bOutputBaseFolder, bOutputFolderName, bOutFileName
+							pArg->cmemMessage, pArg->sGrepOption,
+							pszFullPath, pArg->pszBasePath, pszFolder, pszRelPath, pszCodeName,
+							pArg->bOutputBaseFolder, bOutputFolderName, bOutFileName
 						);
 						
-						/* Grep結果を、cmemMessageに格納する */
+						/* Grep結果を、pArg->cmemMessageに格納する */
 						SetGrepResult(
-							cmemMessage, pszDispFilePath, pszCodeName,
+							pArg->cmemMessage, pszDispFilePath, pszCodeName,
 							iMatchLinePrev,			// line
 							iLogMatchIdx + 1,		// column
 							pMatchStr,				// match str
 							iLogMatchLen,			// match str len
 							nEolCodeLen,			// eol len
-							sGrepOption
+							pArg->sGrepOption
 						);
 					}
 					
@@ -1521,85 +1468,85 @@ int CGrepAgent::DoGrepReplaceFile(
 					// - 検索時は
 					//   - ファイル検索時は終了
 					//   - (非)該当モード時は，search buf に行 cat されていなければ終了
-					if( !sGrepOption.bGrepReplace && (
-						sGrepOption.bGrepOutputFileOnly ||
-						( sGrepOption.nGrepOutputLineType != GREP_MATCH_POS && !pRegexp->IsSearchBufExists())
+					if( !pArg->sGrepOption.bGrepReplace && (
+						pArg->sGrepOption.bGrepOutputFileOnly ||
+						( pArg->sGrepOption.nGrepOutputLineType != GREP_MATCH_POS && !pArg->pRegexp->IsSearchBufExists())
 					)){
 						break;
 					}
 				}
 				
 				// 置換結果文字列の生成
-				if( sGrepOption.bGrepReplace ){
+				if( pArg->sGrepOption.bGrepReplace ){
 					pOutput->OutputHead();
 					
 					// hit 位置直前までをコピー
-					cOutBuffer.AppendString( pRegexp->GetSubject() + nIndex, pRegexp->GetIndex() - nIndex );
+					pArg->cOutBuffer.AppendString( pArg->pRegexp->GetSubject() + nIndex, pArg->pRegexp->GetIndex() - nIndex );
 					
 					// 置換後文字列をコピー
-					if( sGrepOption.bGrepPaste ){
+					if( pArg->sGrepOption.bGrepPaste ){
 						// クリップボード
-						cOutBuffer.AppendNativeData( cmGrepReplace );
+						pArg->cOutBuffer.AppendNativeData( pArg->cmGrepReplace );
 					}else{
 						// regexp 置換結果
-						cOutBuffer.AppendString( pRegexp->GetReplacedString(), pRegexp->GetReplacedLen());
+						pArg->cOutBuffer.AppendString( pArg->pRegexp->GetReplacedString(), pArg->pRegexp->GetReplacedLen());
 					}
 				}
 				
 				// 次検索開始位置
-				nIndex = pRegexp->GetIndex() + pRegexp->GetMatchLen();
+				nIndex = pArg->pRegexp->GetIndex() + pArg->pRegexp->GetMatchLen();
 				
 				// 0 幅マッチの場合 1文字進める
-				if( pRegexp->GetMatchLen() == 0 ) ++nIndex;
+				if( pArg->pRegexp->GetMatchLen() == 0 ) ++nIndex;
 			}
 			
-			if( sGrepOption.bGrepReplace ){
+			if( pArg->sGrepOption.bGrepReplace ){
 				// 何も引っかからなかったので，nIndex 以降をコピー
-				cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
-				pOutput->AppendBuffer(cOutBuffer);
+				pArg->cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
+				pOutput->AppendBuffer(pArg->cOutBuffer);
 			}
 			
-			if( 0 < cmemMessage.GetStringLength() &&
+			if( 0 < pArg->cmemMessage.GetStringLength() &&
 			   (nHitCount - nOutputHitCount >= 10) &&
 			   (::GetTickCount() - m_dwTickAddTail > ADDTAIL_INTERVAL_MILLISEC)
 			){
 				nOutputHitCount = nHitCount;
-				AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
-				cmemMessage._SetStringLength(0);
+				AddTail( pArg->pcViewDst, pArg->cmemMessage, pArg->sGrepOption.bGrepStdout );
+				pArg->cmemMessage._SetStringLength(0);
 			}
 			
 			// ファイル検索の場合は、1つ見つかったら終了
-			if( !sGrepOption.bGrepReplace && sGrepOption.bGrepOutputFileOnly && 1 <= nHitCount ){
+			if( !pArg->sGrepOption.bGrepReplace && pArg->sGrepOption.bGrepOutputFileOnly && 1 <= nHitCount ){
 				break;
 			}
 		}
 		
 		// ファイルを明示的に閉じるが、ここで閉じないときはデストラクタで閉じている
 		cfl.FileClose();
-		if( sGrepOption.bGrepReplace) pOutput->Close();
+		if( pArg->sGrepOption.bGrepReplace) pOutput->Close();
 	} // try
 	
 	catch( const CError_Regex& ){
-		pRegexp->ShowErrorMsg();
+		pArg->pRegexp->ShowErrorMsg();
 		return -1;	// ファイル探索も終了
 	}
 	catch( const CError_FileOpen& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEOPEN));
 		str.Replace(L"%s", pszFullPath);
-		cmemMessage.AppendNativeData( str );
+		pArg->cmemMessage.AppendNativeData( str );
 		return 0;
 	}
 	catch( const CError_FileRead& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEREAD));
 		str.Replace(L"%s", pszFullPath);
-		cmemMessage.AppendNativeData( str );
+		pArg->cmemMessage.AppendNativeData( str );
 	}
 	catch( const CError_WriteFileOpen& ){
 		std::wstring file = pszFullPath;
 		file += L".skrnew";
 		CNativeW str(LS(STR_GREP_ERR_FILEWRITE));
 		str.Replace(L"%s", file.c_str());
-		cmemMessage.AppendNativeData( str );
+		pArg->cmemMessage.AppendNativeData( str );
 	} // 例外処理終わり
 
 	return nHitCount;
