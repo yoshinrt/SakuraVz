@@ -1474,12 +1474,16 @@ int CGrepAgent::DoGrepReplaceFile(
 				int iLogMatchIdx;
 				int iLogMatchLen;
 				int iLogMatchLineOffs;
+				const wchar_t*	pMatchStr = pLine;
 				
 				pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
 				
-				if( sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
-					iLogMatchIdx = pRegexp->GetIndex();
-					iLogMatchLen = pRegexp->GetMatchLen();
+				if( sGrepOption.nGrepOutputLineType == GREP_MATCH_LINE ){
+					iLogMatchIdx	= pRegexp->GetIndex();
+				}else if( sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
+					iLogMatchIdx	= pRegexp->GetIndex();
+					iLogMatchLen	= pRegexp->GetMatchLen();
+					pMatchStr		= pLine + iLogMatchIdx;
 				}
 				
 				++nHitCount;
@@ -1505,7 +1509,7 @@ int CGrepAgent::DoGrepReplaceFile(
 							cmemMessage, pszDispFilePath, pszCodeName,
 							iMatchLinePrev,			// line
 							iLogMatchIdx + 1,		// column
-							pLine + iLogMatchIdx,	// match str
+							pMatchStr,				// match str
 							iLogMatchLen,			// match str len
 							nEolCodeLen,			// eol len
 							sGrepOption
