@@ -1387,6 +1387,9 @@ int CGrepAgent::DoGrepReplaceFile(
 		
 		LONGLONG iMatchLinePrev = -1;
 		
+		// 非該当行表示時は，partial match を off
+		UINT uMatchOpt = sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ? CBregexp::optNoPartialMatch : 0;
+		
 		while( RESULT_FAILURE != ReadLine( &GrepLineInfo ))
 		{
 			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
@@ -1450,8 +1453,8 @@ int CGrepAgent::DoGrepReplaceFile(
 				
 				// マッチ
 				bool bMatch = bRestartGrep ?
-					pRegexp->Match( pLine, nLineLen, nIndex ) :
-					pRegexp->Match( nullptr, 0, nIndex );
+					pRegexp->Match( pLine,   nLineLen, nIndex, uMatchOpt ) :
+					pRegexp->Match( nullptr, 0,        nIndex, uMatchOpt );
 				bRestartGrep = false;
 				
 				// cat した serch buf に切り替わっているかもしれないので，pLine nLineLen をそちらに更新
