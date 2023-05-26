@@ -655,7 +655,7 @@ DWORD CGrepAgent::DoGrep(
 	CGrepEnumFolders cGrepExceptAbsFolders;
 	cGrepExceptAbsFolders.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFolderKeys, cGrepEnumOptions);
 
-	int nGrepTreeResult = 0;
+	int nTreeRet = 0;
 	
 	bool bOutputBaseFolder = false;
 	tGrepArg Arg = {
@@ -701,8 +701,7 @@ DWORD CGrepAgent::DoGrep(
 			Arg.pszBasePath = szWindowPath;
 			
 			currentFile += szWindowName;
-			int nHitCount = nGrepTreeResult;
-			int nTreeRet = DoGrepReplaceFile(
+			nTreeRet = DoGrepReplaceFile(
 				&Arg,
 				hwnd,
 				szWindowName,
@@ -711,11 +710,7 @@ DWORD CGrepAgent::DoGrep(
 				(sGrepOption.bGrepSeparateFolder ? szWindowName : currentFile.c_str() + nPathLen),
 				bOutputFolderName
 			);
-			if( nTreeRet == -1 ){
-				nGrepTreeResult = -1;
-				break;
-			}
-			nGrepTreeResult += nTreeRet;
+			if( nTreeRet == -1 ) break;
 		}
 		if( 0 < cmemMessage.GetStringLength() ){
 			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
@@ -724,30 +719,25 @@ DWORD CGrepAgent::DoGrep(
 				CEditWnd::getInstance()->RedrawAllViews( pcViewDst );
 			cmemMessage.Clear();
 		}
-		nHitCount = nGrepTreeResult;
 	}else{
 		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
 			std::wstring sPath = ChopYen( vPaths[nPath] );
 			
 			Arg.pszBasePath = sPath.c_str();
 			
-			int nTreeRet = DoGrepTree(
+			nTreeRet = DoGrepTree(
 				&Arg,
 				0,
 				sPath.c_str()
 			);
-			if( nTreeRet == -1 ){
-				nGrepTreeResult = -1;
-				break;
-			}
-			nGrepTreeResult += nTreeRet;
+			if( nTreeRet == -1 ) break;
 		}
 		if( 0 < cmemMessage.GetStringLength() ) {
 			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
 			cmemMessage._SetStringLength(0);
 		}
 	}
-	if( -1 == nGrepTreeResult && sGrepOption.bGrepHeader ){
+	if( -1 == nTreeRet && sGrepOption.bGrepHeader ){
 		const wchar_t* p = LS( STR_GREP_SUSPENDED );	//L"中断しました。\r\n"
 		CNativeW cmemSuspend;
 		cmemSuspend.SetString( p );
@@ -939,12 +929,12 @@ int CGrepAgent::DoGrepTree(
 			currentPath += L"\\";
 			currentPath += lpFileName;
 
-			int nGrepTreeResult = DoGrepTree(
+			int nHitCount = DoGrepTree(
 				pArg,
 				nNest + 1,
 				currentPath.c_str()
 			);
-			if( -1 == nGrepTreeResult ){
+			if( -1 == nHitCount ){
 				goto cancel_return;
 			}
 			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszPath );	//@@@ 2002.01.10 add サブフォルダーから戻ってきたら...
