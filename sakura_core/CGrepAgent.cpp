@@ -59,6 +59,10 @@
 #define ADDTAIL_INTERVAL_MILLISEC 200	// 結果出力の時間間隔
 #define UIFILENAME_INTERVAL_MILLISEC 200	// Cancelダイアログのファイル名表示更新間隔
 
+#define GREP_MATCH_POS		0
+#define GREP_MATCH_LINE		1
+#define GREP_NOT_MATCH_LINE	2
+
 /*!
  * 指定された文字列をタイプ別設定に従ってエスケープする
  */
@@ -443,8 +447,8 @@ DWORD CGrepAgent::DoGrep(
 	sGrepOption.bGrepBackup = bGrepBackup;
 	if( sGrepOption.bGrepReplace ){
 		// Grep否定行はGrep置換では無効
-		if( sGrepOption.nGrepOutputLineType == 2 ){
-			sGrepOption.nGrepOutputLineType = 1; // 行単位
+		if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ){
+			sGrepOption.nGrepOutputLineType = GREP_MATCH_LINE; // 行単位
 		}
 	}
 
@@ -602,10 +606,10 @@ DWORD CGrepAgent::DoGrep(
 	}
 
 	if( 0 < nWork ){ // 2003.06.10 Moca ファイル検索の場合は表示しない // 2004.09.26 条件誤り修正
-		if( sGrepOption.nGrepOutputLineType == 1 ){
+		if( sGrepOption.nGrepOutputLineType == GREP_MATCH_LINE ){
 			/* 該当行 */
 			pszWork = LS( STR_GREP_SHOW_MATCH_LINE );	//L"    (一致した行を出力)\r\n"
-		}else if( sGrepOption.nGrepOutputLineType == 2 ){
+		}else if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ){
 			// 否該当行
 			pszWork = LS( STR_GREP_SHOW_MATCH_NOHITLINE );	//L"    (一致しなかった行を出力)\r\n"
 		}else{
@@ -1454,7 +1458,7 @@ int CGrepAgent::DoGrepReplaceFile(
 				pLine		= pRegexp->GetSubject();
 				nLineLen	= pRegexp->GetSubjectLen();
 				
-				if( sGrepOption.nGrepOutputLineType == 2/*非該当行*/ ) bMatch = !bMatch;
+				if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ) bMatch = !bMatch;
 				
 				if( !bMatch ) break;
 				
@@ -1470,7 +1474,7 @@ int CGrepAgent::DoGrepReplaceFile(
 				
 				pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
 				
-				if( sGrepOption.nGrepOutputLineType == 0/*該当部分*/ ){
+				if( sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
 					iLogMatchIdx = pRegexp->GetIndex();
 					iLogMatchLen = pRegexp->GetMatchLen();
 				}
@@ -1481,8 +1485,8 @@ int CGrepAgent::DoGrepReplaceFile(
 				if( bOutput ){
 					
 					if(
-						sGrepOption.nGrepOutputLineType == 0 ||
-						 iMatchLinePrev != iLineDisp + iLogMatchLineOffs
+						sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ||
+						iMatchLinePrev != iLineDisp + iLogMatchLineOffs
 					){
 						
 						iMatchLinePrev = iLineDisp + iLogMatchLineOffs;
@@ -1512,7 +1516,7 @@ int CGrepAgent::DoGrepReplaceFile(
 					//   - (非)該当モード時は，search buf に行 cat されていなければ終了
 					if( !sGrepOption.bGrepReplace && (
 						sGrepOption.bGrepOutputFileOnly ||
-						( sGrepOption.nGrepOutputLineType != 0/*該当部分*/ && !pRegexp->IsSearchBufExists())
+						( sGrepOption.nGrepOutputLineType != GREP_MATCH_POS && !pRegexp->IsSearchBufExists())
 					)){
 						break;
 					}
