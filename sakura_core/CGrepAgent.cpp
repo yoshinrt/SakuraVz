@@ -301,18 +301,11 @@ DWORD CGrepAgent::DoGrep(
 	CDlgCancel	cDlgCancel;
 	HWND		hwndCancel;
 	//	Jun. 27, 2001 genta	正規表現ライブラリの差し替え
-	CBregexp	cRegexp;
 	CNativeW	cmemMessage;
-	CNativeW	cUnicodeBuffer;
-	CNativeW	cOutBuffer;
 	int			nWork;
 
-	/*
-	|| バッファサイズの調整
-	*/
+	// バッファサイズの調整
 	cmemMessage.AllocStringBuffer( 4000 );
-	cUnicodeBuffer.AllocStringBuffer( 4000 );
-	if( sGrepOption.bGrepReplace ) cOutBuffer.AllocStringBuffer( 4000 );
 
 	pcViewDst->m_bDoing_UndoRedo		= true;
 
@@ -401,31 +394,6 @@ DWORD CGrepAgent::DoGrep(
 	//	2011.12.10 Moca 表示の際に...に切り捨てられるので登録するように
 	wcsncpy_s( CAppMode::getInstance()->m_szGrepKey, _countof(CAppMode::getInstance()->m_szGrepKey), pcmGrepKey->GetStringPtr(), _TRUNCATE );
 	this->m_bGrepMode = true;
-
-	//	2007.07.22 genta
-	//	バージョン番号取得のため，処理を前の方へ移動した
-	CSearchStringPattern pattern;
-	{
-		/* 検索パターンのコンパイル */
-		bool bError = !pattern.SetPattern(
-			pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
-			sSearchOption, &cRegexp
-		);
-		if( bError ){
-			this->m_bGrepRunning = false;
-			pcViewDst->m_bDoing_UndoRedo = false;
-			pcViewDst->SetUndoBuffer();
-			return 0;
-		}
-	}
-	
-	// Grepオプションまとめ
-	if( sGrepOption.bGrepReplace ){
-		// Grep否定行はGrep置換では無効
-		if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ){
-			sGrepOption.nGrepOutputLineType = GREP_MATCH_LINE; // 行単位
-		}
-	}
 
 //2002.02.08 Grepアイコンも大きいアイコンと小さいアイコンを別々にする。
 	HICON	hIconBig, hIconSmall;
@@ -561,13 +529,6 @@ DWORD CGrepAgent::DoGrep(
 			pszWork = LS( STR_GREP_IGNORE_CASE );	//L"    (英大文字小文字を区別しない)\r\n"
 		}
 		cmemMessage.AppendString( pszWork );
-
-		if( sSearchOption.bRegularExp ){
-			//	2007.07.22 genta : 正規表現ライブラリのバージョンも出力する
-			cmemMessage.AppendString( LS( STR_GREP_REGEX_DLL ) );	//L"    (正規表現:"
-			cmemMessage.AppendString( cRegexp.GetVersionW() );
-			cmemMessage.AppendString( L")\r\n" );
-		}
 	}
 
 	if( CODE_AUTODETECT == sGrepOption.nGrepCharSet ){
@@ -629,9 +590,46 @@ DWORD CGrepAgent::DoGrep(
 	cGrepExceptAbsFiles.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFileKeys, cGrepEnumOptions);
 	CGrepEnumFolders cGrepExceptAbsFolders;
 	cGrepExceptAbsFolders.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFolderKeys, cGrepEnumOptions);
-
-	int nTreeRet = 0;
 	
+	// スレッド毎 obj 生成
+	UINT uMaxThreadNum = hWndTarget ? 1 : std::thread::hardware_concurrency();
+	
+	CSearchStringPattern pattern;
+	m_cRegexp.reserve( uMaxThreadNum );
+	m_cUnicodeBuffer.reserve( uMaxThreadNum );
+	if( sGrepOption.bGrepReplace ) m_cOutBuffer.reserve( uMaxThreadNum );
+	
+	for( UINT u = 0; u < uMaxThreadNum; ++u ){
+		// パターンコンパイル
+		m_cRegexp.emplace_back();
+		bool bError = !pattern.SetPattern(
+			pcViewDst->GetHwnd(), pcmGrepKey->GetStringPtr(), pcmGrepKey->GetStringLength(),
+			sSearchOption, &m_cRegexp[ u ]
+		);
+		if( bError ){
+			this->m_bGrepRunning = false;
+			pcViewDst->m_bDoing_UndoRedo = false;
+			pcViewDst->SetUndoBuffer();
+			return 0;
+		}
+		
+		m_cUnicodeBuffer.emplace_back();
+		m_cUnicodeBuffer[ u ].AllocStringBuffer( 4000 );
+		
+		if( sGrepOption.bGrepReplace ){
+			m_cOutBuffer.emplace_back();
+			m_cOutBuffer[ u ].AllocStringBuffer( 4000 );
+		}
+	}
+	
+	// Grepオプションまとめ
+	if( sGrepOption.bGrepReplace ){
+		// Grep否定行はGrep置換では無効
+		if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ){
+			sGrepOption.nGrepOutputLineType = GREP_MATCH_LINE; // 行単位
+		}
+	}
+
 	tGrepArg Arg = {
 		// window
 		pcViewDst,
@@ -645,18 +643,24 @@ DWORD CGrepAgent::DoGrep(
 		cGrepExceptAbsFolders,			//!< [in] 除外フォルダー絶対パス
 		sSearchOption,					//!< [in] 検索オプション
 		sGrepOption,					//!< [in] Grepオプション
-		pattern,						//!< [in] 検索パターン
-		&cRegexp,						//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
+		nullptr,						//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
 		
 		&nHitCount,						//!< [i/o] ヒット数の合計
 		
 		// buffer
 		cmemMessage,					//!< [i/o] Grep結果文字列
-		cUnicodeBuffer,					//!< [i/o] ファイルオーブンバッファ
-		cOutBuffer						//!< [o] 置換後ファイルバッファ
+		nullptr,						//!< [i/o] ファイルオーブンバッファ
+		nullptr							//!< [o] 置換後ファイルバッファ
 	};
 	
+	int nTreeRet = 0;
 	if( hWndTarget ){
+		Arg.pRegexp			= &m_cRegexp[ 0 ];
+		Arg.pcUnicodeBuffer	= &m_cUnicodeBuffer[ 0 ];
+		if( sGrepOption.bGrepReplace ){
+			Arg.pcOutBuffer		= &m_cOutBuffer[ 0 ];
+		}
+		
 		nTreeRet = DoGrepReplaceFile(
 			&Arg,
 			hWndTarget,
@@ -671,6 +675,12 @@ DWORD CGrepAgent::DoGrep(
 			cmemMessage.Clear();
 		}
 	}else{
+		Arg.pRegexp			= &m_cRegexp[ 0 ];
+		Arg.pcUnicodeBuffer	= &m_cUnicodeBuffer[ 0 ];
+		if( sGrepOption.bGrepReplace ){
+			Arg.pcOutBuffer		= &m_cOutBuffer[ 0 ];
+		}
+		
 		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
 			std::wstring sPath = ChopYen( vPaths[nPath] );
 			nTreeRet = DoGrepTree(
@@ -1154,7 +1164,7 @@ private:
 //****************************************************************************
 // Grep worker スレッド
 
-void CGrepAgent::Run( CGrepTask& task ){
+void CGrepAgent::ThreadRun( CGrepTask& task ){
 	
 }
 
@@ -1232,7 +1242,7 @@ int CGrepAgent::DoGrepReplaceFile(
 		// 注意 : cfl.ReadLine が throw する可能性がある
 		
 		// next line callback 設定
-		CGrepDocInfo GrepLineInfo( &cfl, &pArg->cUnicodeBuffer, &cEol, &nLine );
+		CGrepDocInfo GrepLineInfo( &cfl, &*pArg->pcUnicodeBuffer, &cEol, &nLine );
 		pArg->pRegexp->SetNextLineCallback( GetNextLine, &GrepLineInfo );
 		
 		LONGLONG iMatchLinePrev = -1;
@@ -1242,8 +1252,8 @@ int CGrepAgent::DoGrepReplaceFile(
 		
 		while( RESULT_FAILURE != ReadLine( &GrepLineInfo ))
 		{
-			const wchar_t*	pLine = pArg->cUnicodeBuffer.GetStringPtr();
-			int		nLineLen = pArg->cUnicodeBuffer.GetStringLength();
+			const wchar_t*	pLine = pArg->pcUnicodeBuffer->GetStringPtr();
+			int		nLineLen = pArg->pcUnicodeBuffer->GetStringLength();
 			
 			nEolCodeLen = cEol.GetLen();
 			
@@ -1282,7 +1292,7 @@ int CGrepAgent::DoGrepReplaceFile(
 			int nHitOldLine = nHitCount;
 			int nHitCountOldLine = *pArg->pnHitCount;
 			
-			if( pArg->sGrepOption.bGrepReplace ) pArg->cOutBuffer.SetString( L"", 0 );
+			if( pArg->sGrepOption.bGrepReplace ) pArg->pcOutBuffer->SetString( L"", 0 );
 			
 			// replace 時の結果 2回目以降の表示
 			bool bOutput = true;
@@ -1384,15 +1394,15 @@ int CGrepAgent::DoGrepReplaceFile(
 					pOutput->OutputHead();
 					
 					// hit 位置直前までをコピー
-					pArg->cOutBuffer.AppendString( pArg->pRegexp->GetSubject() + nIndex, pArg->pRegexp->GetIndex() - nIndex );
+					pArg->pcOutBuffer->AppendString( pArg->pRegexp->GetSubject() + nIndex, pArg->pRegexp->GetIndex() - nIndex );
 					
 					// 置換後文字列をコピー
 					if( pArg->sGrepOption.bGrepPaste ){
 						// クリップボード
-						pArg->cOutBuffer.AppendNativeData( pArg->cmGrepReplace );
+						pArg->pcOutBuffer->AppendNativeData( pArg->cmGrepReplace );
 					}else{
 						// regexp 置換結果
-						pArg->cOutBuffer.AppendString( pArg->pRegexp->GetReplacedString(), pArg->pRegexp->GetReplacedLen());
+						pArg->pcOutBuffer->AppendString( pArg->pRegexp->GetReplacedString(), pArg->pRegexp->GetReplacedLen());
 					}
 				}
 				
@@ -1405,8 +1415,8 @@ int CGrepAgent::DoGrepReplaceFile(
 			
 			if( pArg->sGrepOption.bGrepReplace ){
 				// 何も引っかからなかったので，nIndex 以降をコピー
-				pArg->cOutBuffer.AppendString( pLine + nIndex, nLineLen - nIndex );
-				pOutput->AppendBuffer(pArg->cOutBuffer);
+				pArg->pcOutBuffer->AppendString( pLine + nIndex, nLineLen - nIndex );
+				pOutput->AppendBuffer(*pArg->pcOutBuffer);
 			}
 			
 			if( 0 < pArg->cmemMessage.GetStringLength() &&

@@ -112,15 +112,14 @@ typedef struct {
 	CGrepEnumFolders&			cGrepExceptAbsFolders;	//!< [in] 除外フォルダー絶対パス
 	const SSearchOption&		sSearchOption;			//!< [in] 検索オプション
 	const SGrepOption&			sGrepOption;			//!< [in] Grepオプション
-	const CSearchStringPattern&	pattern;				//!< [in] 検索パターン
 	CBregexp*					pRegexp;				//!< [in] 正規表現コンパイルデータ。既にコンパイルされている必要がある
 	
 	int*						pnHitCount;				//!< [i/o] ヒット数の合計
 	
 	// buffer
 	CNativeW&					cmemMessage;			//!< [i/o] Grep結果文字列
-	CNativeW&					cUnicodeBuffer;			//!< [i/o] ファイルオーブンバッファ
-	CNativeW&					cOutBuffer;				//!< [o] 置換後ファイルバッファ
+	CNativeW*					pcUnicodeBuffer;		//!< [i/o] ファイルオーブンバッファ
+	CNativeW*					pcOutBuffer;			//!< [o] 置換後ファイルバッファ
 } tGrepArg;
 
 //****************************************************************************
@@ -329,7 +328,10 @@ private:
 	DWORD m_dwTickUIFileName;	// Cancelダイアログのファイル名表示更新を行った時間
 	
 	// thread pool
-	virtual void Run( CGrepTask& task );
+	virtual void ThreadRun( CGrepTask& task );
+	std::vector<CBregexp>	m_cRegexp;
+	std::vector<CNativeW>	m_cUnicodeBuffer;
+	std::vector<CNativeW>	m_cOutBuffer;
 	
 public: //$$ 仮
 	bool	m_bGrepMode;		//!< Grepモードか
