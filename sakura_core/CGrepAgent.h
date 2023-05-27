@@ -116,7 +116,7 @@ typedef struct {
 	int*						pnHitCount;				//!< [i/o] ヒット数の合計
 	
 	// buffer
-	CNativeW&					cmemMessage;			//!< [i/o] Grep結果文字列
+	CNativeW*					pcmemMessage;			//!< [i/o] Grep結果文字列
 	CNativeW*					pcUnicodeBuffer;		//!< [i/o] ファイルオーブンバッファ
 	CNativeW*					pcOutBuffer;			//!< [o] 置換後ファイルバッファ
 } tGrepArg;
@@ -126,10 +126,18 @@ typedef struct {
 
 class CGrepTask {
 public:
-	CGrepTask( UINT uTaskNum, LPWSTR szFileName, LPWSTR szPathName ) :
+	CGrepTask(){};
+	
+	CGrepTask( UINT uTaskNum, LPCWSTR szFileName, LPCWSTR szPathName ) :
 		m_uTaskNum( uTaskNum ),
 		m_strFileName( szFileName ),
 		m_strPathName( szPathName )
+	{}
+	
+	CGrepTask( CGrepTask&& p ) :
+		m_uTaskNum( p.m_uTaskNum ),
+		m_strFileName( std::move( p.m_strFileName )),
+		m_strPathName( std::move( p.m_strPathName ))
 	{}
 	
 	UINT			m_uTaskNum;
@@ -333,19 +341,10 @@ private:
 	// thread pool
 private:
 	
-	void StartWorkerThread(UINT uThreadNum){
+	void StartWorkerThread(UINT uThreadNum, tGrepArg *pArg){
 		for(UINT u = 0; u < uThreadNum; ++u){
-			m_Workers.emplace_back([this, u] { Spawn( u ); });
+			m_Workers.emplace_back([this, u, pArg] { GrepThread( u, pArg ); });
 		}
-	}
-
-	void Post(CGrepTask& task){
-		{
-			std::unique_lock<std::mutex> lock(m_Mutex);
-			m_Tasks.push(task);
-		}
-
-		m_Condition.notify_one();
 	}
 
 	void Join(){
@@ -361,25 +360,11 @@ private:
 		}
 	}
 
-	void Spawn( UINT uId ){
-		MYTRACE( L"*** thread %d started.***\n", uId );
-		//for(;;){
-		//	CGrepTask task;
-		//	{
-		//		std::unique_lock<std::mutex> lock(m_Mutex);
-		//		m_Condition.wait(lock, [this] { return !m_Tasks.empty() || m_bStop; });
-		//		if(m_bStop && m_Tasks.empty()) return;
-		//		task = std::move(m_Tasks.front());
-		//		m_Tasks.pop();
-		//	}
-		//	Run(task);
-		//}
-	}
-	
-	void ThreadRun(CGrepTask& task);
+	void GrepThread( UINT uId, tGrepArg *pArg );
 	
 	std::vector<std::thread> m_Workers;
 	std::queue<CGrepTask> m_Tasks;
+	std::vector<CGrepResult> m_Result;
 	
 	std::mutex m_Mutex;
 	std::condition_variable m_Condition;
@@ -388,6 +373,8 @@ private:
 	std::vector<CBregexp>	m_cRegexp;
 	std::vector<CNativeW>	m_cUnicodeBuffer;
 	std::vector<CNativeW>	m_cOutBuffer;
+	
+	UINT	m_uTaskId;
 	
 public: //$$ 仮
 	bool	m_bGrepMode;		//!< Grepモードか
