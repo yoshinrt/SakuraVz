@@ -129,18 +129,18 @@ public:
 	CGrepTask(){};
 	
 	CGrepTask( UINT uTaskNum, LPCWSTR szFileName, LPCWSTR szPathName ) :
-		m_uTaskNum( uTaskNum ),
+		m_uTaskId( uTaskNum ),
 		m_strFileName( szFileName ),
 		m_strPathName( szPathName )
 	{}
 	
 	CGrepTask( CGrepTask&& p ) :
-		m_uTaskNum( p.m_uTaskNum ),
+		m_uTaskId( p.m_uTaskId ),
 		m_strFileName( std::move( p.m_strFileName )),
 		m_strPathName( std::move( p.m_strPathName ))
 	{}
 	
-	UINT			m_uTaskNum;
+	UINT			m_uTaskId;
 	std::wstring	m_strFileName;
 	std::wstring	m_strPathName;
 };
@@ -338,10 +338,16 @@ private:
 	DWORD m_dwTickUICheck;	// 処理中にユーザーによるUI操作が行われていないか確認した時間
 	DWORD m_dwTickUIFileName;	// Cancelダイアログのファイル名表示更新を行った時間
 	
+	UINT UpdateResult( tGrepArg *pArg );	// grep リザルト更新
+	
 	// thread pool
 private:
 	
 	void StartWorkerThread(UINT uThreadNum, tGrepArg *pArg){
+		m_uTaskId		= 0;
+		m_uTaskIdDisp	= 0;
+		m_bStop			= 0;
+		
 		for(UINT u = 0; u < uThreadNum; ++u){
 			m_Workers.emplace_back([this, u, pArg] { GrepThread( u, pArg ); });
 		}
@@ -364,7 +370,7 @@ private:
 	
 	std::vector<std::thread> m_Workers;
 	std::queue<CGrepTask> m_Tasks;
-	std::vector<CGrepResult> m_Result;
+	std::vector<CGrepResult*> m_Result;
 	
 	std::mutex m_Mutex;
 	std::condition_variable m_Condition;
@@ -375,6 +381,7 @@ private:
 	std::vector<CNativeW>	m_cOutBuffer;
 	
 	UINT	m_uTaskId;
+	UINT	m_uTaskIdDisp;
 	
 public: //$$ 仮
 	bool	m_bGrepMode;		//!< Grepモードか
