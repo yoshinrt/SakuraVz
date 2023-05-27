@@ -253,7 +253,6 @@ private:
 		tGrepArg				*pArg,
 		HWND					hWndTarget,			//!< [in] 対象Windows(NULLでファイル)
 		const WCHAR*			pszFile,
-		const WCHAR*			pszFullPath,
 		const WCHAR*			pszFolder
 	);
 

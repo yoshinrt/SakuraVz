@@ -685,19 +685,12 @@ DWORD CGrepAgent::DoGrep(
 	if( hWndTarget ){
 		for( HWND hwnd = hWndTarget; NULL != hwnd; hwnd = NULL ){
 			// 複数ウィンドウループ予約
-			std::wstring currentFile = szWindowPath;
-			if( currentFile.size() ){
-				currentFile += L'\\';
-			}
-			
 			Arg.pszBasePath = szWindowPath;
 			
-			currentFile += szWindowName;
 			nTreeRet = DoGrepReplaceFile(
 				&Arg,
 				hwnd,
 				szWindowName,
-				currentFile.c_str(),
 				szWindowPath
 			);
 			if( nTreeRet == -1 ) break;
@@ -837,16 +830,11 @@ int CGrepAgent::DoGrepTree(
 			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, lpFileName );
 		}
 
-		std::wstring currentFile = pszPath;
-		currentFile += L"\\";
-		currentFile += lpFileName;
-
 		/* ファイル内の検索 */
 		int nRet = DoGrepReplaceFile(
 			pArg,
 			NULL,
 			lpFileName,
-			currentFile.c_str(),
 			pszPath
 		);
 
@@ -1205,7 +1193,6 @@ int CGrepAgent::DoGrepReplaceFile(
 	tGrepArg				*pArg,
 	HWND					hWndTarget,			//!< [in] 対象Windows(NULLでファイル)
 	const WCHAR*			pszFile,
-	const WCHAR*			pszFullPath,
 	const WCHAR*			pszFolder
 )
 {
@@ -1218,7 +1205,12 @@ int CGrepAgent::DoGrepReplaceFile(
 	int			nOldPercent = 0;
 	int			nKeyLen = wcslen( pArg->pszKey );
 	const WCHAR*	pszCodeName = L"";
-
+	
+	// full path 生成
+	std::wstring strFullPath = pszFolder;
+	if( strFullPath.size()) strFullPath += L'\\';
+	strFullPath += pszFile;
+	
 	const STypeConfigMini* type = NULL;
 	if( !CDocTypeManager().GetTypeConfigMini( CDocTypeManager().GetDocumentTypeOfPath( pszFile ), &type ) ){
 		return -1;
@@ -1226,17 +1218,17 @@ int CGrepAgent::DoGrepReplaceFile(
 	CFileLoadOrWnd	cfl( type->m_encoding, hWndTarget );	// 2012/12/18 Uchi 検査するファイルのデフォルトの文字コードを取得する様に
 	bool bBom;
 	// ファイル名表示
-	const WCHAR* pszDispFilePath = pszFullPath;
+	const WCHAR* pszDispFilePath = strFullPath.c_str();
 	
 	try{
 		// ファイルを開く
 		// FileCloseで明示的に閉じるが、閉じていないときはデストラクタで閉じる
 		// 2003.06.10 Moca 文字コード判定処理もFileOpenで行う
-		nCharCode = cfl.FileOpen( pszFullPath, true, pArg->sGrepOption.nGrepCharSet, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
+		nCharCode = cfl.FileOpen( strFullPath.c_str(), true, pArg->sGrepOption.nGrepCharSet, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
 		std::unique_ptr<CWriteData> pOutput;
 		
 		if( pArg->sGrepOption.bGrepReplace ){
-			pOutput.reset( new CWriteData( nHitCount, pszFullPath, nCharCode, bBom, pArg->sGrepOption.bGrepBackup, pArg->cmemMessage ));
+			pOutput.reset( new CWriteData( nHitCount, strFullPath.c_str(), nCharCode, bBom, pArg->sGrepOption.bGrepBackup, pArg->cmemMessage ));
 		}
 		
 		WCHAR szCpName[100];
@@ -1385,7 +1377,7 @@ int CGrepAgent::DoGrepReplaceFile(
 						
 						OutputPathInfo(
 							pArg->cmemMessage, pArg->sGrepOption,
-							pszFullPath, pszCodeName,
+							strFullPath.c_str(), pszCodeName,
 							bOutFileName
 						);
 						
@@ -1470,17 +1462,17 @@ int CGrepAgent::DoGrepReplaceFile(
 	}
 	catch( const CError_FileOpen& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEOPEN));
-		str.Replace(L"%s", pszFullPath);
+		str.Replace(L"%s", strFullPath.c_str());
 		pArg->cmemMessage.AppendNativeData( str );
 		return 0;
 	}
 	catch( const CError_FileRead& ){
 		CNativeW str(LS(STR_GREP_ERR_FILEREAD));
-		str.Replace(L"%s", pszFullPath);
+		str.Replace(L"%s", strFullPath.c_str());
 		pArg->cmemMessage.AppendNativeData( str );
 	}
 	catch( const CError_WriteFileOpen& ){
-		std::wstring file = pszFullPath;
+		std::wstring file = strFullPath.c_str();
 		file += L".skrnew";
 		CNativeW str(LS(STR_GREP_ERR_FILEWRITE));
 		str.Replace(L"%s", file.c_str());
