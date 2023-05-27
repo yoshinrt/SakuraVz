@@ -43,6 +43,7 @@ class CGrepEnumFolders;
 
 struct SGrepOption{
 	bool		bGrepReplace;			//!< Grep置換
+	bool		bGrepCurFolder;			//!< カレントフォルダが初期値
 	bool		bGrepSubFolder;			//!< サブフォルダーからも検索する
 	bool		bGrepStdout;			//!< 標準出力モード
 	bool		bGrepHeader;			//!< ヘッダー・フッター表示
@@ -55,6 +56,7 @@ struct SGrepOption{
 
 	SGrepOption() :
 		 bGrepReplace(false)
+		,bGrepCurFolder(false)
 		,bGrepSubFolder(true)
 		,bGrepStdout(false)
 		,bGrepHeader(true)
@@ -64,6 +66,32 @@ struct SGrepOption{
 		,bGrepOutputFileOnly(false)
 		,bGrepPaste(false)
 		,bGrepBackup(false)
+	{}
+	
+	SGrepOption(
+		bool		bGrepReplace,			//!< Grep置換
+		bool		bGrepCurFolder,			//!< カレントフォルダが初期値
+		bool		bGrepSubFolder,			//!< サブフォルダーからも検索する
+		bool		bGrepStdout,			//!< 標準出力モード
+		bool		bGrepHeader,			//!< ヘッダー・フッター表示
+		ECodeType	nGrepCharSet,			//!< 文字コードセット選択
+		int			nGrepOutputLineType,	//!< 0:ヒット部分を出力, 1: ヒット行を出力, 2: 否ヒット行を出力
+		int			nGrepOutputStyle,		//!< 出力形式 1: Normal, 2: WZ風(ファイル単位) 3: 結果のみ
+		bool		bGrepOutputFileOnly,	//!< ファイル毎最初のみ検索
+		bool		bGrepPaste,				//!< Grep置換：クリップボードから貼り付ける
+		bool		bGrepBackup				//!< Grep置換：バックアップ
+	) :
+		bGrepReplace		(bGrepReplace),
+		bGrepCurFolder		(bGrepCurFolder),
+		bGrepSubFolder		(bGrepSubFolder),
+		bGrepStdout			(bGrepStdout),
+		bGrepHeader			(bGrepHeader),
+		nGrepCharSet		(nGrepCharSet),
+		nGrepOutputLineType	(nGrepOutputLineType),
+		nGrepOutputStyle	(nGrepOutputStyle),
+		bGrepOutputFileOnly	(bGrepOutputFileOnly),
+		bGrepPaste			(bGrepPaste),
+		bGrepBackup			(bGrepBackup)
 	{}
 };
 
@@ -219,24 +247,12 @@ public:
 	// Grep実行
 	DWORD DoGrep(
 		CEditView*				pcViewDst,
-		bool					bGrepReplace,
 		const CNativeW*			pcmGrepKey,
 		const CNativeW*			pcmGrepReplace,
 		const CNativeW*			pcmGrepFile,
 		const CNativeW*			pcmGrepFolder,
-		bool					bGrepCurFolder,
-		BOOL					bGrepSubFolder,
-		bool					bGrepStdout,
-		bool					bGrepHeader,
 		const SSearchOption&	sSearchOption,
-		ECodeType				nGrepCharSet,	// 2002/09/21 Moca 文字コードセット選択
-		int						nGrepOutputLineType,
-		int						nGrepOutputStyle,
-		bool					bGrepOutputFileOnly,	//!< [in] ファイル毎最初のみ出力
-		bool					bGrepOutputBaseFolder,	//!< [in] ベースフォルダー表示
-		bool					bGrepSeparateFolder,	//!< [in] フォルダー毎に表示
-		bool					bGrepPaste,
-		bool					bGrepBackup
+		SGrepOption&			sGrepOption
 	);
 
 private:

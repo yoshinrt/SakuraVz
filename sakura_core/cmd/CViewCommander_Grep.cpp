@@ -89,26 +89,28 @@ void CViewCommander::Command_GREP( void )
 			GetDocument()->OnChangeType();
 		}
 		
-		CEditApp::getInstance()->m_pcGrepAgent->DoGrep(
-			m_pCommanderView,
+		SGrepOption sGrepOption(
 			false,
-			&cmWork1,
-			&cmWork4,
-			&cmWork2,
-			&cmWork3,
 			false,
 			GetEditWindow()->m_cDlgGrep.m_bSubFolder,
 			false,
 			true, // Header
-			GetEditWindow()->m_cDlgGrep.m_sSearchOption,
 			GetEditWindow()->m_cDlgGrep.m_nGrepCharSet,
 			GetEditWindow()->m_cDlgGrep.m_nGrepOutputLineType,
 			GetEditWindow()->m_cDlgGrep.m_nGrepOutputStyle,
 			GetEditWindow()->m_cDlgGrep.m_bGrepOutputFileOnly,
-			GetEditWindow()->m_cDlgGrep.m_bGrepOutputBaseFolder,
-			GetEditWindow()->m_cDlgGrep.m_bGrepSeparateFolder,
 			false,
 			false
+		);
+		
+		CEditApp::getInstance()->m_pcGrepAgent->DoGrep(
+			m_pCommanderView,
+			&cmWork1,
+			&cmWork4,
+			&cmWork2,
+			&cmWork3,
+			GetEditWindow()->m_cDlgGrep.m_sSearchOption,
+			sGrepOption
 		);
 
 		//プラグイン：DocumentOpenイベント実行
@@ -183,26 +185,29 @@ void CViewCommander::Command_GREP_REPLACE( void )
 		  !CAppMode::getInstance()->IsDebugMode()
 		)
 	){
-		CEditApp::getInstance()->m_pcGrepAgent->DoGrep(
-			m_pCommanderView,
+		
+		SGrepOption sGrepOption(
 			true,
-			&cmWork1,
-			&cmWork4,
-			&cmWork2,
-			&cmWork3,
 			false,
 			cDlgGrepRep.m_bSubFolder,
 			false, // Stdout
 			true, // Header
-			cDlgGrepRep.m_sSearchOption,
 			cDlgGrepRep.m_nGrepCharSet,
 			cDlgGrepRep.m_nGrepOutputLineType,
 			cDlgGrepRep.m_nGrepOutputStyle,
 			cDlgGrepRep.m_bGrepOutputFileOnly,
-			cDlgGrepRep.m_bGrepOutputBaseFolder,
-			cDlgGrepRep.m_bGrepSeparateFolder,
 			cDlgGrepRep.m_bPaste,
 			cDlgGrepRep.m_bBackup
+		);
+		
+		CEditApp::getInstance()->m_pcGrepAgent->DoGrep(
+			m_pCommanderView,
+			&cmWork1,
+			&cmWork4,
+			&cmWork2,
+			&cmWork3,
+			cDlgGrepRep.m_sSearchOption,
+			sGrepOption
 		);
 	}
 	else{

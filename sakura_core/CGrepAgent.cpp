@@ -279,24 +279,12 @@ int GetHwndTitle(HWND& hWndTarget, CNativeW* pmemTitle, WCHAR* pszWindowName, WC
 */
 DWORD CGrepAgent::DoGrep(
 	CEditView*				pcViewDst,
-	bool					bGrepReplace,
 	const CNativeW*			pcmGrepKey,
 	const CNativeW*			pcmGrepReplace,
 	const CNativeW*			pcmGrepFile,
 	const CNativeW*			pcmGrepFolder,
-	bool					bGrepCurFolder,
-	BOOL					bGrepSubFolder,
-	bool					bGrepStdout,
-	bool					bGrepHeader,
 	const SSearchOption&	sSearchOption,
-	ECodeType				nGrepCharSet,	// 2002/09/21 Moca 文字コードセット選択
-	int						nGrepOutputLineType,
-	int						nGrepOutputStyle,
-	bool					bGrepOutputFileOnly,
-	bool					bGrepOutputBaseFolder,	// 不使用
-	bool					bGrepSeparateFolder,	// 不使用
-	bool					bGrepPaste,
-	bool					bGrepBackup
+	SGrepOption&			sGrepOption
 )
 {
 	MY_RUNNINGTIMER( cRunningTimer, L"CEditView::DoGrep" );
@@ -318,14 +306,13 @@ DWORD CGrepAgent::DoGrep(
 	CNativeW	cUnicodeBuffer;
 	CNativeW	cOutBuffer;
 	int			nWork;
-	SGrepOption	sGrepOption;
 
 	/*
 	|| バッファサイズの調整
 	*/
 	cmemMessage.AllocStringBuffer( 4000 );
 	cUnicodeBuffer.AllocStringBuffer( 4000 );
-	if( bGrepReplace ) cOutBuffer.AllocStringBuffer( 4000 );
+	if( sGrepOption.bGrepReplace ) cOutBuffer.AllocStringBuffer( 4000 );
 
 	pcViewDst->m_bDoing_UndoRedo		= true;
 
@@ -349,8 +336,8 @@ DWORD CGrepAgent::DoGrep(
 
 	// 置換後文字列の準備
 	CNativeW cmemReplace;
-	if( bGrepReplace ){
-		if( bGrepPaste ){
+	if( sGrepOption.bGrepReplace ){
+		if( sGrepOption.bGrepPaste ){
 			// 矩形・ラインモード貼り付けは未サポート
 			bool bColmnSelect;
 			bool bLineSelect = false;
@@ -399,7 +386,7 @@ DWORD CGrepAgent::DoGrep(
 	GetEditWnd().m_cDlgGrep.m_strText = pcmGrepKey->GetStringPtr();
 	GetEditWnd().m_cDlgGrep.m_bSetText = true;
 	GetEditWnd().m_cDlgGrepReplace.m_strText = pcmGrepKey->GetStringPtr();
-	if( bGrepReplace ){
+	if( sGrepOption.bGrepReplace ){
 		GetEditWnd().m_cDlgGrepReplace.m_strText2 = pcmGrepReplace->GetStringPtr();
 	}
 	GetEditWnd().m_cDlgGrepReplace.m_bSetText = true;
@@ -433,16 +420,6 @@ DWORD CGrepAgent::DoGrep(
 	}
 	
 	// Grepオプションまとめ
-	sGrepOption.bGrepSubFolder = FALSE != bGrepSubFolder;
-	sGrepOption.bGrepStdout = bGrepStdout;
-	sGrepOption.bGrepHeader = bGrepHeader;
-	sGrepOption.nGrepCharSet = nGrepCharSet;
-	sGrepOption.nGrepOutputLineType = nGrepOutputLineType;
-	sGrepOption.nGrepOutputStyle = nGrepOutputStyle;
-	sGrepOption.bGrepOutputFileOnly = bGrepOutputFileOnly;
-	sGrepOption.bGrepReplace = bGrepReplace;
-	sGrepOption.bGrepPaste = bGrepPaste;
-	sGrepOption.bGrepBackup = bGrepBackup;
 	if( sGrepOption.bGrepReplace ){
 		// Grep否定行はGrep置換では無効
 		if( sGrepOption.nGrepOutputLineType == GREP_NOT_MATCH_LINE ){
@@ -501,9 +478,9 @@ DWORD CGrepAgent::DoGrep(
 		cmemMessage.AppendString( LS( STR_GREP_SEARCH_FILE ) );	//L"「ファイル検索」\r\n"
 	}
 
-	if( bGrepReplace ){
+	if( sGrepOption.bGrepReplace ){
 		cmemMessage.AppendString( LS(STR_GREP_REPLACE_TO) );
-		if( bGrepPaste ){
+		if( sGrepOption.bGrepPaste ){
 			cmemMessage.AppendString( LS(STR_GREP_PASTE_CLIPBOAD) );
 		}else{
 			cmemMessage.AppendString( L"\"" );
@@ -611,7 +588,7 @@ DWORD CGrepAgent::DoGrep(
 			// 否該当行
 			pszWork = LS( STR_GREP_SHOW_MATCH_NOHITLINE );	//L"    (一致しなかった行を出力)\r\n"
 		}else{
-			if( bGrepReplace && sSearchOption.bRegularExp && !bGrepPaste ){
+			if( sGrepOption.bGrepReplace && sSearchOption.bRegularExp && !sGrepOption.bGrepPaste ){
 				pszWork = LS(STR_GREP_SHOW_FIRST_LINE);
 			}else{
 				pszWork = LS( STR_GREP_SHOW_MATCH_AREA );
@@ -728,7 +705,7 @@ DWORD CGrepAgent::DoGrep(
 	}
 	if( sGrepOption.bGrepHeader ){
 		WCHAR szBuffer[128];
-		if( bGrepReplace ){
+		if( sGrepOption.bGrepReplace ){
 			auto_sprintf( szBuffer, LS(STR_GREP_REPLACE_COUNT), nHitCount );
 		}else{
 			auto_sprintf( szBuffer, LS( STR_GREP_MATCH_COUNT ), nHitCount );
@@ -766,7 +743,7 @@ DWORD CGrepAgent::DoGrep(
 	if( !pCEditWnd->UpdateTextWrap() )	// 折り返し方法関連の更新	// 2008.06.10 ryoji
 		pCEditWnd->RedrawAllViews( NULL );
 
-	if( !bGrepCurFolder ){
+	if( !sGrepOption.bGrepCurFolder ){
 		// 現行フォルダーを検索したフォルダーに変更
 		if( 0 < vPaths.size() ){
 			::SetCurrentDirectory( vPaths[0].c_str() );
