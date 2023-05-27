@@ -33,7 +33,6 @@
 #include "apiwrap/StdApi.h"
 #include "_main/CMutex.h"
 #include "env/CShareData.h"
-#include "CThreadPool.h"
 
 class CDlgCancel;
 class CEditView;
@@ -263,9 +262,13 @@ public:
 
 //	Jun. 26, 2001 genta	正規表現ライブラリの差し替え
 //	Mar. 28, 2004 genta DoGrepFileから不要な引数を削除
-class CGrepAgent : public CDocListenerEx, protected CThreadPool<CGrepTask> {
+class CGrepAgent : public CDocListenerEx {
 public:
 	CGrepAgent();
+
+	~CGrepAgent(){
+		if(!m_bStop) Join();
+	}
 
 	// イベント
 	ECallbackResult OnBeforeClose() override;
@@ -328,7 +331,59 @@ private:
 	DWORD m_dwTickUIFileName;	// Cancelダイアログのファイル名表示更新を行った時間
 	
 	// thread pool
-	virtual void ThreadRun( CGrepTask& task );
+private:
+	
+	void StartWorkerThread(UINT uThreadNum){
+		for(UINT u = 0; u < uThreadNum; ++u){
+			m_Workers.emplace_back([this, u] { Spawn( u ); });
+		}
+	}
+
+	void Post(CGrepTask& task){
+		{
+			std::unique_lock<std::mutex> lock(m_Mutex);
+			m_Tasks.push(task);
+		}
+
+		m_Condition.notify_one();
+	}
+
+	void Join(){
+		{
+			std::unique_lock<std::mutex> lock(m_Mutex);
+			m_bStop = true;
+		}
+
+		m_Condition.notify_all();
+
+		for(UINT u = 0; u < m_Workers.size(); ++u){
+			m_Workers[u].join();
+		}
+	}
+
+	void Spawn( UINT uId ){
+		//for(;;){
+		//	CGrepTask task;
+		//	{
+		//		std::unique_lock<std::mutex> lock(m_Mutex);
+		//		m_Condition.wait(lock, [this] { return !m_Tasks.empty() || m_bStop; });
+		//		if(m_bStop && m_Tasks.empty()) return;
+		//		task = std::move(m_Tasks.front());
+		//		m_Tasks.pop();
+		//	}
+		//	Run(task);
+		//}
+	}
+	
+	void ThreadRun(CGrepTask& task);
+	
+	std::vector<std::thread> m_Workers;
+	std::queue<CGrepTask> m_Tasks;
+	
+	std::mutex m_Mutex;
+	std::condition_variable m_Condition;
+	bool m_bStop;
+	
 	std::vector<CBregexp>	m_cRegexp;
 	std::vector<CNativeW>	m_cUnicodeBuffer;
 	std::vector<CNativeW>	m_cOutBuffer;
