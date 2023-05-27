@@ -172,9 +172,6 @@ BEGIN
     GROUPBOX        "Other",IDC_STATIC,244,140,180,44,WS_GROUP
     CONTROL         "Only first match each file (&7)",IDC_CHECK_FILE_ONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,152,108,8
-    CONTROL         "Output each folder (&8)",IDC_CHECK_SEP_FOLDER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,162,108,8
-    CONTROL         "Output with relative path (&9)",IDC_CHECK_BASE_PATH,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,172,108,8
     LTEXT           "Encoding (&A):",IDC_STATIC,360,148,60,8
     COMBOBOX        IDC_COMBO_CHARSET,360,158,60,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "C&P",IDC_CHECK_CP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,360,172,60,8
@@ -224,9 +221,6 @@ BEGIN
     GROUPBOX        "Other",IDC_STATIC,244,154,180,44,WS_GROUP
     CONTROL         "Only first match each file (&7)",IDC_CHECK_FILE_ONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,166,104,8
-    CONTROL         "Output each folder (&8)",IDC_CHECK_SEP_FOLDER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,176,104,8
-    CONTROL         "Output with relative path (&9)",IDC_CHECK_BASE_PATH,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,252,186,104,8
     LTEXT           "Encoding (&A):",IDC_STATIC,360,162,60,8
     COMBOBOX        IDC_COMBO_CHARSET,360,172,60,120,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "C&P",IDC_CHECK_CP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,360,186,60,8
