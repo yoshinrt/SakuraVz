@@ -650,9 +650,6 @@ DWORD CGrepAgent::DoGrep(
 		
 		&nHitCount,						//!< [i/o] ヒット数の合計
 		
-		// path
-		nullptr,						//!< [in] 検索対象パス(ベースフォルダー)
-		
 		// buffer
 		cmemMessage,					//!< [i/o] Grep結果文字列
 		cUnicodeBuffer,					//!< [i/o] ファイルオーブンバッファ
@@ -662,8 +659,6 @@ DWORD CGrepAgent::DoGrep(
 	if( hWndTarget ){
 		for( HWND hwnd = hWndTarget; NULL != hwnd; hwnd = NULL ){
 			// 複数ウィンドウループ予約
-			Arg.pszBasePath = szWindowPath;
-			
 			nTreeRet = DoGrepReplaceFile(
 				&Arg,
 				hwnd,
@@ -682,9 +677,6 @@ DWORD CGrepAgent::DoGrep(
 	}else{
 		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
 			std::wstring sPath = ChopYen( vPaths[nPath] );
-			
-			Arg.pszBasePath = sPath.c_str();
-			
 			nTreeRet = DoGrepTree(
 				&Arg,
 				0,

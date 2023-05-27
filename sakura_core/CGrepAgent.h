@@ -113,9 +113,6 @@ typedef struct {
 	
 	int*						pnHitCount;				//!< [i/o] ヒット数の合計
 	
-	// path
-	const WCHAR*				pszBasePath;			//!< [in] 検索対象パス(ベースフォルダー)
-	
 	// buffer
 	CNativeW&					cmemMessage;			//!< [i/o] Grep結果文字列
 	CNativeW&					cUnicodeBuffer;			//!< [i/o] ファイルオーブンバッファ
