@@ -362,6 +362,7 @@ private:
 	}
 
 	void Spawn( UINT uId ){
+		MYTRACE( L"*** thread %d started.***\n", uId );
 		//for(;;){
 		//	CGrepTask task;
 		//	{

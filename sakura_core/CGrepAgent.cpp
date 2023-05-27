@@ -682,6 +682,9 @@ DWORD CGrepAgent::DoGrep(
 			Arg.pcOutBuffer		= &m_cOutBuffer[ 0 ];
 		}
 		
+		// ワーカースレッド起動
+		StartWorkerThread( uMaxThreadNum );
+		
 		for( int nPath = 0; nPath < (int)vPaths.size(); nPath++ ){
 			std::wstring sPath = ChopYen( vPaths[nPath] );
 			nTreeRet = DoGrepTree(
@@ -691,6 +694,10 @@ DWORD CGrepAgent::DoGrep(
 			);
 			if( nTreeRet == -1 ) break;
 		}
+		
+		// ワーカースレッド終了まち
+		Join();
+		
 		if( 0 < cmemMessage.GetStringLength() ) {
 			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
 			cmemMessage._SetStringLength(0);
