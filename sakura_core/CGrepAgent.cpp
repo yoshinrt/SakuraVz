@@ -657,16 +657,12 @@ DWORD CGrepAgent::DoGrep(
 	};
 	
 	if( hWndTarget ){
-		for( HWND hwnd = hWndTarget; NULL != hwnd; hwnd = NULL ){
-			// 複数ウィンドウループ予約
-			nTreeRet = DoGrepReplaceFile(
-				&Arg,
-				hwnd,
-				szWindowName,
-				szWindowPath
-			);
-			if( nTreeRet == -1 ) break;
-		}
+		nTreeRet = DoGrepReplaceFile(
+			&Arg,
+			hWndTarget,
+			szWindowName,
+			szWindowPath
+		);
 		if( 0 < cmemMessage.GetStringLength() ){
 			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
 			pcViewDst->GetCommander().Command_GOFILEEND( false );
