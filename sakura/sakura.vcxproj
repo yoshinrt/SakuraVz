@@ -243,6 +243,7 @@
     <ClInclude Include="..\sakura_core\CSearchAgent.h" />
     <ClInclude Include="..\sakura_core\CSelectLang.h" />
     <ClInclude Include="..\sakura_core\CSortedTagJumpList.h" />
+    <ClInclude Include="..\sakura_core\CThreadPool.h" />
     <ClInclude Include="..\sakura_core\CWriteManager.h" />
     <ClInclude Include="..\sakura_core\debug\CRunningTimer.h" />
     <ClInclude Include="..\sakura_core\debug\Debug1.h" />

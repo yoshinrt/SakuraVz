@@ -1111,6 +1111,9 @@
     </ClInclude>
     <ClInclude Include="..\libs\pcre2\include\pcre2.h" />
     <ClInclude Include="..\sakura_core\env\CTextStack.h" />
+    <ClInclude Include="..\sakura_core\CThreadPool.h">
+      <Filter>Cpp Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\resource\auto_scroll_center.cur">

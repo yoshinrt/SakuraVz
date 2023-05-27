@@ -33,6 +33,7 @@
 #include "apiwrap/StdApi.h"
 #include "_main/CMutex.h"
 #include "env/CShareData.h"
+#include "CThreadPool.h"
 
 class CDlgCancel;
 class CEditView;
@@ -95,6 +96,9 @@ struct SGrepOption{
 	{}
 };
 
+//****************************************************************************
+// grep オプション
+
 typedef struct {
 	// window
 	CEditView*					pcViewDst;
@@ -118,6 +122,37 @@ typedef struct {
 	CNativeW&					cUnicodeBuffer;			//!< [i/o] ファイルオーブンバッファ
 	CNativeW&					cOutBuffer;				//!< [o] 置換後ファイルバッファ
 } tGrepArg;
+
+//****************************************************************************
+// grep タスク
+
+class CGrepTask {
+public:
+	CGrepTask( UINT uTaskNum, LPWSTR szFileName, LPWSTR szPathName ) :
+		m_uTaskNum( uTaskNum ),
+		m_strFileName( szFileName ),
+		m_strPathName( szPathName )
+	{}
+	
+	UINT			m_uTaskNum;
+	std::wstring	m_strFileName;
+	std::wstring	m_strPathName;
+};
+
+//****************************************************************************
+// grep result
+
+#define GREP_NOT_PROCESSED	INT_MIN
+
+class CGrepResult {
+public:
+	CGrepResult() : m_iHitCnt ( GREP_NOT_PROCESSED ){}
+	
+	int			m_iHitCnt;
+	CNativeW	m_MsgBuf;
+};
+
+//****************************************************************************
 
 class CFileLoadOrWnd{
 	CFileLoad m_cfl;
@@ -229,7 +264,7 @@ public:
 
 //	Jun. 26, 2001 genta	正規表現ライブラリの差し替え
 //	Mar. 28, 2004 genta DoGrepFileから不要な引数を削除
-class CGrepAgent : public CDocListenerEx{
+class CGrepAgent : public CDocListenerEx, protected CThreadPool<CGrepTask> {
 public:
 	CGrepAgent();
 
@@ -251,7 +286,6 @@ public:
 		const SSearchOption&	sSearchOption,
 		SGrepOption&			sGrepOption
 	);
-
 private:
 	class CError_Regex {};
 	
@@ -293,7 +327,10 @@ private:
 	DWORD m_dwTickAddTail;	// AddTail() を呼び出した時間
 	DWORD m_dwTickUICheck;	// 処理中にユーザーによるUI操作が行われていないか確認した時間
 	DWORD m_dwTickUIFileName;	// Cancelダイアログのファイル名表示更新を行った時間
-
+	
+	// thread pool
+	virtual void Run( CGrepTask& task );
+	
 public: //$$ 仮
 	bool	m_bGrepMode;		//!< Grepモードか
 	bool	m_bGrepRunning;		//!< Grep処理中

@@ -92,6 +92,9 @@
 #include <utility>
 #include <vector>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
 
 #define PCRE2_STATIC
 #define PCRE2_CODE_UNIT_WIDTH 16
