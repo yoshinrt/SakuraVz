@@ -345,7 +345,7 @@ private:
 	DWORD m_dwTickUICheck;	// 処理中にユーザーによるUI操作が行われていないか確認した時間
 	DWORD m_dwTickUIFileName;	// Cancelダイアログのファイル名表示更新を行った時間
 	
-	UINT UpdateResult( tGrepArg *pArg );	// grep リザルト更新
+	int UpdateResult( tGrepArg *pArg );	// grep リザルト更新
 	
 	// thread pool
 private:
