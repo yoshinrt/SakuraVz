@@ -311,7 +311,12 @@ DWORD CGrepAgent::DoGrep(
 	cmemMessage.AllocStringBuffer( 4000 );
 
 	pcViewDst->m_bDoing_UndoRedo		= true;
-
+	
+	// タイマー値リセット
+	m_dwTickAddTail =
+	m_dwTickUICheck =
+	m_dwTickUIFileName = ::GetTickCount() - 100 * 1000;
+	
 	/* アンドゥバッファの処理 */
 	if( NULL != pcViewDst->GetDocument()->m_cDocEditor.m_pcOpeBlk ){	/* 操作ブロック */
 //@@@2002.2.2 YAZAKI NULLじゃないと進まないので、とりあえずコメント。＆NULLのときは、new COpeBlkする。
@@ -822,25 +827,10 @@ int CGrepAgent::DoGrepTree(
 
 		count = cGrepEnumFilterFolders.GetCount();
 		for( i = 0; i < count; i++ ){
+			// Grep 結果更新
+			UpdateResult( pArg );
+			
 			lpFileName = cGrepEnumFilterFolders.GetFileName( i );
-
-			DWORD dwNow = ::GetTickCount();
-			if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ) {
-				m_dwTickUICheck = dwNow;
-				//サブフォルダーの探索を再帰呼び出し。
-				/* 処理中のユーザー操作を可能にする */
-				if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
-					goto cancel_return;
-				}
-				/* 中断ボタン押下チェック */
-				if( pArg->pcDlgCancel->IsCanceled() ){
-					goto cancel_return;
-				}
-				/* 表示設定をチェック */
-				CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-					0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
-				);
-			}
 
 			//フォルダー名を作成する。
 			// 2010.08.01 キャンセルでメモリリークしてました
@@ -856,11 +846,8 @@ int CGrepAgent::DoGrepTree(
 			if( -1 == nHitCount ){
 				goto cancel_return;
 			}
-			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszPath );	//@@@ 2002.01.10 add サブフォルダーから戻ってきたら...
 		}
 	}
-
-	::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, LTEXT(" ") );	// 2002/09/09 Moca add
 
 	return 0;
 
@@ -1181,7 +1168,7 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 		//MYTRACE( L">>task %d started.\n", task.m_uTaskId );
 		
 		// msg buf 生成
-		CGrepResult *pResult = new CGrepResult;
+		CGrepResult *pResult = new CGrepResult( task.m_strPathName, task.m_strFileName );
 		
 		Arg.pcmemMessage = &pResult->m_MsgBuf;
 		
@@ -1189,8 +1176,8 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 		pResult->m_iHitCnt = DoGrepReplaceFile(
 			&Arg,
 			NULL,
-			task.m_strFileName.c_str(),
-			task.m_strPathName.c_str()
+			pResult->m_strFileName.c_str(),
+			pResult->m_strPathName.c_str()
 		);
 		
 		//MYTRACE( L"<<task %d started.\n", task.m_uTaskId );
@@ -1206,43 +1193,10 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 
 UINT CGrepAgent::UpdateResult( tGrepArg *pArg ){
 	
+	DWORD dwNow = ::GetTickCount();
+	
 	// Grep 終了した?
 	if( m_Result[ m_uTaskIdDisp ]){
-		
-//		DWORD dwNow = ::GetTickCount();
-//		if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
-//			m_dwTickUICheck = dwNow;
-//			/* 処理中のユーザー操作を可能にする */
-//			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
-//				return 1;
-//			}
-//			/* 中断ボタン押下チェック */
-//			if( pArg->pcDlgCancel->IsCanceled() ){
-//				return 1;
-//			}
-//
-//			/* 表示設定をチェック */
-//			CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-//				0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
-//			);
-//		}
-//
-//		// 定期的に grep 中のファイル名表示を更新
-//		if( dwNow - m_dwTickUIFileName > UIFILENAME_INTERVAL_MILLISEC ){
-//			m_dwTickUIFileName = dwNow;
-//			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, lpFileName );
-//		}
-//
-//		if( pArg->pcViewDst->GetDrawSwitch() ){
-//			if( LTEXT('\0') != pArg->pszKey[0] ){
-//				// データ検索のときファイルの合計が最大10MBを超えたら表示
-//				nWork += ( cGrepEnumFilterFiles.GetFileSizeLow( i ) + 1023 ) / 1024;
-//			}
-//			if( 10000 < nWork ){
-//				nHitCountOld = -100; // 即表示
-//			}
-//		}
-		
 		CNativeW &Msg = m_Result[ m_uTaskIdDisp ]->m_MsgBuf;
 		
 		// 結果を buf に追記
@@ -1251,6 +1205,14 @@ UINT CGrepAgent::UpdateResult( tGrepArg *pArg ){
 		}
 		
 		*pArg->pnHitCount += m_Result[ m_uTaskIdDisp ]->m_iHitCnt;
+		
+		// 定期的に grep 中のファイル名表示を更新
+		if( dwNow - m_dwTickUIFileName > UIFILENAME_INTERVAL_MILLISEC ){
+			m_dwTickUIFileName = dwNow;
+			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURFILE, m_Result[ m_uTaskIdDisp ]->m_strFileName.c_str());
+			::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, m_Result[ m_uTaskIdDisp ]->m_strPathName.c_str());
+			::SetDlgItemInt(   pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_HITCOUNT, *pArg->pnHitCount, FALSE );
+		}
 		
 		// Result 解放
 		delete m_Result[ m_uTaskIdDisp ];
@@ -1264,6 +1226,52 @@ UINT CGrepAgent::UpdateResult( tGrepArg *pArg ){
 		AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
 		pArg->pcmemMessage->Clear();
 	}
+		
+	if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
+		m_dwTickUICheck = dwNow;
+		/* 処理中のユーザー操作を可能にする */
+		if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
+			return 1;
+		}
+		/* 中断ボタン押下チェック */
+		if( pArg->pcDlgCancel->IsCanceled() ){
+			return 1;
+		}
+
+		/* 表示設定をチェック */
+		CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
+			0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+		);
+	}
+
+//	if( pArg->pcViewDst->GetDrawSwitch() ){
+//		if( LTEXT('\0') != pArg->pszKey[0] ){
+//			// データ検索のときファイルの合計が最大10MBを超えたら表示
+//			nWork += ( cGrepEnumFilterFiles.GetFileSizeLow( i ) + 1023 ) / 1024;
+//		}
+//		if( 10000 < nWork ){
+//			nHitCountOld = -100; // 即表示
+//		}
+//	}
+		
+//			DWORD dwNow = ::GetTickCount();
+//			if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ) {
+//				m_dwTickUICheck = dwNow;
+//				//サブフォルダーの探索を再帰呼び出し。
+//				/* 処理中のユーザー操作を可能にする */
+//				if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
+//					goto cancel_return;
+//				}
+//				/* 中断ボタン押下チェック */
+//				if( pArg->pcDlgCancel->IsCanceled() ){
+//					goto cancel_return;
+//				}
+//				/* 表示設定をチェック */
+//				CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
+//					0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+//				);
+//			}
+
 	// ★暫定
 	//if( -1 == nRet ){
 	//	goto cancel_return;

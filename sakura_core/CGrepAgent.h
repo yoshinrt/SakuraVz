@@ -141,8 +141,8 @@ public:
 	{}
 	
 	UINT			m_uTaskId;
-	std::wstring	m_strFileName;
 	std::wstring	m_strPathName;
+	std::wstring	m_strFileName;
 };
 
 //****************************************************************************
@@ -152,10 +152,17 @@ public:
 
 class CGrepResult {
 public:
-	CGrepResult() : m_iHitCnt ( GREP_NOT_PROCESSED ){}
+	CGrepResult() : m_iHitCnt( 0 ){}
 	
-	int			m_iHitCnt;
-	CNativeW	m_MsgBuf;
+	CGrepResult( std::wstring& strPath, std::wstring& strFile ) :
+		m_iHitCnt( 0 ),
+		m_strPathName( std::move( strPath )),
+		m_strFileName( std::move( strFile )) {}
+	
+	int				m_iHitCnt;
+	CNativeW		m_MsgBuf;
+	std::wstring	m_strPathName;
+	std::wstring	m_strFileName;
 };
 
 //****************************************************************************
