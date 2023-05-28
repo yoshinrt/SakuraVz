@@ -1165,10 +1165,36 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 
 int CGrepAgent::UpdateResult( tGrepArg *pArg ){
 	
-	DWORD dwNow = ::GetTickCount();
-	
-	// Grep 終了した?
-	while( m_Result.size() > m_uTaskIdDisp && m_Result[ m_uTaskIdDisp ]){
+	while( 1 ){
+		DWORD dwNow = ::GetTickCount();
+		
+		// 表示更新
+		if( (::GetTickCount() - m_dwTickAddTail) > ADDTAIL_INTERVAL_MILLISEC && pArg->pcmemMessage->GetStringLength()){
+			AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
+			pArg->pcmemMessage->Clear();
+		}
+		
+		// UI チェック
+		if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
+			m_dwTickUICheck = dwNow;
+			/* 処理中のユーザー操作を可能にする */
+			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
+				return -1;
+			}
+			/* 中断ボタン押下チェック */
+			if( pArg->pcDlgCancel->IsCanceled() ){
+				return -1;
+			}
+			
+			/* 表示設定をチェック */
+			CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
+				0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
+			);
+		}
+		
+		// Grep 終了した?
+		if( m_Result.size() <= m_uTaskIdDisp || !m_Result[ m_uTaskIdDisp ]) break;
+		
 		CNativeW &Msg = m_Result[ m_uTaskIdDisp ]->m_MsgBuf;
 		
 		// 結果を buf に追記
@@ -1191,29 +1217,6 @@ int CGrepAgent::UpdateResult( tGrepArg *pArg ){
 		m_Result[ m_uTaskIdDisp ] = nullptr;
 		
 		++m_uTaskIdDisp;
-	}
-	
-	// 表示更新
-	if( (::GetTickCount() - m_dwTickAddTail) > ADDTAIL_INTERVAL_MILLISEC && pArg->pcmemMessage->GetStringLength()){
-		AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
-		pArg->pcmemMessage->Clear();
-	}
-		
-	if( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ){
-		m_dwTickUICheck = dwNow;
-		/* 処理中のユーザー操作を可能にする */
-		if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
-			return -1;
-		}
-		/* 中断ボタン押下チェック */
-		if( pArg->pcDlgCancel->IsCanceled() ){
-			return -1;
-		}
-
-		/* 表示設定をチェック */
-		CEditWnd::getInstance()->SetDrawSwitchOfAllViews(
-			0 != ::IsDlgButtonChecked( pArg->pcDlgCancel->GetHwnd(), IDC_CHECK_REALTIMEVIEW )
-		);
 	}
 
 	return 0;
