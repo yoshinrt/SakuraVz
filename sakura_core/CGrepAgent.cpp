@@ -1118,7 +1118,7 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 		// buffer
 		nullptr,							//!< [i/o] Grep結果文字列
 		&m_cUnicodeBuffer[ uId ],			//!< [i/o] ファイルオーブンバッファ
-		nullptr //pArg->sGrepOption.bGrepReplace ? &m_cOutBuffer[ uId ] : nullptr		//!< [o] 置換後ファイルバッファ
+		pArg->sGrepOption.bGrepReplace ? &m_cOutBuffer[ uId ] : nullptr		//!< [o] 置換後ファイルバッファ
 	};
 	
 	for(;;){
