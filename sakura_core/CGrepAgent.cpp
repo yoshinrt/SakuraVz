@@ -56,7 +56,7 @@
 #include "String_define.h"
 
 #define UICHECK_INTERVAL_MILLISEC 200	// UI確認の時間間隔
-#define ADDTAIL_INTERVAL_MILLISEC 200	// 結果出力の時間間隔
+#define ADDTAIL_INTERVAL_MILLISEC 1000	// 結果出力の時間間隔
 #define UIFILENAME_INTERVAL_MILLISEC 200	// Cancelダイアログのファイル名表示更新間隔
 
 #define GREP_MATCH_POS		0
@@ -595,7 +595,7 @@ DWORD CGrepAgent::DoGrep(
 	cGrepExceptAbsFolders.Enumerates(L"", cGrepEnumKeys.m_vecExceptAbsFolderKeys, cGrepEnumOptions);
 	
 	// スレッド毎 obj 生成
-	UINT uMaxThreadNum = 1; //★暫定hWndTarget ? 1 : std::thread::hardware_concurrency();
+	UINT uMaxThreadNum = hWndTarget ? 1 : std::thread::hardware_concurrency();
 	
 	CSearchStringPattern pattern;
 	m_cRegexp.reserve( uMaxThreadNum );
@@ -692,17 +692,16 @@ DWORD CGrepAgent::DoGrep(
 		}
 		
 		// grep 終了待ち
-		while (m_uTaskIdDisp < m_uTaskId) {
+		while( m_uTaskIdDisp < m_uTaskId ){
+			{
+				std::unique_lock<std::mutex> lock(m_Mutex);
+				m_Condition.wait(lock, [this]{ return m_Result[ m_uTaskIdDisp ]; });
+			}
 			if( UpdateResult( &Arg )) ++m_uTaskIdDisp;
 		}
 		
 		// ワーカースレッド終了まち
 		Join();
-		
-		if( 0 < cmemMessage.GetStringLength() ) {
-			AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
-			cmemMessage._SetStringLength(0);
-		}
 	}
 	
 	// スレッド毎 object 破棄
@@ -716,10 +715,7 @@ DWORD CGrepAgent::DoGrep(
 	}
 	
 	if( -1 == nTreeRet && sGrepOption.bGrepHeader ){
-		const wchar_t* p = LS( STR_GREP_SUSPENDED );	//L"中断しました。\r\n"
-		CNativeW cmemSuspend;
-		cmemSuspend.SetString( p );
-		AddTail( pcViewDst, cmemSuspend, sGrepOption.bGrepStdout );
+		cmemMessage.AppendString( LS( STR_GREP_SUSPENDED ));	//L"中断しました。\r\n"
 	}
 	if( sGrepOption.bGrepHeader ){
 		WCHAR szBuffer[128];
@@ -728,15 +724,15 @@ DWORD CGrepAgent::DoGrep(
 		}else{
 			auto_sprintf( szBuffer, LS( STR_GREP_MATCH_COUNT ), nHitCount );
 		}
-		CNativeW cmemOutput;
-		cmemOutput.SetString( szBuffer );
-		AddTail( pcViewDst, cmemOutput, sGrepOption.bGrepStdout );
+		cmemMessage.AppendString( szBuffer );
 #if defined(_DEBUG) && defined(TIME_MEASURE)
 		auto_sprintf( szBuffer, LS(STR_GREP_TIMER), cRunningTimer.Read() );
-		cmemOutput.SetString( szBuffer );
-		AddTail( pcViewDst, cmemOutput, sGrepOption.bGrepStdout );
+		cmemMessage.AppendString( szBuffer );
 #endif
 	}
+	AddTail( pcViewDst, cmemMessage, sGrepOption.bGrepStdout );
+	cmemMessage.Clear();
+	
 	pcViewDst->GetCaret().MoveCursor( CLayoutPoint(CLayoutInt(0), tmp_PosY_Layout), true );	//	カーソルをGrep直前の位置に戻す。
 
 	cDlgCancel.CloseDialog( 0 );
@@ -1199,6 +1195,9 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 		
 		//MYTRACE( L"<<task %d started.\n", task.m_uTaskId );
 		m_Result[ task.m_uTaskId ] = pResult;
+		
+		// メインスレッドに終了通知
+		m_Condition.notify_all();
 	}
 }
 
@@ -1246,21 +1245,12 @@ UINT CGrepAgent::UpdateResult( tGrepArg *pArg ){
 		
 		CNativeW &Msg = m_Result[ m_uTaskIdDisp ]->m_MsgBuf;
 		
-		/* 結果出力 */
-		if( 0 < Msg.GetStringLength() /*&&
-		   (*pArg->pnHitCount - nHitCountOld) >= 10 &&
-		   (::GetTickCount() - m_dwTickAddTail) > ADDTAIL_INTERVAL_MILLISEC*/
-		){
-			// ★なんか遅い
-			AddTail( pArg->pcViewDst, Msg, pArg->sGrepOption.bGrepStdout );
-//			nWork = 0;
-//			nHitCountOld = *pArg->pnHitCount;
+		// 結果を buf に追記
+		if( 0 < Msg.GetStringLength()){
+			*pArg->pcmemMessage += Msg;
 		}
-		// ★暫定
-		//if( -1 == nRet ){
-		//	goto cancel_return;
-		//}
 		
+		*pArg->pnHitCount += m_Result[ m_uTaskIdDisp ]->m_iHitCnt;
 		
 		// Result 解放
 		delete m_Result[ m_uTaskIdDisp ];
@@ -1268,6 +1258,18 @@ UINT CGrepAgent::UpdateResult( tGrepArg *pArg ){
 		
 		++m_uTaskIdDisp;
 	}
+	
+	// 表示更新
+	if( (::GetTickCount() - m_dwTickAddTail) > ADDTAIL_INTERVAL_MILLISEC && pArg->pcmemMessage->GetStringLength()){
+		AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
+		pArg->pcmemMessage->Clear();
+	}
+	// ★暫定
+	//if( -1 == nRet ){
+	//	goto cancel_return;
+	//}
+	
+	
 
 	return 0;
 }
@@ -1329,18 +1331,18 @@ int CGrepAgent::DoGrepReplaceFile(
 			}
 		}
 		
-		DWORD dwNow = ::GetTickCount();
-		if ( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ) {
-			m_dwTickUICheck = dwNow;
-			/* 処理中のユーザー操作を可能にする */
-			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
-				return -1;
-			}
-			/* 中断ボタン押下チェック */
-			if( pArg->pcDlgCancel->IsCanceled() ){
-				return -1;
-			}
-		}
+//		DWORD dwNow = ::GetTickCount();
+//		if ( dwNow - m_dwTickUICheck > UICHECK_INTERVAL_MILLISEC ) {
+//			m_dwTickUICheck = dwNow;
+//			/* 処理中のユーザー操作を可能にする */
+//			if( !::BlockingHook( pArg->pcDlgCancel->GetHwnd() ) ){
+//				return -1;
+//			}
+//			/* 中断ボタン押下チェック */
+//			if( pArg->pcDlgCancel->IsCanceled() ){
+//				return -1;
+//			}
+//		}
 		int nOutputHitCount = 0;
 		
 		// 注意 : cfl.ReadLine が throw する可能性がある
@@ -1393,8 +1395,6 @@ int CGrepAgent::DoGrepReplaceFile(
 //				::SetDlgItemInt( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_HITCOUNT, *pArg->pnHitCount, FALSE );
 //				::DlgItem_SetText( pArg->pcDlgCancel->GetHwnd(), IDC_STATIC_CURPATH, pszFolder );
 //			}
-			int nHitOldLine = nHitCount;
-			int nHitCountOldLine = *pArg->pnHitCount;
 			
 			if( pArg->sGrepOption.bGrepReplace ) pArg->pcOutBuffer->SetString( L"", 0 );
 			
@@ -1451,7 +1451,6 @@ int CGrepAgent::DoGrepReplaceFile(
 				}
 				
 				++nHitCount;
-				++(*pArg->pnHitCount);
 				
 				if( bOutput ){
 					
@@ -1523,14 +1522,14 @@ int CGrepAgent::DoGrepReplaceFile(
 				pOutput->AppendBuffer(*pArg->pcOutBuffer);
 			}
 			
-			if( 0 < pArg->pcmemMessage->GetStringLength() &&
-			   (nHitCount - nOutputHitCount >= 10) &&
-			   (::GetTickCount() - m_dwTickAddTail > ADDTAIL_INTERVAL_MILLISEC)
-			){
-				nOutputHitCount = nHitCount;
-				AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
-				pArg->pcmemMessage->_SetStringLength(0);
-			}
+//			if( 0 < pArg->pcmemMessage->GetStringLength() &&
+//			   (nHitCount - nOutputHitCount >= 10) &&
+//			   (::GetTickCount() - m_dwTickAddTail > ADDTAIL_INTERVAL_MILLISEC)
+//			){
+//				nOutputHitCount = nHitCount;
+//				AddTail( pArg->pcViewDst, *pArg->pcmemMessage, pArg->sGrepOption.bGrepStdout );
+//				pArg->pcmemMessage->_SetStringLength(0);
+//			}
 			
 			// ファイル検索の場合は、1つ見つかったら終了
 			if( !pArg->sGrepOption.bGrepReplace && pArg->sGrepOption.bGrepOutputFileOnly && 1 <= nHitCount ){
