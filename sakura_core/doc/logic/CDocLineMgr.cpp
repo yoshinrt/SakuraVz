@@ -87,7 +87,7 @@ CDocLine* CDocLineMgr::AddNewLine( const wchar_t* pData, int nDataLen ){
 	//チェーン適用
 	CDocLine* pcDocLine = AddNewLine();
 	//インスタンス設定
-	pcDocLine->SetDocLineString( pData, nDataLen );
+	pcDocLine->SetDocLineString( pData, nDataLen, false );
 	
 	return pcDocLine;
 }
