@@ -790,11 +790,10 @@ int CGrepAgent::DoGrepTree(
 	for( i = 0; i < count; i++ ){
 		lpFileName = cGrepEnumFilterFiles.GetFileName( i );
 		
-		m_Result.emplace_back();
-		
 		// ファイル内の検索タスクをキューに詰む
 		{
 			std::unique_lock<std::mutex> lock(m_Mutex);
+			m_Result.emplace_back();
 			m_Tasks.emplace( m_uTaskId, lpFileName, pszPath );
 		}
 		//MYTRACE( L"++task %d queued.\n", m_uTaskId );
@@ -1153,7 +1152,10 @@ void CGrepAgent::GrepThread( UINT uId, tGrepArg *pArg ){
 		);
 		
 		//MYTRACE( L"<<task %d started.\n", task.m_uTaskId );
-		m_Result[ task.m_uTaskId ] = pResult;
+		{
+			std::unique_lock<std::mutex> lock(m_Mutex);
+			m_Result[ task.m_uTaskId ] = pResult;
+		}
 		
 		// メインスレッドに終了通知
 		m_Condition.notify_all();
