@@ -1296,9 +1296,11 @@ int CGrepAgent::DoGrepReplaceFile(
 				int iLogMatchLineOffs;
 				const wchar_t*	pMatchStr = pLine;
 				
+				// GREP_NOT_MATCH_LINE 時は match 失敗時にここを通るが，正しく 1行を取り出せる
 				pArg->pRegexp->GetMatchLine( &iLogMatchIdx, &iLogMatchLen, &iLogMatchLineOffs );
 				
 				if( pArg->sGrepOption.nGrepOutputLineType == GREP_MATCH_LINE ){
+					pMatchStr		= pLine + iLogMatchIdx;
 					iLogMatchIdx	= pArg->pRegexp->GetIndex();
 				}else if( pArg->sGrepOption.nGrepOutputLineType == GREP_MATCH_POS ){
 					iLogMatchIdx	= pArg->pRegexp->GetIndex();
