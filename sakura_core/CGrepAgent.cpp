@@ -680,10 +680,10 @@ DWORD CGrepAgent::DoGrep(
 		std::vector<CNativeW>		cOutBuffer		= std::move( m_cOutBuffer );
 	}
 	
-	if( -1 == nTreeRet && sGrepOption.bGrepHeader ){
+	if( nHitCount < 0 || -1 == nTreeRet && sGrepOption.bGrepHeader ){
 		cmemMessage.AppendString( LS( STR_GREP_SUSPENDED ));	//L"中断しました。\r\n"
 	}
-	if( sGrepOption.bGrepHeader ){
+	if( nHitCount >= 0 && sGrepOption.bGrepHeader ){
 		WCHAR szBuffer[128];
 		if( sGrepOption.bGrepReplace ){
 			auto_sprintf( szBuffer, LS(STR_GREP_REPLACE_COUNT), nHitCount );
