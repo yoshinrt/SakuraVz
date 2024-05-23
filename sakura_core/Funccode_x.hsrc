@@ -580,6 +580,7 @@ F_GETVIEWLINES		= 40056,	// ビューの行数取得
 F_GETVIEWCOLUMNS	= 40057,	// ビューの列数取得
 F_CREATEMENU		= 40058,	// メニュー作成
 F_GETVIEWTOP		= 40059,	// 画面に表示される一番上の行番号を取得
+F_CHGINSSPACE		= 40060,	// SPACEの挿入を取得、設定する
 F_GETMACROINFO,				// 実行中のマクロ名等の情報を返す
 F_GetCursorPosX,			// カーソル位置 X (layout 単位)
 F_GetCursorPosXLogic,			// カーソル位置 X (Logic 単位)
