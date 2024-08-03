@@ -42,7 +42,13 @@
 CClipboard::CClipboard(HWND hwnd)
 {
 	m_hwnd = hwnd;
-	m_bOpenResult = ::OpenClipboard(hwnd);
+	
+	UINT uRetry = 100;
+	
+	while(uRetry--){
+		if(m_bOpenResult = ::OpenClipboard(hwnd)) break;
+		::Sleep(1);
+	}
 }
 
 CClipboard::~CClipboard()
