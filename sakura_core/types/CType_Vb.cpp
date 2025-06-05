@@ -30,7 +30,7 @@
 #include "doc/CDocOutline.h"
 #include "doc/logic/CDocLine.h"
 #include "outline/CFuncInfoArr.h"
-#include "view/Colors/EColorIndexType.h"
+#include "view/colors/EColorIndexType.h"
 
 /* Visual Basic */
 //JUl. 10, 2001 JEPRO VB   ユーザーに贈る
@@ -89,7 +89,7 @@ void CDocOutline::MakeFuncList_VisualBasic( CFuncInfoArr* pcFuncInfoArr )
 	bClass	= false;
 	int filelen = wcslen(m_pcDocRef->m_cDocFile.GetFilePath());
 	if ( 4 < filelen ) {
-		if ( 0 == _wcsicmp((m_pcDocRef->m_cDocFile.GetFilePath() + filelen - 4), _FT(".cls")) ) {
+		if ( 0 == _wcsicmp((m_pcDocRef->m_cDocFile.GetFilePath() + filelen - 4), L".cls") ) {
 			bClass	= true;
 		}
 	}

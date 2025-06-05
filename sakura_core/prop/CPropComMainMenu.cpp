@@ -31,7 +31,7 @@
 #include "StdAfx.h"
 #include "prop/CPropCommon.h"
 #include "env/CShareData.h"
-#include "env/cShareData_IO.h"
+#include "env/CShareData_IO.h"
 #include "typeprop/CImpExpManager.h"
 #include "dlg/CDlgInput1.h"
 #include "util/shell.h"
@@ -1183,12 +1183,12 @@ static const WCHAR* MakeDispLabel( SMainMenuWork* pFunc )
 	static	WCHAR	szLabel[MAX_MAIN_MENU_NAME_LEN + 10];
 
 	if (pFunc->m_sKey[0]) {
-		auto_sprintf_s( szLabel, MAX_MAIN_MENU_NAME_LEN + 10, L"%ls%ls(%ls)",
+		auto_snprintf_s( szLabel, MAX_MAIN_MENU_NAME_LEN + 10, L"%ls%ls(%ls)",
 			pFunc->m_bDupErr ? L">" : L"",
 			pFunc->m_sName.substr(0, MAX_MAIN_MENU_NAME_LEN).c_str(), pFunc->m_sKey);
 	}
 	else {
-		auto_sprintf_s( szLabel, MAX_MAIN_MENU_NAME_LEN + 10, L"%ls%ls",
+		auto_snprintf_s( szLabel, MAX_MAIN_MENU_NAME_LEN + 10, L"%ls%ls",
 			pFunc->m_bDupErr ? L">" : L"",
 			pFunc->m_sName.substr(0, MAX_MAIN_MENU_NAME_LEN).c_str() );
 	}

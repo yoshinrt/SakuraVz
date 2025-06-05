@@ -80,12 +80,6 @@
       <AdditionalDependencies>$(SolutionDir)$(Platform)\$(Configuration)\libpcre2-16-static.lib;comctl32.lib;Imm32.lib;mpr.lib;imagehlp.lib;Shlwapi.lib;Dwmapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>call postBuild.bat $(Platform) $(Configuration)</Command>
-    </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>call preBuild.bat $(SolutionDir)Win32\$(Configuration)</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
@@ -133,7 +127,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
     <ClCompile>
-      <PreprocessorDefinitions>X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -247,7 +241,6 @@
     <ClInclude Include="..\sakura_core\debug\CRunningTimer.h" />
     <ClInclude Include="..\sakura_core\debug\Debug1.h" />
     <ClInclude Include="..\sakura_core\debug\Debug2.h" />
-    <ClInclude Include="..\sakura_core\debug\Debug3.h" />
     <ClInclude Include="..\sakura_core\dlg\CDialog.h" />
     <ClInclude Include="..\sakura_core\dlg\CDlgAbout.h" />
     <ClInclude Include="..\sakura_core\dlg\CDlgCancel.h" />
@@ -316,7 +309,6 @@
     <ClInclude Include="..\sakura_core\extmodule\CIcu4cI18n.h" />
     <ClInclude Include="..\sakura_core\extmodule\CMigemo.h" />
     <ClInclude Include="..\sakura_core\extmodule\CUchardet.h" />
-    <ClInclude Include="..\sakura_core\extmodule\CUxTheme.h" />
     <ClInclude Include="..\sakura_core\Funccode_define.h" />
     <ClInclude Include="..\sakura_core\Funccode_enum.h" />
     <ClInclude Include="..\sakura_core\func\CFuncKeyWnd.h" />
@@ -614,7 +606,6 @@
     <ClCompile Include="..\sakura_core\debug\CRunningTimer.cpp" />
     <ClCompile Include="..\sakura_core\debug\Debug1.cpp" />
     <ClCompile Include="..\sakura_core\debug\Debug2.cpp" />
-    <ClCompile Include="..\sakura_core\debug\Debug3.cpp" />
     <ClCompile Include="..\sakura_core\dlg\CDialog.cpp" />
     <ClCompile Include="..\sakura_core\dlg\CDlgAbout.cpp" />
     <ClCompile Include="..\sakura_core\dlg\CDlgCancel.cpp" />
@@ -687,7 +678,6 @@
     <ClCompile Include="..\sakura_core\extmodule\CIcu4cI18n.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CMigemo.cpp" />
     <ClCompile Include="..\sakura_core\extmodule\CUchardet.cpp" />
-    <ClCompile Include="..\sakura_core\extmodule\CUxTheme.cpp" />
     <ClCompile Include="..\sakura_core\func\CFuncKeyWnd.cpp" />
     <ClCompile Include="..\sakura_core\func\CFuncLookup.cpp" />
     <ClCompile Include="..\sakura_core\func\CKeyBind.cpp" />
