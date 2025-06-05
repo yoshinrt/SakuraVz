@@ -82,119 +82,56 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 	}
 
 	EConvertResult eRet = RESULT_COMPLETE;
-	
-	UINT uMaxThreadNum = std::thread::hardware_concurrency();
-	
-	std::vector<CFileLoad>		cfl( uMaxThreadNum );
-	std::vector<CDocLineMgr>	cDocMgr( uMaxThreadNum );
-	std::vector<std::thread>	cThread;
-	
-	volatile bool	bBreakRead = false;
-	
+
 	try{
-		cfl[ 0 ].SetEncodingConfig( type->m_encoding );
-		
+		CFileLoad cfl(type->m_encoding);
+
 		bool bBigFile;
-		#ifdef _WIN64
-			bBigFile = true;
-		#else
-			bBigFile = false;
-		#endif
+#ifdef _WIN64
+		bBigFile = true;
+#else
+		bBigFile = false;
+#endif
 		// ファイルを開く
 		// ファイルを閉じるにはFileCloseメンバ又はデストラクタのどちらかで処理できます
 		//	Jul. 28, 2003 ryoji BOMパラメータ追加
-		cfl[ 0 ].FileOpen( pszPath, bBigFile, eCharCode, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
+		cfl.FileOpen( pszPath, bBigFile, eCharCode, GetDllShareData().m_Common.m_sFile.GetAutoMIMEdecode(), &bBom );
 		pFileInfo->SetBomExist( bBom );
-		
+
 		/* ファイル時刻の取得 */
 		FILETIME	FileTime;
-		if( cfl[ 0 ].GetFileTime( NULL, NULL, &FileTime )){
+		if( cfl.GetFileTime( NULL, NULL, &FileTime ) ){
 			pFileInfo->SetFileTime( FileTime );
 		}
-		
-		auto ReadThread = [ &, this ]( int iThreadID ){
-			
-			// 処理開始・終了位置探索
-			size_t	uBeginPos;
-			if( iThreadID == 0 ){
-				uBeginPos = 0;
-			}else{
-				uBeginPos = cfl[ iThreadID ].GetNextLineTop(
-					( cfl[ iThreadID ].GetFileSize() * iThreadID / uMaxThreadNum ) & ~1
-				);
+
+		// ReadLineはファイルから 文字コード変換された1行を読み出します
+		// エラー時はthrow CError_FileRead を投げます
+		CEol			cEol;
+		CNativeW		cUnicodeBuffer;
+		EConvertResult	eRead;
+		constexpr DWORD timeInterval = 33;
+		ULONGLONG nextTime = GetTickCount64() + timeInterval;
+		while( RESULT_FAILURE != (eRead = cfl.ReadLine( &cUnicodeBuffer, &cEol )) ){
+			if(eRead==RESULT_LOSESOME){
+				eRet = RESULT_LOSESOME;
 			}
-			
-			size_t	uEndPos;
-			if( iThreadID == uMaxThreadNum - 1 ){
-				uEndPos = cfl[ iThreadID ].GetFileSize();
-			}else{
-				uEndPos = cfl[ iThreadID ].GetNextLineTop(
-					( cfl[ iThreadID ].GetFileSize() * ( iThreadID + 1 ) / uMaxThreadNum ) & ~1
-				);
-			}
-			
-			cfl[ iThreadID ].SetBufLimit( uBeginPos, uEndPos );
-			#ifdef DEBUG
-				MYTRACE( L"pid:%d range:%u - %u\n", iThreadID, ( UINT )uBeginPos, ( UINT )uEndPos );
-			#endif
-			
-			// ReadLineはファイルから 文字コード変換された1行を読み出します
-			// エラー時はthrow CError_FileRead を投げます
-			int				nLineNum = 0;
-			CEol			cEol;
-			CNativeW		cUnicodeBuffer;
-			EConvertResult	eRead;
-			constexpr DWORD timeInterval = 33;
-			ULONGLONG nextTime = GetTickCount64() + timeInterval;
-			
-			while( RESULT_FAILURE != (eRead = cfl[ iThreadID ].ReadLine( &cUnicodeBuffer, &cEol ))){
-				if(eRead==RESULT_LOSESOME){
-					eRet = RESULT_LOSESOME;
+			const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
+			int		nLineLen = cUnicodeBuffer.GetStringLength();
+			CDocEditAgent(pcDocLineMgr).AddLineStrX( pLine, nLineLen );
+			//経過通知
+			ULONGLONG currTime = GetTickCount64();
+			if(currTime >= nextTime){
+				nextTime += timeInterval;
+				NotifyProgress(cfl.GetPercent());
+				// 処理中のユーザー操作を可能にする
+				if( !::BlockingHook( NULL ) ){
+					throw CAppExitException(); //中断検出
 				}
-				const wchar_t*	pLine = cUnicodeBuffer.GetStringPtr();
-				int		nLineLen = cUnicodeBuffer.GetStringLength();
-				++nLineNum;
-				cDocMgr[ iThreadID ].AddNewLine( pLine, nLineLen );
-				//経過通知
-				if( iThreadID == 0 ){
-					ULONGLONG currTime = GetTickCount64();
-					if(currTime >= nextTime){
-						nextTime += timeInterval;
-						NotifyProgress( cfl[ 0 ].GetPercent() / 2 );
-						// 処理中のユーザー操作を可能にする
-						if( !::BlockingHook( NULL )) bBreakRead = true;
-					}
-				}
-				if( bBreakRead ) break;
-			}
-		};
-		
-		for( int iThreadID = uMaxThreadNum - 1; iThreadID >= 0; --iThreadID ){
-			if( iThreadID == 0 ){
-				ReadThread( iThreadID );
-			}else{
-				cfl[ iThreadID ].Copy( cfl[ 0 ]);	// cfl インスタンスコピー
-				cThread.emplace_back( std::thread( ReadThread, iThreadID ));
 			}
 		}
-		
-		// 全スレッド終了待ち
-		for( UINT u = 0; u < uMaxThreadNum - 1; ++u ){
-			cThread[ u ].join();
-		}
-		
-		if( bBreakRead ) throw CAppExitException(); //中断検出
-		
-		for( UINT u = 0; u < uMaxThreadNum; ++u ) pcDocLineMgr->Cat( &cDocMgr[ u ]);
-		
-		// 巨大ファイル判定
-		pFileInfo->SetLargeFile(
-			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize &&
-			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize * ( 1024 * 1024UL ) <= cfl[ 0 ].GetFileSize()
-		);
-		
+
 		// ファイルをクローズする
-		cfl[ 0 ].FileClose();
+		cfl.FileClose();
 	}
 	catch(const CAppExitException&){
 		//WM_QUITが発生した
@@ -244,8 +181,8 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		/* 既存データのクリア */
 		pcDocLineMgr->DeleteAllLine();
 	} // 例外処理終わり
-	
-	//NotifyProgress(0);
+
+	NotifyProgress(0);
 	/* 処理中のユーザー操作を可能にする */
 	if( !::BlockingHook( NULL ) ){
 		return RESULT_FAILURE; //####INTERRUPT

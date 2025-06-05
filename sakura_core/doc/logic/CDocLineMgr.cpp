@@ -82,55 +82,15 @@ CDocLine* CDocLineMgr::AddNewLine()
 	return pcDocLineNew;
 }
 
-//! 文字列を指定して最下部に新しい行を挿入
-CDocLine* CDocLineMgr::AddNewLine( const wchar_t* pData, int nDataLen ){
-	//チェーン適用
-	CDocLine* pcDocLine = AddNewLine();
-	//インスタンス設定
-	pcDocLine->SetDocLineString( pData, nDataLen, false );
-	
-	return pcDocLine;
-}
-
 //! 全ての行を削除する
 void CDocLineMgr::DeleteAllLine()
 {
-	int iMaxThreadNum = std::thread::hardware_concurrency();
-	
-	std::vector<std::thread>	cThread;
-	std::vector<CDocLine *>		pDocLineStart( iMaxThreadNum );
-	
-	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
-		pDocLineStart[ iThreadID ] = GetLine( m_nLines * iThreadID / iMaxThreadNum );
+	CDocLine* pDocLine = m_pDocLineTop;
+	while( pDocLine ){
+		CDocLine* pDocLineNext = pDocLine->GetNextLine();
+		delete pDocLine;
+		pDocLine = pDocLineNext;
 	}
-	
-	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
-		// 各スレッドの開始位置特定
-		CLogicInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
-		CLogicInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
-		
-		#ifdef _DEBUG
-			MYTRACE( L"DeleteAllLine %d: %d - %d / %d\n", iThreadID, iStart, iEnd, m_nLines );
-		#endif
-		
-		// delete 本体
-		cThread.emplace_back( std::thread(
-			[ &, this, iThreadID, iStart, iEnd, pDocLineStart ]{
-				CDocLine* pDocLine = pDocLineStart[ iThreadID ];
-				for( int i = iStart; i < iEnd; ++i ){
-					CDocLine* pDocLineNext = pDocLine->GetNextLine();
-					delete pDocLine;
-					pDocLine = pDocLineNext;
-				}
-			}
-		));
-	}
-	
-	// join
-	for( int i = 0; i < iMaxThreadNum; ++i ){
-		cThread[ i ].join();
-	}
-	
 	_Init();
 }
 
@@ -478,32 +438,3 @@ void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
 		Line->SetEol( cEol, nullptr );
 	}
 }
-
-// CDocLineMgr 同士の連結
-// pAppendData 側のデータを this の後ろに連結後，pAppendData はクリアされる
-void CDocLineMgr::Cat( CDocLineMgr *pAppendData ){
-	
-	CDocLine*	pAppendTop;
-	
-	// pAppendData が空なら何もせず return
-	if(
-		pAppendData == nullptr ||
-		( pAppendTop = pAppendData->GetDocLineTop()) == nullptr
-	){
-		return;
-	}
-	
-	// this が空なら，top は append の top
-	if( !m_pDocLineTop ) m_pDocLineTop = pAppendTop;
-	
-	pAppendTop->m_pPrev = m_pDocLineBot;
-	if( m_pDocLineBot ) m_pDocLineBot->m_pNext = pAppendTop;
-	
-	m_pDocLineBot = pAppendData->GetDocLineBottom();
-	
-	m_nLines += pAppendData->GetLineCount();
-	
-	// append data のクリア (delete 時に行データが削除されないように)
-	pAppendData->_Init();
-}
-

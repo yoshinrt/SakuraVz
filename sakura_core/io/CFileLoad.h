@@ -55,8 +55,7 @@ public:
 	static std::wstring GetSizeStringForHuman(ULONGLONG size); //!< 人にとって見やすいサイズ文字列を作る (例: "2 GB", "10 GB", "400 MB", "32 KB")
 
 public:
-	CFileLoad(){ _Init(); };
-	CFileLoad( const SEncodingConfig& encode ) : m_pEencoding( &encode ){ _Init(); }
+	CFileLoad( const SEncodingConfig& encode );
 	~CFileLoad( void );
 
 	//	Jul. 26, 2003 ryoji BOM引数追加
@@ -85,46 +84,32 @@ public:
 	int GetPercent( void );
 
 	//! ファイルサイズを取得する
-	inline size_t GetFileSize( void ){ return m_nFileSize; }
+	inline LONGLONG GetFileSize( void ){ return m_nFileSize; }
 
-	static const size_t gm_nBufSizeDef; // ロード用バッファサイズの初期値
+	static const int gm_nBufSizeDef; // ロード用バッファサイズの初期値
 //	static const int gm_nBufSizeMin; // ロード用バッファサイズの設定可能な最低値
-	
-	void SetEncodingConfig( const SEncodingConfig& Cfg ){
-		m_pEencoding = &Cfg;
-	}
-	
-	// 並列実行用コピー
-	void Copy( CFileLoad& Src );
-	
-	// 次の行頭を検索
-	size_t GetNextLineTop( size_t uPos );
-	
-	// buf 処理範囲を制限
-	void SetBufLimit( size_t uBegin, size_t uEnd ){
-		m_nReadBufOffSet	= uBegin;
-		m_uBufSize			= uEnd;
-	}
-	
+
 protected:
-	void _Init( void );
-	
 	// Oct. 19, 2002 genta スペルミス修正
 //	void SeekBegin( void );		// ファイルの先頭位置に移動する(BOMを考慮する)
+	void Buffering( void );		// バッファにデータをロードする
+	void ReadBufEmpty( void );	// バッファを空にする
 
 	// GetLextLine の 文字コード考慮版
-	const char* GetNextLineCharCode(const char*	pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, int* pnEolLen);
+	const char* GetNextLineCharCode(const char*	pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, int* pnEolLen, int* pnBufferNext);
 	EConvertResult ReadLine_core(CNativeW* pUnicodeBuffer, CEol* pcEol);
+
+	int Read(void* pBuf, size_t nSize); // inline
+	DWORD FilePointer(DWORD offset, DWORD origin); // inline
 
 	/* メンバオブジェクト */
 	const SEncodingConfig* m_pEencoding;
 
 //	LPWSTR	m_pszFileName;	// ファイル名
 	HANDLE	m_hFile;		// ファイルハンドル
-	HANDLE	m_hMap;		//!< メモリマップドファイルハンドル
-	
-	size_t	m_nFileSize;	// ファイルサイズ(64bit)
-	size_t	m_uBufSize;		// 処理対象の buf サイズ
+	LONGLONG	m_nFileSize;	// ファイルサイズ(64bit)
+	LONGLONG	m_nFileDataLen;	// ファイルデータ長からBOM長を引いたバイト数
+	LONGLONG	m_nReadLength;	// 現在までにロードしたデータの合計バイト数(BOM長を含まない)
 	int		m_nLineIndex;	// 現在ロードしている論理行(0開始)
 	ECodeType	m_CharCode;		// 文字コード
 	CCodeBase*	m_pCodeBase;	////
@@ -134,11 +119,22 @@ protected:
 	int		m_nMaxEolLen;	//!< EOLの長さ
 	bool	m_bBomExist;	// ファイルのBOMが付いているか Jun. 08, 2003 Moca 
 	int		m_nFlag;		// 文字コードの変換オプション
-	bool	m_bCopyInstance;// 並列実行用のコピーインスタンス
-	
+	//	Jun. 13, 2003 Moca
+	//	状態をenumとしてわかりやすく．
+	enum enumFileLoadMode{
+		FLMODE_CLOSE = 0, //!< 初期状態
+		FLMODE_OPEN, //!< ファイルオープンのみ
+		FLMODE_READY, //!< 順アクセスOK
+		FLMODE_READBUFEND //!<ファイルの終端までバッファに入れた
+	};
+	enumFileLoadMode	m_eMode;		// 現在の読み込み状態
+
 	// 読み込みバッファ系
-	const char*	m_pReadBuf;		// 読み込みバッファへのポインタ
-	size_t		m_nReadBufOffSet;	// 読み込みバッファ中のオフセット(次の行頭位置)
+	char*	m_pReadBuf;			// 読み込みバッファへのポインタ
+	int		m_nReadBufSize;		// 読み込みバッファの実際に確保しているサイズ
+	int		m_nReadDataLen;		// 読み込みバッファの有効データサイズ
+	int		m_nReadBufOffSet;	// 読み込みバッファ中のオフセット(次の行頭位置)
+//	int		m_nReadBufSumSize;	// 今までにバッファに読み込んだデータの合計サイズ
 	CMemory m_cLineBuffer;
 	CNativeW m_cLineTemp;
 	int		m_nReadOffset2;
@@ -154,4 +150,21 @@ inline BOOL CFileLoad::GetFileTime( FILETIME* pftCreate, FILETIME* pftLastAccess
 	return ::GetFileTime( m_hFile, pftCreate, pftLastAccess, pftLastWrite );
 }
 
+// protected
+inline int CFileLoad::Read( void* pBuf, size_t nSize )
+{
+	DWORD ReadSize;
+	if( !::ReadFile( m_hFile, pBuf, nSize, &ReadSize, NULL ) )
+		throw CError_FileRead();
+	return (int)ReadSize;
+}
+
+// protected
+inline DWORD CFileLoad::FilePointer( DWORD offset, DWORD origin )
+{
+	DWORD fp;
+	if( INVALID_SET_FILE_POINTER == ( fp = ::SetFilePointer( m_hFile, offset, NULL, FILE_BEGIN ) ) )
+		throw CError_FileRead();
+	return fp;
+}
 #endif /* SAKURA_CFILELOAD_B9B7A22E_8C14_4913_8B92_3B5ABA6FC0DB_H_ */

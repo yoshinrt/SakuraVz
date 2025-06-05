@@ -97,4 +97,19 @@ public:
 	//! クリップボードから貼り付け可能か？
 	bool IsEnablePaste( void ) const;
 };
+
+class CDocEditAgent{
+public:
+	CDocEditAgent(CDocLineMgr* pcDocLineMgr) : m_pcDocLineMgr(pcDocLineMgr) { }
+
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+	//                           操作                              //
+	// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
+	//	May 15, 2000 genta
+	void AddLineStrX( const wchar_t*, int );	/* 末尾に行を追加 Ver1.5 */
+
+private:
+	CDocLineMgr* m_pcDocLineMgr;
+};
+
 #endif /* SAKURA_CDOCEDITOR_87202DA6_D60E_4235_AD2F_02507F4E101A_H_ */

@@ -149,15 +149,15 @@ const char* GetNextLine(
 */
 const wchar_t* GetNextLineW(
 	const wchar_t*	pData,		//!< [in]	検索文字列
-	size_t			nDataLen,	//!< [in]	検索文字列の文字数
-	size_t*			pnLineLen,	//!< [out]	1行の文字数を返すただしEOLは含まない
-	size_t*			pnBgn,		//!< [i/o]	検索文字列のオフセット位置
+	int				nDataLen,	//!< [in]	検索文字列の文字数
+	int*			pnLineLen,	//!< [out]	1行の文字数を返すただしEOLは含まない
+	int*			pnBgn,		//!< [i/o]	検索文字列のオフセット位置
 	CEol*			pcEol,		//!< [out]	EOL
 	bool			bExtEol
 )
 {
-	size_t	i;
-	size_t	nBgn;
+	int		i;
+	int		nBgn;
 	nBgn = *pnBgn;
 
 	pcEol->SetType( EEolType::none );

@@ -43,7 +43,6 @@ protected:
 	ECodeType	eCharCodeLoad;
 	bool		bBomExistLoad;
 	CFileTime	cFileTime;
-	bool		bLargeFile;		// 巨大ファイル
 
 public:
 	SFileInfo()
@@ -51,13 +50,10 @@ public:
 		eCharCode = eCharCodeLoad = CODE_DEFAULT;
 		bBomExist = bBomExistLoad = false;
 		cFileTime.ClearFILETIME();
-		bLargeFile	= false;
 	}
 	void	SetCodeSet(ECodeType eSet, bool bBom)	{ eCharCode = eCharCodeLoad = eSet; bBomExist = bBomExistLoad = bBom; }	//!< 文字コードセットを設定
 	void	SetBomExist(bool bBom)					{ bBomExist = bBomExistLoad = bBom; }	//!< BOM付加を設定
 	void	SetFileTime( FILETIME& Time )			{ cFileTime.SetFILETIME( Time ); }
-	void	SetLargeFile( bool bLarge )				{ bLargeFile = bLarge; }
-	bool	IsLargeFile( void )						{ return bLargeFile; }
 };
 
 class CDocFile : public CFile{

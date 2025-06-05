@@ -40,16 +40,7 @@ int AddLastChar( WCHAR* pszPath, int nMaxLen, WCHAR c );/* 2003.06.24 Moca 最�
 int LimitStringLengthW( const WCHAR* pszData, int nDataLength, int nLimitLength, CNativeW& cmemDes );/* データを指定「文字数」以内に切り詰める */
 
 const char*    GetNextLine  ( const char* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol); /* CR0LF0,CRLF,LF,CRで区切られる「行」を返す。改行コードは行長に加えない */
-const wchar_t* GetNextLineW ( const wchar_t* pData, size_t nDataLen, size_t* pnLineLen, size_t* pnBgn, CEol* pcEol, bool bExtEol ); // GetNextLineのwchar_t版
-static inline const wchar_t* GetNextLineW ( const wchar_t* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, bool bExtEol ){
-	size_t	sizeLineLen;
-	size_t	sizeBgn	= ( size_t )*pnBgn;
-	const wchar_t* ret = GetNextLineW( pData, ( size_t )nDataLen, &sizeLineLen, &sizeBgn, pcEol, bExtEol );
-	*pnLineLen	= ( int )sizeLineLen;
-	*pnBgn		= ( int )sizeBgn;
-	
-	return ret;
-}
+const wchar_t* GetNextLineW ( const wchar_t* pData, int nDataLen, int* pnLineLen, int* pnBgn, CEol* pcEol, bool bExtEol); // GetNextLineのwchar_t版
 //wchar_t* GetNextLineWB( const wchar_t*, int, int*, int*, CEol* ); // GetNextLineのwchar_t版(ビックエンディアン用)  // 未使用
 void GetLineColumn( const wchar_t* pLine, int* pnJumpToLine, int* pnJumpToColumn );
 

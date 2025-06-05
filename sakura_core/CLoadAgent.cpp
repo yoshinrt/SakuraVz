@@ -264,14 +264,11 @@ ELoadResult CLoadAgent::OnLoad(const SLoadInfo& sLoadInfo)
 	// 「右端で折り返す」は、この後のOnSize()で再設定される
 	const STypeConfig& ref = pcDoc->m_cDocType.GetDocumentAttribute();
 	CKetaXInt nMaxLineKetas = ref.m_nMaxLineKetas;
-	if( ref.m_nTextWrapMethod != WRAP_SETTING_WIDTH || pcDoc->m_cDocFile.m_sFileInfo.IsLargeFile())
+	if( ref.m_nTextWrapMethod != WRAP_SETTING_WIDTH )
 		nMaxLineKetas = CKetaXInt(MAXLINEKETAS);
 
 	CProgressSubject* pOld = CEditApp::getInstance()->m_pcVisualProgress->CProgressListener::Listen(&pcDoc->m_cLayoutMgr);
-	pcDoc->m_cLayoutMgr.SetLayoutInfo(
-		ref.m_nTextWrapMethod != WRAP_WINDOW_WIDTH || pcDoc->m_cDocFile.m_sFileInfo.IsLargeFile(),
-		true, ref, ref.m_nTabSpace, ref.m_nTsvMode, nMaxLineKetas, CLayoutXInt(-1), &GetEditWnd().GetLogfont()
-	);
+	pcDoc->m_cLayoutMgr.SetLayoutInfo( true, true, ref, ref.m_nTabSpace, ref.m_nTsvMode, nMaxLineKetas, CLayoutXInt(-1), &GetEditWnd().GetLogfont() );
 	GetEditWnd().ClearViewCaretPosInfo();
 	if (pcDoc->m_cLayoutMgr.m_tsvInfo.m_nTsvMode != TSV_MODE_NONE) {
 		pcDoc->m_cLayoutMgr.m_tsvInfo.CalcTabLength(pcDoc->m_cLayoutMgr.m_pcDocLineMgr);
@@ -293,13 +290,8 @@ void CLoadAgent::OnAfterLoad(const SLoadInfo& sLoadInfo)
 	pcDoc->m_nCommandExecNum=0;
 
 	// テキストの折り返し方法を初期化
-	if( pcDoc->m_cDocFile.m_sFileInfo.IsLargeFile()){
-		pcDoc->m_nTextWrapMethodCur = WRAP_NO_TEXT_WRAP;											// 折り返し方法
-		pcDoc->m_bTextWrapMethodCurTemp = true;														// 一時設定適用中を解除
-	}else{
-		pcDoc->m_nTextWrapMethodCur = pcDoc->m_cDocType.GetDocumentAttribute().m_nTextWrapMethod;	// 折り返し方法
-		pcDoc->m_bTextWrapMethodCurTemp = false;													// 一時設定適用中を解除
-	}
+	pcDoc->m_nTextWrapMethodCur = pcDoc->m_cDocType.GetDocumentAttribute().m_nTextWrapMethod;	// 折り返し方法
+	pcDoc->m_bTextWrapMethodCurTemp = false;													// 一時設定適用中を解除
 	pcDoc->m_blfCurTemp = false;
 	pcDoc->m_bTabSpaceCurTemp = false;
 
