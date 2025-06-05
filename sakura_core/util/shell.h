@@ -31,9 +31,6 @@
 
 #include <Windows.h>
 
-#include <filesystem>
-#include <string_view>
-
 BOOL MyWinHelp(HWND hwndCaller, UINT uCommand, DWORD_PTR dwData);	/* WinHelp のかわりに HtmlHelp を呼び出す */	// 2006.07.22 ryoji
 
 /* Shell Interface系(?) */
@@ -53,17 +50,8 @@ DWORD NetConnect ( const WCHAR strNetWorkPass[] );
 /* ヘルプの目次を表示 */
 void ShowWinHelpContents( HWND hwnd );
 
-BOOL GetSpecialFolderPath( int nFolder, LPWSTR pszPath );	// 特殊フォルダーのパスを取得する	// 2007.05.19 ryoji
-
 INT_PTR MyPropertySheet( LPPROPSHEETHEADER lppsph );	// 独自拡張プロパティシート	// 2007.05.24 ryoji
 
 //!フォント選択ダイアログ
 BOOL MySelectFont( LOGFONT* plf, INT* piPointSize, HWND hwndDlgOwner, bool );	// 2009.10.01 ryoji ポイントサイズ（1/10ポイント単位）引数追加
-
-//! Windows エクスプローラーで開く
-bool OpenWithExplorer(HWND hWnd, const std::filesystem::path& path);
-
-//! ブラウザで開く
-bool OpenWithBrowser(HWND hWnd, std::wstring_view url);
-
 #endif /* SAKURA_SHELL_0A8B6454_B007_46E5_9606_8D2FD7993B91_H_ */
