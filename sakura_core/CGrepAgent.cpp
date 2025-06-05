@@ -112,9 +112,6 @@ std::wstring FormatPathList( const ContainerType& containter )
 CGrepAgent::CGrepAgent()
 : m_bGrepMode( false )			/* Grepモードか */
 , m_bGrepRunning( false )		/* Grep処理中 */
-, m_dwTickAddTail( 0 )
-, m_dwTickUICheck( 0 )
-, m_dwTickUIFileName( 0 )
 , m_uTaskId( 0 )
 , m_uTaskIdDisp( 0 )
 , m_bStop( false )
@@ -943,7 +940,6 @@ public:
 		:nHitCount(hit)
 		,fileName(name_)
 		,name(name_)
-		,code(code_)
 		,bBom(bBom_)
 		,bOldSave(bOldSave_)
 		,bufferSize(0)
@@ -1042,7 +1038,6 @@ private:
 	int& nHitCount;
 	LPCWSTR fileName;
 	std::wstring name;
-	ECodeType code;
 	bool bBom;
 	bool bOldSave;
 	size_t bufferSize;

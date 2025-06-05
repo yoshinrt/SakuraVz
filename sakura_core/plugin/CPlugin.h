@@ -296,8 +296,6 @@ public:
 	CPluginOption::Array m_options;		// オプション	// 2010/3/24 Uchi
 	std::vector<std::wstring> m_aStrings;	// 文字列
 	wstring m_sJack;			// 実行中の Jack 名
-private:
-	bool m_bLoaded;
 protected:
 	CPlug::Array m_plugs;
 	int m_nCommandCount;
