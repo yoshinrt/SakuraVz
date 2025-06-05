@@ -39,6 +39,7 @@
 //	May 15, 2000 genta
 #include "CEol.h"
 #include "mem/CMemory.h"// 2002/2/10 aroka
+#include "mem/CPoolResource.h"
 
 #include "io/CFileLoad.h" // 2002/08/30 Moca
 #include "io/CIoBridge.h"
@@ -53,6 +54,8 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 CDocLineMgr::CDocLineMgr()
+	: m_docLineMemRes(new CPoolResource<CDocLine>())
+	//: m_docLineMemRes(new std::pmr::unsynchronized_pool_resource()) // メモリ使用量が大きい為に使用しない
 {
 	_Init();
 }
@@ -69,7 +72,7 @@ CDocLineMgr::~CDocLineMgr()
 //! pPosの直前に新しい行を挿入
 CDocLine* CDocLineMgr::InsertNewLine(CDocLine* pPos)
 {
-	CDocLine* pcDocLineNew = new CDocLine;
+	CDocLine* pcDocLineNew = new (m_docLineMemRes->allocate(sizeof(CDocLine))) CDocLine();
 	_InsertBeforePos(pcDocLineNew,pPos);
 	return pcDocLineNew;
 }
@@ -77,7 +80,7 @@ CDocLine* CDocLineMgr::InsertNewLine(CDocLine* pPos)
 //! 最下部に新しい行を挿入
 CDocLine* CDocLineMgr::AddNewLine()
 {
-	CDocLine* pcDocLineNew = new CDocLine;
+	CDocLine* pcDocLineNew = new (m_docLineMemRes->allocate(sizeof(CDocLine))) CDocLine();
 	_PushBottom(pcDocLineNew);
 	return pcDocLineNew;
 }
@@ -88,7 +91,8 @@ void CDocLineMgr::DeleteAllLine()
 	CDocLine* pDocLine = m_pDocLineTop;
 	while( pDocLine ){
 		CDocLine* pDocLineNext = pDocLine->GetNextLine();
-		delete pDocLine;
+		pDocLine->~CDocLine();
+		m_docLineMemRes->deallocate(pDocLine, sizeof(CDocLine));
 		pDocLine = pDocLineNext;
 	}
 	_Init();
@@ -119,7 +123,8 @@ void CDocLineMgr::DeleteLine( CDocLine* pcDocLineDel )
 	}
 
 	//データ削除
-	delete pcDocLineDel;
+	pcDocLineDel->~CDocLine();
+	m_docLineMemRes->deallocate(pcDocLineDel, sizeof(CDocLine));
 
 	//行数減算
 	m_nLines--;
