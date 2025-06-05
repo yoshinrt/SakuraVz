@@ -1,7 +1,7 @@
-// このファイルにはリソースエディタで編集できない要素を配置します.
-// このファイルのエンコーディング/改行コードは UTF-16LE(BOM)/CRLF です.
+// 此文件包含资源编辑器无法编辑的元素。
+// 这个文件的编码/换行代码是UTF-16LE(BOM)/CRLF。
 
-#define _APP_NAME_1 "SAKURA Editor"
+#define _APP_NAME_1 "樱花编辑器"
 
 #ifdef DEV_VERSION
 #define _APP_NAME_2 " Dev"
@@ -27,8 +27,8 @@
 #define _GSTR_APPNAME  _APP_NAME_1 _APP_NAME_2 _APP_NAME_3 _APP_NAME_4
 #endif
 
-#define	S_COPYRIGHT				"Copyright (C) 1998-2022  by Norio Nakatani & Collaborators"
-#define	S_COPYRIGHT_TRANSLATION	"Copyright (C) 2011-2022  by Lucien & Collaborators"
+#define S_COPYRIGHT "版权所有 (C) 1998-2022  Norio Nakatani 及贡献者"
+#define S_COPYRIGHT_TRANSLATION "汉化版权 (C) 2011-2025 彭嘉宝"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -37,23 +37,23 @@
 
 IDD_ABOUT DIALOG 0, 0, 245, 228
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Version Information"
+CAPTION "版本信息"
 FONT 9, "Tahoma"
 BEGIN
     ICON            IDI_ICON_STD, IDC_STATIC_MYICON, 5, 5, 20, 20, SS_NOTIFY
     EDITTEXT        IDC_EDIT_VER, 33, 6, 204, 51, ES_MULTILINE | ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
-    LTEXT           "Original Author: Take-san(竹パンダ) さん", IDC_STATIC, 33, 61, 125, 8, NOT WS_GROUP
+    LTEXT           "原作者: Take-san(竹熊猫)", IDC_STATIC, 33, 61, 125, 8, NOT WS_GROUP
     LTEXT           S_COPYRIGHT, IDC_STATIC, 33, 75, 205, 8, NOT WS_GROUP | SS_NOPREFIX
-    LTEXT           "Translation:",IDC_STATIC,33,90,41,8
+    LTEXT           "本地化:",IDC_STATIC,33,90,41,8
     LTEXT           S_COPYRIGHT_TRANSLATION,IDC_STATIC,74,90,164,8,SS_NOPREFIX | NOT WS_GROUP
-    LTEXT           "Project URL:", IDC_STATIC_URL_CAPTION, 33, 103, 71, 8, NOT WS_GROUP
+    LTEXT           "项目 URL:", IDC_STATIC_URL_CAPTION, 33, 103, 71, 8, NOT WS_GROUP
     LTEXT           "https://sakura-editor.github.io/", IDC_STATIC_URL_UR, 101, 103, 120, 8, SS_NOTIFY | NOT WS_GROUP | WS_TABSTOP
 #ifdef GIT_REMOTE_ORIGIN_URL
-    LTEXT           "Source URL:", IDC_STATIC_GIT_CAPTION, 33, 113, 71, 8, NOT WS_GROUP
+    LTEXT           "来源 URL:", IDC_STATIC_GIT_CAPTION, 33, 113, 71, 8, NOT WS_GROUP
     LTEXT           GIT_REMOTE_ORIGIN_URL, IDC_STATIC_URL_GIT, 101, 113, 120, 8, SS_NOTIFY | NOT WS_GROUP | WS_TABSTOP
 #endif
 #ifdef CI_BUILD_NUMBER_LABEL
-    LTEXT           "Build URL:", IDC_STATIC_URL_CI_BUILD_CAPTION, 33, 123, 71, 8, NOT WS_GROUP
+    LTEXT           "构建 URL:", IDC_STATIC_URL_CI_BUILD_CAPTION, 33, 123, 71, 8, NOT WS_GROUP
     LTEXT           CI_BUILD_NUMBER_LABEL, IDC_STATIC_URL_CI_BUILD, 101, 123, 120, 8, SS_NOTIFY | NOT WS_GROUP | WS_TABSTOP
 #endif
 #if defined( GITHUB_COMMIT_URL ) || defined( GITHUB_PR_HEAD_URL )
@@ -66,13 +66,13 @@ BEGIN
     LTEXT           GITHUB_PR_NUMBER_LABEL, IDC_STATIC_URL_GITHUB_PR, 150, 133, 30, 8, SS_NOTIFY | NOT WS_GROUP | WS_TABSTOP
 #endif
     EDITTEXT        IDC_EDIT_ABOUT, 5, 146, 233, 53, ES_MULTILINE | ES_READONLY | WS_VSCROLL | NOT WS_TABSTOP
-    DEFPUSHBUTTON   "&OK", IDOK, 97, 203, 50, 14
-    PUSHBUTTON      "&Copy to Clipboard", IDC_BUTTON_COPY, 178, 203, 60, 14
+    DEFPUSHBUTTON   "确定(&O)", IDOK, 97, 203, 50, 14
+    PUSHBUTTON      "复制到剪贴板(&C)", IDC_BUTTON_COPY, 178, 203, 60, 14
 END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// DESIGNINFO
+// 设计信息
 //
 
 #ifdef APSTUDIO_INVOKED
@@ -92,7 +92,7 @@ END
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version
+// 版本信息
 //
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION    FILE_VERSION
@@ -109,14 +109,14 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904b0"
+        BLOCK "080404b0"
         BEGIN
-            VALUE "Comments", "This is free software\0"
-            VALUE "CompanyName", "Project: Sakura-Editor\0"
-            VALUE "FileDescription", "Sakura Editor Language DLL(en_US)\0"
+            VALUE "Comments", "这是免费软件\0"
+            VALUE "CompanyName", "项目: Sakura-Editor\0"
+            VALUE "FileDescription", "樱花编辑器 简体中文语言资源\0"
             VALUE "FileVersion", VERSION_STR
             VALUE "InternalName", "sakura\0"
-            VALUE "LegalCopyright", S_COPYRIGHT_TRANSLATION
+            VALUE "LegalCopyright", S_COPYRIGHT_TRANSLATION "\0"
             VALUE "LegalTrademarks", " \0"
             VALUE "OriginalFilename", "sakura.exe\0"
             VALUE "ProductName", _GSTR_APPNAME "\0"
@@ -125,7 +125,7 @@ BEGIN
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x409, 1200
+        VALUE "Translation", 0x0804, 1200
     END
 END
 
@@ -133,11 +133,11 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
+// 图标
 //
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
+//最低ID值的图标放在首位，以确保应用程序图标
+//在所有系统上保持一致。
 #ifdef _DEBUG
 IDI_ICON_STD            ICON         "../resource/icon_debug.ico"
 #else
@@ -146,19 +146,19 @@ IDI_ICON_STD            ICON         "../resource/icon_std.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// String Table
+// 字符串表
 //
 
 STRINGTABLE
 BEGIN
 	// Select Language
-	STR_SELLANG_NAME				"English (United States)"		// language name [Primary language (Sublanguage)]
-	STR_SELLANG_LANGID				"0x0409"						// language id (hexadecimal string)
+	STR_SELLANG_NAME				"简体中文 (中国)"		 // 语言名称 [主语言（子语言）]
+	STR_SELLANG_LANGID				"0x0804"			    // 语言id（十六进制字符串）
 		// See following link:
 		//  http://msdn.microsoft.com/en-us/library/dd318693.aspx
 
 	// CBregexp.cpp
-	STR_BREGONIG_LOAD				"failed to load the bregonig.dll.\r\nRegex relies upon bregonig.dll(Uniocde ver) to work.\r\nPlease refer to the help for assistance."
-	STR_BREGONIG_INIT				"failed to init the bregonig.dll.\r\nRegex relies upon bregonig.dll(Uniocde ver) to work.\r\nPlease refer to the help for assistance."
+	STR_BREGONIG_LOAD "无法加载 bregonig.dll\r\n正则表达式功能需要此文件(Unicode版本)\r\n请参考帮助文档获取更多信息"
+	STR_BREGONIG_INIT "初始化 bregonig.dll 失败\r\n正则表达式功能需要此文件(Unicode版本)\r\n请参考帮助文档获取更多信息"
 	STR_GSTR_APPNAME				_GSTR_APPNAME
 END
