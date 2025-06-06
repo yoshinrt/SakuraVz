@@ -454,11 +454,38 @@ void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
 		!bForce && cEol == cOrgEol
 	) return;
 	
-	for(; Line; Line = Line->GetNextLine()){
+	int iMaxThreadNum = std::thread::hardware_concurrency();
+	
+	std::vector<std::thread>	cThread;
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
 		
-		// 行単位で，変換前後が同一なら変換しない
-		if( Line->GetEol() == cEol ) continue;
+		// 各スレッドの開始位置特定
+		CLogicInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
+		CLogicInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
 		
-		Line->SetEol( cEol, nullptr );
+		#ifdef _DEBUG
+			MYTRACE( L"SetEol %d: %d - %d / %d\n", iThreadID, iStart, iEnd, m_nLines );
+		#endif
+		
+		// SetEol 本体
+		cThread.emplace_back( std::thread(
+			[ &, this, iThreadID, iStart, iEnd ]{
+				CDocLine *pDocLine = GetLine( iStart );
+				
+				for( int i = iStart; i < iEnd; ++i ){
+					
+					// 行単位で，変換前後が同一なら変換しない
+					if( pDocLine->GetEol() != cEol ) pDocLine->SetEol( cEol, nullptr );
+					
+					pDocLine = pDocLine->GetNextLine();
+				}
+			}
+		));
+	}
+	
+	// join
+	for( int i = 0; i < iMaxThreadNum; ++i ){
+		cThread[ i ].join();
 	}
 }
