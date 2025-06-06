@@ -26,7 +26,6 @@
 
 #include <Windows.h>// 2002/2/10 aroka
 #include <vector>
-#include <memory_resource>
 #include <atomic>
 #include "doc/CDocListener.h"
 #include "_main/global.h"// 2002/2/10 aroka

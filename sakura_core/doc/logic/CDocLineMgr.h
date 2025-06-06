@@ -23,14 +23,13 @@
 #pragma once
 
 #include <Windows.h>
-#include <memory_resource>
 #include <memory>
 #include "_main/global.h" // 2002/2/10 aroka
 #include "basis/SakuraBasis.h"
 #include "util/design_template.h"
 #include "COpe.h"
-#include "CDocLine.h"
 
+class CDocLine; // 2002/2/10 aroka
 class CBregexp; // 2002/2/10 aroka
 
 struct DocLineReplaceArg {
