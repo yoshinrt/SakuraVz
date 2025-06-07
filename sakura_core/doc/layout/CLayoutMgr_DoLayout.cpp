@@ -35,6 +35,7 @@
 #include "debug/CRunningTimer.h"
 #include <atomic>
 #include <thread>
+#include "config/app_constants.h"
 
 //2008.07.27 kobake
 static bool _GetKeywordLength(
@@ -258,7 +259,16 @@ void CLayoutMgr::_MakeOneLine(SLayoutWork* pWork, PF_OnLine pfOnLine)
 		nEol_1 = 0;
 	}
 	CLogicInt nLength = pWork->cLineStr.GetLength() - CLogicInt(nEol_1);
-
+	
+	// 巨大ファイルモード，5120文字で折り返す
+	if( m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile()){
+		for( pWork->nPos = MAXLINEKETAS / 2; pWork->nPos < nLength; pWork->nPos += MAXLINEKETAS / 2 ){
+			( this->*pfOnLine )( pWork );
+		}
+		pWork->nPos = nLength;
+		return;
+	}
+	
 	if(pWork->pcColorStrategy)pWork->pcColorStrategy->InitStrategyStatus();
 	CColorStrategyPool& color = *CColorStrategyPool::getInstance();
 
@@ -355,10 +365,13 @@ void CLayoutMgr::_DoLayout(bool bBlockingHook)
 	const CLogicInt nAllLineCount = m_pcDocLineMgr->GetLineCount();
 
 	int nWorkerThreadCount = 0;
-	if (nAllLineCount < 1000) {
+	if (nAllLineCount < 1) {
 		// 行数が多くなければマルチスレッド処理するまでもない
 		nWorkerThreadCount = 0;
-	} else if (CColorStrategyPool::getInstance()->HasRangeBasedColorStrategies()) {
+	} else if (
+		!m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() &&
+		CColorStrategyPool::getInstance()->HasRangeBasedColorStrategies()
+	) {
 		// 行をまたぐ可能性のある色分けが有効の場合、途中で処理単位が分割されて
 		// しまうと色分けがおかしくなってしまうためやむなくマルチスレッド処理の対象外とする
 		nWorkerThreadCount = 0;

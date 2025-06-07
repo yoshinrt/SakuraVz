@@ -1067,9 +1067,6 @@
     <ClInclude Include="..\sakura_core\recent\CRecentExcludeFolder.h">
       <Filter>Cpp Source Files\recent</Filter>
     </ClInclude>
-    <ClInclude Include="..\sakura_core\mem\CPoolResource.h">
-      <Filter>Cpp Source Files\mem</Filter>
-    </ClInclude>
     <ClInclude Include="..\sakura_core\extmodule\CIcu4cI18n.h">
       <Filter>Cpp Source Files\extmodule</Filter>
     </ClInclude>

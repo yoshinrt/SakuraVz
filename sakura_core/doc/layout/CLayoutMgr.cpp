@@ -26,7 +26,6 @@
 #include "charset/charcode.h"
 #include "mem/CMemory.h"/// 2002/2/10 aroka
 #include "mem/CMemoryIterator.h" // 2006.07.29 genta
-#include "mem/CPoolResource.h"
 #include "view/CViewFont.h"
 #include "view/CTextMetrics.h"
 #include "basis/SakuraBasis.h"
@@ -42,8 +41,6 @@
 
 CLayoutMgr::CLayoutMgr()
 : m_getIndentOffset( &CLayoutMgr::getIndentOffset_Normal )	//	Oct. 1, 2002 genta	//	Nov. 16, 2002 メンバー関数ポインタにはクラス名が必要
-  , m_layoutMemRes(new CPoolResource<CLayout>())
-  //, m_layoutMemRes(new std::pmr::unsynchronized_pool_resource()) // メモリ使用量が大きい為に使用しない
 {
 	m_pcDocLineMgr = NULL;
 	m_pTypeConfig = NULL;
@@ -99,12 +96,38 @@ void CLayoutMgr::Init()
 
 void CLayoutMgr::_Empty()
 {
-	CLayout* pLayout = m_pLayoutTop;
-	while( pLayout ){
-		CLayout* pLayoutNext = pLayout->GetNextLayout();
-		pLayout->~CLayout();
-		m_layoutMemRes->deallocate(pLayout, sizeof(CLayout), alignof(CLayout));
-		pLayout = pLayoutNext;
+	if(m_nLines == 0) return;
+	
+	int iMaxThreadNum = std::thread::hardware_concurrency();
+	
+	std::vector<std::thread>	cThread;
+	std::vector<CLayout *>		pLayoutStart( iMaxThreadNum );
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+		pLayoutStart[ iThreadID ] = SearchLineByLayoutY( m_nLines * iThreadID / iMaxThreadNum );
+	}
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+		// 各スレッドの開始位置特定
+		CLayoutInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
+		CLayoutInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
+		
+		// delete 本体
+		cThread.emplace_back( std::thread(
+			[ &, this, iThreadID, iStart, iEnd, pLayoutStart ]{
+				CLayout* pLayout = pLayoutStart[ iThreadID ];
+				for( CLayoutInt i = iStart; i < iEnd; ++i ){
+					CLayout* pLayoutNext = pLayout->GetNextLayout();
+					delete pLayout;
+					pLayout = pLayoutNext;
+				}
+			}
+		));
+	}
+	
+	// join
+	for( int i = 0; i < iMaxThreadNum; ++i ){
+		cThread[ i ].join();
 	}
 }
 
@@ -390,7 +413,7 @@ CLayout* CLayoutMgr::CreateLayout(
 	CLayoutColorInfo*	colorInfo
 )
 {
-	CLayout* pLayout = new (m_layoutMemRes->allocate(sizeof(CLayout))) CLayout(
+	CLayout* pLayout = new CLayout(
 		pCDocLine,
 		ptLogicPos,
 		nLength,
@@ -598,8 +621,7 @@ CLayout* CLayoutMgr::DeleteLayoutAsLogical(
 			DEBUG_TRACE( L"バグバグ\n" );
 		}
 
-		pLayout->~CLayout();
-		m_layoutMemRes->deallocate(pLayout, sizeof(CLayout), alignof(CLayout));
+		delete pLayout;
 
 		m_nLines--;	/* 全物理行数 */
 		if( NULL == pLayoutNext ){

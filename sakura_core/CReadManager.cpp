@@ -163,7 +163,13 @@ EConvertResult CReadManager::ReadFile_To_CDocLineMgr(
 		for( int i = 0; i < nThreadCount; i++ ){
 			pcDocLineMgr->AppendAsMove( vecThreadDocLineMgrs[i] );
 		}
-
+		
+		// 巨大ファイル判定
+		pFileInfo->SetLargeFile(
+			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize &&
+			GetDllShareData().m_Common.m_sVzMode.m_nLargeFileSize <= (cfl.GetFileSize() / (1024 * 1024))
+		);
+		
 		cfl.FileClose();
 	}
 	catch(const CAppExitException&){

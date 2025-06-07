@@ -39,7 +39,6 @@
 //	May 15, 2000 genta
 #include "CEol.h"
 #include "mem/CMemory.h"// 2002/2/10 aroka
-#include "mem/CPoolResource.h"
 
 #include "io/CFileLoad.h" // 2002/08/30 Moca
 #include "io/CIoBridge.h"
@@ -54,8 +53,6 @@
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- //
 
 CDocLineMgr::CDocLineMgr()
-	: m_docLineMemRes(new CPoolResource<CDocLine>())
-	//: m_docLineMemRes(new std::pmr::unsynchronized_pool_resource()) // メモリ使用量が大きい為に使用しない
 {
 	_Init();
 }
@@ -72,7 +69,7 @@ CDocLineMgr::~CDocLineMgr()
 //! pPosの直前に新しい行を挿入
 CDocLine* CDocLineMgr::InsertNewLine(CDocLine* pPos)
 {
-	CDocLine* pcDocLineNew = new (m_docLineMemRes->allocate(sizeof(CDocLine))) CDocLine();
+	CDocLine* pcDocLineNew = new CDocLine;
 	_InsertBeforePos(pcDocLineNew,pPos);
 	return pcDocLineNew;
 }
@@ -80,7 +77,7 @@ CDocLine* CDocLineMgr::InsertNewLine(CDocLine* pPos)
 //! 最下部に新しい行を挿入
 CDocLine* CDocLineMgr::AddNewLine()
 {
-	CDocLine* pcDocLineNew = new (m_docLineMemRes->allocate(sizeof(CDocLine))) CDocLine();
+	CDocLine* pcDocLineNew = new CDocLine;
 	_PushBottom(pcDocLineNew);
 	return pcDocLineNew;
 }
@@ -88,13 +85,44 @@ CDocLine* CDocLineMgr::AddNewLine()
 //! 全ての行を削除する
 void CDocLineMgr::DeleteAllLine()
 {
-	CDocLine* pDocLine = m_pDocLineTop;
-	while( pDocLine ){
-		CDocLine* pDocLineNext = pDocLine->GetNextLine();
-		pDocLine->~CDocLine();
-		m_docLineMemRes->deallocate(pDocLine, sizeof(CDocLine));
-		pDocLine = pDocLineNext;
+	if(m_nLines){
+		int iMaxThreadNum = std::thread::hardware_concurrency();
+		
+		std::vector<std::thread>	cThread;
+		std::vector<CDocLine *>		pDocLineStart( iMaxThreadNum );
+		
+		for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+			pDocLineStart[ iThreadID ] = GetLine( m_nLines * iThreadID / iMaxThreadNum );
+		}
+		
+		for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
+			// 各スレッドの開始位置特定
+			CLogicInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
+			CLogicInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
+			
+			#ifdef _DEBUG
+				MYTRACE( L"DeleteAllLine %d: %d - %d / %d\n", iThreadID, iStart, iEnd, m_nLines );
+			#endif
+			
+			// delete 本体
+			cThread.emplace_back( std::thread(
+				[ &, this, iThreadID, iStart, iEnd, pDocLineStart ]{
+					CDocLine* pDocLine = pDocLineStart[ iThreadID ];
+					for( int i = iStart; i < iEnd; ++i ){
+						CDocLine* pDocLineNext = pDocLine->GetNextLine();
+						delete pDocLine;
+						pDocLine = pDocLineNext;
+					}
+				}
+			));
+		}
+		
+		// join
+		for( int i = 0; i < iMaxThreadNum; ++i ){
+			cThread[ i ].join();
+		}
 	}
+	
 	_Init();
 }
 
@@ -123,8 +151,7 @@ void CDocLineMgr::DeleteLine( CDocLine* pcDocLineDel )
 	}
 
 	//データ削除
-	pcDocLineDel->~CDocLine();
-	m_docLineMemRes->deallocate(pcDocLineDel, sizeof(CDocLine));
+	delete pcDocLineDel;
 
 	//行数減算
 	m_nLines--;
@@ -459,11 +486,38 @@ void CDocLineMgr::SetEol( const CEol& cEol, CEol* pcOrgEol, bool bForce ){
 		!bForce && cEol == cOrgEol
 	) return;
 	
-	for(; Line; Line = Line->GetNextLine()){
+	int iMaxThreadNum = std::thread::hardware_concurrency();
+	
+	std::vector<std::thread>	cThread;
+	
+	for( int iThreadID = 0; iThreadID < iMaxThreadNum; ++iThreadID ){
 		
-		// 行単位で，変換前後が同一なら変換しない
-		if( Line->GetEol() == cEol ) continue;
+		// 各スレッドの開始位置特定
+		CLogicInt iStart	= m_nLines *   iThreadID       / iMaxThreadNum;
+		CLogicInt iEnd		= m_nLines * ( iThreadID + 1 ) / iMaxThreadNum;
 		
-		Line->SetEol( cEol, nullptr );
+		#ifdef _DEBUG
+			MYTRACE( L"SetEol %d: %d - %d / %d\n", iThreadID, iStart, iEnd, m_nLines );
+		#endif
+		
+		// SetEol 本体
+		cThread.emplace_back( std::thread(
+			[ &, this, iThreadID, iStart, iEnd ]{
+				CDocLine *pDocLine = GetLine( iStart );
+				
+				for( int i = iStart; i < iEnd; ++i ){
+					
+					// 行単位で，変換前後が同一なら変換しない
+					if( pDocLine->GetEol() != cEol ) pDocLine->SetEol( cEol, nullptr );
+					
+					pDocLine = pDocLine->GetNextLine();
+				}
+			}
+		));
+	}
+	
+	// join
+	for( int i = 0; i < iMaxThreadNum; ++i ){
+		cThread[ i ].join();
 	}
 }
