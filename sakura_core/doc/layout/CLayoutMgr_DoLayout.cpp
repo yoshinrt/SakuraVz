@@ -365,10 +365,13 @@ void CLayoutMgr::_DoLayout(bool bBlockingHook)
 	const CLogicInt nAllLineCount = m_pcDocLineMgr->GetLineCount();
 
 	int nWorkerThreadCount = 0;
-	if (nAllLineCount < 1000) {
+	if (nAllLineCount < 1) {
 		// 行数が多くなければマルチスレッド処理するまでもない
 		nWorkerThreadCount = 0;
-	} else if (CColorStrategyPool::getInstance()->HasRangeBasedColorStrategies()) {
+	} else if (
+		!m_pcEditDoc->m_cDocFile.m_sFileInfo.IsLargeFile() &&
+		CColorStrategyPool::getInstance()->HasRangeBasedColorStrategies()
+	) {
 		// 行をまたぐ可能性のある色分けが有効の場合、途中で処理単位が分割されて
 		// しまうと色分けがおかしくなってしまうためやむなくマルチスレッド処理の対象外とする
 		nWorkerThreadCount = 0;
