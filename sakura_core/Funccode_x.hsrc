@@ -315,6 +315,7 @@ F_GREP_DIALOG		= 30910,	//Grep											なし
 F_GREP				= 30911,	//Grep											なし
 F_GREP_REPLACE_DLG	= 30912,	//Grep置換										なし
 F_GREP_REPLACE		= 30913,	//Grep置換										なし
+F_GREP_OR_REPLACE	= 30914,	//Grep検索・置換共用							なし
 F_JUMP_DIALOG		= 30920,	//指定行へジャンプ								なし
 F_JUMP				= 30921,	//指定行へジャンプ								なし
 F_OUTLINE			= 30930,	//アウトライン解析								int nAction

@@ -31,11 +31,12 @@
 //! GREPダイアログボックス
 class CDlgGrep : public CDialog
 {
-public:
+protected:
 	/*
 	||  Constructors
 	*/
 	CDlgGrep();
+public:
 	/*
 	||  Attributes & Operations
 	*/

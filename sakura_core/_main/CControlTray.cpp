@@ -69,40 +69,40 @@ static LRESULT CALLBACK CControlTrayWndProc( HWND, UINT, WPARAM, LPARAM );
 //Stonee, 2001/07/01  多重起動された場合は前回のダイアログを前面に出すようにした。
 void CControlTray::DoGrep()
 {
-	m_cDlgGrep.m_bEnableThisText = false;
+	m_cDlgGrepReplace.m_bEnableThisText = false;
 
 	//Stonee, 2001/06/30
 	//前回のダイアログがあれば前面に (suggested by genta)
-	if ( ::IsWindow(m_cDlgGrep.GetHwnd()) ){
-		::OpenIcon(m_cDlgGrep.GetHwnd());
-		::BringWindowToTop(m_cDlgGrep.GetHwnd());
+	if ( ::IsWindow(m_cDlgGrepReplace.GetHwnd()) ){
+		::OpenIcon(m_cDlgGrepReplace.GetHwnd());
+		::BringWindowToTop(m_cDlgGrepReplace.GetHwnd());
 		return;
 	}
 
 	if( 0 < m_pShareData->m_sSearchKeywords.m_aSearchKeys.size()
 		&& m_nCurSearchKeySequence < GetDllShareData().m_Common.m_sSearch.m_nSearchKeySequence ){
-		m_cDlgGrep.m_strText = m_pShareData->m_sSearchKeywords.m_aSearchKeys[0];
+		m_cDlgGrepReplace.m_strText = m_pShareData->m_sSearchKeywords.m_aSearchKeys[0];
 	}
 	if( 0 < m_pShareData->m_sSearchKeywords.m_aGrepFiles.size() ){
-		wcscpy( m_cDlgGrep.m_szFile, m_pShareData->m_sSearchKeywords.m_aGrepFiles[0] );		/* 検索ファイル */
+		wcscpy( m_cDlgGrepReplace.m_szFile, m_pShareData->m_sSearchKeywords.m_aGrepFiles[0] );		/* 検索ファイル */
 	}
 	if( 0 < m_pShareData->m_sSearchKeywords.m_aGrepFolders.size() ){
-		wcscpy( m_cDlgGrep.m_szFolder, m_pShareData->m_sSearchKeywords.m_aGrepFolders[0] );	/* 検索フォルダー */
+		wcscpy( m_cDlgGrepReplace.m_szFolder, m_pShareData->m_sSearchKeywords.m_aGrepFolders[0] );	/* 検索フォルダー */
 	}
 	if (0 < m_pShareData->m_sSearchKeywords.m_aExcludeFiles.size()) {
-		wcscpy(m_cDlgGrep.m_szExcludeFile, m_pShareData->m_sSearchKeywords.m_aExcludeFiles[0]);	/* 除外ファイル */
+		wcscpy(m_cDlgGrepReplace.m_szExcludeFile, m_pShareData->m_sSearchKeywords.m_aExcludeFiles[0]);	/* 除外ファイル */
 	}
 	if (0 < m_pShareData->m_sSearchKeywords.m_aExcludeFolders.size()) {
-		wcscpy(m_cDlgGrep.m_szExcludeFolder, m_pShareData->m_sSearchKeywords.m_aExcludeFolders[0]);	/* 除外フォルダー */
+		wcscpy(m_cDlgGrepReplace.m_szExcludeFolder, m_pShareData->m_sSearchKeywords.m_aExcludeFolders[0]);	/* 除外フォルダー */
 	}
 
 	/* Grepダイアログの表示 */
-	int nRet = m_cDlgGrep.DoModal( m_hInstance, NULL, L"" );
+	int nRet = m_cDlgGrepReplace.DoModal( false, m_hInstance, NULL, L"" );
 	if( !nRet || GetTrayHwnd() == NULL ){
 		return;
 	}
 	m_nCurSearchKeySequence = GetDllShareData().m_Common.m_sSearch.m_nSearchKeySequence;
-	DoGrepCreateWindow(m_hInstance, GetDllShareData().m_sHandles.m_hwndTray, m_cDlgGrep);
+	DoGrepCreateWindow(m_hInstance, GetDllShareData().m_sHandles.m_hwndTray, m_cDlgGrepReplace);
 }
 
 void CControlTray::DoGrepCreateWindow(HINSTANCE hinst, HWND msgParent, CDlgGrep& cDlgGrep)

@@ -208,15 +208,11 @@ void CMacro::AddLParam( const LPARAM* lParams, const CEditView* pcEditView )
 	case F_GREP_REPLACE:
 	case F_GREP:
 		{
-			CDlgGrep* pcDlgGrep;
-			CDlgGrepReplace* pcDlgGrepRep;
+			CDlgGrepReplace* pcDlgGrepRep = &GetEditWnd().m_cDlgGrepReplace;
 			if( F_GREP == m_nFuncID ){
-				pcDlgGrep = &GetEditWnd().m_cDlgGrep;
-				pcDlgGrepRep = NULL;
-				AddStringParam( pcDlgGrep->m_strText.c_str() );
+				AddStringParam( pcDlgGrepRep->m_strText.c_str() );
 			}else{
-				pcDlgGrep = pcDlgGrepRep = &GetEditWnd().m_cDlgGrepReplace;
-				AddStringParam( pcDlgGrep->m_strText.c_str() );
+				AddStringParam( pcDlgGrepRep->m_strText.c_str() );
 				AddStringParam( GetEditWnd().m_cDlgGrepReplace.m_strText2.c_str() );
 			}
 			AddStringParam( GetDllShareData().m_sSearchKeywords.m_aGrepFiles[0] );	//	lParamを追加。
@@ -225,8 +221,8 @@ void CMacro::AddLParam( const LPARAM* lParams, const CEditView* pcEditView )
 			LPARAM lFlag = 0x00;
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_bGrepSubFolder				? 0x01 : 0x00;
 			//			この編集中のテキストから検索する(0x02.未実装)
-			lFlag |= pcDlgGrep->m_sSearchOption.bLoHiCase		? 0x04 : 0x00;
-			lFlag |= pcDlgGrep->m_sSearchOption.bRegularExp	? 0x08 : 0x00;
+			lFlag |= pcDlgGrepRep->m_sSearchOption.bLoHiCase		? 0x04 : 0x00;
+			lFlag |= pcDlgGrepRep->m_sSearchOption.bRegularExp	? 0x08 : 0x00;
 			lFlag |= (GetDllShareData().m_Common.m_sSearch.m_nGrepCharSet == CODE_AUTODETECT) ? 0x10 : 0x00;	//	2002/09/21 Moca 下位互換性のための処理
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_nGrepOutputLineType == 1	? 0x20 : 0x00;
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_nGrepOutputLineType == 2	? 0x400000 : 0x00;	// 2014.09.23 否ヒット行
@@ -236,7 +232,7 @@ void CMacro::AddLParam( const LPARAM* lParams, const CEditView* pcEditView )
 			if( IsValidCodeType(code) || CODE_AUTODETECT == code ){
 				lFlag |= code << 8;
 			}
-			lFlag |= pcDlgGrep->m_sSearchOption.bWordOnly								? 0x10000 : 0x00;
+			lFlag |= pcDlgGrepRep->m_sSearchOption.bWordOnly								? 0x10000 : 0x00;
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_bGrepOutputFileOnly			? 0x20000 : 0x00;
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_bGrepOutputBaseFolder		? 0x40000 : 0x00;
 			lFlag |= GetDllShareData().m_Common.m_sSearch.m_bGrepSeparateFolder			? 0x80000 : 0x00;

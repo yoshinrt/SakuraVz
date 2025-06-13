@@ -355,8 +355,8 @@ DWORD CGrepAgent::DoGrep(
 	}
 
 	// 別ウィンドウで検索したとき用にGrepダイアログの検索キーを設定
-	GetEditWnd().m_cDlgGrep.m_strText = pcmGrepKey->GetStringPtr();
-	GetEditWnd().m_cDlgGrep.m_bSetText = true;
+	GetEditWnd().m_cDlgGrepReplace.m_strText = pcmGrepKey->GetStringPtr();
+	GetEditWnd().m_cDlgGrepReplace.m_bSetText = true;
 	GetEditWnd().m_cDlgGrepReplace.m_strText = pcmGrepKey->GetStringPtr();
 	if( sGrepOption.bGrepReplace ){
 		GetEditWnd().m_cDlgGrepReplace.m_strText2 = pcmGrepReplace->GetStringPtr();

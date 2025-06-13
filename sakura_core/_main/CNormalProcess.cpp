@@ -268,7 +268,7 @@ bool CNormalProcess::InitializeProcess()
 			hMutex = NULL;
 			
 			CDlgGrep	*dlg = gi.cmGrepRep.GetStringLength() == 0 ?
-				&pEditWnd->m_cDlgGrep : &pEditWnd->m_cDlgGrepReplace;
+				&pEditWnd->m_cDlgGrepReplace : &pEditWnd->m_cDlgGrepReplace;
 			
 			//	Oct. 9, 2003 genta コマンドラインからGERPダイアログを表示させた場合に
 			//	引数の設定がBOXに反映されない
@@ -281,28 +281,19 @@ bool CNormalProcess::InitializeProcess()
 			wcsncpy( dlg->m_szFolder, cmemGrepFolder.GetStringPtr(), nSize );	/* 検索フォルダー */
 			dlg->m_szFolder[nSize-1] = L'\0';
 			
-			if( gi.cmGrepRep.GetStringLength() == 0 ){
-				// Grep
-				
-				// Feb. 23, 2003 Moca Owner windowが正しく指定されていなかった
-				int nRet = pEditWnd->m_cDlgGrep.DoModal( GetProcessInstance(), pEditWnd->GetHwnd(),  NULL);
-				if( FALSE != nRet ){
-					pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP, true, 0, 0, 0, 0);
-				}else{
-					// 自分はGrepでない
-					pEditWnd->GetDocument()->SetCurDirNotitle();
-				}
-			}else{
+			bool bReplace = false;
+			if( gi.cmGrepRep.GetStringLength() != 0 ){
 				// Replace
 				pEditWnd->m_cDlgGrepReplace.m_strText2 = gi.cmGrepRep.GetStringPtr();		/* 置換後文字列 */
-				
-				int nRet = pEditWnd->m_cDlgGrepReplace.DoModal( GetProcessInstance(), pEditWnd->GetHwnd(), NULL, ( LPARAM )NULL );
-				if( FALSE != nRet ){
-					pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP_REPLACE, TRUE, 0, 0, 0, 0);
-				}else{
-					// 自分はGrepでない
-					pEditWnd->GetDocument()->SetCurDirNotitle();
-				}
+				bReplace = true;
+			}
+			
+			int nRet = pEditWnd->m_cDlgGrepReplace.DoModal( bReplace, GetProcessInstance(), pEditWnd->GetHwnd(), NULL);
+			if( FALSE != nRet ){
+				pEditWnd->GetActiveView().GetCommander().HandleCommand(F_GREP_OR_REPLACE, TRUE, 0, 0, 0, 0);
+			}else{
+				// 自分はGrepでない
+				pEditWnd->GetDocument()->SetCurDirNotitle();
 			}
 			pEditWnd->m_cDlgFuncList.Refresh();	// アウトラインを再解析する
 		}

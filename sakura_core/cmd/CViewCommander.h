@@ -273,10 +273,8 @@ public:
 	void Command_SEARCH_CLEARMARK( void );				/* 検索マークのクリア */
 	void Command_JUMP_SRCHSTARTPOS( void );				/* 検索開始位置へ戻る */	// 02/06/26 ai
 
-	void Command_GREP_DIALOG( void );					/* Grepダイアログの表示 */
-	void Command_GREP( void );							/* Grep */
-	void Command_GREP_REPLACE_DLG( void );				/* Grep置換ダイアログの表示 */
-	void Command_GREP_REPLACE( void );					/* Grep置換 */
+	void Command_GREP_REPLACE_DLG( bool bReplace );		/* Grep置換ダイアログの表示 */
+	void Command_GREP_REPLACE( void );				/* Grep検索・置換共用 */
 	void Command_JUMP_DIALOG( void );					/* 指定行ヘジャンプダイアログの表示 */
 	void Command_JUMP( void );							/* 指定行ヘジャンプ */
 // From Here 2001.12.03 hor

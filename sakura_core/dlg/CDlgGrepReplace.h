@@ -34,11 +34,12 @@ public:
 	/*
 	||  Attributes & Operations
 	*/
-	int DoModal( HINSTANCE hInstance, HWND hwndParent, const WCHAR* pszCurrentFilePath, LPARAM lParam );	/* モーダルダイアログの表示 */
+	int DoModal( bool bReplace, HINSTANCE hInstance, HWND hwndParent, const WCHAR* pszCurrentFilePath, LPARAM lParam = (LPARAM)NULL);	/* モーダルダイアログの表示 */
 
 	bool		m_bPaste;
 	bool		m_bBackup;
-
+	bool		m_bReplace;
+	
 	std::wstring	m_strText2;				//!< 置換後
 	int				m_nReplaceKeySequence;	//!< 置換後シーケンス
 
@@ -54,6 +55,7 @@ protected:
 	BOOL OnDestroy() override;
 	BOOL OnBnClicked(int wID) override;
 	LPVOID GetHelpIdTable(void) override;	//@@@ 2002.01.18 add
+	void SetReplaceMode(void);
 
 	void SetData( void ) override;	/* ダイアログデータの設定 */
 	int GetData( void ) override;	/* ダイアログデータの取得 */

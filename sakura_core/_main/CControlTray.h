@@ -30,7 +30,7 @@
 #include <Windows.h>
 #include "uiparts/CMenuDrawer.h"
 #include "uiparts/CImageListMgr.h" // 2002/2/10 aroka
-#include "dlg/CDlgGrep.h" // 2002/2/10 aroka
+#include "dlg/CDlgGrepReplace.h" // 2002/2/10 aroka
 
 struct SLoadInfo;
 struct EditInfo;
@@ -120,7 +120,7 @@ private:
 	BOOL			m_bCreatedTrayIcon;		//!< トレイにアイコンを作った
 
 	DLLSHAREDATA*	m_pShareData;
-	CDlgGrep		m_cDlgGrep;				// Jul. 2, 2001 genta
+	CDlgGrepReplace	m_cDlgGrepReplace;				// Jul. 2, 2001 genta
 	int				m_nCurSearchKeySequence;
 
 	CImageListMgr	m_hIcons;

@@ -1080,7 +1080,7 @@ void CEditWnd::MessageLoop( void )
 		else if( MyIsDialogMessage( m_cDlgFind.GetHwnd(),								&msg ) ){}	//!<「検索」ダイアログ
 		else if( MyIsDialogMessage( m_cDlgFuncList.GetHwnd(),							&msg ) ){}	//!<「アウトライン」ダイアログ
 		else if( MyIsDialogMessage( m_cDlgReplace.GetHwnd(),							&msg ) ){}	//!<「置換」ダイアログ
-		else if( MyIsDialogMessage( m_cDlgGrep.GetHwnd(),								&msg ) ){}	//!<「Grep」ダイアログ
+		else if( MyIsDialogMessage( m_cDlgGrepReplace.GetHwnd(),								&msg ) ){}	//!<「Grep」ダイアログ
 		else if( MyIsDialogMessage( m_cHokanMgr.GetHwnd(),								&msg ) ){}	//!<「入力補完」
 		else if( m_cToolbar.EatMessage(&msg ) ){ }													//!<ツールバー
 		//アクセラレータ
@@ -2934,7 +2934,7 @@ void CEditWnd::PrintPreviewModeONOFF( void )
 		// その他のモードレスダイアログも戻す	// 2010.06.25 ryoji
 		::ShowWindow( m_cDlgFind.GetHwnd(), SW_SHOW );
 		::ShowWindow( m_cDlgReplace.GetHwnd(), SW_SHOW );
-		::ShowWindow( m_cDlgGrep.GetHwnd(), SW_SHOW );
+		::ShowWindow( m_cDlgGrepReplace.GetHwnd(), SW_SHOW );
 
 		::SetFocus( GetHwnd() );
 
@@ -2968,7 +2968,7 @@ void CEditWnd::PrintPreviewModeONOFF( void )
 		// その他のモードレスダイアログも隠す	// 2010.06.25 ryoji
 		::ShowWindow( m_cDlgFind.GetHwnd(), SW_HIDE );
 		::ShowWindow( m_cDlgReplace.GetHwnd(), SW_HIDE );
-		::ShowWindow( m_cDlgGrep.GetHwnd(), SW_HIDE );
+		::ShowWindow( m_cDlgGrepReplace.GetHwnd(), SW_HIDE );
 
 //@@@ 2002.01.14 YAZAKI 印刷プレビューをCPrintPreviewに独立させたことによる変更
 		m_pPrintPreview = new CPrintPreview( this );

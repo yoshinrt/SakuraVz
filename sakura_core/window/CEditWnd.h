@@ -348,7 +348,6 @@ public:
 	CDlgFind		m_cDlgFind;			// 「検索」ダイアログ
 	CDlgReplace		m_cDlgReplace;		// 「置換」ダイアログ
 	CDlgJump		m_cDlgJump;			// 「指定行へジャンプ」ダイアログ
-	CDlgGrep		m_cDlgGrep;			// Grepダイアログ
 	CDlgGrepReplace	m_cDlgGrepReplace;	// Grep置換ダイアログ
 	CDlgFuncList	m_cDlgFuncList;		// アウトライン解析結果ダイアログ
 	CHokanMgr		m_cHokanMgr;		// 入力補完

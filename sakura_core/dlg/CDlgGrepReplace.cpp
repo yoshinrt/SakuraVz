@@ -71,17 +71,34 @@ CDlgGrepReplace::CDlgGrepReplace()
 	if( 0 < m_pShareData->m_sSearchKeywords.m_aReplaceKeys.size() ){
 		m_strText2 = m_pShareData->m_sSearchKeywords.m_aReplaceKeys[0];
 	}
+	m_bReplace = true;
+	
 	return;
 }
 
+// ダイアログモードを検索 or 置換に設定
+void CDlgGrepReplace::SetReplaceMode(void){
+	::EnableWindow(GetItemHwnd(IDC_STATIC_REPLACE),	m_bReplace);	// 置換後キャプション
+	::EnableWindow(GetItemHwnd(IDC_COMBO_TEXT2),	m_bReplace);	// 置換後第不ログボックス
+	::EnableWindow(GetItemHwnd(IDC_CHK_PASTE),		m_bReplace);	// クリップボードの内容で置換(&V)
+	::EnableWindow(GetItemHwnd(IDC_CHK_BACKUP),		m_bReplace);	// バックアップ作成(&B)
+	::EnableWindow(GetItemHwnd(IDC_RADIO_NOHIT),	!m_bReplace);	// 否該当行(&3)
+	
+	CheckDlgButtonBool(GetHwnd(), IDC_CHECK_REPLACE, m_bReplace);	// 置換 チェック
+	::SetWindowText(GetItemHwnd(IDOK),	m_bReplace ? L"置換(&R)" : L"検索(&F)");
+}
+
 /* モーダルダイアログの表示 */
-int CDlgGrepReplace::DoModal( HINSTANCE hInstance, HWND hwndParent, const WCHAR* pszCurrentFilePath, LPARAM lParam )
+int CDlgGrepReplace::DoModal( bool bReplace, HINSTANCE hInstance, HWND hwndParent, const WCHAR* pszCurrentFilePath, LPARAM lParam )
 {
+	m_bReplace = bReplace;
+	
 	m_bSubFolder = m_pShareData->m_Common.m_sSearch.m_bGrepSubFolder;			// Grep: サブフォルダーも検索
 	m_sSearchOption = m_pShareData->m_Common.m_sSearch.m_sSearchOption;		// 検索オプション
 	m_nGrepCharSet = m_pShareData->m_Common.m_sSearch.m_nGrepCharSet;			// 文字コードセット
 	m_nGrepOutputLineType = m_pShareData->m_Common.m_sSearch.m_nGrepOutputLineType;	// 行を出力するか該当部分だけ出力するか
 	m_nGrepOutputStyle = m_pShareData->m_Common.m_sSearch.m_nGrepOutputStyle;	// Grep: 出力形式
+	m_bGrepOutputFileOnly = m_pShareData->m_Common.m_sSearch.m_bGrepOutputFileOnly;	// ファイル毎最初のみ検索 */
 	m_bPaste = false;
 	m_bBackup = m_pShareData->m_Common.m_sSearch.m_bGrepBackup;
 
@@ -130,6 +147,7 @@ int CDlgGrepReplace::DoModal( HINSTANCE hInstance, HWND hwndParent, const WCHAR*
 BOOL CDlgGrepReplace::OnInitDialog( HWND hwndDlg, WPARAM wParam, LPARAM lParam )
 {
 	_SetHwnd( hwndDlg );
+	SetReplaceMode();
 
 	/* コンボボックスのユーザー インターフェースを拡張インターフェースにする */
 	Combo_SetExtendedUI( GetItemHwnd( IDC_COMBO_TEXT2 ), TRUE );
@@ -173,6 +191,12 @@ BOOL CDlgGrepReplace::OnBnClicked( int wID )
 	case IDC_BUTTON_HELP:
 		MyWinHelp( GetHwnd(), HELP_CONTEXT, ::FuncID_To_HelpContextID(F_GREP_REPLACE_DLG) );
 		return TRUE;
+	
+	case IDC_CHECK_REPLACE:
+		m_bReplace = !m_bReplace;
+		SetReplaceMode();
+		return TRUE;
+	
 	case IDC_CHK_PASTE:
 	case IDOK:
 		{
