@@ -656,11 +656,11 @@ void CDlgFuncList::SetData()
 		::ShowWindow( hwndList, SW_SHOW );
 		/* 列の幅をデータに合わせて調整 */
 		ListView_SetColumnWidth( hwndList, FL_COL_ROW, LVSCW_AUTOSIZE );
-		ListView_SetColumnWidth( hwndList, FL_COL_COL, LVSCW_AUTOSIZE );
+		ListView_SetColumnWidth( hwndList, FL_COL_COL, 0 );
 		ListView_SetColumnWidth( hwndList, FL_COL_NAME, LVSCW_AUTOSIZE );
 		ListView_SetColumnWidth( hwndList, FL_COL_REMARK, LVSCW_AUTOSIZE );
 		ListView_SetColumnWidth( hwndList, FL_COL_ROW, ListView_GetColumnWidth( hwndList, FL_COL_ROW ) + 16 );
-		ListView_SetColumnWidth( hwndList, FL_COL_COL, ListView_GetColumnWidth( hwndList, FL_COL_COL ) + 16 );
+		ListView_SetColumnWidth( hwndList, FL_COL_COL, 0 );
 		ListView_SetColumnWidth( hwndList, FL_COL_NAME, ListView_GetColumnWidth( hwndList, FL_COL_NAME ) + 16 );
 		ListView_SetColumnWidth( hwndList, FL_COL_REMARK, ListView_GetColumnWidth( hwndList, FL_COL_REMARK ) + 16 );
 
