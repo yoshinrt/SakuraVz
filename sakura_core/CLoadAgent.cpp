@@ -293,8 +293,8 @@ void CLoadAgent::OnAfterLoad(const SLoadInfo& sLoadInfo)
 
 	// 2009.08.28 nasukoji	「折り返さない」ならテキスト最大幅を算出、それ以外は変数をクリア
 	if( pcDoc->m_nTextWrapMethodCur == WRAP_NO_TEXT_WRAP )
-		// CLayoutMgr::_DoLayoutにて長さ算出済みなのでbCalLineLen=FALSE指定
-		pcDoc->m_cLayoutMgr.CalculateTextWidth(FALSE);	// テキスト最大幅を算出する
+		// !IsLargeFile の場合は CLayoutMgr::_DoLayoutにて長さ算出済みなのでbCalLineLen=FALSE指定
+		pcDoc->m_cLayoutMgr.CalculateTextWidth(pcDoc->m_cDocFile.m_sFileInfo.IsLargeFile());	// テキスト最大幅を算出する
 	else
 		pcDoc->m_cLayoutMgr.ClearLayoutLineWidth();		// 各行のレイアウト行長の記憶をクリアする
 }
