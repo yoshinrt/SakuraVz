@@ -78,6 +78,18 @@ protected:
 	std::unique_ptr<CCodeBase> pcCodeBase;
 };
 
+// ConPTY 用の動的ロード型定義
+#ifndef HPCON
+typedef HANDLE HPCON;
+#endif
+
+#ifndef PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE
+#define PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE 0x00020016
+#endif
+
+typedef HRESULT(WINAPI* PFN_CreatePseudoConsole)(COORD size, HANDLE hInput, HANDLE hOutput, DWORD dwFlags, HPCON* phPC);
+typedef VOID(WINAPI* PFN_ClosePseudoConsole)(HPCON hPC);
+
 /*!	@brief	外部コマンドの実行
 
 	@param[in] pszCmd コマンドライン
@@ -96,7 +108,7 @@ protected:
 		@li	0x08000000	[31:28] を SW_* として使用する
 		@li 0x0xxxxxxx - 0xFxxxxxxx	SW_* << 28 の値
 
-	@note	子プロセスの標準出力取得はパイプを使用する
+	@note	子プロセスの標準出力取得はConPTY（Pseudo Console）を使用する
 	@note	子プロセスの標準入力への送信は一時ファイルを使用
 
 	@author	N.Nakatani
@@ -160,20 +172,52 @@ bool CEditView::ExecCmd( const WCHAR* pszCmd, int nFlgOpt, const WCHAR* pszCurDi
 		ptFrom = this->GetSelectionInfo().m_sSelect.GetFrom();
 	}
 
-	//子プロセスの標準出力と接続するパイプを作成
+	// ConPTY API の動的取得
+	HMODULE hKernel32 = GetModuleHandle(L"kernel32.dll");
+	auto pfnCreatePseudoConsole = (PFN_CreatePseudoConsole)(hKernel32 ? GetProcAddress(hKernel32, "CreatePseudoConsole") : NULL);
+	auto pfnClosePseudoConsole  = (PFN_ClosePseudoConsole)(hKernel32 ? GetProcAddress(hKernel32, "ClosePseudoConsole") : NULL);
+
+	HANDLE hPipeInRead = NULL, hPipeInWrite = NULL;
+	HPCON hPC = NULL;
+
+	//SECURITY_ATTRIBUTESの準備
 	SECURITY_ATTRIBUTES	sa;
 	sa.nLength = sizeof(sa);
 	sa.bInheritHandle = TRUE;
 	sa.lpSecurityDescriptor = NULL;
-	if( CreatePipe( &hStdOutRead, &hStdOutWrite, &sa, 1000 ) == FALSE ) {
-		//エラー。対策無し
-		return false;
+
+	if (pfnCreatePseudoConsole && pfnClosePseudoConsole) {
+		// ConPTY 時は文字コードを UTF-8 に固定する
+		outputEncoding = CODE_UTF8;
+		sendEncoding = CODE_UTF8;
+
+		// ConPTY用パイプの作成 (In / Out)
+		if (CreatePipe(&hPipeInRead, &hPipeInWrite, &sa, 0) == FALSE) return false;
+		if (CreatePipe(&hStdOutRead, &hStdOutWrite, &sa, 0) == FALSE) {
+			CloseHandle(hPipeInRead); CloseHandle(hPipeInWrite);
+			return false;
+		}
+
+		COORD consoleSize = { 80, 25 };
+		if (FAILED(pfnCreatePseudoConsole(consoleSize, hPipeInRead, hStdOutWrite, 0, &hPC))) {
+			CloseHandle(hPipeInRead); CloseHandle(hPipeInWrite);
+			CloseHandle(hStdOutRead); CloseHandle(hStdOutWrite);
+			return false;
+		}
+		CloseHandle(hPipeInRead);
+		hPipeInRead = NULL;
+	} else {
+		//子プロセスの標準出力と接続するパイプを作成 (従来処理)
+		if( CreatePipe( &hStdOutRead, &hStdOutWrite, &sa, 1000 ) == FALSE ) {
+			//エラー。対策無し
+			return false;
+		}
+		//hStdOutReadのほうは子プロセスでは使用されないので継承不能にする（子プロセスのリソースを無駄に増やさない）
+		DuplicateHandle( GetCurrentProcess(), hStdOutRead,
+					GetCurrentProcess(), &hStdOutRead,					// 新しい継承不能ハンドルを受け取る	// 2007.01.31 ryoji
+					0, FALSE,
+					DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS );	// 元の継承可能ハンドルは DUPLICATE_CLOSE_SOURCE で閉じる	// 2007.01.31 ryoji
 	}
-	//hStdOutReadのほうは子プロセスでは使用されないので継承不能にする（子プロセスのリソースを無駄に増やさない）
-	DuplicateHandle( GetCurrentProcess(), hStdOutRead,
-				GetCurrentProcess(), &hStdOutRead,					// 新しい継承不能ハンドルを受け取る	// 2007.01.31 ryoji
-				0, FALSE,
-				DUPLICATE_CLOSE_SOURCE | DUPLICATE_SAME_ACCESS );	// 元の継承可能ハンドルは DUPLICATE_CLOSE_SOURCE で閉じる	// 2007.01.31 ryoji
 
 	// From Here 2007.03.18 maru 子プロセスの標準入力ハンドル
 	// CDocLineMgr::WriteFileなど既存のファイル出力系の関数のなかには
@@ -225,11 +269,34 @@ bool CEditView::ExecCmd( const WCHAR* pszCmd, int nFlgOpt, const WCHAR* pszCurDi
 	}
 	// To Here 2007.03.18 maru 子プロセスの標準入力ハンドル
 	
-	//CreateProcessに渡すSTARTUPINFOを作成
-	STARTUPINFO	sui;
-	ZeroMemory( &sui, sizeof(sui) );
-	sui.cb = sizeof(sui);
-	if( bGetStdout || bSendStdin ) {
+	// ConPTY経由で標準入力データを流し込む処理
+	if (hPC && bSendStdin && hStdIn && hPipeInWrite) {
+		char szBuffer[4096];
+		DWORD dwRead = 0, dwWritten = 0;
+		while (ReadFile(hStdIn, szBuffer, sizeof(szBuffer), &dwRead, NULL) && dwRead > 0) {
+			WriteFile(hPipeInWrite, szBuffer, dwRead, &dwWritten, NULL);
+		}
+	}
+
+	// CreateProcess の準備
+	STARTUPINFOEX suiEx;
+	ZeroMemory( &suiEx, sizeof(suiEx) );
+	STARTUPINFO& sui = suiEx.StartupInfo;
+	sui.cb = hPC ? sizeof(STARTUPINFOEX) : sizeof(STARTUPINFO);
+	
+	PPROC_THREAD_ATTRIBUTE_LIST pAttrList = NULL;
+	DWORD dwCreationFlags = CREATE_NEW_CONSOLE;
+
+	if (hPC) {
+		SIZE_T attrSize = 0;
+		InitializeProcThreadAttributeList(NULL, 1, 0, &attrSize);
+		pAttrList = (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attrSize);
+		if (pAttrList && InitializeProcThreadAttributeList(pAttrList, 1, 0, &attrSize)) {
+			UpdateProcThreadAttribute(pAttrList, 0, PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE, hPC, sizeof(HPCON), NULL, NULL);
+			suiEx.lpAttributeList = pAttrList;
+			dwCreationFlags = EXTENDED_STARTUPINFO_PRESENT;
+		}
+	} else if( bGetStdout || bSendStdin ) {
 		sui.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
 		sui.wShowWindow =	nFlgOpt & 0x8000000 ? nFlgOpt >> 28 :
 							bGetStdout ? SW_HIDE : SW_SHOW;
@@ -242,8 +309,8 @@ bool CEditView::ExecCmd( const WCHAR* pszCmd, int nFlgOpt, const WCHAR* pszCurDi
 	//コマンドライン実行
 	WCHAR	cmdline[1024];
 	wcscpy( cmdline, pszCmd );
-	if( CreateProcess( NULL, cmdline, NULL, NULL, TRUE,
-				CREATE_NEW_CONSOLE, NULL, bCurDir ? pszCurDir : NULL, &sui, &pi ) == FALSE ) {
+	if( CreateProcess( NULL, cmdline, NULL, NULL, hPC ? FALSE : TRUE,
+				dwCreationFlags, NULL, bCurDir ? pszCurDir : NULL, &sui, &pi ) == FALSE ) {
 		//実行に失敗した場合、コマンドラインベースのアプリケーションと判断して
 		// command(9x) か cmd(NT) を呼び出す
 
@@ -261,12 +328,25 @@ bool CEditView::ExecCmd( const WCHAR* pszCmd, int nFlgOpt, const WCHAR* pszCurDi
 			( bGetStdout ? L"/C " : L"/K " ),
 			pszCmd
 		);
-		if( CreateProcess( NULL, cmdline, NULL, NULL, TRUE,
-					CREATE_NEW_CONSOLE, NULL, bCurDir ? pszCurDir : NULL, &sui, &pi ) == FALSE ) {
+		if( CreateProcess( NULL, cmdline, NULL, NULL, hPC ? FALSE : TRUE,
+					dwCreationFlags, NULL, bCurDir ? pszCurDir : NULL, &sui, &pi ) == FALSE ) {
+			if (pAttrList) {
+				DeleteProcThreadAttributeList(pAttrList);
+				HeapFree(GetProcessHeap(), 0, pAttrList);
+			}
+			if (hPC) pfnClosePseudoConsole(hPC);
+			if (hPipeInRead) CloseHandle(hPipeInRead);
+			if (hPipeInWrite) CloseHandle(hPipeInWrite);
 			MessageBox( NULL, cmdline, LS(STR_EDITVIEW_EXECCMD_ERR), MB_OK | MB_ICONEXCLAMATION );
 			goto finish;
 		}
 	}
+
+	if (pAttrList) {
+		DeleteProcThreadAttributeList(pAttrList);
+		HeapFree(GetProcessHeap(), 0, pAttrList);
+	}
+	if (hPipeInRead) CloseHandle(hPipeInRead);
 
 	// ファイル全体に対するフィルタ動作
 	//	現在編集中のファイルからのデータ書きだしおよびデータ取り込みが
@@ -617,13 +697,53 @@ user_cancel:
 
 finish:
 	//終了処理
+	if( hPipeInWrite ) CloseHandle( hPipeInWrite );
+	if( hPC && pfnClosePseudoConsole ) pfnClosePseudoConsole( hPC );
 	if(hStdIn != NULL) CloseHandle( hStdIn );	/* 2007.03.18 maru 標準入力の制御のため */
 	if(hStdOutWrite) CloseHandle( hStdOutWrite );
-	CloseHandle( hStdOutRead );
+	if(hStdOutRead) CloseHandle( hStdOutRead );
 	if( pi.hProcess ) CloseHandle( pi.hProcess );
 	if( pi.hThread ) CloseHandle( pi.hThread );
 	delete oaInst;
 	return bRet;
+}
+
+static std::wstring StripEscapeSequences(const WCHAR* pBuf, int size)
+{
+	if (size < 0) size = (int)wcslen(pBuf);
+	std::wstring result;
+	result.reserve(size);
+
+	for (int i = 0; i < size; ++i) {
+		if (pBuf[i] == L'\x1b') {
+			if (i + 1 < size && pBuf[i + 1] == L'[') {	// CSI
+				i += 2;
+				while (i < size && (pBuf[i] >= 0x20 && pBuf[i] <= 0x3F)) {
+					i++;
+				}
+				if (i < size && (pBuf[i] >= 0x40 && pBuf[i] <= 0x7E)) {
+					// 終端文字読み飛ばし完了
+				} else {
+					i--;
+				}
+			} else if (i + 1 < size && pBuf[i + 1] == L']') {	// OSC
+				i += 2;
+				while (i < size) {
+					if (pBuf[i] == L'\x07') break;
+					if (pBuf[i] == L'\x1b' && i + 1 < size && pBuf[i + 1] == L'\\') {
+						i++;
+						break;
+					}
+					i++;
+				}
+			} else if (i + 1 < size) {	// その他の2バイトエスケープシーケンス等
+				i++;
+			}
+		} else {
+			result.push_back(pBuf[i]);
+		}
+	}
+	return result;
 }
 
 /*!
@@ -632,10 +752,11 @@ finish:
 */
 void COutputAdapterDefault::OutputBuf(const WCHAR* pBuf, int size)
 {
+	std::wstring clean = StripEscapeSequences(pBuf, size);
 	if( m_bWindow ){
-		m_pCommander->Command_INSTEXT( false, pBuf, CLogicInt(size), true);
+		m_pCommander->Command_INSTEXT( false, clean.c_str(), CLogicInt((int)clean.length()), true);
 	}else{
-		m_pCShareData->TraceOutString( pBuf , size );
+		m_pCShareData->TraceOutString( clean.c_str() , (int)clean.length() );
 	}
 }
 
