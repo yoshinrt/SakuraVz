@@ -45,12 +45,14 @@ if errorlevel 1 (
 	exit /b 1
 )
 
+set platform_toolset=v143
+
 if "%SONAR_QUBE_TOKEN%" == "" (
-	@echo "%CMD_MSBUILD%" %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration%  /t:"Build" %EXTRA_CMD% %LOG_OPTION%
-	      "%CMD_MSBUILD%" %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration%  /t:"Build" %EXTRA_CMD% %LOG_OPTION%
+	@echo "%CMD_MSBUILD%" %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration% /p:PlatformToolset=%platform_toolset% /t:"Build" %EXTRA_CMD% %LOG_OPTION%
+	      "%CMD_MSBUILD%" %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration% /p:PlatformToolset=%platform_toolset% /t:"Build" %EXTRA_CMD% %LOG_OPTION%
 ) else (
-    @echo "%BUILDWRAPPER_EXE%" --out-dir %~dp0bw-output "%CMD_MSBUILD%"  %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration%  /t:"Rebuild" %LOG_OPTION%
-          "%BUILDWRAPPER_EXE%" --out-dir %~dp0bw-output "%CMD_MSBUILD%"  %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration%  /t:"Rebuild" %LOG_OPTION%
+    @echo "%BUILDWRAPPER_EXE%" --out-dir %~dp0bw-output "%CMD_MSBUILD%"  %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration% /p:PlatformToolset=%platform_toolset% /t:"Rebuild" %LOG_OPTION%
+          "%BUILDWRAPPER_EXE%" --out-dir %~dp0bw-output "%CMD_MSBUILD%"  %SLN_FILE% /p:Platform=%platform% /p:Configuration=%configuration% /p:PlatformToolset=%platform_toolset% /t:"Rebuild" %LOG_OPTION%
 )
 if errorlevel 1 (
 	echo ERROR in msbuild.exe errorlevel %errorlevel%
